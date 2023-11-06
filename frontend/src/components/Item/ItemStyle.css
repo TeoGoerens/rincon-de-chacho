@@ -1,0 +1,50 @@
+.itemCard {
+  width: 300px;
+  border: solid 1px grey;
+  border-radius: 20px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.itemCard h4 {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.itemCard img {
+  height: 200px;
+  margin: 0 auto 1rem;
+}
+
+.itemCard h5,
+.itemCard h6 {
+  text-align: center;
+}
+
+.itemCard p {
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.itemCard__button {
+  text-decoration: none;
+  border: 1px solid gray;
+  color: gray;
+  padding: 0.5rem;
+  border-radius: 20px;
+  text-align: center;
+  width: 50%;
+  margin: 0 auto;
+  font-size: 0.8rem;
+  transition: all ease-in-out 250ms;
+}
+
+.itemCard__button:hover {
+  text-decoration: none;
+  background-color: gray;
+  color: white;
+  scale: 1.05;
+}

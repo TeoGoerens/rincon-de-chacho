@@ -1,0 +1,38 @@
+.ItemDetail__ItemCount {
+  display: flex;
+  margin: 0 auto;
+  width: 50%;
+}
+
+.ItemDetail__ItemCount p {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ItemDetail__ItemCount button {
+  text-decoration: none;
+  color: rgba(80, 80, 238);
+  font-weight: bold;
+  background-color: white;
+  border: 1px solid rgba(80, 80, 238);
+  padding: 0.2rem;
+  text-align: center;
+  border-radius: 50px;
+  width: 30px;
+  margin: 0 auto;
+  transition: all ease-in-out 250ms;
+}
+
+.ItemDetail__ItemCount button:disabled {
+  opacity: 0.5;
+}
+
+.ItemDetail__ItemCount button:hover {
+  text-decoration: none;
+  background-color: rgba(80, 80, 238);
+  color: white;
+  scale: 1.05;
+}
