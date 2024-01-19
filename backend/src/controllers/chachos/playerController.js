@@ -30,14 +30,14 @@ export default class PlayerController {
   createPlayer = async (req, res, next) => {
     try {
       const player = {
-        first_name: "Teo",
-        last_name: "Goerens",
-        nickname: "Duende",
-        email: "goerens_teo@hotmail.com",
-        field_position: "Volante",
+        first_name: "Rafa",
+        last_name: "Giaccio",
+        nickname: "Chacho",
+        email: "rafa_chacho@hotmail.com",
+        field_position: "Defensor",
       };
 
-      const playerLoaded = await repository.baseCreate(player);
+      const playerLoaded = await repository.baseCreate(player, "email");
 
       res
         .status(200)

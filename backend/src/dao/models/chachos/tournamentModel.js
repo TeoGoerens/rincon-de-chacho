@@ -12,7 +12,7 @@ const tournamentSchema = new mongoose.Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "Football Category",
     },
   },
   {

@@ -14,15 +14,51 @@ const tournamentRoundSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    score_chachos: {
+      type: Number,
+      required: true,
+    },
+    score_rival: {
+      type: Number,
+      required: true,
+    },
+    win: {
+      type: Boolean,
+      default: false,
+    },
+    draw: {
+      type: Boolean,
+      default: false,
+    },
+    defeat: {
+      type: Boolean,
+      default: false,
+    },
     players: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Player",
       },
     ],
+    white_pearl: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Player",
+    },
+    vanilla_pearl: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Player",
+    },
+    ocher_pearl: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Player",
+    },
+    black_pearl: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Player",
+    },
     open_for_vote: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   {

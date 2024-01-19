@@ -28,4 +28,27 @@ export default class UserRepository extends baseRepository {
 
     return userToLoad;
   };
+
+  loginUser = async (user) => {
+    //Check if user exists
+    const userExists = await User.findOne({ email: user.email });
+    if (!userExists) {
+      throw new Error("User is not properly registered");
+    }
+
+    //Compare hashed passwords
+    const matchingPasswords = await bcrypt.compareSync(
+      user.password,
+      userExists.password
+    );
+
+    //Return user information
+    if (matchingPasswords) {
+      return userExists;
+    } else {
+      throw new Error(
+        "Login credentials are not valid. Check the information submitted"
+      );
+    }
+  };
 }

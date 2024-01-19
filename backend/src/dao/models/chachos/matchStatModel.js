@@ -2,13 +2,23 @@ import mongoose from "mongoose";
 
 const matchStatSchema = new mongoose.Schema(
   {
+    round: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tournament Round",
+    },
     player: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
     },
-    round: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Tournament Round",
+    played: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    points: {
+      type: Number,
+      required: true,
+      default: 0,
     },
     goals: {
       type: Number,
@@ -36,24 +46,24 @@ const matchStatSchema = new mongoose.Schema(
       default: 0,
     },
     white_pearl: {
-      type: Number,
+      type: Boolean,
       required: true,
-      default: 0,
+      default: false,
     },
     vanilla_pearl: {
-      type: Number,
+      type: Boolean,
       required: true,
-      default: 0,
+      default: false,
     },
     ocher_pearl: {
-      type: Number,
+      type: Boolean,
       required: true,
-      default: 0,
+      default: false,
     },
     black_pearl: {
-      type: Number,
+      type: Boolean,
       required: true,
-      default: 0,
+      default: false,
     },
   },
   {

@@ -24,9 +24,14 @@ export default class baseRepository {
     }
   }
 
-  async baseCreate(data) {
+  async baseCreate(data, uniqueField) {
     try {
-      const documentExists = await this.model.findOne({ email: data.email });
+      //Dynamic filter
+      const filter = {};
+      filter[uniqueField] = data[uniqueField];
+
+      //Search in database based on dynamic filter options
+      const documentExists = await this.model.findOne(filter);
       if (documentExists) {
         throw new Error("Element already exists in database");
       }

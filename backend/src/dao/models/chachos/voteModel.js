@@ -10,10 +10,12 @@ const voteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tournament Round",
     },
-    match_date: {
-      type: Date,
-      required: true,
-    },
+    evaluation: [
+      {
+        player: { type: mongoose.Schema.Types.ObjectId, ref: "Player" },
+        points: { type: Number, required: true },
+      },
+    ],
     white_pearl: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",

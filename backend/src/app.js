@@ -15,11 +15,17 @@ initMongoDB();
 // ---------- ROUTER CONFIGURATION ----------
 import userRouter from "./routes/userRouter.js";
 import playerRouter from "./routes/chachos/playerRouter.js";
+import tournamentRouter from "./routes/chachos/tournamentRouter.js";
+import footballCategoryRouter from "./routes/chachos/footballCategoryRouter.js";
+import rivalTeamRouter from "./routes/chachos/rivalTeamRouter.js";
 app.use("/api/users", userRouter);
 app.use("/api/chachos/player", playerRouter);
+app.use("/api/chachos/tournament", tournamentRouter);
+app.use("/api/chachos/football-category", footballCategoryRouter);
+app.use("/api/chachos/rival-team", rivalTeamRouter);
 
 // ---------- MIDDLEWARE CONFIGURATIONS ----------
-import errorHandler from "./middlewares/errorHandler.js";
+import errorHandler from "./middlewares/error/errorHandler.js";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(errorHandler);
