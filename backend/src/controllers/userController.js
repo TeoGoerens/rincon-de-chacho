@@ -8,9 +8,9 @@ export default class UserController {
   registerUser = async (req, res, next) => {
     try {
       const user = {
-        first_name: "Teo",
-        last_name: "Goerens",
-        email: "goerens_teo@hotmail.com",
+        first_name: "Rafa",
+        last_name: "Giaccio",
+        email: "rafael_chacho@hotmail.com",
         password: "123",
       };
       const userLoaded = await repository.createUser(user);
@@ -27,15 +27,57 @@ export default class UserController {
   loginUser = async (req, res, next) => {
     try {
       const user = {
-        first_name: "Teo",
-        last_name: "Goerens",
-        email: "goerens_teo@hotmail.com",
+        email: "rafael_chacho@hotmail.com",
         password: "123",
       };
       const userLoaded = await repository.loginUser(user);
       const userToDisplay = new userDTO(userLoaded);
 
       res.status(200).json({ message: "User is now logged in", userToDisplay });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ---------- FORGET PASSWORD TOKEN GENERATOR ----------
+  forgetPasswordTokenGenerator = async (req, res, next) => {
+    try {
+      const userEmail = req.body.email;
+
+      const { user, resetToken } = await repository.createPasswordResetToken(
+        userEmail
+      );
+
+      const mailSent = await repository.sendViaEmailResetToken(
+        user,
+        resetToken
+      );
+      res.status(200).json({
+        message: `Token was properly generated and sent by email to user ${user.email}`,
+        user,
+        resetToken,
+        mailSent,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ---------- PASSWORD RESET ----------
+  passwordReset = async (req, res, next) => {
+    try {
+      const resetToken = req.body.resetToken;
+      const newPassword = req.body.newPassword;
+
+      const userUpdated = await repository.passwordReset(
+        resetToken,
+        newPassword
+      );
+
+      res.status(200).json({
+        message: `${userUpdated.email}'s password was correctly updated`,
+        userUpdated,
+      });
     } catch (error) {
       next(error);
     }

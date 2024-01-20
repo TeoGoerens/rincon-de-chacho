@@ -31,7 +31,7 @@ export default class TournamentController {
   createTournament = async (req, res, next) => {
     try {
       const tournament = {
-        name: "Copa Campeones del Mundo",
+        name: "Copa Super 8 CUBA",
         year: 2024,
         category: "65a9bfe3bcf0281e6cfbddde",
       };

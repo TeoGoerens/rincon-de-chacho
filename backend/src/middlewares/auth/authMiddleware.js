@@ -1,9 +1,4 @@
 import jwt from "jsonwebtoken";
-import User from "../../dao/models/userModel.js";
-import baseRepository from "../../repository/baseRepository.js";
-
-const repository = new baseRepository(User);
-
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,7 +11,6 @@ const authMiddleware = async (req, res, next) => {
       try {
         if (token) {
           const tokenDecoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-          //const userLogged = await repository.baseGetById(tokenDecoded.id);
           req.user = tokenDecoded;
           next();
         }

@@ -31,7 +31,7 @@ export default class RivalTeamController {
   createRivalTeam = async (req, res, next) => {
     try {
       const rivalTeam = {
-        name: "Villa de Mayo",
+        name: "Furano",
       };
 
       const rivalTeamLoaded = await repository.baseCreate(rivalTeam, "name");

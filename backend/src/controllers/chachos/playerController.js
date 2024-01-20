@@ -30,10 +30,10 @@ export default class PlayerController {
   createPlayer = async (req, res, next) => {
     try {
       const player = {
-        first_name: "Rafa",
-        last_name: "Giaccio",
-        nickname: "Chacho",
-        email: "rafa_chacho@hotmail.com",
+        first_name: "Juan Martin",
+        last_name: "Bernaldo de Quiros",
+        nickname: "Bernata",
+        email: "jmbernaldodequiros@gmail.com",
         field_position: "Defensor",
       };
 

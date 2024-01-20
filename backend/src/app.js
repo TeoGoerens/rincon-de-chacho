@@ -8,6 +8,9 @@ app.use(cors());
 import dotenv from "dotenv";
 dotenv.config();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // ---------- MONGO DB SET UP & CONNECTION ----------
 import initMongoDB from "./dao/connection.js";
 initMongoDB();
@@ -18,16 +21,20 @@ import playerRouter from "./routes/chachos/playerRouter.js";
 import tournamentRouter from "./routes/chachos/tournamentRouter.js";
 import footballCategoryRouter from "./routes/chachos/footballCategoryRouter.js";
 import rivalTeamRouter from "./routes/chachos/rivalTeamRouter.js";
+import tournamentRoundRouter from "./routes/chachos/tournamentRoundRouter.js";
+import voteRouter from "./routes/chachos/voteRouter.js";
 app.use("/api/users", userRouter);
 app.use("/api/chachos/player", playerRouter);
 app.use("/api/chachos/tournament", tournamentRouter);
 app.use("/api/chachos/football-category", footballCategoryRouter);
 app.use("/api/chachos/rival-team", rivalTeamRouter);
+app.use("/api/chachos/tournament-round", tournamentRoundRouter);
+app.use("/api/chachos/vote", voteRouter);
 
-// ---------- MIDDLEWARE CONFIGURATIONS ----------
+// ---------- ERROR MIDDLEWARE CONFIGURATIONS ----------
 import errorHandler from "./middlewares/error/errorHandler.js";
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+import routingErrorHandler from "./middlewares/error/errorRouting.js";
+app.use(routingErrorHandler);
 app.use(errorHandler);
 
 // ---------- PORT CONFIGURATION & SET UP ----------

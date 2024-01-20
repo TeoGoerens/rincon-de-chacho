@@ -19,18 +19,22 @@ const voteSchema = new mongoose.Schema(
     white_pearl: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
+      default: null,
     },
     vanilla_pearl: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
+      default: null,
     },
     ocher_pearl: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
+      default: null,
     },
     black_pearl: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
+      default: null,
     },
   },
   {

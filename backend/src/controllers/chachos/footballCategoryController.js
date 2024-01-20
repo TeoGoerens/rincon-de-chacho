@@ -32,7 +32,7 @@ export default class FootballCategoryController {
   createFootballCategory = async (req, res, next) => {
     try {
       const footballCategory = {
-        name: "CUBA +32 - División A",
+        name: "CUBA Libres - División B",
       };
 
       const footballCategoryLoaded = await repository.baseCreate(
