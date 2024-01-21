@@ -3,44 +3,66 @@ import VoteRepository from "../../repository/chachos/voteRepository.js";
 const repository = new VoteRepository();
 
 export default class VoteController {
-  // ---------- GET TOURNAMENT ROUND BY ID ----------
-  getTournamentRoundById = async (req, res, next) => {
+  // ---------- GET USER'S VOTE IN A ROUND ----------
+  getVoteByRoundAndUser = async (req, res, next) => {
     try {
       const tournamentRoundId = req.params.pid;
-      const tournamentRound = await repository.baseGetById(tournamentRoundId);
+      const voterId = req.params.vid;
+      const userId = req.user.id;
+
+      const usersVote = await repository.getVotefromUserByRound(
+        tournamentRoundId,
+        voterId,
+        userId
+      );
+
       res.status(200).json({
-        message: `Tournament round with id ${tournamentRoundId} has been properly retrieved`,
-        tournamentRound,
+        message:
+          "User's vote has been properly retrieved for the current round",
+        usersVote,
       });
     } catch (error) {
       next(error);
     }
   };
 
-  // ---------- GET PLAYERS FROM TOURNAMENT ROUND BY ID ----------
-  getPlayersTournamentRoundById = async (req, res, next) => {
+  // ---------- GET VOTES RECEIVED BY A PLAYER IN A ROUND ----------
+  getVoteByRoundAndPlayer = async (req, res, next) => {
     try {
       const tournamentRoundId = req.params.pid;
-      const tournamentRound =
-        await repository.getPlayersDetailFromTournamentRound(tournamentRoundId);
-      const players = tournamentRound.players;
+      const playerId = req.params.cid;
+      const userId = req.user.id;
+
+      const playersVote = await repository.getVoteForAPlayerByRound(
+        tournamentRoundId,
+        playerId,
+        userId
+      );
+
       res.status(200).json({
-        message: `Players from tournament round with id ${tournamentRoundId} have been properly retrieved`,
-        tournamentRound,
-        players,
+        message:
+          "Votes assigned to requested player have been properly retrieved for the current round",
+        playersVote,
       });
     } catch (error) {
       next(error);
     }
   };
 
-  // ---------- GET ALL TOURNAMENT ROUNDS ----------
-  getAllTournamentRounds = async (req, res, next) => {
+  // ---------- GET ALL VOTES FOR ROUND ----------
+  getAllVotesForRound = async (req, res, next) => {
     try {
-      const tournamentRounds = await repository.baseGetAll();
+      const tournamentRoundId = req.params.pid;
+      const userId = req.user.id;
+
+      const allVotesForRound = await repository.getAllVotesForRound(
+        tournamentRoundId,
+        userId
+      );
+
       res.status(200).json({
-        message: "All tournament rounds have been properly retrieved",
-        tournamentRounds,
+        message: "All votes have been properly retrieved",
+        allVotesForRound,
       });
     } catch (error) {
       next(error);

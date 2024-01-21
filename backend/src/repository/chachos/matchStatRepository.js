@@ -1,12 +1,10 @@
-import mongoose from "mongoose";
-import Vote from "../../dao/models/chachos/voteModel.js";
-import User from "../../dao/models/userModel.js";
+import MatchStat from "../../dao/models/chachos/matchStatModel.js";
 import TournamentRound from "../../dao/models/chachos/tournamentRoundModel.js";
 import baseRepository from "../baseRepository.js";
 
-export default class VoteRepository extends baseRepository {
+export default class MatchStatRepository extends baseRepository {
   constructor() {
-    super(Vote);
+    super(MatchStat);
   }
 
   // ---------- VERIFY IF TOURNAMENT ROUND IS OPEN FOR VOTE ----------
@@ -203,21 +201,21 @@ export default class VoteRepository extends baseRepository {
     }
   };
 
-  // ---------- CREATE VOTE ----------
-  createVote = async (vote, userId, roundId) => {
+  // ---------- CREATE MATCH STAT ----------
+  createMatchStat = async (matchStat, tournamenteRoundId, playerId) => {
     try {
       //Search in database based on dynamic filter options
       const documentExists = await this.model.findOne({
-        voter: userId,
-        round: roundId,
+        round: tournamenteRoundId,
+        player: playerId,
       });
 
       if (documentExists) {
         throw new Error(
-          `User with id ${userId} has already voted in this tournament round`
+          `A match stat has been already created for this player in this tournament round`
         );
       }
-      const document = await this.model.create(vote);
+      const document = await this.model.create(matchStat);
       return document;
     } catch (error) {
       throw error;
@@ -225,25 +223,23 @@ export default class VoteRepository extends baseRepository {
   };
 
   // ---------- UPDATE VOTE ----------
-  updateVote = async (vote, userId, roundId) => {
+  updateMatchStat = async (newMatchStatInfo, matchStatId) => {
     try {
       //Search in database based on dynamic filter options
       const documentExists = await this.model.findOne({
-        voter: userId,
-        round: roundId,
+        _id: matchStatId,
       });
 
       if (!documentExists) {
         throw new Error(
-          `User with id ${userId} has not voted in this tournament round`
+          `This match stat document does not currently exist in database`
         );
       }
       const document = await this.model.updateOne(
         {
-          voter: userId,
-          round: roundId,
+          _id: matchStatId,
         },
-        vote
+        newMatchStatInfo
       );
       return document;
     } catch (error) {
@@ -252,22 +248,20 @@ export default class VoteRepository extends baseRepository {
   };
 
   // ---------- DELETE VOTE ----------
-  deleteVote = async (userId, roundId) => {
+  deleteMatchStat = async (matchStatId) => {
     try {
       //Search in database based on dynamic filter options
       const documentExists = await this.model.findOne({
-        voter: userId,
-        round: roundId,
+        _id: matchStatId,
       });
 
       if (!documentExists) {
         throw new Error(
-          `User with id ${userId} has not voted in this tournament round`
+          `This match stat document does not currently exist in database`
         );
       }
       const document = await this.model.deleteOne({
-        voter: userId,
-        round: roundId,
+        _id: matchStatId,
       });
       return document;
     } catch (error) {

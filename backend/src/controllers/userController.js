@@ -27,7 +27,7 @@ export default class UserController {
   loginUser = async (req, res, next) => {
     try {
       const user = {
-        email: "rafael_chacho@hotmail.com",
+        email: "goerens_teo@hotmail.com",
         password: "123",
       };
       const userLoaded = await repository.loginUser(user);

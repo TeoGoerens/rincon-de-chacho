@@ -17,8 +17,7 @@ const matchStatSchema = new mongoose.Schema(
     },
     points: {
       type: Number,
-      required: true,
-      default: 0,
+      default: null,
     },
     goals: {
       type: Number,
@@ -47,22 +46,18 @@ const matchStatSchema = new mongoose.Schema(
     },
     white_pearl: {
       type: Boolean,
-      required: true,
       default: false,
     },
     vanilla_pearl: {
       type: Boolean,
-      required: true,
       default: false,
     },
     ocher_pearl: {
       type: Boolean,
-      required: true,
       default: false,
     },
     black_pearl: {
       type: Boolean,
-      required: true,
       default: false,
     },
   },

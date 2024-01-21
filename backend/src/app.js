@@ -23,6 +23,8 @@ import footballCategoryRouter from "./routes/chachos/footballCategoryRouter.js";
 import rivalTeamRouter from "./routes/chachos/rivalTeamRouter.js";
 import tournamentRoundRouter from "./routes/chachos/tournamentRoundRouter.js";
 import voteRouter from "./routes/chachos/voteRouter.js";
+import matchStatRouter from "./routes/chachos/matchStatRouter.js";
+
 app.use("/api/users", userRouter);
 app.use("/api/chachos/player", playerRouter);
 app.use("/api/chachos/tournament", tournamentRouter);
@@ -30,6 +32,7 @@ app.use("/api/chachos/football-category", footballCategoryRouter);
 app.use("/api/chachos/rival-team", rivalTeamRouter);
 app.use("/api/chachos/tournament-round", tournamentRoundRouter);
 app.use("/api/chachos/vote", voteRouter);
+app.use("/api/chachos/match-stat", matchStatRouter);
 
 // ---------- ERROR MIDDLEWARE CONFIGURATIONS ----------
 import errorHandler from "./middlewares/error/errorHandler.js";
