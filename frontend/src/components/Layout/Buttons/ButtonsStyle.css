@@ -1,0 +1,48 @@
+/* BUTTON RESET */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+  color: inherit;
+}
+
+button span {
+  font-size: 24px;
+  margin: 0;
+}
+
+/* OPEN VOTE BUTTON / LINK */
+.open-vote {
+  background-color: green;
+  color: white;
+}
+
+/* CLOSE VOTE BUTTON / LINK */
+.close-vote {
+  background-color: #e74c3c;
+  color: white;
+}
+
+/* VIEW BUTTON / LINK */
+.view-button {
+  color: #3498db;
+}
+
+/* EDIT BUTTON / LINK */
+.edit-button {
+  color: #f39c12;
+}
+
+/* DELETE BUTTON / LINK */
+.delete-button {
+  color: #e74c3c;
+}
+
+/* HOVER EFFECTS */
+
+button:hover span,
+a:hover span {
+  scale: 1.1;
+}
