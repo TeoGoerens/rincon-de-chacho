@@ -1,47 +1,37 @@
 import MatchStatRepository from "../../repository/chachos/matchStatRepository.js";
+import TournamentRoundRepository from "../../repository/chachos/tournamentRoundRepository.js";
 const repository = new MatchStatRepository();
 
 export default class MatchStatController {
-  // ---------- GET USER'S VOTE IN A ROUND ----------
-  getVoteByRoundAndUser = async (req, res, next) => {
+  // ---------- GET MATCH STAT BY A SPECIFIED ID ----------
+  getMatchStatById = async (req, res, next) => {
     try {
-      const tournamentRoundId = req.params.pid;
-      const voterId = req.params.vid;
-      const userId = req.user.id;
+      const matchStatId = req.params.pid;
 
-      const usersVote = await repository.getVotefromUserByRound(
-        tournamentRoundId,
-        voterId,
-        userId
-      );
+      const matchStat = await repository.getMatchStatById(matchStatId);
 
       res.status(200).json({
-        message:
-          "User's vote has been properly retrieved for the current round",
-        usersVote,
+        message: "Match stat has been properly retrieved for the current round",
+        matchStat,
       });
     } catch (error) {
       next(error);
     }
   };
 
-  // ---------- GET VOTES RECEIVED BY A PLAYER IN A ROUND ----------
-  getVoteByRoundAndPlayer = async (req, res, next) => {
+  // ---------- GET MATCH STAT OF ALL PLAYERS BY A SPECIFIED ROUND ID ----------
+  getMatchStatByRound = async (req, res, next) => {
     try {
       const tournamentRoundId = req.params.pid;
-      const playerId = req.params.cid;
-      const userId = req.user.id;
 
-      const playersVote = await repository.getVoteForAPlayerByRound(
-        tournamentRoundId,
-        playerId,
-        userId
+      const roundMatchStat = await repository.getMatchStatByRound(
+        tournamentRoundId
       );
 
       res.status(200).json({
         message:
-          "Votes assigned to requested player have been properly retrieved for the current round",
-        playersVote,
+          "All match stats related to the provided tournament round have been properly retrieved",
+        roundMatchStat,
       });
     } catch (error) {
       next(error);
@@ -73,7 +63,12 @@ export default class MatchStatController {
     try {
       const playerId = "65a6cc297f343aa94e08bab9";
       const tournamentRoundId = "65aaccb5b94a3c9f41816897";
+      const tournamentRound = await TournamentRoundRepository.findById(
+        tournamentRoundId
+      );
+      const tournamentId = tournamentRound.tournament;
       const matchStat = {
+        tournament: tournamentId,
         round: tournamentRoundId,
         player: playerId,
         played: true,

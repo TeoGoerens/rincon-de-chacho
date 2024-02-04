@@ -13,7 +13,7 @@ export default class UserRepository extends baseRepository {
     //Check if user exists
     const userExists = await User.findOne({ email: user.email });
     if (userExists) {
-      throw new Error("User already exists");
+      throw new Error("El usuario ya está registrado en la base de datos");
     }
 
     //Hash user's password
@@ -36,7 +36,7 @@ export default class UserRepository extends baseRepository {
     //Check if user exists
     const userExists = await User.findOne({ email: user.email });
     if (!userExists) {
-      throw new Error("User is not properly registered");
+      throw new Error("Este usuario no figura en nuestra base de datos");
     }
 
     //Compare hashed passwords
@@ -50,7 +50,7 @@ export default class UserRepository extends baseRepository {
       return userExists;
     } else {
       throw new Error(
-        "Login credentials are not valid. Check the information submitted"
+        "Las credenciales no son válidas. Verifica la información ingresada"
       );
     }
   };

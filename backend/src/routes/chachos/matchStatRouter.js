@@ -7,8 +7,12 @@ const router = Router();
 const controller = new MatchStatController();
 
 // ---------- GET ROUTES ----------
-//Estadisticas por id
-//Estadisticas por ronda (promedio puntaje)
+router.get("/:pid", authMiddleware, controller.getMatchStatById);
+router.get(
+  "/tournament-round/:pid",
+  authMiddleware,
+  controller.getMatchStatByRound
+);
 //Estadisticas por campeonat (promedio puntaje)
 //Estadisticas globales (promedio puntaje)
 

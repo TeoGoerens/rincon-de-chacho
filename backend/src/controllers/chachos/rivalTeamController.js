@@ -18,7 +18,7 @@ export default class RivalTeamController {
   // ---------- GET ALL RIVAL TEAMS ----------
   getAllRivalTeams = async (req, res, next) => {
     try {
-      const rivalTeams = await repository.baseGetAll();
+      const rivalTeams = await repository.baseGetAll({ sortBy: "name" });
       res.status(200).json({
         message: "All rival teams have been properly retrieved",
         rivalTeams,
@@ -31,7 +31,8 @@ export default class RivalTeamController {
   createRivalTeam = async (req, res, next) => {
     try {
       const rivalTeam = {
-        name: "Furano",
+        avatar: req.body.avatar,
+        name: req.body.name,
       };
 
       const rivalTeamLoaded = await repository.baseCreate(rivalTeam, "name");
@@ -50,7 +51,8 @@ export default class RivalTeamController {
       const rivalTeamId = req.params.pid;
 
       const newRivalTeamInfo = {
-        name: "La Ponderosa",
+        avatar: req.body.avatar,
+        name: req.body.name,
       };
 
       const rivalTeamUpdated = await repository.baseUpdateById(

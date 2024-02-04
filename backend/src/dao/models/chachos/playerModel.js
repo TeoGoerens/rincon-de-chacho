@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const playerSchema = new mongoose.Schema(
   {
+    shirt: {
+      type: Number,
+      required: true,
+    },
     first_name: {
       type: String,
       required: true,

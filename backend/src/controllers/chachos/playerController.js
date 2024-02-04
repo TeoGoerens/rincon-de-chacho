@@ -18,7 +18,7 @@ export default class PlayerController {
   // ---------- GET ALL PLAYERS ----------
   getAllPlayers = async (req, res, next) => {
     try {
-      const players = await repository.baseGetAll();
+      const players = await repository.baseGetAll({ sortBy: "shirt" });
       res
         .status(200)
         .json({ message: "All players have been properly retrieved", players });
@@ -30,14 +30,15 @@ export default class PlayerController {
   createPlayer = async (req, res, next) => {
     try {
       const player = {
-        first_name: "Juan Martin",
-        last_name: "Bernaldo de Quiros",
-        nickname: "Bernata",
-        email: "jmbernaldodequiros@gmail.com",
-        field_position: "Defensor",
+        shirt: req.body.shirt,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        nickname: req.body.nickname,
+        email: req.body.email,
+        field_position: req.body.field_position,
       };
 
-      const playerLoaded = await repository.baseCreate(player, "email");
+      const playerLoaded = await repository.baseCreate(player, "shirt");
 
       res
         .status(200)
@@ -52,11 +53,12 @@ export default class PlayerController {
       const playerId = req.params.pid;
 
       const newPlayerInfo = {
-        first_name: "Teo",
-        last_name: "Gutierrez",
-        nickname: "Duende",
-        email: "goerens_teo@hotmail.com",
-        field_position: "Delantero",
+        shirt: req.body.shirt,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        nickname: req.body.nickname,
+        email: req.body.email,
+        field_position: req.body.field_position,
       };
 
       const playerUpdated = await repository.baseUpdateById(

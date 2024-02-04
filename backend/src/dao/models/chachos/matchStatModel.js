@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const matchStatSchema = new mongoose.Schema(
   {
+    tournament: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tournament",
+    },
     round: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tournament Round",
@@ -13,7 +17,7 @@ const matchStatSchema = new mongoose.Schema(
     played: {
       type: Boolean,
       required: true,
-      default: false,
+      default: true,
     },
     points: {
       type: Number,

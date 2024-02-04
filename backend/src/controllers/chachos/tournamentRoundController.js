@@ -7,7 +7,15 @@ export default class TournamentRoundController {
   getTournamentRoundById = async (req, res, next) => {
     try {
       const tournamentRoundId = req.params.pid;
-      const tournamentRound = await repository.baseGetById(tournamentRoundId);
+      const tournamentRound = await repository.baseGetById(tournamentRoundId, [
+        "tournament",
+        "rival",
+        "players",
+        "white_pearl",
+        "vanilla_pearl",
+        "ocher_pearl",
+        "black_pearl",
+      ]);
       res.status(200).json({
         message: `Tournament round with id ${tournamentRoundId} has been properly retrieved`,
         tournamentRound,
@@ -37,7 +45,19 @@ export default class TournamentRoundController {
   // ---------- GET ALL TOURNAMENT ROUNDS ----------
   getAllTournamentRounds = async (req, res, next) => {
     try {
-      const tournamentRounds = await repository.baseGetAll();
+      const tournamentRounds = await repository.baseGetAll({
+        sortBy: "match_date",
+        sortOrder: "desc",
+        populateBy: [
+          "tournament",
+          "rival",
+          "players",
+          "white_pearl",
+          "vanilla_pearl",
+          "ocher_pearl",
+          "black_pearl",
+        ],
+      });
       res.status(200).json({
         message: "All tournament rounds have been properly retrieved",
         tournamentRounds,
@@ -51,17 +71,12 @@ export default class TournamentRoundController {
   createTournamentRound = async (req, res, next) => {
     try {
       const tournamentRound = {
-        tournament: "65a9e81e3140c1302a39a0b8",
-        rival: "65a9e25708c645473df09ac7",
-        match_date: Date.now(),
-        score_chachos: 7,
-        score_rival: 1,
-        players: [],
-        white_pearl: undefined,
-        vanilla_pearl: undefined,
-        ocher_pearl: undefined,
-        black_pearl: undefined,
-        open_for_vote: false,
+        tournament: req.body.tournament,
+        rival: req.body.rival,
+        match_date: req.body.match_date,
+        score_chachos: req.body.score_chachos,
+        score_rival: req.body.score_rival,
+        players: req.body.players,
       };
 
       const { win, draw, defeat } = await defineMatchOutcome(
@@ -111,15 +126,22 @@ export default class TournamentRoundController {
       const tournamentRoundId = req.params.pid;
 
       const newTournamentRoundInfo = {
-        players: [
-          "65a6cc297f343aa94e08bab9",
-          "65a9e48d91209489b551cbe1",
-          "65aac004fde14a3e6366fbf8",
-          "65aac0327501d9e2c15c953e",
-        ],
-        white_pearl: "65a6cc297f343aa94e08bab9",
-        black_pearl: "65a9e48d91209489b551cbe1",
+        tournament: req.body.tournament,
+        rival: req.body.rival,
+        match_date: req.body.match_date,
+        score_chachos: req.body.score_chachos,
+        score_rival: req.body.score_rival,
+        players: req.body.players,
       };
+
+      const { win, draw, defeat } = await defineMatchOutcome(
+        newTournamentRoundInfo.score_chachos,
+        newTournamentRoundInfo.score_rival
+      );
+
+      newTournamentRoundInfo.win = win;
+      newTournamentRoundInfo.draw = draw;
+      newTournamentRoundInfo.defeat = defeat;
 
       const tournamentRoundUpdated = await repository.baseUpdateById(
         tournamentRoundId,

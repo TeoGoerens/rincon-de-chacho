@@ -18,7 +18,11 @@ export default class TournamentController {
   // ---------- GET ALL TOURNAMENTS ----------
   getAllTournaments = async (req, res, next) => {
     try {
-      const tournaments = await repository.baseGetAll();
+      const tournaments = await repository.baseGetAll({
+        sortBy: "year",
+        populateBy: "category",
+      });
+
       res.status(200).json({
         message: "All tournaments have been properly retrieved",
         tournaments,
@@ -31,9 +35,9 @@ export default class TournamentController {
   createTournament = async (req, res, next) => {
     try {
       const tournament = {
-        name: "Copa Super 8 CUBA",
-        year: 2024,
-        category: "65a9bfe3bcf0281e6cfbddde",
+        name: req.body.name,
+        year: req.body.year,
+        category: req.body.category,
       };
 
       const tournamentLoaded = await repository.baseCreate(tournament, "name");
@@ -52,8 +56,9 @@ export default class TournamentController {
       const tournamentId = req.params.pid;
 
       const newTournamentInfo = {
-        name: "Gaucho Gil",
-        year: 2025,
+        name: req.body.name,
+        year: req.body.year,
+        category: req.body.category,
       };
 
       const tournamentUpdated = await repository.baseUpdateById(

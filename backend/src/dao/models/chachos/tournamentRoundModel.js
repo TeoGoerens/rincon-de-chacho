@@ -4,10 +4,12 @@ const tournamentRoundSchema = new mongoose.Schema(
   {
     tournament: {
       type: mongoose.Schema.Types.ObjectId,
+      required: true,
       ref: "Tournament",
     },
     rival: {
       type: mongoose.Schema.Types.ObjectId,
+      required: true,
       ref: "Rival Team",
     },
     match_date: {

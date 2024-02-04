@@ -8,10 +8,10 @@ export default class UserController {
   registerUser = async (req, res, next) => {
     try {
       const user = {
-        first_name: "Rafa",
-        last_name: "Giaccio",
-        email: "rafael_chacho@hotmail.com",
-        password: "123",
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        email: req.body.email,
+        password: req.body.password,
       };
       const userLoaded = await repository.createUser(user);
 
@@ -27,8 +27,8 @@ export default class UserController {
   loginUser = async (req, res, next) => {
     try {
       const user = {
-        email: "goerens_teo@hotmail.com",
-        password: "123",
+        email: req.body.email,
+        password: req.body.password,
       };
       const userLoaded = await repository.loginUser(user);
       const userToDisplay = new userDTO(userLoaded);

@@ -3,21 +3,51 @@ export default class baseRepository {
     this.model = model;
   }
 
-  async baseGetById(id) {
+  async baseGetById(id, populateBy) {
     try {
-      const document = await this.model.findById(id);
+      let query = this.model.findById(id);
+
+      if (populateBy) {
+        if (Array.isArray(populateBy)) {
+          populateBy.forEach((field) => {
+            query = query.populate(field);
+          });
+        } else {
+          query = query.populate(populateBy);
+        }
+      }
+
+      const document = await query.exec();
+
       if (!document) {
         throw new Error("Element was not found in the database");
       }
+
       return document;
     } catch (error) {
       throw error;
     }
   }
 
-  async baseGetAll() {
+  async baseGetAll(options) {
     try {
-      const documents = await this.model.find();
+      let query = this.model.find();
+
+      if (options.sortBy) {
+        const sortOrder = options.sortOrder === "desc" ? -1 : 1;
+        query = query.sort({ [options.sortBy]: sortOrder });
+      }
+
+      if (options.populateBy) {
+        if (Array.isArray(options.populateBy)) {
+          options.populateBy.forEach((field) => {
+            query = query.populate(field);
+          });
+        } else {
+          query = query.populate(options.populateBy);
+        }
+      }
+      const documents = await query.exec();
       return documents;
     } catch (error) {
       throw error;

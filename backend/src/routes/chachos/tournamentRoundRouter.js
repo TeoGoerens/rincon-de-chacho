@@ -21,7 +21,7 @@ router.post(
 
 // ---------- PUT ROUTES ----------
 router.put(
-  "/:pid/open-for-vote",
+  "/open-for-vote/:pid",
   authMiddleware,
   adminAuthMiddleware,
   controller.ToggleOpenForVote

@@ -18,8 +18,9 @@ export default class FootballCategoryController {
   // ---------- GET ALL FOOTBALL CATEGORIES ----------
   getAllFootballCategories = async (req, res, next) => {
     try {
-      const footballCategories = await repository.baseGetAll();
-      console.log(req.user);
+      const footballCategories = await repository.baseGetAll({
+        sortBy: "name",
+      });
       res.status(200).json({
         message: "All football categories have been properly retrieved",
         footballCategories,
@@ -32,7 +33,7 @@ export default class FootballCategoryController {
   createFootballCategory = async (req, res, next) => {
     try {
       const footballCategory = {
-        name: "CUBA Libres - División B",
+        name: req.body.name,
       };
 
       const footballCategoryLoaded = await repository.baseCreate(
@@ -41,7 +42,7 @@ export default class FootballCategoryController {
       );
 
       res.status(200).json({
-        message: "Football category has been properly created",
+        message: "La categoria fue correctamente creada",
         footballCategoryLoaded,
       });
     } catch (error) {
@@ -54,7 +55,7 @@ export default class FootballCategoryController {
       const footballCategoryId = req.params.pid;
 
       const newFootballCategoryInfo = {
-        name: "CUBA +32 - A",
+        name: req.body.name,
       };
 
       const footballCategoryUpdated = await repository.baseUpdateById(

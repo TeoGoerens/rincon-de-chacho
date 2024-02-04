@@ -1,21 +1,47 @@
 import { Router } from "express";
 import TournamentController from "../../controllers/chachos/tournamentController.js";
 import authMiddleware from "../../middlewares/auth/authMiddleware.js";
+import adminAuthMiddleware from "../../middlewares/auth/adminAuthMiddleware.js";
 
 const router = Router();
 const controller = new TournamentController();
 
 // ---------- GET ROUTES ----------
-router.get("/:pid", controller.getTournamentById);
-router.get("/", controller.getAllTournaments);
+router.get(
+  "/:pid",
+  authMiddleware,
+  adminAuthMiddleware,
+  controller.getTournamentById
+);
+router.get(
+  "/",
+  authMiddleware,
+  adminAuthMiddleware,
+  controller.getAllTournaments
+);
 
 // ---------- POST ROUTES ----------
-router.post("/", controller.createTournament);
+router.post(
+  "/",
+  authMiddleware,
+  adminAuthMiddleware,
+  controller.createTournament
+);
 
 // ---------- PUT ROUTES ----------
-router.put("/:pid", controller.updateTournamentById);
+router.put(
+  "/:pid",
+  authMiddleware,
+  adminAuthMiddleware,
+  controller.updateTournamentById
+);
 
 // ---------- DELETE ROUTES ----------
-router.delete("/:pid", controller.deleteTournamentById);
+router.delete(
+  "/:pid",
+  authMiddleware,
+  adminAuthMiddleware,
+  controller.deleteTournamentById
+);
 
 export default router;

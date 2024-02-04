@@ -7,195 +7,33 @@ export default class MatchStatRepository extends baseRepository {
     super(MatchStat);
   }
 
-  // ---------- VERIFY IF TOURNAMENT ROUND IS OPEN FOR VOTE ----------
-  verifyTournamentRoundOpenForVote = async (tournamentRoundId) => {
+  // ---------- GET MATCH STAT BY ID ----------
+  getMatchStatById = async (matchStatId) => {
     try {
-      const document = await TournamentRound.findById(tournamentRoundId);
-      if (!document) {
+      const documentExists = await this.model.findById(matchStatId);
+      if (!documentExists) {
         throw new Error("Element was not found in the database");
       }
 
-      return document.open_for_vote;
+      return documentExists;
     } catch (error) {
       throw error;
     }
   };
 
-  // ---------- GET VOTE FROM SPECIFIC USER FOR A ROUND ----------
-  getVotefromUserByRound = async (tournamentRoundId, voterId, userId) => {
+  // ---------- GET MATCH STAT BY ROUND ----------
+  getMatchStatByRound = async (tournamentRoundId) => {
     try {
       const documentExists = await TournamentRound.findById(tournamentRoundId);
       if (!documentExists) {
         throw new Error("Element was not found in the database");
       }
 
-      //Verify if user is admin and if user has already voted for this round
-      const user = await User.findOne({ _id: userId });
-      const userIsAdmin = user.is_admin;
-      const usersVote = await this.model.findOne({
-        voter: userId,
+      const roundMatchStat = await this.model.find({
         round: tournamentRoundId,
       });
 
-      if (!userIsAdmin && (usersVote == null || usersVote == undefined)) {
-        throw new Error(
-          "User has not yet voted. Please vote to see round's results"
-        );
-      }
-
-      //Return vote from requested voter
-      const requestedVote = await this.model.find({
-        round: tournamentRoundId,
-        voter: voterId,
-      });
-
-      if (requestedVote.length === 0) {
-        throw new Error(
-          "The selected voter has not yet submitted results. No information to display"
-        );
-      }
-
-      return requestedVote;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  // ---------- GET VOTES RECEIVED BY A PLAYER FOR A ROUND ----------
-  getVoteForAPlayerByRound = async (tournamentRoundId, playerId, userId) => {
-    try {
-      const documentExists = await TournamentRound.findById(tournamentRoundId);
-      if (!documentExists) {
-        throw new Error("Element was not found in the database");
-      }
-
-      //Verify if user is admin and if user has already voted for this round
-      const user = await User.findOne({ _id: userId });
-      const userIsAdmin = user.is_admin;
-      const usersVote = await this.model.findOne({
-        voter: userId,
-        round: tournamentRoundId,
-      });
-
-      if (!userIsAdmin && (usersVote == null || usersVote == undefined)) {
-        throw new Error(
-          "User has not yet voted. Please vote to see round's results"
-        );
-      }
-
-      //Return votes received for requested player
-      const requestedVote = await this.model.aggregate([
-        {
-          $match: {
-            $and: [
-              {
-                $or: [
-                  { white_pearl: new mongoose.Types.ObjectId(playerId) },
-                  { vanilla_pearl: new mongoose.Types.ObjectId(playerId) },
-                  { ocher_pearl: new mongoose.Types.ObjectId(playerId) },
-                  { black_pearl: new mongoose.Types.ObjectId(playerId) },
-                ],
-              },
-              { round: new mongoose.Types.ObjectId(tournamentRoundId) },
-            ],
-          },
-        },
-        {
-          $project: {
-            voter: 1,
-            round: 1,
-            white_pearl: {
-              $cond: {
-                if: {
-                  $eq: ["$white_pearl", new mongoose.Types.ObjectId(playerId)],
-                },
-                then: "$white_pearl",
-                else: null,
-              },
-            },
-            vanilla_pearl: {
-              $cond: {
-                if: {
-                  $eq: [
-                    "$vanilla_pearl",
-                    new mongoose.Types.ObjectId(playerId),
-                  ],
-                },
-                then: "$vanilla_pearl",
-                else: null,
-              },
-            },
-            ocher_pearl: {
-              $cond: {
-                if: {
-                  $eq: ["$ocher_pearl", new mongoose.Types.ObjectId(playerId)],
-                },
-                then: "$ocher_pearl",
-                else: null,
-              },
-            },
-            black_pearl: {
-              $cond: {
-                if: {
-                  $eq: ["$black_pearl", new mongoose.Types.ObjectId(playerId)],
-                },
-                then: "$black_pearl",
-                else: null,
-              },
-            },
-
-            evaluation: {
-              $filter: {
-                input: "$evaluation",
-                as: "eval",
-                cond: {
-                  $eq: ["$$eval.player", new mongoose.Types.ObjectId(playerId)],
-                },
-              },
-            },
-          },
-        },
-      ]);
-      console.log(requestedVote);
-
-      if (requestedVote.length === 0) {
-        throw new Error(
-          "The selected player has not been assigned any votes in this round"
-        );
-      }
-
-      return requestedVote;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  // ---------- GET ALL VOTES ----------
-  getAllVotesForRound = async (tournamentRoundId, userId) => {
-    try {
-      const documentExists = await TournamentRound.findById(tournamentRoundId);
-      if (!documentExists) {
-        throw new Error("Element was not found in the database");
-      }
-
-      //Verify if user is admin and if user has already voted for this round
-      const user = await User.findOne({ _id: userId });
-      const userIsAdmin = user.is_admin;
-      const usersVote = await this.model.findOne({
-        voter: userId,
-        round: tournamentRoundId,
-      });
-
-      if (!userIsAdmin && (usersVote == null || usersVote == undefined)) {
-        throw new Error(
-          "User has not yet voted. Please vote to see round's results"
-        );
-      }
-
-      //Return all votes
-      const allVotes = await this.model.find({ round: tournamentRoundId });
-      //.populate({ path: "evaluation.player", model: "Player" });
-      return allVotes;
+      return roundMatchStat;
     } catch (error) {
       throw error;
     }
