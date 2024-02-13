@@ -10,6 +10,9 @@ import { baseURL } from "../../../helpers/baseURL";
 const resetUpdateTournamentRoundAction = createAction(
   "tournament-rounds/update-reset"
 );
+const resetConsolidatePearlsAction = createAction(
+  "tournament-rounds/consolidate-pearls-reset"
+);
 const resetDeleteTournamentRoundAction = createAction(
   "tournament-rounds/delete-reset"
 );
@@ -30,7 +33,10 @@ export const createTournamentRoundAction = createAsyncThunk(
   async (tournamentRound, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -61,7 +67,10 @@ export const getAllTournamentRoundsAction = createAsyncThunk(
   async (tournamentRound, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -88,7 +97,10 @@ export const getTournamentRoundAction = createAsyncThunk(
   async (id, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -109,13 +121,46 @@ export const getTournamentRoundAction = createAsyncThunk(
   }
 );
 
+// ---------- GET ROUNDS BY TOURNAMENT ----------
+export const getTournamentRoundsByTournamentAction = createAsyncThunk(
+  "tournament-rounds/get-by-tournament",
+  async (id, { rejectWithValue, getState, dispatch }) => {
+    try {
+      //Retrieve information from the user
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
+
+      //HTTP call
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+      const endpoint = `${baseURL}/api/chachos/tournament-round/tournament/${id}`;
+      const response = await axios.get(endpoint, config);
+      return response.data;
+    } catch (error) {
+      if (!error?.response) {
+        throw error;
+      }
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 // ---------- UPDATE TOURNAMENT ROUND ----------
 export const updateTournamentRoundAction = createAsyncThunk(
   "tournament-rounds/update",
   async (tournamentRound, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -152,13 +197,58 @@ export const updateTournamentRoundAction = createAsyncThunk(
   }
 );
 
+// ---------- CONSOLIDATE PEARLS ----------
+export const consolidatePearlsAction = createAsyncThunk(
+  "tournament-rounds/consolidate-pearls",
+  async (tournamentRound, { rejectWithValue, getState, dispatch }) => {
+    try {
+      //Retrieve information from the user
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
+      const votes = getState().votes?.votesFromRound?.allVotesForRound || null;
+
+      //HTTP call
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+      const endpoint = `${baseURL}/api/chachos/tournament-round/consolidate-pearls/${tournamentRound}`;
+
+      const response = await axios.put(
+        endpoint,
+        {
+          votes,
+        },
+        config
+      );
+
+      //Reset update state
+      dispatch(resetConsolidatePearlsAction());
+
+      return response.data;
+    } catch (error) {
+      if (!error?.response) {
+        throw error;
+      }
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 // ---------- DELETE TOURNAMENT ROUND ----------
 export const deleteTournamentRoundAction = createAsyncThunk(
   "tournament-rounds/delete",
   async (id, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -189,7 +279,10 @@ export const updateOpenForVoteAction = createAsyncThunk(
   async (tournamentRoundId, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -284,6 +377,33 @@ const tournamentRoundsSlices = createSlice({
       state.serverError = action?.error?.message;
     });
 
+    // ---------- GET ROUNDS BY TOURNAMENT ----------
+    builder.addCase(
+      getTournamentRoundsByTournamentAction.pending,
+      (state, action) => {
+        state.loading = true;
+        state.appError = undefined;
+        state.serverError = undefined;
+      }
+    );
+    builder.addCase(
+      getTournamentRoundsByTournamentAction.fulfilled,
+      (state, action) => {
+        state.loading = false;
+        state.tournamentRoundsByTournament = action?.payload;
+        state.appError = undefined;
+        state.serverError = undefined;
+      }
+    );
+    builder.addCase(
+      getTournamentRoundsByTournamentAction.rejected,
+      (state, action) => {
+        state.loading = false;
+        state.appError = action?.payload?.message;
+        state.serverError = action?.error?.message;
+      }
+    );
+
     // ---------- UPDATE TOURNAMENT ROUND ----------
     builder.addCase(updateTournamentRoundAction.pending, (state, action) => {
       state.loading = true;
@@ -301,6 +421,28 @@ const tournamentRoundsSlices = createSlice({
       state.serverError = undefined;
     });
     builder.addCase(updateTournamentRoundAction.rejected, (state, action) => {
+      state.loading = false;
+      state.appError = action?.payload?.message;
+      state.serverError = action?.error?.message;
+    });
+
+    // ---------- CONSOLIDATE PEARLS ----------
+    builder.addCase(consolidatePearlsAction.pending, (state, action) => {
+      state.loading = true;
+      state.appError = undefined;
+      state.serverError = undefined;
+    });
+    builder.addCase(resetConsolidatePearlsAction, (state, action) => {
+      state.arePearlsConsolidated = true;
+    });
+    builder.addCase(consolidatePearlsAction.fulfilled, (state, action) => {
+      state.loading = false;
+      state.TournamentRoundWithPearls = action?.payload;
+      state.arePearlsConsolidated = false;
+      state.appError = undefined;
+      state.serverError = undefined;
+    });
+    builder.addCase(consolidatePearlsAction.rejected, (state, action) => {
       state.loading = false;
       state.appError = action?.payload?.message;
       state.serverError = action?.error?.message;

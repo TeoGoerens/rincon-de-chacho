@@ -1,0 +1,125 @@
+.register-page-container {
+  height: calc(100vh - 80px);
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5rem;
+  overflow-x: hidden;
+  padding-inline: 5%;
+  background-color: transparent;
+}
+
+.message-error {
+  font-size: 0.85rem;
+  color: var(--fourth-color);
+}
+
+/* --------------- REGISTER IMAGE --------------- */
+
+.register-image-container {
+  width: 400px;
+  height: 450px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.register-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: inherit;
+}
+
+/* --------------- REGISTER TEXT --------------- */
+
+.register-text {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-text h1 {
+  font-size: 2.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+.register-text-brand {
+  font-family: var(--accent-font);
+}
+
+.register-text-brand span {
+  font-family: var(--accent-font);
+  color: var(--third-color);
+}
+
+.register-text h2 {
+  width: 100%;
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 1rem;
+}
+
+.register-text form {
+  margin-top: 3rem;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.register-text form label {
+  display: inline-block;
+  width: 100px;
+  font-weight: 700;
+}
+
+.register-text form input {
+  font-size: 0.85rem;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  width: 100%;
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-weight: 700;
+}
+
+.register-text form button {
+  margin-top: 0.5rem;
+  width: 100px;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 10px;
+  transition: all ease 0.3s;
+}
+
+.register-text form button:hover {
+  scale: 1.05;
+}
+
+.register-text form .message-error {
+  color: var(--fourth-color);
+  font-size: 0.85rem;
+}
+
+/* --------------- MEDIA QUERIES --------------- */
+
+@media only screen and (max-width: 769px) {
+  .register-page-container {
+    height: auto;
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .register-text {
+    width: 100%;
+  }
+
+  .register-image-container {
+    display: none;
+  }
+}

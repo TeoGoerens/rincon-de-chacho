@@ -1,10 +1,22 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, createAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { baseURL } from "../../../helpers/baseURL";
 import {
   getIsAdminFromLocalStorage,
   getUserInfoFromLocalStorage,
 } from "../../../helpers/userInfoFromLocalStorage";
+
+// --------------------
+// GLOBAL ACTIONS
+// --------------------
+
+// ---------- REDIRECT ----------
+const resetLoginAction = createAction("users/login-reset");
+const resetLogoutAction = createAction("users/logout-reset");
+
+// --------------------
+// ACTIONS
+// --------------------
 
 // ---------- REGISTER ACTION ----------
 export const registerUserAction = createAsyncThunk(
@@ -48,6 +60,10 @@ export const loginUserAction = createAsyncThunk(
         "userInfo",
         JSON.stringify(response.data.userToDisplay)
       );
+
+      //Reset update state
+      dispatch(resetLoginAction());
+
       return response.data;
     } catch (error) {
       if (!error?.response) {
@@ -65,6 +81,9 @@ export const logoutUserAction = createAsyncThunk(
     try {
       //Remove user from local storage
       localStorage.removeItem("userInfo");
+
+      //Reset update state
+      dispatch(resetLogoutAction());
     } catch (error) {
       if (!error?.response) {
         throw error;
@@ -108,10 +127,14 @@ const userSlices = createSlice({
       state.appError = undefined;
       state.serverError = undefined;
     });
+    builder.addCase(resetLoginAction, (state, action) => {
+      state.isLoggedIn = true;
+    });
     builder.addCase(loginUserAction.fulfilled, (state, action) => {
       state.loading = false;
       state.userAuth = action?.payload;
       state.isAdmin = action?.payload.userToDisplay.is_admin;
+      state.isLoggedIn = true;
       state.appError = undefined;
       state.serverError = undefined;
     });

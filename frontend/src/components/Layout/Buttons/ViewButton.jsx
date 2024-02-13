@@ -8,7 +8,7 @@ import "./ButtonsStyle.css";
 const ViewButton = ({ to }) => {
   return (
     <Link to={to}>
-      <span class="material-icons view-button">visibility</span>
+      <span className="material-icons view-button">visibility</span>
     </Link>
   );
 };

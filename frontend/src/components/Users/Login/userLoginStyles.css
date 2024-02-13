@@ -1,0 +1,123 @@
+.login-page-container {
+  height: calc(100vh - 80px);
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  overflow-x: hidden;
+  padding-inline: 5%;
+  background-color: transparent;
+}
+
+/* --------------- HERO TEXT --------------- */
+
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  width: 65%;
+}
+
+.hero-text * {
+  background-color: transparent;
+  color: inherit;
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+}
+
+.hero-text-brand {
+  font-family: var(--accent-font);
+}
+
+.hero-text-brand span {
+  font-family: var(--accent-font);
+  color: var(--third-color);
+}
+
+.hero-text h4 {
+  margin-top: 1rem;
+  font-family: var(--secondary-font);
+  font-size: 0.85rem;
+}
+
+.hero-text form {
+  margin-top: 3rem;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.hero-text form label {
+  display: inline-block;
+  width: 100px;
+  font-weight: 700;
+}
+
+.hero-text form input {
+  font-size: 0.85rem;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  width: 300px;
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-weight: 700;
+}
+
+.hero-text form button {
+  margin-top: 0.5rem;
+  width: 100px;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 10px;
+  transition: all ease 0.3s;
+}
+
+.hero-text form button:hover {
+  scale: 1.05;
+}
+
+.hero-text form .message-error {
+  color: var(--fourth-color);
+  font-size: 0.85rem;
+}
+
+/* --------------- HERO IMAGE --------------- */
+
+.hero-image-container {
+  width: 400px;
+  height: 450px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.hero-image {
+  object-fit: cover;
+  background-color: inherit;
+}
+
+/* --------------- MEDIA QUERIES --------------- */
+
+@media only screen and (max-width: 769px) {
+  .login-page-container {
+    height: auto;
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .hero-text {
+    width: 100%;
+  }
+  .hero-text h1 {
+    font-size: 2.5rem;
+  }
+  .hero-image-container {
+    display: none;
+  }
+}

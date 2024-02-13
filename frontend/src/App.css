@@ -1,11 +1,32 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Protest+Strike&display=swap");
+
+:root {
+  --primary-color: #191919;
+  --secondary-color: #457b9d;
+  --third-color: #a8dadc;
+  --fourth-color: #e63946;
+  --background-color: #f1faee;
+  --text-color: #343a40;
+
+  --primary-font: "Roboto", sans-serif;
+  --secondary-font: "Poppins", sans-serif;
+  --accent-font: "Protest Strike", sans-serif;
+}
 
 * {
-  font-family: "Poppins", sans-serif;
   margin: 0;
   box-sizing: border-box;
+  font-family: var(--primary-font);
+  color: var(--text-color);
 }
 
 body {
-  color: #060417;
+  background: radial-gradient(circle, white 50%, var(--background-color) 90%);
+}
+
+.container {
+  width: 90%;
+  margin: 0 auto;
 }

@@ -7,7 +7,7 @@ import "./ButtonsStyle.css";
 const DeleteButton = ({ onClick, id }) => {
   return (
     <button onClick={() => onClick(id)}>
-      <span class="material-icons delete-button">delete</span>
+      <span className="material-icons delete-button">delete</span>
     </button>
   );
 };

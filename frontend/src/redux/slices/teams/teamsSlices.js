@@ -21,7 +21,10 @@ export const createTeamAction = createAsyncThunk(
   async (team, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -52,7 +55,10 @@ export const getAllTeamsAction = createAsyncThunk(
   async (teams, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -79,7 +85,10 @@ export const getTeamAction = createAsyncThunk(
   async (id, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -106,7 +115,10 @@ export const updateTeamAction = createAsyncThunk(
   async (team, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {
@@ -145,7 +157,10 @@ export const deleteTeamAction = createAsyncThunk(
   async (id, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve information from the user
-      const token = getState().users?.userAuth?.jwt || null;
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
 
       //HTTP call
       const config = {

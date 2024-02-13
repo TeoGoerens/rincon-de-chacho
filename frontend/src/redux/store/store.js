@@ -5,6 +5,7 @@ import playersSlices from "../slices/players/playersSlices";
 import teamsSlices from "../slices/teams/teamsSlices";
 import tournamentsSlices from "../slices/tournaments/tournamentsSlices";
 import tournamentRoundsSlices from "../slices/tournament-rounds/tournamentRoundsSlices";
+import votesSlices from "../slices/votes/votesSlices";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     teams: teamsSlices,
     tournaments: tournamentsSlices,
     tournamentRounds: tournamentRoundsSlices,
+    votes: votesSlices,
   },
 });
 

@@ -1,5 +1,125 @@
-nav ul {
+@import "../../../App.css";
+
+nav {
+  position: sticky;
+  top: 0;
+  height: 80px;
   display: flex;
-  justify-content: flex-end;
-  gap: 4rem;
+  justify-content: space-between;
+  background-color: var(--primary-color);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  z-index: 900;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+  background-color: transparent;
+}
+
+.menu-btn {
+  font-size: 2rem;
+  border: 1px solid;
+  background-color: white;
+  color: var(--primary-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logo-img {
+  height: 60px;
+  border-radius: 50%;
+  background-color: inherit;
+  margin-left: 1rem;
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-family: var(--accent-font);
+  color: white;
+  background-color: transparent;
+  margin-left: 1rem;
+}
+
+.logo-text span {
+  font-family: inherit;
+  background-color: transparent;
+  color: var(--third-color);
+}
+
+.menu-container {
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.credentials-btn-container {
+  display: flex;
+  gap: 1rem;
+  background-color: transparent;
+}
+
+.nav-login-btn {
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.7rem;
+  border-radius: 10%;
+  background-color: transparent;
+  color: var(--third-color);
+  border: 2px solid;
+  border-color: var(--third-color);
+  transition: all 0.4s ease;
+}
+
+.nav-login-btn:hover {
+  color: var(--primary-color);
+  background-color: var(--third-color);
+  border-color: var(--primary-color);
+}
+
+.nav-register-btn {
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.7rem;
+  border-radius: 10%;
+  color: var(--primary-color);
+  border: 2px solid;
+  border-color: var(--primary-color);
+  background-color: var(--third-color);
+  transition: all 0.4s ease;
+}
+
+.nav-register-btn:hover {
+  background-color: var(--primary-color);
+  border-color: var(--third-color);
+  color: var(--third-color);
+}
+
+.user-credentials-container {
+  background-color: transparent;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.user-img {
+  width: 30px;
+  border-radius: 50%;
+}
+
+.user-credentials-container span {
+  background-color: transparent;
+  color: white;
+}
+
+/* MEDIA QUERIES */
+
+@media only screen and (max-width: 600px) {
+  .logo-text {
+    display: none;
+  }
 }

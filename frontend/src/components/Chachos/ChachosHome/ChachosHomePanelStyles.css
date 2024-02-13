@@ -1,0 +1,27 @@
+/* TopWhitePearlPlayersCard.css */
+
+.top-players-card {
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.top-players-card h3 {
+  color: #333;
+}
+
+.player-item {
+  list-style: none;
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.player-item strong {
+  color: #007bff;
+}

@@ -1,33 +1,36 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import AdminPanel from "./AdminPanel";
-import FootballCategoriesIndex from "../Chachos/FootballCategories/FootballCategoriesIndex";
-import FootballCategoriesCreate from "../Chachos/FootballCategories/FootballCategoriesCreate";
-import FootballCategoriesUpdate from "../Chachos/FootballCategories/FootballCategoriesUpdate";
-import PlayersIndex from "../Chachos/Players/PlayersIndex";
-import PlayersCreate from "../Chachos/Players/PlayersCreate";
-import PlayersUpdate from "../Chachos/Players/PlayersUpdate";
-import TeamsIndex from "../Chachos/Teams/TeamsIndex";
-import TeamsCreate from "../Chachos/Teams/TeamsCreate";
-import TeamsUpdate from "../Chachos/Teams/TeamsUpdate";
-import TournamentsIndex from "../Chachos/Tournaments/TournamentsIndex";
-import TournamentsCreate from "../Chachos/Tournaments/TournamentsCreate";
-import TournamentsUpdate from "../Chachos/Tournaments/TournamentsUpdate";
-import TournamentRoundsIndex from "../Chachos/TournamentRounds/TournamentRoundsIndex";
-import TournamentRoundsCreate from "../Chachos/TournamentRounds/TournamentRoundsCreate";
-import TournamentRoundsDetail from "../Chachos/TournamentRounds/TournamentRoundsDetail";
-import TournamentRoundsUpdate from "../Chachos/TournamentRounds/TournamentRoundsUpdate";
+
+import AdminHomePanel from "./AdminHome/AdminHomePanel";
+import AdminChachosPanel from "./AdminChachos/AdminChachosPanel";
+import FootballCategoriesIndex from "./AdminChachos/FootballCategories/FootballCategoriesIndex";
+import FootballCategoriesCreate from "./AdminChachos/FootballCategories/FootballCategoriesCreate";
+import FootballCategoriesUpdate from "./AdminChachos/FootballCategories/FootballCategoriesUpdate";
+import PlayersIndex from "./AdminChachos/Players/PlayersIndex";
+import PlayersCreate from "./AdminChachos/Players/PlayersCreate";
+import PlayersUpdate from "./AdminChachos/Players/PlayersUpdate";
+import TeamsIndex from "./AdminChachos/Teams/TeamsIndex";
+import TeamsCreate from "./AdminChachos/Teams/TeamsCreate";
+import TeamsUpdate from "./AdminChachos/Teams/TeamsUpdate";
+import TournamentsIndex from "./AdminChachos/Tournaments/TournamentsIndex";
+import TournamentsCreate from "./AdminChachos/Tournaments/TournamentsCreate";
+import TournamentsUpdate from "./AdminChachos/Tournaments/TournamentsUpdate";
+import TournamentRoundsIndex from "./AdminChachos/TournamentRounds/TournamentRoundsIndex";
+import TournamentRoundsCreate from "./AdminChachos/TournamentRounds/TournamentRoundsCreate";
+import TournamentRoundsDetail from "./AdminChachos/TournamentRounds/TournamentRoundsDetail";
+import TournamentRoundsUpdate from "./AdminChachos/TournamentRounds/TournamentRoundsUpdate";
 
 const AdminRoutes = () => {
   return (
     <>
       <Routes>
+        <Route path="/" Component={AdminHomePanel} />
         <Route path="users" element={<h1>Admin Users WIP</h1>} />
         <Route path="prode" element={<h1>Admin Prode WIP</h1>} />
         <Route path="cronicas" element={<h1>Admin Cronicas WIP</h1>} />
 
         <Route path="chachos/*">
-          <Route index Component={AdminPanel} />
+          <Route index Component={AdminChachosPanel} />
           {/* Players routes */}
           <Route path="players" Component={PlayersIndex} />
           <Route path="players/create" Component={PlayersCreate} />

@@ -8,7 +8,7 @@ import "./ButtonsStyle.css";
 const EditButton = ({ to }) => {
   return (
     <Link to={to}>
-      <span class="material-icons edit-button">edit</span>
+      <span className="material-icons edit-button">edit</span>
     </Link>
   );
 };
