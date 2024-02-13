@@ -43,26 +43,34 @@ const tournamentRoundSchema = new mongoose.Schema(
         ref: "Player",
       },
     ],
-    white_pearl: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Player",
-      default: null,
-    },
-    vanilla_pearl: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Player",
-      default: null,
-    },
-    ocher_pearl: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Player",
-      default: null,
-    },
-    black_pearl: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Player",
-      default: null,
-    },
+    white_pearl: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Player",
+        default: null,
+      },
+    ],
+    vanilla_pearl: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Player",
+        default: null,
+      },
+    ],
+    ocher_pearl: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Player",
+        default: null,
+      },
+    ],
+    black_pearl: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Player",
+        default: null,
+      },
+    ],
     open_for_vote: {
       type: Boolean,
       default: false,

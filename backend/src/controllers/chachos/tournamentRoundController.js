@@ -1,8 +1,26 @@
 import defineMatchOutcome from "../../helpers/winDrawDefeatChachos.js";
 import TournamentRoundRepository from "../../repository/chachos/tournamentRoundRepository.js";
+import consolidatePearls from "../../helpers/consolidatePearls.js";
+
 const repository = new TournamentRoundRepository();
 
 export default class TournamentRoundController {
+  // ---------- GET ROUNDS BY TOURNAMENT ----------
+  getRoundsByTournament = async (req, res, next) => {
+    try {
+      const tournamentId = req.params.pid;
+      const tournamentRounds = await repository.getTournamentRoundsByTournament(
+        tournamentRoundId
+      );
+      res.status(200).json({
+        message: `Todas las fechas correspondientes al torneo de id ${tournamentId} han sido correctamente recuperadas de la base de datos`,
+        tournamentRounds,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- GET TOURNAMENT ROUND BY ID ----------
   getTournamentRoundById = async (req, res, next) => {
     try {
@@ -113,6 +131,35 @@ export default class TournamentRoundController {
 
       res.status(200).json({
         message: `Tournament round with id ${tournamentRoundId} has toggled its open_for_vote status to ${tournamentRound.open_for_vote}`,
+        tournamentRound,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ---------- CONSOLIDATE PEARLS ----------
+  consolidatePearls = async (req, res, next) => {
+    try {
+      //Get information from endpoint and body
+      const tournamentRoundId = req.params.pid;
+      const votes = req.body.votes;
+
+      //Search for the tournament round information on database
+      const tournamentRound = await repository.baseGetById(tournamentRoundId);
+
+      //Votes information consolidation
+      const consolidatedVotes = consolidatePearls(votes);
+
+      //Update tournament round information in database
+      tournamentRound.white_pearl = consolidatedVotes.white_pearl;
+      tournamentRound.vanilla_pearl = consolidatedVotes.vanilla_pearl;
+      tournamentRound.ocher_pearl = consolidatedVotes.ocher_pearl;
+      tournamentRound.black_pearl = consolidatedVotes.black_pearl;
+      await tournamentRound.save();
+
+      res.status(200).json({
+        message: `Pearls have been properly consolidated`,
         tournamentRound,
       });
     } catch (error) {

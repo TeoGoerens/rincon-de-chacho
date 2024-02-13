@@ -18,6 +18,7 @@ router.get(
   controller.getVoteByRoundAndPlayer
 );
 router.get("/:pid", authMiddleware, controller.getAllVotesForRound);
+router.get("/", authMiddleware, controller.getAllVotes);
 
 // ---------- POST ROUTES ----------
 router.post("/:pid", authMiddleware, controller.createVoteForRound);
@@ -35,7 +36,7 @@ router.delete(
   "/:pid",
   authMiddleware,
   adminAuthMiddleware,
-  controller.deleteVoteForRound
+  controller.deleteVoteById
 );
 
 export default router;

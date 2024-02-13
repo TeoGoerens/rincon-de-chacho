@@ -23,6 +23,30 @@ export default class VoteRepository extends baseRepository {
     }
   };
 
+  // ---------- GET ALL VOTES ----------
+  getAllVotes = async () => {
+    try {
+      //Return all votes
+      const allVotes = await this.model
+        .find()
+        .populate([
+          "voter",
+          "round",
+          "white_pearl",
+          "vanilla_pearl",
+          "ocher_pearl",
+          "black_pearl",
+        ])
+        .populate({
+          path: "evaluation",
+          populate: { path: "player", model: "Player" },
+        });
+      return allVotes;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // ---------- GET VOTE FROM SPECIFIC USER FOR A ROUND ----------
   getVotefromUserByRound = async (tournamentRoundId, voterId, userId) => {
     try {
@@ -172,7 +196,7 @@ export default class VoteRepository extends baseRepository {
     }
   };
 
-  // ---------- GET ALL VOTES ----------
+  // ---------- GET ALL VOTES FOR ROUND ----------
   getAllVotesForRound = async (tournamentRoundId, userId) => {
     try {
       const documentExists = await TournamentRound.findById(tournamentRoundId);
@@ -195,8 +219,20 @@ export default class VoteRepository extends baseRepository {
       }
 
       //Return all votes
-      const allVotes = await this.model.find({ round: tournamentRoundId });
-      //.populate({ path: "evaluation.player", model: "Player" });
+      const allVotes = await this.model
+        .find({ round: tournamentRoundId })
+        .populate([
+          "voter",
+          "round",
+          "white_pearl",
+          "vanilla_pearl",
+          "ocher_pearl",
+          "black_pearl",
+        ])
+        .populate({
+          path: "evaluation",
+          populate: { path: "player", model: "Player" },
+        });
       return allVotes;
     } catch (error) {
       throw error;
@@ -252,22 +288,20 @@ export default class VoteRepository extends baseRepository {
   };
 
   // ---------- DELETE VOTE ----------
-  deleteVote = async (userId, roundId) => {
+  deleteVoteById = async (voteId) => {
     try {
       //Search in database based on dynamic filter options
       const documentExists = await this.model.findOne({
-        voter: userId,
-        round: roundId,
+        _id: voteId,
       });
 
       if (!documentExists) {
         throw new Error(
-          `User with id ${userId} has not voted in this tournament round`
+          `El voto que desea eliminar no existe en la base de datos`
         );
       }
       const document = await this.model.deleteOne({
-        voter: userId,
-        round: roundId,
+        _id: voteId,
       });
       return document;
     } catch (error) {

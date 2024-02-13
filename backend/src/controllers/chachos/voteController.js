@@ -3,6 +3,21 @@ import VoteRepository from "../../repository/chachos/voteRepository.js";
 const repository = new VoteRepository();
 
 export default class VoteController {
+  // ---------- GET ALL VOTES ----------
+  getAllVotes = async (req, res, next) => {
+    try {
+      const allVotes = await repository.getAllVotes();
+
+      res.status(200).json({
+        message:
+          "Todos los votos han sido recuperados exitosamente de la base de datos",
+        allVotes,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- GET USER'S VOTE IN A ROUND ----------
   getVoteByRoundAndUser = async (req, res, next) => {
     try {
@@ -86,28 +101,11 @@ export default class VoteController {
       const vote = {
         voter: user.id,
         round: tournamentRoundId,
-        evaluation: [
-          {
-            player: "65a6cc297f343aa94e08bab9",
-            points: 9,
-          },
-          {
-            player: "65a9e48d91209489b551cbe1",
-            points: 7,
-          },
-          {
-            player: "65aac004fde14a3e6366fbf8",
-            points: 2,
-          },
-          {
-            player: "65aac01dd7e7f1daf88f8e27",
-            points: 4,
-          },
-        ],
-        white_pearl: "65a6cc297f343aa94e08bab9",
-        vanilla_pearl: "65a9e48d91209489b551cbe1",
-        ocher_pearl: "65aac01dd7e7f1daf88f8e27",
-        black_pearl: "65aac004fde14a3e6366fbf8",
+        evaluation: req.body.evaluation,
+        white_pearl: req.body.white_pearl,
+        vanilla_pearl: req.body.vanilla_pearl,
+        ocher_pearl: req.body.ocher_pearl,
+        black_pearl: req.body.black_pearl,
       };
 
       const pearlsValidation = await validateUniquePearls(vote);
@@ -173,17 +171,13 @@ export default class VoteController {
   };
 
   // ---------- DELETE VOTE ----------
-  deleteVoteForRound = async (req, res, next) => {
+  deleteVoteById = async (req, res, next) => {
     try {
-      const userId = "65a6d0e3f40f338682057f57";
-      const tournamentRoundId = req.params.pid;
+      const voteId = req.params.pid;
 
-      const voteDeleted = await repository.deleteVote(
-        userId,
-        tournamentRoundId
-      );
+      const voteDeleted = await repository.deleteVoteById(voteId);
       res.status(200).json({
-        message: `Vote from user with id ${userId} for round with id ${tournamentRoundId} has been properly deleted`,
+        message: `Vote has been properly deleted`,
         voteDeleted,
       });
     } catch (error) {

@@ -7,6 +7,7 @@ const router = Router();
 const controller = new TournamentRoundController();
 
 // ---------- GET ROUTES ----------
+router.get("/tournament/:pid", controller.getRoundsByTournament);
 router.get("/:pid", controller.getTournamentRoundById);
 router.get("/:pid/players", controller.getPlayersTournamentRoundById);
 router.get("/", controller.getAllTournamentRounds);
@@ -25,6 +26,12 @@ router.put(
   authMiddleware,
   adminAuthMiddleware,
   controller.ToggleOpenForVote
+);
+router.put(
+  "/consolidate-pearls/:pid",
+  authMiddleware,
+  adminAuthMiddleware,
+  controller.consolidatePearls
 );
 router.put("/:pid", controller.updateTournamentRoundById);
 
