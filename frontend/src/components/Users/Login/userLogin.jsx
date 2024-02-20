@@ -56,12 +56,6 @@ const UserLogin = () => {
 
   return (
     <div className="container login-page-container">
-      {appError || serverError ? (
-        <h5 className="message-error">
-          {appError} {serverError}
-        </h5>
-      ) : null}
-
       <div className="hero-text">
         <h2>Hola chacal,</h2>
         <h1>
@@ -90,7 +84,6 @@ const UserLogin = () => {
           <div className="message-error">
             {formik.touched.email && formik.errors.email}
           </div>
-
           <div>
             <label>Password</label>
             <input
@@ -104,6 +97,11 @@ const UserLogin = () => {
           <div className="message-error">
             {formik.touched.password && formik.errors.password}
           </div>
+
+          {/*  Text corresponding to appError */}
+          {appError || serverError ? (
+            <h5 className="message-error">{appError}</h5>
+          ) : null}
 
           <button type="submit">Login</button>
         </form>
