@@ -64,82 +64,83 @@ const ChachosHomePanel = () => {
   return (
     <>
       <ChachosMenu />
+      <div className="container chachos-home-panel-container">
+        <h3>Performance Plantel</h3>
+        {appError || serverError ? (
+          <h5>
+            {appError} {serverError}
+          </h5>
+        ) : null}
 
-      <h3>Performance Plantel</h3>
-      {appError || serverError ? (
-        <h5>
-          {appError} {serverError}
-        </h5>
-      ) : null}
-
-      <table>
-        <thead>
-          <tr>
-            <th>Ranking</th>
-            <th>Jugador</th>
-            <th>PJ</th>
-            <th>Puntaje</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedAllEvaluation.map((player, index) => (
-            <tr key={player._id}>
-              <td>{index + 1}</td>
-              <td>{`${player.first_name} ${player.last_name}`}</td>
-              <td>
-                {gamesByPlayer &&
-                  gamesByPlayer.find((element) => element._id === player._id)
-                    ?.gamesPlayed}
-              </td>
-              <td>{player.points.toFixed(2)}</td>
+        <table className="chachos-panel-main-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Jugador</th>
+              <th>PJ</th>
+              <th>Puntaje</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sortedAllEvaluation.map((player, index) => (
+              <tr key={player._id}>
+                <td>{index + 1}</td>
+                <td>{`${player.first_name} ${player.last_name}`}</td>
+                <td>
+                  {gamesByPlayer &&
+                    gamesByPlayer.find((element) => element._id === player._id)
+                      ?.gamesPlayed}
+                </td>
+                <td>{player.points.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      <div className="top-players-card">
-        <h3>Top 3: Perla Blanca</h3>
-        <ul>
-          {whitePearls.map((player) => (
-            <li key={player._id} className="player-item">
-              <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-              <p>{player.timesPearl}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="top-players-card">
-        <h3>Top 3: Perla Vainilla</h3>
-        <ul>
-          {vanillaPearls.map((player) => (
-            <li key={player._id} className="player-item">
-              <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-              <p>{player.timesPearl}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="top-players-card">
-        <h3>Top 3: Perla Ocre</h3>
-        <ul>
-          {ocherPearls.map((player) => (
-            <li key={player._id} className="player-item">
-              <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-              <p>{player.timesPearl}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="top-players-card">
-        <h3>Top 3: Perla Negra</h3>
-        <ul>
-          {blackPearls.map((player) => (
-            <li key={player._id} className="player-item">
-              <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-              <p>{player.timesPearl}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="top-players-card">
+          <h3>Top 3: Perla Blanca</h3>
+          <ul>
+            {whitePearls.map((player) => (
+              <li key={player._id} className="player-item">
+                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
+                <p>{player.timesPearl}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="top-players-card">
+          <h3>Top 3: Perla Vainilla</h3>
+          <ul>
+            {vanillaPearls.map((player) => (
+              <li key={player._id} className="player-item">
+                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
+                <p>{player.timesPearl}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="top-players-card">
+          <h3>Top 3: Perla Ocre</h3>
+          <ul>
+            {ocherPearls.map((player) => (
+              <li key={player._id} className="player-item">
+                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
+                <p>{player.timesPearl}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="top-players-card">
+          <h3>Top 3: Perla Negra</h3>
+          <ul>
+            {blackPearls.map((player) => (
+              <li key={player._id} className="player-item">
+                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
+                <p>{player.timesPearl}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </>
   );

@@ -1,4 +1,23 @@
-/* TopWhitePearlPlayersCard.css */
+.chachos-panel-main-table {
+  background-color: white;
+  font-size: 0.85rem;
+}
+
+.chachos-panel-main-table thead {
+  background-color: var(--primary-color);
+}
+
+.chachos-panel-main-table thead tr th {
+  color: white;
+}
+
+.chachos-panel-main-table tbody tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--third-color), transparent 75%);
+}
+
+.chachos-panel-main-table tbody tr:hover {
+  background-color: color-mix(in srgb, var(--third-color), transparent 0%);
+}
 
 .top-players-card {
   background-color: #f4f4f4;
