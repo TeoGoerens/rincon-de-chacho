@@ -71,9 +71,8 @@ const UserLogin = () => {
           </span>
         </h1>
         <h4>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae
-          praesentium obcaecati, consectetur accusantium voluptate laudantium
-          nisi voluptatum omnis laborum est!
+          El punto de encuentro entre <span>amigos</span>, <span>fútbol</span> y{" "}
+          <span>apuestas</span>
         </h4>
 
         <form onSubmit={formik.handleSubmit}>

@@ -40,7 +40,14 @@
 .hero-text h4 {
   margin-top: 1rem;
   font-family: var(--secondary-font);
-  font-size: 0.85rem;
+  font-size: 1.3rem;
+  font-weight: 400;
+}
+
+.hero-text h4 span {
+  font-family: var(--primary-font);
+  color: var(--secondary-color);
+  font-weight: 800;
 }
 
 .hero-text form {
