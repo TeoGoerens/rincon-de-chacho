@@ -6,7 +6,7 @@ import { Navigate } from "react-router-dom";
 import "./userRegisterStyles.css";
 
 //Import components
-import imageRegisterSource from "../../../assets/images/chacho-blow.png";
+import imageRegisterSource from "../../../assets/photos/chacho-blow.png";
 
 //Import components
 

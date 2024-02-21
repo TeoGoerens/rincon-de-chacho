@@ -10,6 +10,7 @@ import AdminRoutes from "./components/Admin/AdminRoutes";
 import Home from "./components/Home/Home";
 import AuthProtectedRoutes from "./components/AuthRoutes/AuthProtectedRoutes";
 import AdminProtectedRoutes from "./components/AuthRoutes/AdminProtectedRoutes";
+import PhotoGallery from "./components/PhotoGallery/PhotoGallery";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         {/* Auth protected routes */}
         <Route Component={AuthProtectedRoutes}>
           <Route path="/home" Component={Home} />
+          <Route path="/photo-gallery" Component={PhotoGallery} />
           <Route path="/prode" />
           <Route path="/cronicas" />
           <Route path="/chachos/*" Component={ChachosRoutes} />

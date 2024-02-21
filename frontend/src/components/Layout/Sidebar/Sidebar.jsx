@@ -46,6 +46,16 @@ function Sidebar({ sidebarOpen, handleToggleSidebar }) {
           </li>
           <li>
             <Link
+              to="/photo-gallery"
+              className="aside-link"
+              onClick={handleToggleSidebar}
+            >
+              <span className="material-symbols-outlined">photo_camera</span>
+              <p>Galería</p>
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/prode"
               className="aside-link"
               onClick={handleToggleSidebar}

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import "./userLoginStyles.css";
 
 //Import components
-import heroImageSource from "../../../assets/images/chacho-hero.png";
+import heroImageSource from "../../../assets/photos/chacho-hero.png";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
