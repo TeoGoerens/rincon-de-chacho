@@ -5,10 +5,14 @@ import { Link } from "react-router-dom";
 //Import CSS & styles
 import "./ButtonsStyle.css";
 
+//Import components
+import submitVoteSource from "../../../assets/images/submit-vote.png";
+
 const VoteButton = ({ to }) => {
   return (
     <Link to={to}>
-      <span className="material-icons view-button">how_to_vote</span>
+      <img src={submitVoteSource} alt="Submit Vote Icon" />
+      <span className="tooltip-text">Votar</span>
     </Link>
   );
 };

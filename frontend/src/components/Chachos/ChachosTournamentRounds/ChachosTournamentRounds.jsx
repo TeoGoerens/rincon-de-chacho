@@ -38,49 +38,52 @@ const ChachosTournamentRounds = () => {
     <>
       <ChachosMenu />
 
-      <div className="container">
+      <div className="container chachos-tournament-rounds-container">
+        <h2>Historial de fechas</h2>
         {appError || serverError ? (
-          <h3>
-            {appError} {serverError}
-          </h3>
+          <h5>{appError}</h5>
         ) : tournamentRounds?.length <= 0 ? (
           <h3>No se encontraron fechas en la base de datos</h3>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Rival</th>
-                <th>Resultado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tournamentRounds?.map((tournamentRound) => (
-                <tr key={tournamentRound._id}>
-                  <td>
-                    <p>{formatDate(tournamentRound.match_date)}</p>
-                  </td>
-                  <td>
-                    <p>{tournamentRound.rival?.name}</p>
-                  </td>
-                  <td>
-                    <p>
-                      {tournamentRound.score_chachos} -{" "}
-                      {tournamentRound.score_rival}
-                    </p>
-                  </td>
-                  <td className="icon-container">
-                    {tournamentRound.open_for_vote ? (
-                      <VoteButton to={`${tournamentRound.id}/vote`} />
-                    ) : (
-                      <ViewResultsButton to={`${tournamentRound.id}/results`} />
-                    )}
-                  </td>
+          <div className="chachos-tournament-rounds-main-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Rival</th>
+                  <th>Resultado</th>
+                  <th>Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {tournamentRounds?.map((tournamentRound) => (
+                  <tr key={tournamentRound._id}>
+                    <td>
+                      <p>{formatDate(tournamentRound.match_date)}</p>
+                    </td>
+                    <td>
+                      <p>{tournamentRound.rival?.name}</p>
+                    </td>
+                    <td>
+                      <p>
+                        {tournamentRound.score_chachos} -{" "}
+                        {tournamentRound.score_rival}
+                      </p>
+                    </td>
+                    <td className="icon-container">
+                      {tournamentRound.open_for_vote ? (
+                        <VoteButton to={`${tournamentRound.id}/vote`} />
+                      ) : (
+                        <ViewResultsButton
+                          to={`${tournamentRound.id}/results`}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </>

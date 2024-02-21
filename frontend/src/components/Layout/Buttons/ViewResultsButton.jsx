@@ -5,10 +5,14 @@ import { Link } from "react-router-dom";
 //Import CSS & styles
 import "./ButtonsStyle.css";
 
+//Import components
+import viewResultsSource from "../../../assets/images/view-results.png";
+
 const ViewResultsButton = ({ to }) => {
   return (
     <Link to={to}>
-      <span className="material-icons view-button">leaderboard</span>
+      <img src={viewResultsSource} alt="View Results Icon" />
+      <span className="tooltip-text">Ver resultados</span>
     </Link>
   );
 };

@@ -23,7 +23,8 @@
 }
 
 body {
-  background: radial-gradient(circle, white 50%, var(--background-color) 90%);
+  /* background: radial-gradient(circle, white 50%, var(--background-color) 90%); */
+  background-color: var(--background-color);
 }
 
 .container {
@@ -31,9 +32,13 @@ body {
   margin: 0 auto;
 }
 
+table {
+  border-radius: 20px;
+}
+
 table,
 th,
 td {
   border-collapse: collapse;
-  padding: 0.8rem;
+  padding: 0.6rem;
 }

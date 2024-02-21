@@ -1,4 +1,5 @@
 .chachos-menu-container {
+  z-index: 800;
   font-size: 1rem;
   display: flex;
   gap: 1rem;

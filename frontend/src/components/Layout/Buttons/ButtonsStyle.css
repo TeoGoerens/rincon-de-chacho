@@ -13,6 +13,32 @@ button span {
   margin: 0;
 }
 
+a {
+  position: relative;
+}
+
+a .tooltip-text {
+  display: none;
+  position: fixed;
+  font-size: 0.7rem;
+  background-color: var(--primary-color);
+  padding: 0.25rem 1rem;
+  color: white;
+  font-weight: 400;
+  border-radius: 20px;
+
+  height: 24px;
+}
+
+a:hover span {
+  display: initial;
+}
+
+a img {
+  width: 36px;
+  margin-inline: 1rem;
+}
+
 /* OPEN VOTE BUTTON / LINK */
 .open-vote {
   background-color: green;

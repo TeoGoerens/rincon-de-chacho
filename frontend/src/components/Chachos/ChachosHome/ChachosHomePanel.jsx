@@ -11,6 +11,10 @@ import { pearlsCount } from "../../../helpers/countPlayerPearlsinTournamentRound
 
 //Import components
 import ChachosMenu from "../ChachosMenu";
+import firstPlaceSource from "../../../assets/images/first-place.png";
+import secondPlaceSource from "../../../assets/images/second-place.png";
+import secondToLastPlaceSource from "../../../assets/images/clown.png";
+import lastPlaceSource from "../../../assets/images/black-star.png";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
@@ -65,81 +69,95 @@ const ChachosHomePanel = () => {
     <>
       <ChachosMenu />
       <div className="container chachos-home-panel-container">
-        <h3>Performance Plantel</h3>
+        <h2>Performance Plantel</h2>
         {appError || serverError ? (
           <h5>
             {appError} {serverError}
           </h5>
         ) : null}
 
-        <table className="chachos-panel-main-table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Jugador</th>
-              <th>PJ</th>
-              <th>Puntaje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedAllEvaluation.map((player, index) => (
-              <tr key={player._id}>
-                <td>{index + 1}</td>
-                <td>{`${player.first_name} ${player.last_name}`}</td>
-                <td>
-                  {gamesByPlayer &&
-                    gamesByPlayer.find((element) => element._id === player._id)
-                      ?.gamesPlayed}
-                </td>
-                <td>{player.points.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="chachos-panel-content">
+          <div className="chachos-panel-main-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Jugador</th>
+                  <th>PJ</th>
+                  <th>Puntaje</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedAllEvaluation.map((player, index) => (
+                  <tr key={player._id}>
+                    <td>{index + 1}</td>
+                    <td>{`${player.first_name} ${player.last_name}`}</td>
+                    <td>
+                      {gamesByPlayer &&
+                        gamesByPlayer.find(
+                          (element) => element._id === player._id
+                        )?.gamesPlayed}
+                    </td>
+                    <td>{player.points.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        <div className="top-players-card">
-          <h3>Top 3: Perla Blanca</h3>
-          <ul>
-            {whitePearls.map((player) => (
-              <li key={player._id} className="player-item">
-                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-                <p>{player.timesPearl}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="top-players-card">
-          <h3>Top 3: Perla Vainilla</h3>
-          <ul>
-            {vanillaPearls.map((player) => (
-              <li key={player._id} className="player-item">
-                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-                <p>{player.timesPearl}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="top-players-card">
-          <h3>Top 3: Perla Ocre</h3>
-          <ul>
-            {ocherPearls.map((player) => (
-              <li key={player._id} className="player-item">
-                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-                <p>{player.timesPearl}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="top-players-card">
-          <h3>Top 3: Perla Negra</h3>
-          <ul>
-            {blackPearls.map((player) => (
-              <li key={player._id} className="player-item">
-                <strong>{`${player.shirt} - ${player.first_name} ${player.last_name}`}</strong>
-                <p>{player.timesPearl}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="chachos-panel-cards">
+            <div className="top-players-card">
+              <img src={firstPlaceSource} alt="First Place Badge" />
+              <h5>Perla Blanca</h5>
+              <ul>
+                {whitePearls.map((player) => (
+                  <li key={player._id} className="player-item">
+                    <p>{player.timesPearl}</p>
+                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="top-players-card">
+              <img src={secondPlaceSource} alt="Second Place Badge" />
+              <h5>Perla Vainilla</h5>
+              <ul>
+                {vanillaPearls.map((player) => (
+                  <li key={player._id} className="player-item">
+                    <p>{player.timesPearl}</p>
+                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="top-players-card">
+              <img
+                src={secondToLastPlaceSource}
+                alt="Second To Last Place Badge"
+              />
+              <h5>Perla Ocre</h5>
+              <ul>
+                {ocherPearls.map((player) => (
+                  <li key={player._id} className="player-item">
+                    <p>{player.timesPearl}</p>
+                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="top-players-card">
+              <img src={lastPlaceSource} alt="Last Place Badge" />
+              <h5>Perla Negra</h5>
+              <ul>
+                {blackPearls.map((player) => (
+                  <li key={player._id} className="player-item">
+                    <p>{player.timesPearl}</p>
+                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </>

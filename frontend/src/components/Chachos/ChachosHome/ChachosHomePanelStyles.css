@@ -1,6 +1,42 @@
+/* ---------- Chachos home container ---------- */
+.chachos-home-panel-container {
+  margin-bottom: 3rem;
+}
+
+/* ---------- Chachos home panel title ---------- */
+.chachos-home-panel-container h2 {
+  margin: 1rem 0 2rem;
+  font-family: var(--secondary-font);
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* ---------- Chachos home panel content ---------- */
+.chachos-panel-content {
+  display: flex;
+  gap: 2rem;
+}
+
+/* ---------- Chachos home panel main table ---------- */
 .chachos-panel-main-table {
   background-color: white;
   font-size: 0.85rem;
+  border-radius: 20px;
+  overflow: hidden;
+  display: inline-block;
+  width: 50%;
+  height: 100%;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  transition: all ease 0.3s;
+}
+
+.chachos-panel-main-table:hover {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
+}
+
+.chachos-panel-main-table table {
+  width: 100%;
 }
 
 .chachos-panel-main-table thead {
@@ -17,30 +53,113 @@
 
 .chachos-panel-main-table tbody tr:hover {
   background-color: color-mix(in srgb, var(--third-color), transparent 0%);
+  font-weight: 800;
+}
+
+.chachos-panel-main-table tbody tr td {
+  text-align: center;
+}
+
+/* ---------- Chachos home panel cards ---------- */
+.chachos-panel-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 50%;
 }
 
 .top-players-card {
-  background-color: #f4f4f4;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  position: relative;
+  align-items: center;
+  border-radius: 20px;
+  background-color: white;
+  font-size: 0.85rem;
+  padding: 1rem;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  transition: all ease 0.3s;
 }
 
-.top-players-card h3 {
-  color: #333;
+.top-players-card:hover {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
 }
 
-.player-item {
+.top-players-card img {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: 60px;
+}
+.top-players-card h5 {
+  font-family: var(--accent-font);
+  font-size: 1rem;
+  font-weight: 400;
+  width: 120px;
+}
+
+.top-players-card ul {
   list-style: none;
-  margin: 15px 0;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding-left: 1rem;
+  border-left: 2px dotted;
+  border-color: var(--primary-color);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.player-item strong {
-  color: #007bff;
+.top-players-card ul li {
+  display: flex;
+  align-items: center;
+}
+
+.top-players-card ul li:first-child {
+  background-color: var(--third-color);
+  border-radius: 10px;
+}
+
+.top-players-card ul li:first-child p,
+.top-players-card ul li:first-child span {
+  font-size: 1.2rem;
+  font-weight: 500;
+  padding-block: 0.5rem;
+}
+
+.top-players-card ul li p {
+  width: 25px;
+  text-align: center;
+}
+
+.top-players-card ul li span {
+  margin-left: 0.5rem;
+  padding-inline: 0.5rem;
+  padding-block: 0.2rem;
+}
+
+/* ---------- Media queries ---------- */
+@media only screen and (max-width: 750px) {
+  .chachos-panel-content {
+    flex-direction: column;
+  }
+
+  .chachos-panel-main-table {
+    width: 100%;
+  }
+
+  .chachos-panel-cards {
+    width: 100%;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .top-players-card h5 {
+    font-size: 0.85rem;
+    width: 90px;
+  }
+
+  .top-players-card ul li:first-child p,
+  .top-players-card ul li:first-child span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding-block: 0.5rem;
+  }
 }
