@@ -1,0 +1,179 @@
+/* ---------- Players votes container ---------- */
+.players-votes-container {
+  margin-bottom: 3rem;
+}
+
+/* ---------- Players votes title ---------- */
+.players-votes-title {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0 2rem;
+}
+
+.players-votes-title h2 {
+  font-family: var(--secondary-font);
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.players-votes-title .return-link {
+  text-decoration: none;
+  margin-left: 3rem;
+  font-size: 0.8rem;
+  background-color: var(--fourth-color);
+  color: white;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  transition: all ease 0.3s;
+}
+
+/* ---------- Players votes content ---------- */
+.players-votes-content {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
+  grid-template-areas:
+    "match-details evaluation"
+    "pearls evaluation"
+    "button button";
+
+  background-color: white;
+  padding: 1rem;
+  border-radius: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.players-votes-content h4 {
+  margin-bottom: 1rem;
+}
+
+.players-votes-content p {
+  font-size: 0.9rem;
+}
+
+.players-votes-content:hover {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------- Players votes match details ---------- */
+.players-votes-content .players-votes-match-details {
+  grid-area: match-details;
+}
+
+.players-votes-content .players-votes-match-details span {
+  font-weight: 900;
+}
+
+/* ---------- Players votes pearls details ---------- */
+.players-votes-content .players-votes-pearls-details {
+  grid-area: pearls;
+  display: flex;
+  flex-direction: column;
+}
+
+.votes-pearl-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.votes-pearl-container:not(:first-child):not(:nth-child(2)) {
+  margin-top: 0.8rem;
+}
+
+.votes-pearl-container label,
+.votes-pearl-container select,
+.votes-pearl-container option {
+  font-size: 0.9rem;
+}
+
+.votes-pearl-container .error-message {
+  font-size: 0.9rem;
+  color: red;
+}
+
+.votes-pearl-details {
+  display: flex;
+  align-items: center;
+}
+
+.votes-pearl-details label {
+  display: inline-block;
+  width: 120px;
+}
+
+.votes-pearl-details select {
+  flex-grow: 1;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  border-radius: 10px;
+  padding: 0.2rem;
+  font-weight: 700;
+}
+
+/* ---------- Players votes evaluation details ---------- */
+.players-votes-content .players-votes-evaluation-container {
+  grid-area: evaluation;
+  display: flex;
+  flex-direction: column;
+}
+
+.players-votes-content .player-details:not(:first-child):not(:nth-child(2)) {
+  margin-top: 0.8rem;
+}
+
+.players-votes-content .player-details {
+  display: flex;
+  align-items: center;
+}
+
+.player-details p {
+  font-size: 0.85rem;
+  display: inline-block;
+  width: 160px;
+}
+
+.player-details input {
+  font-size: 0.85rem;
+  text-align: center;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  border-radius: 10px;
+  padding: 0.2rem;
+  font-weight: 700;
+}
+
+/* ---------- Submit button ---------- */
+.players-votes-btn {
+  grid-area: button;
+  text-decoration: none;
+  font-size: 0.8rem;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  transition: all ease 0.3s;
+  width: 150px;
+  margin: 0 auto;
+}
+
+.players-votes-btn:hover {
+  scale: 1.1;
+}
+
+/* ---------- Media queries ---------- */
+@media only screen and (max-width: 600px) {
+  .players-votes-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "match-details"
+      "pearls"
+      "evaluation"
+      "button";
+
+    padding: 1rem;
+  }
+}

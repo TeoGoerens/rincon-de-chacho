@@ -75,8 +75,6 @@ const PlayersVotes = () => {
   const VotesStoreData = useSelector((store) => store.votes);
   const voteByVoterAndRound = VotesStoreData?.voteByVoterAndRound?.usersVote;
 
-  console.log(voteByVoterAndRound);
-
   const { appError, serverError } = VotesStoreData;
 
   //Navigate to index in case there is an created vote
@@ -84,147 +82,191 @@ const PlayersVotes = () => {
     return <Navigate to="/chachos/tournament-rounds" />;
 
   return (
-    <>
-      <h3>Votos para la fecha</h3>
+    <div className="container players-votes-container">
+      <div className="players-votes-title">
+        <h2>Tus votos para la fecha</h2>
+        <Link className="return-link" to="/chachos/tournament-rounds">
+          Volver
+        </Link>
+      </div>
+
       {appError || serverError ? <h5>{appError}</h5> : null}
 
       {voteByVoterAndRound ? (
-        <>
-          <h4>
-            Tu voto ya fue registrado. Espera que se cierre la fecha para ver
-            resultados
-          </h4>
-          <Link className="return-link" to="/chachos/tournament-rounds">
-            Volver
-          </Link>
-        </>
+        <h3>
+          Ya votaste, no seas chacal tramposo. Espera que se cierre la fecha
+          para ver resultados
+        </h3>
       ) : (
-        <>
-          <p>Fecha: {formatDate(tournamentRound?.match_date)}</p>
-          <p>Rival: {tournamentRound?.rival?.name}</p>
-          <p>
-            Resultado: {tournamentRound?.score_chachos} -{" "}
-            {tournamentRound?.score_rival}
-          </p>
-
-          <form onSubmit={formik.handleSubmit}>
-            <label>Puntajes</label>
-            {players &&
-              players.map((player) => (
-                <div className="player-details" key={player._id}>
-                  <p value={player._id}>
-                    {player.first_name} {player.last_name}
-                  </p>
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={
-                      playersEvaluation.find(
-                        (evaluation) => evaluation.player === player._id
-                      )?.points || 0
-                    }
-                    onChange={(e) => {
-                      const newPoints = parseInt(e.target.value, 10) || 0;
-                      const updatedEvaluation = {
-                        player: player._id,
-                        points: newPoints,
-                      };
-
-                      setPlayersEvaluation((prevPlayersEvaluation) => {
-                        const index = prevPlayersEvaluation.findIndex(
-                          (evaluation) => evaluation.player === player._id
-                        );
-
-                        if (index !== -1) {
-                          // Actualizar el objeto existente
-                          const updatedArray = [...prevPlayersEvaluation];
-                          updatedArray[index] = updatedEvaluation;
-                          return updatedArray;
-                        } else {
-                          // Agregar el nuevo objeto al array
-                          return [...prevPlayersEvaluation, updatedEvaluation];
-                        }
-                      });
-                    }}
-                    onBlur={formik.handleBlur("evaluation")}
-                  />
-                </div>
-              ))}
-            <div>{formik.touched.evaluation && formik.errors.evaluation}</div>
-
-            <label>Perla Blanca</label>
-            <select
-              value={formik.values.white_pearl}
-              onChange={formik.handleChange("white_pearl")}
-              onBlur={formik.handleBlur("white_pearl")}
-              name="white_pearl"
-            >
-              <option value="" label="Selecciona un jugador" />
-              {players &&
-                players.map((player) => (
-                  <option key={player._id} value={player._id}>
-                    {player.first_name} {player.last_name}
-                  </option>
-                ))}
-            </select>
-            <div>{formik.touched.white_pearl && formik.errors.white_pearl}</div>
-            <label>Perla Vainilla</label>
-            <select
-              value={formik.values.vanilla_pearl}
-              onChange={formik.handleChange("vanilla_pearl")}
-              onBlur={formik.handleBlur("vanilla_pearl")}
-              name="vanilla_pearl"
-            >
-              <option value="" label="Selecciona un jugador" />
-              {players &&
-                players.map((player) => (
-                  <option key={player._id} value={player._id}>
-                    {player.first_name} {player.last_name}
-                  </option>
-                ))}
-            </select>
-            <div>
-              {formik.touched.vanilla_pearl && formik.errors.vanilla_pearl}
+        <form onSubmit={formik.handleSubmit}>
+          <div className="players-votes-content">
+            <div className="players-votes-match-details">
+              <h4>Detalles del partido:</h4>
+              <p>
+                Fecha: <span>{formatDate(tournamentRound?.match_date)}</span>
+              </p>
+              <p>
+                Rival: <span>{tournamentRound?.rival?.name}</span>
+              </p>
+              <p>
+                Resultado:{" "}
+                <span>
+                  {tournamentRound?.score_chachos} -{" "}
+                  {tournamentRound?.score_rival}
+                </span>
+              </p>
             </div>
-            <label>Perla Ocre</label>
-            <select
-              value={formik.values.ocher_pearl}
-              onChange={formik.handleChange("ocher_pearl")}
-              onBlur={formik.handleBlur("ocher_pearl")}
-              name="ocher_pearl"
-            >
-              <option value="" label="Selecciona un jugador" />
-              {players &&
-                players.map((player) => (
-                  <option key={player._id} value={player._id}>
-                    {player.first_name} {player.last_name}
-                  </option>
-                ))}
-            </select>
-            <div>{formik.touched.ocher_pearl && formik.errors.ocher_pearl}</div>
-            <label>Perla Negra</label>
-            <select
-              value={formik.values.black_pearl}
-              onChange={formik.handleChange("black_pearl")}
-              onBlur={formik.handleBlur("black_pearl")}
-              name="black_pearl"
-            >
-              <option value="" label="Selecciona un jugador" />
-              {players &&
-                players.map((player) => (
-                  <option key={player._id} value={player._id}>
-                    {player.first_name} {player.last_name}
-                  </option>
-                ))}
-            </select>
-            <div>{formik.touched.black_pearl && formik.errors.black_pearl}</div>
 
-            <button type="submit">Crear voto</button>
-          </form>
-        </>
+            <div className="players-votes-pearls-details">
+              <h4>Perlas:</h4>
+              <div className="votes-pearl-container">
+                <div className="votes-pearl-details">
+                  <label>Perla Blanca</label>
+                  <select
+                    value={formik.values.white_pearl}
+                    onChange={formik.handleChange("white_pearl")}
+                    onBlur={formik.handleBlur("white_pearl")}
+                    name="white_pearl"
+                  >
+                    <option value="" label="Selecciona un jugador" />
+                    {players &&
+                      players.map((player) => (
+                        <option key={player._id} value={player._id}>
+                          {player.first_name} {player.last_name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <div className="error-message">
+                  {formik.touched.white_pearl && formik.errors.white_pearl}
+                </div>
+              </div>
+              <div className="votes-pearl-container">
+                <div className="votes-pearl-details">
+                  <label>Perla Vainilla</label>
+                  <select
+                    value={formik.values.vanilla_pearl}
+                    onChange={formik.handleChange("vanilla_pearl")}
+                    onBlur={formik.handleBlur("vanilla_pearl")}
+                    name="vanilla_pearl"
+                  >
+                    <option value="" label="Selecciona un jugador" />
+                    {players &&
+                      players.map((player) => (
+                        <option key={player._id} value={player._id}>
+                          {player.first_name} {player.last_name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="error-message">
+                  {formik.touched.vanilla_pearl && formik.errors.vanilla_pearl}
+                </div>
+              </div>
+              <div className="votes-pearl-container">
+                <div className="votes-pearl-details">
+                  <label>Perla Ocre</label>
+                  <select
+                    value={formik.values.ocher_pearl}
+                    onChange={formik.handleChange("ocher_pearl")}
+                    onBlur={formik.handleBlur("ocher_pearl")}
+                    name="ocher_pearl"
+                  >
+                    <option value="" label="Selecciona un jugador" />
+                    {players &&
+                      players.map((player) => (
+                        <option key={player._id} value={player._id}>
+                          {player.first_name} {player.last_name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="error-message">
+                  {formik.touched.ocher_pearl && formik.errors.ocher_pearl}
+                </div>
+              </div>
+              <div className="votes-pearl-container">
+                <div className="votes-pearl-details">
+                  <label>Perla Negra</label>
+                  <select
+                    value={formik.values.black_pearl}
+                    onChange={formik.handleChange("black_pearl")}
+                    onBlur={formik.handleBlur("black_pearl")}
+                    name="black_pearl"
+                  >
+                    <option value="" label="Selecciona un jugador" />
+                    {players &&
+                      players.map((player) => (
+                        <option key={player._id} value={player._id}>
+                          {player.first_name} {player.last_name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="error-message">
+                  {formik.touched.black_pearl && formik.errors.black_pearl}
+                </div>
+              </div>
+            </div>
+
+            <div className="players-votes-evaluation-container">
+              <h4>Puntajes:</h4>
+              {players &&
+                players.map((player) => (
+                  <div className="player-details" key={player._id}>
+                    <p value={player._id}>
+                      {player.first_name} {player.last_name}
+                    </p>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={
+                        playersEvaluation.find(
+                          (evaluation) => evaluation.player === player._id
+                        )?.points || 0
+                      }
+                      onChange={(e) => {
+                        const newPoints = parseInt(e.target.value, 10) || 0;
+                        const updatedEvaluation = {
+                          player: player._id,
+                          points: newPoints,
+                        };
+
+                        setPlayersEvaluation((prevPlayersEvaluation) => {
+                          const index = prevPlayersEvaluation.findIndex(
+                            (evaluation) => evaluation.player === player._id
+                          );
+
+                          if (index !== -1) {
+                            // Actualizar el objeto existente
+                            const updatedArray = [...prevPlayersEvaluation];
+                            updatedArray[index] = updatedEvaluation;
+                            return updatedArray;
+                          } else {
+                            // Agregar el nuevo objeto al array
+                            return [
+                              ...prevPlayersEvaluation,
+                              updatedEvaluation,
+                            ];
+                          }
+                        });
+                      }}
+                      onBlur={formik.handleBlur("evaluation")}
+                    />
+                  </div>
+                ))}
+              <div>{formik.touched.evaluation && formik.errors.evaluation}</div>
+            </div>
+
+            <button className="players-votes-btn" type="submit">
+              Crear voto
+            </button>
+          </div>
+        </form>
       )}
-    </>
+    </div>
   );
 };
 
