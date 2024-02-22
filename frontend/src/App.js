@@ -11,6 +11,7 @@ import Home from "./components/Home/Home";
 import AuthProtectedRoutes from "./components/AuthRoutes/AuthProtectedRoutes";
 import AdminProtectedRoutes from "./components/AuthRoutes/AdminProtectedRoutes";
 import PhotoGallery from "./components/PhotoGallery/PhotoGallery";
+import CurrentlyWorking from "./components/Layout/SoonTag/CurrentlyWorking";
 
 function App() {
   return (
@@ -26,8 +27,8 @@ function App() {
         <Route Component={AuthProtectedRoutes}>
           <Route path="/home" Component={Home} />
           <Route path="/photo-gallery" Component={PhotoGallery} />
-          <Route path="/prode" />
-          <Route path="/cronicas" />
+          <Route path="/prode" Component={CurrentlyWorking} />
+          <Route path="/cronicas" Component={CurrentlyWorking} />
           <Route path="/chachos/*" Component={ChachosRoutes} />
 
           {/* Admin protected routes */}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 //Import components
 import { logoutUserAction } from "../../../redux/slices/users/usersSlices";
+import SoonTag from "../SoonTag/SoonTag";
 
 //Import CSS & styles
 import "./UserMenuStyle.css";
@@ -56,6 +57,7 @@ function UserMenu({ userMenuOpen, handleToggleUserMenu }) {
         <Link to="/" onClick={handleToggleUserMenu}>
           <span className="material-symbols-outlined">account_circle</span>
           <p>Mi perfil</p>
+          <SoonTag />
         </Link>
         <Link to="/" onClick={handleToggleUserMenu}>
           <span className="material-symbols-outlined">lock</span>
@@ -64,10 +66,12 @@ function UserMenu({ userMenuOpen, handleToggleUserMenu }) {
         <Link to="/" onClick={handleToggleUserMenu}>
           <span className="material-symbols-outlined">favorite</span>
           <p>Mis favoritos</p>
+          <SoonTag />
         </Link>
         <Link to="/" onClick={handleToggleUserMenu}>
           <span className="material-symbols-outlined">star</span>
           <p>Destacados</p>
+          <SoonTag />
         </Link>
       </div>
 

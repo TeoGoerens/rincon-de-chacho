@@ -1,0 +1,15 @@
+.soon-tag {
+  position: absolute;
+  left: 60%;
+}
+
+.soon-tag h6 {
+  background-color: var(--secondary-color);
+  font-size: 0.65rem;
+  font-weight: 400;
+  padding: 0.4rem;
+  margin: 0;
+  color: white;
+  border-radius: 20px;
+  line-height: 0.7rem;
+}

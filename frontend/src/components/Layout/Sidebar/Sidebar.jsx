@@ -3,6 +3,7 @@
 import { Link } from "react-router-dom";
 
 //Import components
+import SoonTag from "../SoonTag/SoonTag";
 
 //Import CSS & styles
 import "./SidebarStyle.css";
@@ -64,6 +65,7 @@ function Sidebar({ sidebarOpen, handleToggleSidebar }) {
                 stadia_controller
               </span>
               <p>Prode</p>
+              <SoonTag />
             </Link>
           </li>
           <li>
@@ -74,6 +76,7 @@ function Sidebar({ sidebarOpen, handleToggleSidebar }) {
             >
               <span className="material-symbols-outlined">edit_note</span>
               <p>Cronicas</p>
+              <SoonTag />
             </Link>
           </li>
           <li>
