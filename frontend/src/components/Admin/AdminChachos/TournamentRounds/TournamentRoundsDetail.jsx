@@ -44,7 +44,6 @@ const TournamentRoundsDetail = () => {
 
   //Functions assigned to buttons
   const handleDelete = (id) => {
-    console.log(id);
     dispatch(deleteVoteByIdAction(id));
   };
 
