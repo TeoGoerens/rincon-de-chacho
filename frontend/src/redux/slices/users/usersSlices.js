@@ -13,6 +13,7 @@ import {
 // ---------- REDIRECT ----------
 const resetLoginAction = createAction("users/login-reset");
 const resetLogoutAction = createAction("users/logout-reset");
+export const resetAllUsersErrorsAction = createAction("users/errors-reset");
 
 // --------------------
 // ACTIONS
@@ -93,6 +94,54 @@ export const logoutUserAction = createAsyncThunk(
   }
 );
 
+// ---------- RESET PASSWORD TOKEN GENERATOR ----------
+export const resetPasswordTokenGeneratorAction = createAsyncThunk(
+  "users/reset-password-token-generator",
+  async (email, { rejectWithValue, getState, dispatch }) => {
+    try {
+      //HTTP call
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const endpoint = `${baseURL}/api/users/forgot-password`;
+      const response = await axios.post(endpoint, email, config);
+
+      return response.data;
+    } catch (error) {
+      if (!error?.response) {
+        throw error;
+      }
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+// ---------- RESET PASSWORD ----------
+export const resetPasswordAction = createAsyncThunk(
+  "users/reset-password",
+  async (data, { rejectWithValue, getState, dispatch }) => {
+    try {
+      //HTTP call
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const endpoint = `${baseURL}/api/users/reset-password`;
+      const response = await axios.put(endpoint, data, config);
+
+      return response.data;
+    } catch (error) {
+      if (!error?.response) {
+        throw error;
+      }
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 // --------------------
 // SLICES
 // --------------------
@@ -103,6 +152,14 @@ const userSlices = createSlice({
     isAdmin: getIsAdminFromLocalStorage,
   },
   extraReducers: (builder) => {
+    // ---------- RESET ERRORS ----------
+    builder.addCase(resetAllUsersErrorsAction, (state, action) => {
+      state.appError = undefined;
+      state.serverError = undefined;
+      state.resetTokenCreated = undefined;
+      state.passwordReset = undefined;
+    });
+
     // ---------- USER REGISTER ----------
     builder.addCase(registerUserAction.pending, (state, action) => {
       state.loading = true;
@@ -161,6 +218,55 @@ const userSlices = createSlice({
       state.loading = false;
       state.appError = action?.payload?.message;
       state.serverError = action?.error?.message;
+    });
+
+    // ---------- PASSWORD RESET TOKEN GENERATOR ----------
+    builder.addCase(
+      resetPasswordTokenGeneratorAction.pending,
+      (state, action) => {
+        state.loading = true;
+        state.appError = undefined;
+        state.serverError = undefined;
+        state.resetTokenCreated = undefined;
+      }
+    );
+    builder.addCase(
+      resetPasswordTokenGeneratorAction.fulfilled,
+      (state, action) => {
+        state.loading = false;
+        state.resetTokenCreated = action?.payload;
+        state.appError = undefined;
+        state.serverError = undefined;
+      }
+    );
+    builder.addCase(
+      resetPasswordTokenGeneratorAction.rejected,
+      (state, action) => {
+        state.loading = false;
+        state.appError = action?.payload?.message;
+        state.serverError = action?.error?.message;
+        state.resetTokenCreated = undefined;
+      }
+    );
+
+    // ---------- PASSWORD RESET ----------
+    builder.addCase(resetPasswordAction.pending, (state, action) => {
+      state.loading = true;
+      state.appError = undefined;
+      state.serverError = undefined;
+      state.passwordReset = undefined;
+    });
+    builder.addCase(resetPasswordAction.fulfilled, (state, action) => {
+      state.loading = false;
+      state.passwordReset = action?.payload;
+      state.appError = undefined;
+      state.serverError = undefined;
+    });
+    builder.addCase(resetPasswordAction.rejected, (state, action) => {
+      state.loading = false;
+      state.appError = action?.payload?.message;
+      state.serverError = action?.error?.message;
+      state.passwordReset = undefined;
     });
   },
 });

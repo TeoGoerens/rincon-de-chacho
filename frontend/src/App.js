@@ -12,6 +12,8 @@ import AuthProtectedRoutes from "./components/AuthRoutes/AuthProtectedRoutes";
 import AdminProtectedRoutes from "./components/AuthRoutes/AdminProtectedRoutes";
 import PhotoGallery from "./components/PhotoGallery/PhotoGallery";
 import CurrentlyWorking from "./components/Layout/SoonTag/CurrentlyWorking";
+import ForgotPassword from "./components/Users/PasswordManagement/ForgotPassword";
+import ResetPassword from "./components/Users/PasswordManagement/ResetPassword";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         {/* Public routes */}
         <Route path="/" Component={UserLogin} />
         <Route path="/register" Component={UserRegister} />
+        <Route path="/forgot-password" Component={ForgotPassword} />
+        <Route path="/reset-password/:resetToken" Component={ResetPassword} />
 
         {/* Auth protected routes */}
         <Route Component={AuthProtectedRoutes}>

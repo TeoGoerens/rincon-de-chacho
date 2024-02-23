@@ -88,7 +88,7 @@ const VotesResults = () => {
             <div className="pearl-container">
               <img src={firstPlaceSource} alt="First Place Badge" />
               <div className="pearl-winners">
-                {tournamentRound.white_pearl &&
+                {tournamentRound?.white_pearl &&
                   tournamentRound.white_pearl.map((player) => (
                     <p key={player._id}>
                       {player.first_name} {player.last_name}
@@ -99,7 +99,7 @@ const VotesResults = () => {
             <div className="pearl-container">
               <img src={secondPlaceSource} alt="Second Place Badge" />
               <div className="pearl-winners">
-                {tournamentRound.vanilla_pearl &&
+                {tournamentRound?.vanilla_pearl &&
                   tournamentRound.vanilla_pearl.map((player) => (
                     <p key={player._id}>
                       {player.first_name} {player.last_name}
@@ -113,7 +113,7 @@ const VotesResults = () => {
                 alt="Second To Last Place Badge"
               />
               <div className="pearl-winners">
-                {tournamentRound.ocher_pearl &&
+                {tournamentRound?.ocher_pearl &&
                   tournamentRound.ocher_pearl.map((player) => (
                     <p key={player._id}>
                       {player.first_name} {player.last_name}
@@ -124,7 +124,7 @@ const VotesResults = () => {
             <div className="pearl-container">
               <img src={lastPlaceSource} alt="Last Place Badge" />
               <div className="pearl-winners">
-                {tournamentRound.black_pearl &&
+                {tournamentRound?.black_pearl &&
                   tournamentRound.black_pearl.map((player) => (
                     <p key={player._id}>
                       {player.first_name} {player.last_name}

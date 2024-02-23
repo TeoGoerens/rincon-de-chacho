@@ -1,5 +1,5 @@
 //Import React & Hooks
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 
 //Import CSS & styles
@@ -12,7 +12,10 @@ import imageRegisterSource from "../../../assets/photos/chacho-blow.png";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
-import { registerUserAction } from "../../../redux/slices/users/usersSlices";
+import {
+  registerUserAction,
+  resetAllUsersErrorsAction,
+} from "../../../redux/slices/users/usersSlices";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -50,6 +53,11 @@ const UserRegister = () => {
   //Select state from store
   const storeData = useSelector((store) => store.users);
   const { appError, serverError, registered } = storeData;
+
+  //Reset all errors and success messages once the component is render to avoid carry forward from other components
+  useEffect(() => {
+    dispatch(resetAllUsersErrorsAction());
+  }, [dispatch]);
 
   if (registered) {
     return <Navigate to="/" />;

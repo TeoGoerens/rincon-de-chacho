@@ -1,6 +1,6 @@
 //Import React & Hooks
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 //Import helpers
 
@@ -20,9 +20,6 @@ import { useSelector } from "react-redux";
 //----------------------------------------
 
 const Navbar = () => {
-  //Navigate const creation
-  const navigate = useNavigate();
-
   //Select state from tournament rounds store
   const storeData = useSelector((store) => store.users);
   const { userAuth } = storeData;
@@ -37,12 +34,6 @@ const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const handleToggleUserMenu = () => {
     setUserMenuOpen(!userMenuOpen);
-  };
-
-  //Define function to focus on email input field
-  const focusInputEmail = async () => {
-    await navigate("/");
-    await document.getElementById("email").focus();
   };
 
   return (
@@ -82,7 +73,7 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="credentials-btn-container">
-              <Link to="/" className="nav-login-btn" onClick={focusInputEmail}>
+              <Link to="/" className="nav-login-btn">
                 Login
               </Link>
               <Link to="/register" className="nav-register-btn">

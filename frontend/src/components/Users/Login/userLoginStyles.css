@@ -51,7 +51,7 @@
 }
 
 .hero-text form {
-  margin-top: 3rem;
+  margin-top: 2rem;
   font-size: 0.85rem;
   display: flex;
   flex-direction: column;
@@ -93,6 +93,11 @@
 .hero-text form .message-error {
   color: var(--fourth-color);
   font-size: 0.85rem;
+}
+
+.forgot-password-link {
+  font-size: 0.85rem;
+  margin-top: 1rem;
 }
 
 /* --------------- HERO IMAGE --------------- */
