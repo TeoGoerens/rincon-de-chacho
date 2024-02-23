@@ -60,7 +60,9 @@ export default class UserRepository extends baseRepository {
     //Check if user exists
     const userExists = await User.findOne({ email: email });
     if (!userExists) {
-      throw new Error("User is not properly registered");
+      throw new Error(
+        "El usuario no está correctamente registrado en la base de datos"
+      );
     }
 
     //Create reset token, hash it and append it to user in database
@@ -93,9 +95,15 @@ export default class UserRepository extends baseRepository {
       from: "chacho@elrincondechacho.com",
       to: user.email,
       subject: "Chacal olvidadizo... Resetea tu contraseña",
-      html: `<h1>Hola ${user.first_name} ${user.last_name}</h1>
-            <h3>Sos un chacal muy distraído</h3>
-            <p>Por favor hace click en el siguiente link, el cuál será válido por los próximos 10 minutos <a href="http://localhost:8080/reset-password/${token}">Resetear contraseña</a></p>`,
+      html: `    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+
+      <h1>Hola ${user.first_name} ${user.last_name}</h1>
+      <h3>Sos un chacal muy distraído</h3>
+      <p>
+        Por favor hace click en el siguiente link, el cuál será válido por los próximos 10 minutos
+        <a href="http://localhost:3000/reset-password/${token}">Resetear contraseña</a>
+      </p>
+    </div>`,
     };
     let mailSent = await transport.sendMail(mailOptions);
 
@@ -106,7 +114,7 @@ export default class UserRepository extends baseRepository {
   passwordReset = async (token, password) => {
     //Hash token and password provided
     if (!token || !password) {
-      throw new Error("Missing information. Please try again");
+      throw new Error("Hay información faltante. Por favor volvé a intentarlo");
     }
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -114,7 +122,9 @@ export default class UserRepository extends baseRepository {
     const hashedPassword = await bcrypt.hashSync(password, salt);
 
     if (!hashedToken || !hashedPassword) {
-      throw new Error("Error while hashing data. Please try again");
+      throw new Error(
+        "Hubo un error validando el token. Por favor volvé a intentarlo"
+      );
     }
 
     //Find user based on matching hashed token and within expiry interval
@@ -124,7 +134,7 @@ export default class UserRepository extends baseRepository {
     });
 
     if (!userExists) {
-      throw new Error("Token expired. Request your new token by email");
+      throw new Error("Tu token expiró, volvé a solicitarlo por correo");
     }
 
     //In case a user was found, update password

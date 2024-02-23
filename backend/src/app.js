@@ -11,10 +11,6 @@ dotenv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ---------- MONGO DB SET UP & CONNECTION ----------
-import initMongoDB from "./dao/connection.js";
-initMongoDB();
-
 // ---------- ROUTER CONFIGURATION ----------
 import userRouter from "./routes/userRouter.js";
 import playerRouter from "./routes/chachos/playerRouter.js";

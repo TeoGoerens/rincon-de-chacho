@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { mongoConnections } from "../../connection.js";
+const { dbChachos } = mongoConnections;
 
 const tournamentRoundSchema = new mongoose.Schema(
   {
@@ -87,7 +89,7 @@ const tournamentRoundSchema = new mongoose.Schema(
   }
 );
 
-const TournamentRound = mongoose.model(
+const TournamentRound = dbChachos.model(
   "Tournament Round",
   tournamentRoundSchema
 );

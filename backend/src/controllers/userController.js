@@ -53,10 +53,7 @@ export default class UserController {
         resetToken
       );
       res.status(200).json({
-        message: `Token was properly generated and sent by email to user ${user.email}`,
-        user,
-        resetToken,
-        mailSent,
+        message: `Se envió un correo a la dirección ${user.email} para reestablecer la contraseña`,
       });
     } catch (error) {
       next(error);
@@ -75,8 +72,7 @@ export default class UserController {
       );
 
       res.status(200).json({
-        message: `${userUpdated.email}'s password was correctly updated`,
-        userUpdated,
+        message: `La contraseña del usuario ${userUpdated.email} se actualizó correctamente`,
       });
     } catch (error) {
       next(error);

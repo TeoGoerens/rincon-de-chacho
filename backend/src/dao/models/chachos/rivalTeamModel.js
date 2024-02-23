@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { mongoConnections } from "../../connection.js";
+const { dbChachos } = mongoConnections;
 
 const rivalTeamSchema = new mongoose.Schema(
   {
@@ -23,5 +25,5 @@ const rivalTeamSchema = new mongoose.Schema(
   }
 );
 
-const RivalTeam = mongoose.model("Rival Team", rivalTeamSchema);
+const RivalTeam = dbChachos.model("Rival Team", rivalTeamSchema);
 export default RivalTeam;

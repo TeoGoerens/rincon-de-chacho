@@ -9,7 +9,7 @@ router.post("/register", controller.registerUser);
 router.post("/login", controller.loginUser);
 
 // ---------- PASSWORD MANAGEMENT ROUTES ----------
-router.post("/forget-password-token", controller.forgetPasswordTokenGenerator);
+router.post("/forgot-password", controller.forgetPasswordTokenGenerator);
 router.put("/reset-password", controller.passwordReset);
 
 export default router;

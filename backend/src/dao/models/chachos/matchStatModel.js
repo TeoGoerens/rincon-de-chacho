@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { mongoConnections } from "../../connection.js";
+const { dbChachos } = mongoConnections;
 
 const matchStatSchema = new mongoose.Schema(
   {
@@ -76,5 +78,5 @@ const matchStatSchema = new mongoose.Schema(
   }
 );
 
-const MatchStat = mongoose.model("Match Stat", matchStatSchema);
+const MatchStat = dbChachos.model("Match Stat", matchStatSchema);
 export default MatchStat;

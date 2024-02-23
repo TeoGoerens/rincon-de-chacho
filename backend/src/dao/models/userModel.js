@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { mongoConnections } from "../connection.js";
+const { dbUsers } = mongoConnections;
 
 const userSchema = new mongoose.Schema(
   {
@@ -51,5 +53,5 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const User = mongoose.model("User", userSchema);
+const User = dbUsers.model("User", userSchema);
 export default User;
