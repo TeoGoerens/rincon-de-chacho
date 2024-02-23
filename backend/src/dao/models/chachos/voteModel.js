@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import User from "../userModel.js";
 import { mongoConnections } from "../../connection.js";
 const { dbChachos } = mongoConnections;
 
@@ -6,7 +7,7 @@ const voteSchema = new mongoose.Schema(
   {
     voter: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: User,
     },
     round: {
       type: mongoose.Schema.Types.ObjectId,

@@ -76,7 +76,8 @@ export default class VoteController {
       );
 
       res.status(200).json({
-        message: "All votes have been properly retrieved",
+        message:
+          "Todos los votos de la fecha han sido recuperados exitosamente de la base de datos",
         allVotesForRound,
       });
     } catch (error) {
