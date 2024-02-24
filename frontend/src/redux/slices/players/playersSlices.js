@@ -69,6 +69,7 @@ export const getAllPlayersAction = createAsyncThunk(
       };
       const endpoint = `${baseURL}/api/chachos/player/`;
       const response = await axios.get(endpoint, config);
+
       return response.data;
     } catch (error) {
       if (!error?.response) {
