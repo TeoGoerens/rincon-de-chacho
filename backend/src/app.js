@@ -20,12 +20,6 @@ if (process.env.npm_lifecycle_event === "start") {
   app.use(express.static(join(__dirname, "../../frontend/build")));
 }
 
-// Ruta principal
-app.get("*", (req, res) => {
-  const indexPath = join(__dirname, "../../frontend/build/index.html");
-  res.sendFile(indexPath);
-});
-
 // ---------- ROUTER CONFIGURATION ----------
 import userRouter from "./routes/userRouter.js";
 import playerRouter from "./routes/chachos/playerRouter.js";
@@ -44,6 +38,11 @@ app.use("/api/chachos/rival-team", rivalTeamRouter);
 app.use("/api/chachos/tournament-round", tournamentRoundRouter);
 app.use("/api/chachos/vote", voteRouter);
 app.use("/api/chachos/match-stat", matchStatRouter);
+// Ruta principal
+app.get("*", (req, res) => {
+  const indexPath = join(__dirname, "../../frontend/build/index.html");
+  res.sendFile(indexPath);
+});
 
 // ---------- ERROR MIDDLEWARE CONFIGURATIONS ----------
 import errorHandler from "./middlewares/error/errorHandler.js";
