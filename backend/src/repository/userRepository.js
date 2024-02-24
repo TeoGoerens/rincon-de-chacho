@@ -101,7 +101,7 @@ export default class UserRepository extends baseRepository {
       <h3>Sos un chacal muy distraído</h3>
       <p>
         Por favor hace click en el siguiente link, el cuál será válido por los próximos 10 minutos
-        <a href="www.elrincondechacho/reset-password/${token}">Resetear contraseña</a>
+        <a href="https://elrincondechacho.com/reset-password/${token}">Resetear contraseña</a>
       </p>
     </div>`,
     };
