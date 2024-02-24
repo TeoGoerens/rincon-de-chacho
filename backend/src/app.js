@@ -2,11 +2,32 @@
 import express from "express";
 const app = express();
 
+import dotenv from "dotenv";
+dotenv.config();
+
 import cors from "cors";
 app.use(cors());
 
-import dotenv from "dotenv";
-dotenv.config();
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import path from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+if (process.env.npm_lifecycle_event === "start") {
+  app.use(express.static(join(__dirname, "../frontend/build")));
+}
+
+// Ruta principal
+app.get("/", (req, res) => {
+  // En producción, sirve el archivo 'index.html' desde la carpeta 'build'
+  res.sendFile(
+    path.join(
+      __dirname,
+      "../frontend/build",
+      process.env.npm_lifecycle_event === "start" ? "index.html" : "index.html"
+    )
+  );
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
