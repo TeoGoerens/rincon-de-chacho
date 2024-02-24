@@ -8,29 +8,23 @@ dotenv.config();
 import cors from "cors";
 app.use(cors());
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
 if (process.env.npm_lifecycle_event === "start") {
-  app.use(express.static(join(__dirname, "../frontend/build")));
+  app.use(express.static(join(__dirname, "../../frontend/build")));
 }
 
 // Ruta principal
-app.get("/", (req, res) => {
-  // En producción, sirve el archivo 'index.html' desde la carpeta 'build'
-  res.sendFile(
-    path.join(
-      __dirname,
-      "../frontend/build",
-      process.env.npm_lifecycle_event === "start" ? "index.html" : "index.html"
-    )
-  );
+app.get("*", (req, res) => {
+  const indexPath = join(__dirname, "../../frontend/build/index.html");
+  res.sendFile(indexPath);
 });
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // ---------- ROUTER CONFIGURATION ----------
 import userRouter from "./routes/userRouter.js";
