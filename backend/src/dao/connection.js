@@ -9,8 +9,8 @@ const initMongoDB = () => {
       ? process.env.MONGO_ATLAS_URL_DEV
       : process.env.MONGO_ATLAS_URL_PROD;
 
-    const dbUsers = mongoose.createConnection(`${MONGO_ATLAS_URL}/Users?`);
-    const dbChachos = mongoose.createConnection(`${MONGO_ATLAS_URL}/Chachos?`);
+    const dbUsers = mongoose.createConnection(`${MONGO_ATLAS_URL}/users?`);
+    const dbChachos = mongoose.createConnection(`${MONGO_ATLAS_URL}/chachos?`);
     console.log("Connected to Mongo DBs");
 
     return { dbUsers, dbChachos };
