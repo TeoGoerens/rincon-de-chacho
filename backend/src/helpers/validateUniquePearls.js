@@ -19,7 +19,7 @@ const validateUniquePearls = async (vote) => {
     return {
       isValid: false,
       message:
-        "Your vote is incomplete. Please check that you have voted for all pearls",
+        "Tu voto está incompleto. Por favor fijate que hayas votado todas las perlas",
     };
   }
 
@@ -28,11 +28,11 @@ const validateUniquePearls = async (vote) => {
     return {
       isValid: false,
       message:
-        "It seems you have voted twice for the same player. Please review your vote",
+        "Parece que votaste dos veces por el mismo jugador. Por favor corregí tu voto",
     };
   }
 
-  return { isValid: true, message: "Vote correctly submitted" };
+  return { isValid: true, message: "El voto fue correctamente registrado" };
 };
 
 export default validateUniquePearls;

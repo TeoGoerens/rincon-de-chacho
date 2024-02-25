@@ -121,7 +121,7 @@ export default class VoteController {
       );
 
       res.status(200).json({
-        message: "Vote has been properly created",
+        message: "Tu voto fue correctamente registrado",
         voteLoaded,
       });
     } catch (error) {
