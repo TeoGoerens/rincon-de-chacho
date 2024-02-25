@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.7efe9c1c.css",
-    "main.js": "/static/js/main.927f7d1b.js",
+    "main.css": "/static/css/main.cf32d98a.css",
+    "main.js": "/static/js/main.a1e7ae1a.js",
     "static/media/carousel-11.jpeg": "/static/media/carousel-11.b9ea1fab4b49218b48c7.jpeg",
     "static/media/carousel-10.jpeg": "/static/media/carousel-10.482e81dec85657fabbdc.jpeg",
     "static/media/chacho-home.png": "/static/media/chacho-home.cb4569001613ffeb1b98.png",
@@ -27,11 +27,11 @@
     "static/media/computer.png": "/static/media/computer.99623fd700ee3767ae6d.png",
     "static/media/password.png": "/static/media/password.2236ea7737a7b7e0a48d.png",
     "index.html": "/index.html",
-    "main.7efe9c1c.css.map": "/static/css/main.7efe9c1c.css.map",
-    "main.927f7d1b.js.map": "/static/js/main.927f7d1b.js.map"
+    "main.cf32d98a.css.map": "/static/css/main.cf32d98a.css.map",
+    "main.a1e7ae1a.js.map": "/static/js/main.a1e7ae1a.js.map"
   },
   "entrypoints": [
-    "static/css/main.7efe9c1c.css",
-    "static/js/main.927f7d1b.js"
+    "static/css/main.cf32d98a.css",
+    "static/js/main.a1e7ae1a.js"
   ]
 }

@@ -218,7 +218,7 @@ const PlayersVotes = () => {
                     <p value={player._id}>
                       {player.first_name} {player.last_name}
                     </p>
-                    <input
+                    {/*     <input
                       type="number"
                       min={1}
                       max={10}
@@ -254,7 +254,52 @@ const PlayersVotes = () => {
                         });
                       }}
                       onBlur={formik.handleBlur("evaluation")}
-                    />
+                    /> */}
+                    <select
+                      value={
+                        playersEvaluation.find(
+                          (evaluation) => evaluation.player === player._id
+                        )?.points || 0
+                      }
+                      onChange={(e) => {
+                        const newPoints = parseInt(e.target.value, 10) || 0;
+                        const updatedEvaluation = {
+                          player: player._id,
+                          points: newPoints,
+                        };
+
+                        setPlayersEvaluation((prevPlayersEvaluation) => {
+                          const index = prevPlayersEvaluation.findIndex(
+                            (evaluation) => evaluation.player === player._id
+                          );
+
+                          if (index !== -1) {
+                            // Actualizar el objeto existente
+                            const updatedArray = [...prevPlayersEvaluation];
+                            updatedArray[index] = updatedEvaluation;
+                            return updatedArray;
+                          } else {
+                            // Agregar el nuevo objeto al array
+                            return [
+                              ...prevPlayersEvaluation,
+                              updatedEvaluation,
+                            ];
+                          }
+                        });
+                      }}
+                      onBlur={formik.handleBlur("evaluation")}
+                    >
+                      <option value="1" label="1" />
+                      <option value="2" label="2" />
+                      <option value="3" label="3" />
+                      <option value="4" label="4" />
+                      <option value="5" label="5" />
+                      <option value="6" label="6" />
+                      <option value="7" label="7" />
+                      <option value="8" label="8" />
+                      <option value="9" label="9" />
+                      <option value="10" label="10" />
+                    </select>
                   </div>
                 ))}
               <div>{formik.touched.evaluation && formik.errors.evaluation}</div>

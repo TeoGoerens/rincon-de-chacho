@@ -124,10 +124,10 @@
   margin-top: 0.8rem;
 }
 
-.players-votes-content .player-details {
+/* .players-votes-content .player-details {
   display: flex;
   align-items: center;
-}
+} */
 
 .player-details p {
   font-size: 0.85rem;
@@ -135,7 +135,7 @@
   width: 160px;
 }
 
-.player-details input {
+/* .player-details input {
   font-size: 0.85rem;
   text-align: center;
   border: 1px solid;
@@ -144,6 +144,18 @@
   border-radius: 10px;
   padding: 0.2rem;
   font-weight: 700;
+} */
+
+.player-details select {
+  flex-grow: 1;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  border-radius: 10px;
+  padding: 0.2rem;
+  font-weight: 700;
+  width: 80px;
+  text-align: center;
 }
 
 /* ---------- Submit button ---------- */
