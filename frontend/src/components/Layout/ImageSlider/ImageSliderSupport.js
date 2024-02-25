@@ -44,7 +44,7 @@ const sliderImages = [
     date: "octubre 2022",
     title: "Merlo San Luis",
     description:
-      "Trecking entre las rocas a puro ritmo liderados por la dupla de hermanos Cebreiro",
+      "Trekking entre las rocas a puro ritmo liderados por la dupla de hermanos Cebreiro",
   },
   {
     img: sliderImage6Source,
