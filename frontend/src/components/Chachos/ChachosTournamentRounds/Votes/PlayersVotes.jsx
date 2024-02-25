@@ -289,6 +289,7 @@ const PlayersVotes = () => {
                       }}
                       onBlur={formik.handleBlur("evaluation")}
                     >
+                      <option value="" label="?" />
                       <option value="1" label="1" />
                       <option value="2" label="2" />
                       <option value="3" label="3" />

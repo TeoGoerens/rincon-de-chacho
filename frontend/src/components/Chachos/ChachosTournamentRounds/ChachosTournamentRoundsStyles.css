@@ -50,7 +50,7 @@
 }
 
 .chachos-tournament-rounds-main-table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--third-color), transparent 0%);
+  background-color: var(--third-color);
   font-weight: 800;
 }
 
