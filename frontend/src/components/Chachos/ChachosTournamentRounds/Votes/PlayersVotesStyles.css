@@ -3,6 +3,12 @@
   margin-bottom: 3rem;
 }
 
+.players-votes-container h5 {
+  color: red;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
 /* ---------- Players votes title ---------- */
 .players-votes-title {
   display: flex;
@@ -89,7 +95,7 @@
 }
 
 .votes-pearl-container .error-message {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: red;
 }
 
@@ -124,27 +130,11 @@
   margin-top: 0.8rem;
 }
 
-/* .players-votes-content .player-details {
-  display: flex;
-  align-items: center;
-} */
-
 .player-details p {
   font-size: 0.85rem;
   display: inline-block;
   width: 160px;
 }
-
-/* .player-details input {
-  font-size: 0.85rem;
-  text-align: center;
-  border: 1px solid;
-  border-color: var(--third-color);
-  background-color: var(--third-color);
-  border-radius: 10px;
-  padding: 0.2rem;
-  font-weight: 700;
-} */
 
 .player-details select {
   flex-grow: 1;

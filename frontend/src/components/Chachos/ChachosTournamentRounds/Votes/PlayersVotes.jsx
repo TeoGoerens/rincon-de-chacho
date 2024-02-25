@@ -77,7 +77,7 @@ const PlayersVotes = () => {
 
   const { appError, serverError } = VotesStoreData;
 
-  //Navigate to index in case there is an created vote
+  //Navigate to index in case there is a created vote
   if (VotesStoreData?.isCreated)
     return <Navigate to="/chachos/tournament-rounds" />;
 
@@ -138,9 +138,7 @@ const PlayersVotes = () => {
                   </select>
                 </div>
 
-                <div className="error-message">
-                  {formik.touched.white_pearl && formik.errors.white_pearl}
-                </div>
+                <div className="error-message">{formik.errors.white_pearl}</div>
               </div>
               <div className="votes-pearl-container">
                 <div className="votes-pearl-details">
@@ -161,7 +159,7 @@ const PlayersVotes = () => {
                   </select>
                 </div>
                 <div className="error-message">
-                  {formik.touched.vanilla_pearl && formik.errors.vanilla_pearl}
+                  {formik.errors.vanilla_pearl}
                 </div>
               </div>
               <div className="votes-pearl-container">
@@ -182,9 +180,7 @@ const PlayersVotes = () => {
                       ))}
                   </select>
                 </div>
-                <div className="error-message">
-                  {formik.touched.ocher_pearl && formik.errors.ocher_pearl}
-                </div>
+                <div className="error-message">{formik.errors.ocher_pearl}</div>
               </div>
               <div className="votes-pearl-container">
                 <div className="votes-pearl-details">
@@ -204,9 +200,7 @@ const PlayersVotes = () => {
                       ))}
                   </select>
                 </div>
-                <div className="error-message">
-                  {formik.touched.black_pearl && formik.errors.black_pearl}
-                </div>
+                <div className="error-message">{formik.errors.black_pearl}</div>
               </div>
             </div>
 
@@ -218,43 +212,6 @@ const PlayersVotes = () => {
                     <p value={player._id}>
                       {player.first_name} {player.last_name}
                     </p>
-                    {/*     <input
-                      type="number"
-                      min={1}
-                      max={10}
-                      value={
-                        playersEvaluation.find(
-                          (evaluation) => evaluation.player === player._id
-                        )?.points || 0
-                      }
-                      onChange={(e) => {
-                        const newPoints = parseInt(e.target.value, 10) || 0;
-                        const updatedEvaluation = {
-                          player: player._id,
-                          points: newPoints,
-                        };
-
-                        setPlayersEvaluation((prevPlayersEvaluation) => {
-                          const index = prevPlayersEvaluation.findIndex(
-                            (evaluation) => evaluation.player === player._id
-                          );
-
-                          if (index !== -1) {
-                            // Actualizar el objeto existente
-                            const updatedArray = [...prevPlayersEvaluation];
-                            updatedArray[index] = updatedEvaluation;
-                            return updatedArray;
-                          } else {
-                            // Agregar el nuevo objeto al array
-                            return [
-                              ...prevPlayersEvaluation,
-                              updatedEvaluation,
-                            ];
-                          }
-                        });
-                      }}
-                      onBlur={formik.handleBlur("evaluation")}
-                    /> */}
                     <select
                       value={
                         playersEvaluation.find(

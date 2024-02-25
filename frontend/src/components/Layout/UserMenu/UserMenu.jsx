@@ -41,6 +41,12 @@ function UserMenu({ userMenuOpen, handleToggleUserMenu }) {
   return (
     <section className={`user-menu ${!userMenuOpen ? "user-menu-active" : ""}`}>
       <div className="user-menu-title">
+        <span
+          className="material-symbols-outlined user-menu-close-btn"
+          onClick={handleToggleUserMenu}
+        >
+          close
+        </span>
         <p>
           {userAuth?.userToDisplay === undefined
             ? `${userAuth?.first_name} ${userAuth?.last_name}`

@@ -26,6 +26,16 @@
   border-color: var(--third-color);
 }
 
+.user-menu-close-btn {
+  cursor: pointer;
+  background-color: var(--fourth-color);
+  color: white;
+  border-radius: 20%;
+  position: absolute;
+  top: 1.2rem;
+  left: 1.5rem;
+}
+
 .user-menu-title p {
   background-color: transparent;
   text-align: end;
