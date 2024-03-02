@@ -119,7 +119,16 @@
 }
 
 @media only screen and (max-width: 600px) {
+  .img-slider-list .img-slider-item .img-slider-item-content {
+    bottom: 5%;
+  }
+
   .img-slider-list .img-slider-item .img-slider-item-content h2 {
-    font-size: 3.6rem;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .img-slider-list .img-slider-item .img-slider-item-content p {
+    font-size: 0.9rem;
   }
 }
