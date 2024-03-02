@@ -41,7 +41,6 @@ const AuthProtectedRoutes = () => {
 
   //Select current date to compare it with credentials' expiry date
   const rightNow = new Date();
-  console.log(expired_credentials_date, rightNow);
 
   //Compare both dates
   if (rightNow > expired_credentials_date) {
