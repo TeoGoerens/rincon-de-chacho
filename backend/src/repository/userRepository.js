@@ -47,7 +47,12 @@ export default class UserRepository extends baseRepository {
 
     //Return user information
     if (matchingPasswords) {
-      return userExists;
+      const userExistsUpdatedLogin = await User.findOneAndUpdate(
+        { email: user.email },
+        { $set: { last_login: new Date() } },
+        { new: true }
+      );
+      return userExistsUpdatedLogin;
     } else {
       throw new Error(
         "Las credenciales no son válidas. Verifica la información ingresada"
