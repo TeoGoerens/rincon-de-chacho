@@ -34,11 +34,14 @@
 /* ---------- IMAGE SLIDER CONTENT ---------- */
 .img-slider-list .img-slider-item .img-slider-item-content {
   position: absolute;
-  left: 15%;
+  left: 5%;
   bottom: 10%;
   width: 500px;
   max-width: 80%;
   z-index: 10;
+  border-radius: 20px;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
 }
 
 .img-slider-list .img-slider-item .img-slider-item-content p:nth-child(1) {

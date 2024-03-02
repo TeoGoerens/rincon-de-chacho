@@ -28,7 +28,7 @@ const sliderImages = [
   {
     img: sliderImage3Source,
     date: "marzo 2018",
-    title: "Parque Arqueológico Pisac",
+    title: "Parque Pisac",
     description:
       "Combatiendo la altura a pura foto para tomar aire y seguir el recorrido",
   },
