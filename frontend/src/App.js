@@ -31,6 +31,7 @@ function App() {
         <Route Component={AuthProtectedRoutes}>
           <Route path="/home" Component={Home} />
           <Route path="/photo-gallery" Component={PhotoGallery} />
+          <Route path="/podrida" Component={CurrentlyWorking} />
           <Route path="/prode" Component={CurrentlyWorking} />
           <Route path="/cronicas" Component={CurrentlyWorking} />
           <Route path="/chachos/*" Component={ChachosRoutes} />

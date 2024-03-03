@@ -11,7 +11,24 @@ import "./ChachosMenuStyles.css";
 
 const ChachosMenu = () => {
   const location = useLocation();
-  const activeIndex = location.pathname === "/chachos" ? 0 : 1;
+  let activeIndex;
+
+  switch (location.pathname) {
+    case "/chachos":
+      activeIndex = 0;
+      break;
+
+    case "/chachos/tournament-rounds":
+      activeIndex = 1;
+      break;
+
+    case "/chachos/squad":
+      activeIndex = 2;
+      break;
+
+    default:
+      activeIndex = -1;
+  }
 
   return (
     <div className="chachos-menu-container">
@@ -26,6 +43,12 @@ const ChachosMenu = () => {
         className={activeIndex === 1 ? "chachos-menu-active-link" : ""}
       >
         Fechas
+      </Link>
+      <Link
+        to="/chachos/squad"
+        className={activeIndex === 2 ? "chachos-menu-active-link" : ""}
+      >
+        Plantel
       </Link>
     </div>
   );

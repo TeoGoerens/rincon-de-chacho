@@ -57,6 +57,17 @@ function Sidebar({ sidebarOpen, handleToggleSidebar }) {
           </li>
           <li>
             <Link
+              to="/podrida"
+              className="aside-link"
+              onClick={handleToggleSidebar}
+            >
+              <span className="material-symbols-outlined">playing_cards</span>
+              <p>Podrida</p>
+              <SoonTag />
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/prode"
               className="aside-link"
               onClick={handleToggleSidebar}

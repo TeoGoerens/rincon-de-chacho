@@ -1,0 +1,76 @@
+/* ---------- Chachos squad container ---------- */
+.chachos-squad-container {
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---------- Chachos squad title ---------- */
+.chachos-squad-container h2 {
+  margin: 1rem 0 2rem;
+  font-family: var(--secondary-font);
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+/* ---------- Chachos squad main table ---------- */
+.chachos-squad-main-table {
+  background-color: white;
+  font-size: 1rem;
+  border-radius: 20px;
+  overflow: hidden;
+  display: inline-block;
+  width: 80%;
+  height: 100%;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  transition: all ease 0.3s;
+}
+
+.chachos-squad-main-table:hover {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
+}
+
+.chachos-squad-main-table table {
+  width: 100%;
+}
+
+.chachos-squad-main-table thead {
+  background-color: var(--primary-color);
+}
+
+.chachos-squad-main-table thead tr th {
+  color: white;
+}
+
+.chachos-squad-main-table tbody tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--third-color), transparent 75%);
+}
+
+.chachos-squad-main-table tbody tr:hover {
+  background-color: var(--third-color);
+  font-weight: 800;
+}
+
+.chachos-squad-main-table tbody tr td {
+  text-align: center;
+}
+
+.chachos-squad-main-table tbody tr td a {
+  text-decoration: none;
+}
+
+.chachos-squad-main-table tbody tr td a span {
+  color: var(--secondary-color);
+  font-weight: bold;
+}
+
+/* ---------- Media queries ---------- */
+
+@media only screen and (max-width: 750px) {
+  .chachos-squad-main-table {
+    width: 100%;
+  }
+}
