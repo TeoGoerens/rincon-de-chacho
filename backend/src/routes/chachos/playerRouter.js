@@ -7,12 +7,7 @@ const router = Router();
 const controller = new PlayerController();
 
 // ---------- GET ROUTES ----------
-router.get(
-  "/:pid",
-  authMiddleware,
-  adminAuthMiddleware,
-  controller.getPlayerById
-);
+router.get("/:pid", authMiddleware, controller.getPlayerById);
 router.get("/", authMiddleware, adminAuthMiddleware, controller.getAllPlayers);
 
 // ---------- POST ROUTES ----------

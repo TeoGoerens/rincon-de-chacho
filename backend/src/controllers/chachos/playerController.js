@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import PlayerRepository from "../../repository/chachos/playerRepository.js";
 const repository = new PlayerRepository();
 
