@@ -1,14 +1,22 @@
 //Import React & Hooks
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useState } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { Navigate, Link } from "react-router-dom";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+//Import helpers
+import { toolbarReactQuill } from "../../../../../helpers/reactQuillModules";
+
+//Import CSS & styles
+import "./PlayersCreateStyle.css";
+
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
-import { createPlayerAction } from "../../../../redux/slices/players/playersSlices";
+import { createPlayerAction } from "../../../../../redux/slices/players/playersSlices";
 
 //Form schema
 const formSchema = Yup.object({
@@ -44,9 +52,17 @@ const PlayersCreate = () => {
     onSubmit: (values) => {
       //Dispatch the action
       dispatch(createPlayerAction(values));
+      console.log(values);
     },
     validationSchema: formSchema,
   });
+
+  //Define the features of React Quill
+  const [interview, setInterview] = useState("");
+  const handleChangeInterview = (value) => {
+    setInterview(value);
+    formik.values.interview = value;
+  };
 
   //Select state from store
   const storeData = useSelector((store) => store.players);
@@ -56,11 +72,19 @@ const PlayersCreate = () => {
   if (storeData?.isCreated) return <Navigate to="/admin/chachos/players" />;
 
   return (
-    <>
-      <h2>Crear jugador</h2>
-      {appError || serverError ? <h5>{appError}</h5> : null}
+    <div className="container create-player-container">
+      <div className="create-player-title">
+        <h2>Crear jugador de Chachos</h2>
+        <Link className="return-link" to="/admin/chachos/players">
+          Volver
+        </Link>
+      </div>
 
-      <form onSubmit={formik.handleSubmit}>
+      {appError || serverError ? (
+        <h5 className="error-message">{appError}</h5>
+      ) : null}
+
+      <form className="create-player-form" onSubmit={formik.handleSubmit}>
         <label>Camiseta</label>
         <input
           value={formik.values.shirt}
@@ -69,7 +93,9 @@ const PlayersCreate = () => {
           type="text"
           name="shirt"
         ></input>
-        <div>{formik.touched.shirt && formik.errors.shirt}</div>
+        <div className="error-message">
+          {formik.touched.shirt && formik.errors.shirt}
+        </div>
         <label>Nombre</label>
         <input
           value={formik.values.first_name}
@@ -78,7 +104,9 @@ const PlayersCreate = () => {
           type="text"
           name="first_name"
         ></input>
-        <div>{formik.touched.first_name && formik.errors.first_name}</div>
+        <div className="error-message">
+          {formik.touched.first_name && formik.errors.first_name}
+        </div>
         <label>Apellido</label>
         <input
           value={formik.values.last_name}
@@ -87,7 +115,9 @@ const PlayersCreate = () => {
           type="text"
           name="last_name"
         ></input>
-        <div>{formik.touched.last_name && formik.errors.last_name}</div>
+        <div className="error-message">
+          {formik.touched.last_name && formik.errors.last_name}
+        </div>
         <label>Apodo</label>
         <input
           value={formik.values.nickname}
@@ -96,7 +126,9 @@ const PlayersCreate = () => {
           type="text"
           name="nickname"
         ></input>
-        <div>{formik.touched.nickname && formik.errors.nickname}</div>
+        <div className="error-message">
+          {formik.touched.nickname && formik.errors.nickname}
+        </div>
         <label>Email</label>
         <input
           value={formik.values.email}
@@ -105,8 +137,10 @@ const PlayersCreate = () => {
           type="text"
           name="email"
         ></input>
-        <div>{formik.touched.email && formik.errors.email}</div>
-        <label>Posicion</label>
+        <div className="error-message">
+          {formik.touched.email && formik.errors.email}
+        </div>
+        <label>Posición</label>
         <input
           value={formik.values.field_position}
           onChange={formik.handleChange("field_position")}
@@ -114,13 +148,32 @@ const PlayersCreate = () => {
           type="text"
           name="field_position"
         ></input>
-        <div>
+        <div className="error-message">
           {formik.touched.field_position && formik.errors.field_position}
         </div>
+        <label>Bio (max 1.000 caracteres)</label>
+        <div className="create-player-form-bio">
+          <textarea
+            name="bio"
+            value={formik.values.bio}
+            onChange={formik.handleChange("bio")}
+            onBlur={formik.handleBlur("bio")}
+            maxLength={1000}
+            rows={5}
+            cols={50}
+          />
+          <p>{formik.values.bio ? formik.values.bio?.length : 0}/1000</p>
+        </div>
+        <label>Entrevista</label>
+        <ReactQuill
+          value={interview}
+          onChange={handleChangeInterview}
+          modules={toolbarReactQuill}
+        />
 
         <button type="submit">Crear jugador</button>
       </form>
-    </>
+    </div>
   );
 };
 

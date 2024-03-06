@@ -8,6 +8,7 @@ import "./ChachosSquadPlayerDetailsStyles.css";
 //Import helpers
 
 //Import components
+import chachosSquadImages from "./ChachosSquadPlayerDetailsSupport";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
@@ -34,18 +35,47 @@ const ChachosSquadPlayerDetails = () => {
   useEffect(() => {
     dispatch(getPlayerAction(id));
   }, [dispatch, id]);
+
+  const playerInfo = chachosSquadImages.find(
+    (jugador) => jugador.shirt === selectedPlayer?.shirt
+  );
+  const imgSource = playerInfo?.img;
+
   return (
     <>
       <div className="container chachos-player-details-container">
-        <h2>Detalles</h2>
         {appError || serverError ? (
           <h5>
             {appError} {serverError}
           </h5>
         ) : null}
+        <div className="chachos-player-details-link">
+          <Link className="return-link" to="/chachos/squad">
+            Volver
+          </Link>
+        </div>
 
         <div className="chachos-player-details-content">
-          {selectedPlayer?.first_name}
+          <div className="chachos-player-details-title">
+            <h6>Entrevista | Chachos</h6>
+            <h2>
+              Conociendo a{" "}
+              <span>
+                {selectedPlayer?.first_name} {selectedPlayer?.last_name}
+              </span>
+            </h2>
+            <h4>{selectedPlayer?.bio}</h4>
+          </div>
+
+          <div className="chachos-player-details-image">
+            <img src={imgSource} alt="Jugador" />
+          </div>
+
+          <div className="chachos-player-details-interview">
+            <div
+              dangerouslySetInnerHTML={{ __html: selectedPlayer?.interview }}
+            />
+          </div>
         </div>
       </div>
     </>

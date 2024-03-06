@@ -139,6 +139,8 @@ export const updatePlayerAction = createAsyncThunk(
           nickname: player?.nickname,
           email: player?.email,
           field_position: player?.field_position,
+          bio: player?.bio,
+          interview: player?.interview,
         },
         config
       );

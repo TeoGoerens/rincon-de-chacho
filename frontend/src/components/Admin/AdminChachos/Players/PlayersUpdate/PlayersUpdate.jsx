@@ -1,17 +1,25 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { Navigate, useParams, Link } from "react-router-dom";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
 import * as Yup from "yup";
+
+//Import helpers
+import { toolbarReactQuill } from "../../../../../helpers/reactQuillModules";
+
+//Import CSS & styles
+import "./PlayersUpdateStyle.css";
 
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPlayerAction,
   updatePlayerAction,
-} from "../../../../redux/slices/players/playersSlices";
+} from "../../../../../redux/slices/players/playersSlices";
 
 //Form schema
 const formSchema = Yup.object({
@@ -57,6 +65,19 @@ const PlayersUpdate = () => {
   const nickname = storeData?.player?.player?.nickname;
   const email = storeData?.player?.player?.email;
   const field_position = storeData?.player?.player?.field_position;
+  const bio = storeData?.player?.player?.bio;
+  const interviewFromDB = storeData?.player?.player?.interview;
+
+  //Define the features of React Quill
+  const [interview, setInterview] = useState(interviewFromDB);
+  useEffect(() => {
+    setInterview(interviewFromDB);
+  }, [interviewFromDB]);
+
+  const handleChangeInterview = (value) => {
+    setInterview(value);
+    formik.values.interview = interview;
+  };
 
   //Formik configuration
   const formik = useFormik({
@@ -68,6 +89,8 @@ const PlayersUpdate = () => {
       nickname,
       email,
       field_position,
+      bio,
+      interview,
     },
     onSubmit: (values) => {
       //Dispatch the action
@@ -79,6 +102,8 @@ const PlayersUpdate = () => {
           nickname: values.nickname,
           email: values.email,
           field_position: values.field_position,
+          bio: values.bio,
+          interview: values.interview,
           id,
         })
       );
@@ -90,11 +115,18 @@ const PlayersUpdate = () => {
   if (storeData?.isEdited) return <Navigate to="/admin/chachos/players" />;
 
   return (
-    <>
-      <h2>Editar jugador</h2>
-      {appError || serverError ? <h5>{appError}</h5> : null}
+    <div className="container update-player-container">
+      <div className="update-player-title">
+        <h2>Editar jugador de Chachos</h2>
+        <Link className="return-link" to="/admin/chachos/players">
+          Volver
+        </Link>
+      </div>
 
-      <form onSubmit={formik.handleSubmit}>
+      {appError || serverError ? (
+        <h5 className="error-message">{appError}</h5>
+      ) : null}
+      <form className="update-player-form" onSubmit={formik.handleSubmit}>
         <label>Camiseta</label>
         <input
           value={formik.values.shirt}
@@ -151,10 +183,32 @@ const PlayersUpdate = () => {
         <div>
           {formik.touched.field_position && formik.errors.field_position}
         </div>
+        <label>Bio (max 1.000 caracteres)</label>
+        <div className="update-player-form-bio">
+          <textarea
+            name="bio"
+            value={formik.values.bio}
+            onChange={formik.handleChange("bio")}
+            onBlur={formik.handleBlur("bio")}
+            maxLength={1000}
+            rows={5}
+            cols={50}
+          />
+          <p>
+            Caracteres restantes:{" "}
+            {1000 - (formik.values.bio ? formik.values.bio?.length : 0)}
+          </p>
+        </div>
+        <label>Entrevista</label>
+        <ReactQuill
+          value={interview}
+          onChange={handleChangeInterview}
+          modules={toolbarReactQuill}
+        />
 
         <button type="submit">Editar jugador</button>
       </form>
-    </>
+    </div>
   );
 };
 

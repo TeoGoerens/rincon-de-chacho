@@ -1,0 +1,106 @@
+/* ---------- Chachos player detail container ---------- */
+.chachos-player-details-container {
+  margin-bottom: 3rem;
+}
+
+/* ---------- Chachos player detail link ---------- */
+.chachos-player-details-container .chachos-player-details-link {
+  margin: 2rem 0 1rem;
+}
+
+.chachos-player-details-container .chachos-player-details-link .return-link {
+  text-decoration: none;
+  font-size: 0.8rem;
+  background-color: var(--fourth-color);
+  color: white;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+}
+
+/* ---------- Chachos player detail content ---------- */
+.chachos-player-details-content {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "image title"
+    "interview interview";
+}
+
+/* ---------- Chachos player detail title ---------- */
+.chachos-player-details-title {
+  grid-area: title;
+  margin-left: 2rem;
+}
+
+.chachos-player-details-title h6 {
+  font-family: var(--secondary-font);
+  text-transform: uppercase;
+  letter-spacing: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.chachos-player-details-title h2 {
+  margin-bottom: 2rem;
+  font-size: 2.9rem;
+}
+
+.chachos-player-details-title h2 span {
+  color: var(--fourth-color);
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-left: 8px;
+  letter-spacing: 8px;
+}
+
+.chachos-player-details-title h4 {
+  font-weight: 400;
+  text-align: justify;
+  font-size: 0.8rem;
+  line-height: 1.4rem;
+}
+
+/* ---------- Chachos player detail image ---------- */
+.chachos-player-details-image {
+  grid-area: image;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.chachos-player-details-image img {
+  max-width: 300px;
+  margin-right: 2rem;
+  margin: 0 auto;
+}
+
+/* ---------- Chachos player detail interview ---------- */
+.chachos-player-details-interview {
+  grid-area: interview;
+  margin-top: 3rem;
+}
+
+/* ---------- Media queries ---------- */
+@media only screen and (max-width: 750px) {
+  .chachos-player-details-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "image"
+      "interview";
+  }
+
+  .chachos-player-details-title {
+    margin-left: 0;
+  }
+
+  .chachos-player-details-title h2 {
+    margin-bottom: 1.5rem;
+    font-size: 2.3rem;
+  }
+
+  .chachos-player-details-image {
+    margin-top: 2rem;
+  }
+}

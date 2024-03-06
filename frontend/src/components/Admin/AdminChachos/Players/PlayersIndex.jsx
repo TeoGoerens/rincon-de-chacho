@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 //Import CSS & styles
-import "./PlayersStyle.css";
 
 //Import components
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";

@@ -7,8 +7,8 @@ import FootballCategoriesIndex from "./AdminChachos/FootballCategories/FootballC
 import FootballCategoriesCreate from "./AdminChachos/FootballCategories/FootballCategoriesCreate";
 import FootballCategoriesUpdate from "./AdminChachos/FootballCategories/FootballCategoriesUpdate";
 import PlayersIndex from "./AdminChachos/Players/PlayersIndex";
-import PlayersCreate from "./AdminChachos/Players/PlayersCreate";
-import PlayersUpdate from "./AdminChachos/Players/PlayersUpdate";
+import PlayersCreate from "./AdminChachos/Players/PlayersCreate/PlayersCreate";
+import PlayersUpdate from "./AdminChachos/Players/PlayersUpdate/PlayersUpdate";
 import TeamsIndex from "./AdminChachos/Teams/TeamsIndex";
 import TeamsCreate from "./AdminChachos/Teams/TeamsCreate";
 import TeamsUpdate from "./AdminChachos/Teams/TeamsUpdate";
