@@ -69,14 +69,14 @@ const PlayersUpdate = () => {
   const interviewFromDB = storeData?.player?.player?.interview;
 
   //Define the features of React Quill
-  const [interview, setInterview] = useState(interviewFromDB);
+  const [interview, setInterview] = useState("");
   useEffect(() => {
     setInterview(interviewFromDB);
   }, [interviewFromDB]);
 
   const handleChangeInterview = (value) => {
     setInterview(value);
-    formik.values.interview = interview;
+    formik.values.interview = value;
   };
 
   //Formik configuration
@@ -90,7 +90,6 @@ const PlayersUpdate = () => {
       email,
       field_position,
       bio,
-      interview,
     },
     onSubmit: (values) => {
       //Dispatch the action
