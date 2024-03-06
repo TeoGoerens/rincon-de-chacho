@@ -102,7 +102,7 @@ const PlayersUpdate = () => {
           email: values.email,
           field_position: values.field_position,
           bio: values.bio,
-          interview: values.interview,
+          interview: interview,
           id,
         })
       );
@@ -193,10 +193,8 @@ const PlayersUpdate = () => {
             rows={5}
             cols={50}
           />
-          <p>
-            Caracteres restantes:{" "}
-            {1000 - (formik.values.bio ? formik.values.bio?.length : 0)}
-          </p>
+
+          <p>{formik.values.bio ? formik.values.bio?.length : 0}/1000</p>
         </div>
         <label>Entrevista</label>
         <ReactQuill
