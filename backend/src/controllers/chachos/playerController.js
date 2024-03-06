@@ -38,6 +38,8 @@ export default class PlayerController {
         nickname: req.body.nickname,
         email: req.body.email,
         field_position: req.body.field_position,
+        bio: req.body.bio,
+        interview: req.body.interview,
       };
 
       const playerLoaded = await repository.baseCreate(player, "shirt");
@@ -61,6 +63,8 @@ export default class PlayerController {
         nickname: req.body.nickname,
         email: req.body.email,
         field_position: req.body.field_position,
+        bio: req.body.bio,
+        interview: req.body.interview,
       };
 
       const playerUpdated = await repository.baseUpdateById(
