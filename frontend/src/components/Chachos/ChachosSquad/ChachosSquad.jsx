@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import "./ChachosSquadStyles.css";
 
 //Import helpers
+import { formatDate } from "../../../helpers/dateFormatter";
 
 //Import components
 import ChachosMenu from "../ChachosMenu";
@@ -28,6 +29,17 @@ const ChachosSquad = () => {
   const { appError, serverError, players } = playerStoreData;
   const chachosSquad = players?.players;
 
+  //Filter players that have bio or interview values and sort based on updatedAt timestamps
+  const filteredSquad = chachosSquad?.filter((player) => player?.bio);
+
+  const compareUpddatedAt = (a, b) => {
+    const timestampA = new Date(a.updatedAt);
+    const timestampB = new Date(b.updatedAt);
+    return timestampB - timestampA;
+  };
+
+  const filteredSortedSquad = filteredSquad?.sort(compareUpddatedAt);
+
   //Dispatch action from store with useEffect()
   useEffect(() => {
     dispatch(getAllPlayersAction());
@@ -49,11 +61,12 @@ const ChachosSquad = () => {
               <tr>
                 <th>Camiseta</th>
                 <th>Jugador</th>
+                <th>Actualizado</th>
                 <th>Perfil</th>
               </tr>
             </thead>
             <tbody>
-              {chachosSquad?.map((player) => (
+              {filteredSortedSquad?.map((player) => (
                 <tr key={player._id}>
                   <td>
                     <p>{player.shirt}</p>
@@ -62,6 +75,9 @@ const ChachosSquad = () => {
                     <p>
                       {player.first_name} {player.last_name}
                     </p>
+                  </td>
+                  <td>
+                    <p>{formatDate(player.updatedAt)}</p>
                   </td>
 
                   <td>
