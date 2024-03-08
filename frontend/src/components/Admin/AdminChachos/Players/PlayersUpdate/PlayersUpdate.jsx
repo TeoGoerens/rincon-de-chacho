@@ -65,6 +65,7 @@ const PlayersUpdate = () => {
   const nickname = storeData?.player?.player?.nickname;
   const email = storeData?.player?.player?.email;
   const field_position = storeData?.player?.player?.field_position;
+  const is_permanent = storeData?.player?.player?.is_permanent;
   const bio = storeData?.player?.player?.bio;
   const interviewFromDB = storeData?.player?.player?.interview;
 
@@ -89,6 +90,7 @@ const PlayersUpdate = () => {
       nickname,
       email,
       field_position,
+      is_permanent,
       bio,
     },
     onSubmit: (values) => {
@@ -101,6 +103,7 @@ const PlayersUpdate = () => {
           nickname: values.nickname,
           email: values.email,
           field_position: values.field_position,
+          is_permanent: values.is_permanent,
           bio: values.bio,
           interview: interview,
           id,
@@ -134,7 +137,7 @@ const PlayersUpdate = () => {
           type="text"
           name="shirt"
         ></input>
-        <div>{formik.touched.shirt && formik.errors.shirt}</div>
+        <div>{formik.errors.shirt}</div>
         <label>Nombre</label>
         <input
           value={formik.values.first_name}
@@ -143,7 +146,7 @@ const PlayersUpdate = () => {
           type="text"
           name="first_name"
         ></input>
-        <div>{formik.touched.first_name && formik.errors.first_name}</div>
+        <div>{formik.errors.first_name}</div>
         <label>Apellido</label>
         <input
           value={formik.values.last_name}
@@ -152,7 +155,7 @@ const PlayersUpdate = () => {
           type="text"
           name="last_name"
         ></input>
-        <div>{formik.touched.last_name && formik.errors.last_name}</div>
+        <div>{formik.errors.last_name}</div>
         <label>Apodo</label>
         <input
           value={formik.values.nickname}
@@ -161,7 +164,7 @@ const PlayersUpdate = () => {
           type="text"
           name="nickname"
         ></input>
-        <div>{formik.touched.nickname && formik.errors.nickname}</div>
+        <div>{formik.errors.nickname}</div>
         <label>Email</label>
         <input
           value={formik.values.email}
@@ -170,7 +173,7 @@ const PlayersUpdate = () => {
           type="text"
           name="email"
         ></input>
-        <div>{formik.touched.email && formik.errors.email}</div>
+        <div>{formik.errors.email}</div>
         <label>Posicion</label>
         <input
           value={formik.values.field_position}
@@ -179,9 +182,20 @@ const PlayersUpdate = () => {
           type="text"
           name="field_position"
         ></input>
-        <div>
-          {formik.touched.field_position && formik.errors.field_position}
-        </div>
+        <div>{formik.errors.field_position}</div>
+
+        <label>¿Es jugador fijo?</label>
+        <select
+          name="is_permanent"
+          value={formik.values.is_permanent}
+          onChange={formik.handleChange("is_permanent")}
+          onBlur={formik.handleBlur("is_permanent")}
+        >
+          <option value="">Selecciona la opción</option>
+          <option value="true">Si</option>
+          <option value="false">No</option>
+        </select>
+
         <label>Bio (max 1.000 caracteres)</label>
         <div className="update-player-form-bio">
           <textarea

@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import "./ChachosSquadStyles.css";
 
 //Import helpers
-import { formatDate } from "../../../helpers/dateFormatter";
 
 //Import components
 import ChachosMenu from "../ChachosMenu";
@@ -30,15 +29,9 @@ const ChachosSquad = () => {
   const chachosSquad = players?.players;
 
   //Filter players that have bio or interview values and sort based on updatedAt timestamps
-  const filteredSquad = chachosSquad?.filter((player) => player?.bio);
-
-  const compareUpddatedAt = (a, b) => {
-    const timestampA = new Date(a.updatedAt);
-    const timestampB = new Date(b.updatedAt);
-    return timestampB - timestampA;
-  };
-
-  const filteredSortedSquad = filteredSquad?.sort(compareUpddatedAt);
+  const filteredSquad = chachosSquad?.filter(
+    (player) => player?.is_permanent === true
+  );
 
   //Dispatch action from store with useEffect()
   useEffect(() => {
@@ -61,12 +54,11 @@ const ChachosSquad = () => {
               <tr>
                 <th>Camiseta</th>
                 <th>Jugador</th>
-                <th>Actualizado</th>
                 <th>Perfil</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSortedSquad?.map((player) => (
+              {filteredSquad?.map((player) => (
                 <tr key={player._id}>
                   <td>
                     <p>{player.shirt}</p>
@@ -77,13 +69,11 @@ const ChachosSquad = () => {
                     </p>
                   </td>
                   <td>
-                    <p>{formatDate(player.updatedAt)}</p>
-                  </td>
-
-                  <td>
-                    <Link to={`${player._id}`}>
-                      <span className="material-symbols-outlined">badge</span>
-                    </Link>
+                    {player.bio ? (
+                      <Link className="view-profile" to={`${player._id}`}>
+                        Ver
+                      </Link>
+                    ) : null}
                   </td>
                 </tr>
               ))}

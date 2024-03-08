@@ -52,7 +52,6 @@ const PlayersCreate = () => {
     onSubmit: (values) => {
       //Dispatch the action
       dispatch(createPlayerAction(values));
-      console.log(values);
     },
     validationSchema: formSchema,
   });
@@ -93,9 +92,7 @@ const PlayersCreate = () => {
           type="text"
           name="shirt"
         ></input>
-        <div className="error-message">
-          {formik.touched.shirt && formik.errors.shirt}
-        </div>
+        <div className="error-message">{formik.errors.shirt}</div>
         <label>Nombre</label>
         <input
           value={formik.values.first_name}
@@ -104,9 +101,7 @@ const PlayersCreate = () => {
           type="text"
           name="first_name"
         ></input>
-        <div className="error-message">
-          {formik.touched.first_name && formik.errors.first_name}
-        </div>
+        <div className="error-message">{formik.errors.first_name}</div>
         <label>Apellido</label>
         <input
           value={formik.values.last_name}
@@ -115,9 +110,7 @@ const PlayersCreate = () => {
           type="text"
           name="last_name"
         ></input>
-        <div className="error-message">
-          {formik.touched.last_name && formik.errors.last_name}
-        </div>
+        <div className="error-message">{formik.errors.last_name}</div>
         <label>Apodo</label>
         <input
           value={formik.values.nickname}
@@ -126,9 +119,7 @@ const PlayersCreate = () => {
           type="text"
           name="nickname"
         ></input>
-        <div className="error-message">
-          {formik.touched.nickname && formik.errors.nickname}
-        </div>
+        <div className="error-message">{formik.errors.nickname}</div>
         <label>Email</label>
         <input
           value={formik.values.email}
@@ -137,9 +128,7 @@ const PlayersCreate = () => {
           type="text"
           name="email"
         ></input>
-        <div className="error-message">
-          {formik.touched.email && formik.errors.email}
-        </div>
+        <div className="error-message">{formik.errors.email}</div>
         <label>Posición</label>
         <input
           value={formik.values.field_position}
@@ -148,9 +137,20 @@ const PlayersCreate = () => {
           type="text"
           name="field_position"
         ></input>
-        <div className="error-message">
-          {formik.touched.field_position && formik.errors.field_position}
-        </div>
+        <div className="error-message">{formik.errors.field_position}</div>
+
+        <label>¿Es jugador fijo?</label>
+        <select
+          name="is_permanent"
+          value={formik.values.is_permanent}
+          onChange={formik.handleChange("is_permanent")}
+          onBlur={formik.handleBlur("is_permanent")}
+        >
+          <option value="">Selecciona la opción</option>
+          <option value="true">Si</option>
+          <option value="false">No</option>
+        </select>
+
         <label>Bio (max 1.000 caracteres)</label>
         <div className="create-player-form-bio">
           <textarea
