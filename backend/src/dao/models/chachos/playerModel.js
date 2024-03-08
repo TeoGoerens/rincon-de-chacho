@@ -25,6 +25,10 @@ const playerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    is_permanent: {
+      type: Boolean,
+      default: true,
+    },
     bio: { type: String },
     interview: { type: String },
   },

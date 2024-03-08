@@ -40,6 +40,7 @@ export default class PlayerController {
         field_position: req.body.field_position,
         bio: req.body.bio,
         interview: req.body.interview,
+        is_permanent: req.body.is_permanent == "false" ? false : true,
       };
 
       const playerLoaded = await repository.baseCreate(player, "shirt");
@@ -65,6 +66,7 @@ export default class PlayerController {
         field_position: req.body.field_position,
         bio: req.body.bio,
         interview: req.body.interview,
+        is_permanent: req.body.is_permanent == "false" ? false : true,
       };
 
       const playerUpdated = await repository.baseUpdateById(
