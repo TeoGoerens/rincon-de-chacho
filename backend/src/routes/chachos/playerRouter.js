@@ -8,7 +8,7 @@ const controller = new PlayerController();
 
 // ---------- GET ROUTES ----------
 router.get("/:pid", authMiddleware, controller.getPlayerById);
-router.get("/", authMiddleware, adminAuthMiddleware, controller.getAllPlayers);
+router.get("/", authMiddleware, controller.getAllPlayers);
 
 // ---------- POST ROUTES ----------
 router.post("/", authMiddleware, adminAuthMiddleware, controller.createPlayer);
