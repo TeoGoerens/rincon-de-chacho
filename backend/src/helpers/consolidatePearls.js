@@ -8,12 +8,12 @@ const consolidatePearls = (votes) => {
   };
 
   // Iterar sobre cada voto
-  votes.forEach((vote) => {
+  votes?.forEach((vote) => {
     // Obtener la información relevante de cada voto
-    const whitePearlId = vote.white_pearl._id;
-    const vanillaPearlId = vote.vanilla_pearl._id;
-    const ocherPearlId = vote.ocher_pearl._id;
-    const blackPearlId = vote.black_pearl._id;
+    const whitePearlId = vote.white_pearl;
+    const vanillaPearlId = vote.vanilla_pearl;
+    const ocherPearlId = vote.ocher_pearl;
+    const blackPearlId = vote.black_pearl;
 
     // Añadir los _id a los arrays correspondientes en consolidatedVotes
     consolidatedVotes.white_pearl.push(whitePearlId);
