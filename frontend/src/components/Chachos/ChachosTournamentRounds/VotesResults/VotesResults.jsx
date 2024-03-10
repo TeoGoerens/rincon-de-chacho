@@ -8,6 +8,7 @@ import "./VotesResultsStyles.css";
 //Import helpers
 import { formatDate } from "../../../../helpers/dateFormatter";
 import { consolidateEvaluation } from "../../../../helpers/consolidateEvaluation";
+import { calculateTotalVotesByPearl } from "../../../../helpers/pearlsManagementInARound";
 
 //Import components
 import firstPlaceSource from "../../../../assets/images/first-place.png";
@@ -38,7 +39,6 @@ const VotesResults = () => {
   //Select tournament round state from store
   const storeData = useSelector((store) => store.tournamentRounds);
   const tournamentRound = storeData.tournamentRound?.tournamentRound;
-
   const { appError, serverError } = storeData;
 
   //Select vote state from store
@@ -47,6 +47,24 @@ const VotesResults = () => {
   const playersEvaluation = consolidateEvaluation(votesByRound);
   const sortedPlayersEvaluation = playersEvaluation.sort(
     (a, b) => b.points - a.points
+  );
+
+  const totalVotes = votesByRound?.length;
+  const whitePearlsStandings = calculateTotalVotesByPearl(
+    votesByRound,
+    "white_pearl"
+  );
+  const vanillaPearlStandings = calculateTotalVotesByPearl(
+    votesByRound,
+    "vanilla_pearl"
+  );
+  const ocherPearlStandings = calculateTotalVotesByPearl(
+    votesByRound,
+    "ocher_pearl"
+  );
+  const blackPearlStandings = calculateTotalVotesByPearl(
+    votesByRound,
+    "black_pearl"
   );
 
   return (
@@ -84,52 +102,122 @@ const VotesResults = () => {
           </div>
 
           <div className="votes-results-pearls-details">
-            <h4>Perlas:</h4>
+            <h4>
+              Perlas - <span>Votos totales: {totalVotes}</span>
+            </h4>
+
+            {/*             Details about white pearl */}
             <div className="pearl-container">
-              <img src={firstPlaceSource} alt="First Place Badge" />
               <div className="pearl-winners">
-                {tournamentRound?.white_pearl &&
-                  tournamentRound.white_pearl.map((player) => (
-                    <p key={player._id}>
-                      {player.first_name} {player.last_name}
+                <img src={firstPlaceSource} alt="First Place Badge" />
+                <div className="pearl-winners-names">
+                  {tournamentRound?.white_pearl &&
+                    tournamentRound.white_pearl.map((player) => (
+                      <p key={player._id}>
+                        {player.first_name} {player.last_name}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              <div className="pearl-list-detail">
+                {whitePearlsStandings?.map((result) => (
+                  <div key={result._id} className="player-detail">
+                    <p>
+                      {result.first_name} {result.last_name}:{" "}
                     </p>
-                  ))}
+                    <span className="player-votes">{result.total_votes}</span>
+                    <span>
+                      {((result.total_votes / totalVotes) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/*             Details about vanilla pearl */}
             <div className="pearl-container">
-              <img src={secondPlaceSource} alt="Second Place Badge" />
               <div className="pearl-winners">
-                {tournamentRound?.vanilla_pearl &&
-                  tournamentRound.vanilla_pearl.map((player) => (
-                    <p key={player._id}>
-                      {player.first_name} {player.last_name}
+                <img src={secondPlaceSource} alt="Second Place Badge" />
+                <div className="pearl-winners-names">
+                  {tournamentRound?.vanilla_pearl &&
+                    tournamentRound.vanilla_pearl.map((player) => (
+                      <p key={player._id}>
+                        {player.first_name} {player.last_name}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              <div className="pearl-list-detail">
+                {vanillaPearlStandings?.map((result) => (
+                  <div key={result._id} className="player-detail">
+                    <p>
+                      {result.first_name} {result.last_name}:{" "}
                     </p>
-                  ))}
+                    <span className="player-votes">{result.total_votes}</span>
+                    <span>
+                      {((result.total_votes / totalVotes) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/*             Details about ocher pearl */}
             <div className="pearl-container">
-              <img
-                src={secondToLastPlaceSource}
-                alt="Second To Last Place Badge"
-              />
               <div className="pearl-winners">
-                {tournamentRound?.ocher_pearl &&
-                  tournamentRound.ocher_pearl.map((player) => (
-                    <p key={player._id}>
-                      {player.first_name} {player.last_name}
+                <img
+                  src={secondToLastPlaceSource}
+                  alt="Second To Last Place Badge"
+                />
+                <div className="pearl-winners-names">
+                  {tournamentRound?.ocher_pearl &&
+                    tournamentRound.ocher_pearl.map((player) => (
+                      <p key={player._id}>
+                        {player.first_name} {player.last_name}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              <div className="pearl-list-detail">
+                {ocherPearlStandings?.map((result) => (
+                  <div key={result._id} className="player-detail">
+                    <p>
+                      {result.first_name} {result.last_name}:{" "}
                     </p>
-                  ))}
+                    <span className="player-votes">{result.total_votes}</span>
+                    <span>
+                      {((result.total_votes / totalVotes) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/*             Details about black pearl */}
             <div className="pearl-container">
-              <img src={lastPlaceSource} alt="Last Place Badge" />
               <div className="pearl-winners">
-                {tournamentRound?.black_pearl &&
-                  tournamentRound.black_pearl.map((player) => (
-                    <p key={player._id}>
-                      {player.first_name} {player.last_name}
+                <img src={lastPlaceSource} alt="Last Place Badge" />
+                <div className="pearl-winners-names">
+                  {tournamentRound?.black_pearl &&
+                    tournamentRound.black_pearl.map((player) => (
+                      <p key={player._id}>
+                        {player.first_name} {player.last_name}
+                      </p>
+                    ))}
+                </div>
+              </div>
+              <div className="pearl-list-detail">
+                {blackPearlStandings?.map((result) => (
+                  <div key={result._id} className="player-detail">
+                    <p>
+                      {result.first_name} {result.last_name}:{" "}
                     </p>
-                  ))}
+                    <span className="player-votes">{result.total_votes}</span>
+                    <span>
+                      {((result.total_votes / totalVotes) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

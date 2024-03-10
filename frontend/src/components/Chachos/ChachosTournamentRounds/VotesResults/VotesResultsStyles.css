@@ -48,6 +48,11 @@
   margin-bottom: 1rem;
 }
 
+.votes-results-content h4 span {
+  color: var(--fourth-color);
+  font-weight: 900;
+}
+
 .votes-results-content p {
   font-size: 0.9rem;
 }
@@ -74,10 +79,7 @@
 
 .pearl-container {
   display: flex;
-  align-items: center;
-}
-
-.pearl-container:hover {
+  flex-direction: column;
   cursor: pointer;
   border: 1px solid;
   border-color: var(--third-color);
@@ -95,6 +97,44 @@
 .pearl-container .pearl-winners {
   flex-grow: 1;
   padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pearl-container .pearl-winners .pearl-winners-names {
+  font-weight: 900;
+}
+
+.pearl-container .pearl-list-detail {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0.5rem 0.5rem 0.5rem;
+}
+
+.pearl-container .pearl-list-detail .player-detail {
+  display: flex;
+  align-items: center;
+  height: 20px;
+}
+
+.pearl-container .pearl-list-detail p {
+  color: var(--secondary-color);
+  font-size: 0.85rem;
+  width: 200px;
+}
+
+.pearl-container .pearl-list-detail .player-detail span {
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.pearl-container .pearl-list-detail .player-detail .player-votes {
+  background-color: var(--third-color);
+  width: 20px;
+  border-radius: 50%;
+  text-align: center;
+  margin-right: 1rem;
 }
 
 /* ---------- Votes results evaluation details ---------- */
