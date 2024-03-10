@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, createAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { baseURL } from "../../../helpers/baseURL";
+import { simplifyVotesInformation } from "../../../helpers/simplifiedVotesForAxios";
 
 // --------------------
 // GLOBAL ACTIONS
@@ -207,8 +208,10 @@ export const consolidatePearlsAction = createAsyncThunk(
         getState().users?.userAuth?.jwt ||
         getState().users?.userAuth?.userToDisplay?.jwt ||
         null;
-      const votes = getState().votes?.votesFromRound?.allVotesForRound || null;
-
+      const fullVotes =
+        getState().votes?.votesFromRound?.allVotesForRound || null;
+      const votes = simplifyVotesInformation(fullVotes);
+      console.log(votes);
       //HTTP call
       const config = {
         headers: {
