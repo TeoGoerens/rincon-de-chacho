@@ -212,7 +212,11 @@ export default class VoteRepository extends baseRepository {
         round: tournamentRoundId,
       });
 
-      if (!userIsAdmin && (usersVote == null || usersVote == undefined)) {
+      if (
+        documentExists.open_for_vote === true &&
+        !userIsAdmin &&
+        (usersVote == null || usersVote == undefined)
+      ) {
         throw new Error(
           "User has not yet voted. Please vote to see round's results"
         );
