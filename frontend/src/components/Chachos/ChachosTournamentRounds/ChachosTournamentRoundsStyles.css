@@ -64,4 +64,8 @@
   .chachos-tournament-rounds-main-table {
     width: 100%;
   }
+
+  .chachos-tournament-rounds-main-table {
+    font-size: 0.85rem;
+  }
 }

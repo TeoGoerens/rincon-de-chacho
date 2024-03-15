@@ -211,7 +211,7 @@ export const consolidatePearlsAction = createAsyncThunk(
       const fullVotes =
         getState().votes?.votesFromRound?.allVotesForRound || null;
       const votes = simplifyVotesInformation(fullVotes);
-      console.log(votes);
+
       //HTTP call
       const config = {
         headers: {
