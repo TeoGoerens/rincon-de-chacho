@@ -126,16 +126,16 @@ export default class TournamentRoundController {
       const tournamentRoundId = req.params.pid;
       const tournamentRound = await repository.baseGetById(tournamentRoundId);
 
-      if (tournamentRound.open_for_vote === true) {
+      tournamentRound.open_for_vote = !tournamentRound.open_for_vote;
+      await tournamentRound.save();
+
+      if (tournamentRound.open_for_vote === false) {
         //Send email to all users informing that the tournament round is no longer available to vote. Check results
         await repository.sendEmailToAllUsersToDisplayResults(tournamentRoundId);
       } else {
         //Send email to all users informing that the tournament round is open for vote
         await repository.sendEmailToAllUsersToRequestVotes(tournamentRoundId);
       }
-
-      tournamentRound.open_for_vote = !tournamentRound.open_for_vote;
-      await tournamentRound.save();
 
       res.status(200).json({
         message: `Tournament round with id ${tournamentRoundId} has toggled its open_for_vote status to ${tournamentRound.open_for_vote}`,
