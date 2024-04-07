@@ -11,9 +11,10 @@ const initMongoDB = () => {
 
     const dbUsers = mongoose.createConnection(`${MONGO_ATLAS_URL}/users?`);
     const dbChachos = mongoose.createConnection(`${MONGO_ATLAS_URL}/chachos?`);
+    const dbPodrida = mongoose.createConnection(`${MONGO_ATLAS_URL}/podrida?`);
     console.log("Connected to Mongo DBs");
 
-    return { dbUsers, dbChachos };
+    return { dbUsers, dbChachos, dbPodrida };
   } catch (error) {
     console.log(`An error occured => ${error}`);
   }

@@ -44,7 +44,6 @@ const consolidatePearls = (votes) => {
     black_pearl: bottomPlayers[1].player_id,
   };
 
-  console.log(finalPearls);
   // Retornar el objeto final con los resultados
   return finalPearls;
 };
