@@ -50,45 +50,43 @@ export default class TournamentRoundRepository extends baseRepository {
   sendEmailToAllUsersToRequestVotes = async (tournamentRoundId) => {
     const registeredUsers = await User.find({}, { first_name: 1, email: 1 });
 
-    for (const user of registeredUsers) {
-      const mailOptions = {
-        from: "chacho@elrincondechacho.com",
-        to: user.email,
-        subject: "¡Atención chacal! Nueva fecha para votar",
-        html: `
-        <h1>Hola ${user.first_name},</h1>
-        <h3>Se abrió la votación para una nueva fecha de Chachos.</h3>
-        <p>No te pierdas la posibilidad de elegir las perlas y puntuar a cada uno de los jugadores.</p>
-        <p>Apurate e ingresá en el link debajo para dejar tu voto:</p>
-        <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/vote">Ver Fecha</a>
-      `,
-      };
-      let mailSent = await transport.sendMail(mailOptions);
+    const mailOptionsList = registeredUsers.map((user) => ({
+      from: "chacho@elrincondechacho.com",
+      to: user.email,
+      subject: "¡Atención chacal! Nueva fecha para votar",
+      html: `
+      <h1>Hola ${user.first_name},</h1>
+      <h3>Se abrió la votación para una nueva fecha de Chachos.</h3>
+      <p>No te pierdas la posibilidad de elegir las perlas y puntuar a cada uno de los jugadores.</p>
+      <p>Apurate e ingresá en el link debajo para dejar tu voto:</p>
+      <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/results">Ver Fecha</a>
+    `,
+    }));
 
-      return mailSent;
-    }
+    await Promise.all(
+      mailOptionsList.map((mailOptions) => transport.sendMail(mailOptions))
+    );
   };
 
   // ---------- SEND EMAIL TO USERS TO DISPLAY RESULTS ----------
   sendEmailToAllUsersToDisplayResults = async (tournamentRoundId) => {
     const registeredUsers = await User.find({}, { first_name: 1, email: 1 });
 
-    for (const user of registeredUsers) {
-      const mailOptions = {
-        from: "chacho@elrincondechacho.com",
-        to: user.email,
-        subject: "¡Se cerró la votación! Mirá los resultados",
-        html: `
-          <h1>Hola ${user.first_name},</h1>
-          <h3>Espero que no te hayas dormido y hayas dejado tu voto a tiempo.</h3>
-          <p>Ya cerró la fecha así que vas a poder consultar quiénes fueron los jugadores más destacados.</p>
-          <p>Ingresá en el link debajo para ver los resultados:</p>
-          <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/results">Ver Fecha</a>
-        `,
-      };
-      let mailSent = await transport.sendMail(mailOptions);
+    const mailOptionsList = registeredUsers.map((user) => ({
+      from: "chacho@elrincondechacho.com",
+      to: user.email,
+      subject: "¡Se cerró la votación! Mirá los resultados",
+      html: `
+        <h1>Hola ${user.first_name},</h1>
+        <h3>Espero que no te hayas dormido y hayas dejado tu voto a tiempo.</h3>
+        <p>Ya cerró la fecha así que vas a poder consultar quiénes fueron los jugadores más destacados.</p>
+        <p>Ingresá en el link debajo para ver los resultados:</p>
+        <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/results">Ver Fecha</a>
+      `,
+    }));
 
-      return mailSent;
-    }
+    await Promise.all(
+      mailOptionsList.map((mailOptions) => transport.sendMail(mailOptions))
+    );
   };
 }
