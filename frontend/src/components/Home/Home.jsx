@@ -48,7 +48,7 @@ const Home = () => {
           ver algunas fotos...
         </h4>
         <Link to="/photo-gallery" className="home-btn">
-          Vamos a la galería de fotos
+          Galería
         </Link>
       </div>
       <div className="home-image-container">
