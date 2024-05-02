@@ -1,8 +1,8 @@
 //Import React & Hooks
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Navigate, useParams, Link } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -12,14 +12,11 @@ import * as Yup from "yup";
 import { toolbarReactQuill } from "../../../../../helpers/reactQuillModules";
 
 //Import CSS & styles
-import "./PlayersUpdateStyle.css";
+import "./InterviewsCreateStyle.css";
 
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getPlayerAction,
-  updatePlayerAction,
-} from "../../../../../redux/slices/players/playersSlices";
+import { createPlayerAction } from "../../../../../redux/slices/players/playersSlices";
 
 //Form schema
 const formSchema = Yup.object({
@@ -32,6 +29,10 @@ const formSchema = Yup.object({
   last_name: Yup.string().required(
     "Por favor chacal escribi el apellido del jugador"
   ),
+  nickname: Yup.string().required(
+    "Por favor chacal escribi el apodo del jugador"
+  ),
+  email: Yup.string().required("Por favor chacal escribi el mail del jugador"),
   field_position: Yup.string().required(
     "Por favor chacal escribi la posicion del jugador"
   ),
@@ -41,75 +42,38 @@ const formSchema = Yup.object({
 //COMPONENT
 //----------------------------------------
 
-const PlayersUpdate = () => {
-  const { id } = useParams();
-
+const InterviewsCreate = () => {
   //Dispatch const creation
   const dispatch = useDispatch();
 
-  //Get category information from database every time the component renders
-  useEffect(() => {
-    dispatch(getPlayerAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.players);
-  const { appError, serverError } = storeData;
-  const shirt = storeData?.player?.player?.shirt;
-  const first_name = storeData?.player?.player?.first_name;
-  const last_name = storeData?.player?.player?.last_name;
-  const field_position = storeData?.player?.player?.field_position;
-  const role = storeData?.player?.player?.role;
-  const bio = storeData?.player?.player?.bio;
-  const interviewFromDB = storeData?.player?.player?.interview;
+  //Formik configuration
+  const formik = useFormik({
+    initialValues: {},
+    onSubmit: (values) => {
+      //Dispatch the action
+      dispatch(createPlayerAction(values));
+    },
+    validationSchema: formSchema,
+  });
 
   //Define the features of React Quill
   const [interview, setInterview] = useState("");
-  useEffect(() => {
-    setInterview(interviewFromDB);
-  }, [interviewFromDB]);
-
   const handleChangeInterview = (value) => {
     setInterview(value);
     formik.values.interview = value;
   };
 
-  //Formik configuration
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      shirt,
-      first_name,
-      last_name,
-      field_position,
-      role,
-      bio,
-    },
-    onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(
-        updatePlayerAction({
-          shirt: values.shirt,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          field_position: values.field_position,
-          role: values.role,
-          bio: values.bio,
-          interview: interview,
-          id,
-        })
-      );
-    },
-    validationSchema: formSchema,
-  });
+  //Select state from store
+  const storeData = useSelector((store) => store.players);
+  const { appError, serverError } = storeData;
 
   //Navigate to index in case there is an updated category
-  if (storeData?.isEdited) return <Navigate to="/admin/chachos/players" />;
+  if (storeData?.isCreated) return <Navigate to="/admin/chachos/players" />;
 
   return (
-    <div className="container update-player-container">
-      <div className="update-player-title">
-        <h2>Editar jugador de Chachos</h2>
+    <div className="container create-player-container">
+      <div className="create-player-title">
+        <h2>Crear jugador de Chachos</h2>
         <Link className="return-link" to="/admin/chachos/players">
           Volver
         </Link>
@@ -118,7 +82,8 @@ const PlayersUpdate = () => {
       {appError || serverError ? (
         <h5 className="error-message">{appError}</h5>
       ) : null}
-      <form className="update-player-form" onSubmit={formik.handleSubmit}>
+
+      <form className="create-player-form" onSubmit={formik.handleSubmit}>
         <label>Camiseta</label>
         <input
           value={formik.values.shirt}
@@ -127,7 +92,7 @@ const PlayersUpdate = () => {
           type="text"
           name="shirt"
         ></input>
-        <div>{formik.errors.shirt}</div>
+        <div className="error-message">{formik.errors.shirt}</div>
         <label>Nombre</label>
         <input
           value={formik.values.first_name}
@@ -136,7 +101,7 @@ const PlayersUpdate = () => {
           type="text"
           name="first_name"
         ></input>
-        <div>{formik.errors.first_name}</div>
+        <div className="error-message">{formik.errors.first_name}</div>
         <label>Apellido</label>
         <input
           value={formik.values.last_name}
@@ -145,8 +110,26 @@ const PlayersUpdate = () => {
           type="text"
           name="last_name"
         ></input>
-        <div>{formik.errors.last_name}</div>
-        <label>Posicion</label>
+        <div className="error-message">{formik.errors.last_name}</div>
+        <label>Apodo</label>
+        <input
+          value={formik.values.nickname}
+          onChange={formik.handleChange("nickname")}
+          onBlur={formik.handleBlur("nickname")}
+          type="text"
+          name="nickname"
+        ></input>
+        <div className="error-message">{formik.errors.nickname}</div>
+        <label>Email</label>
+        <input
+          value={formik.values.email}
+          onChange={formik.handleChange("email")}
+          onBlur={formik.handleBlur("email")}
+          type="text"
+          name="email"
+        ></input>
+        <div className="error-message">{formik.errors.email}</div>
+        <label>Posición</label>
         <input
           value={formik.values.field_position}
           onChange={formik.handleChange("field_position")}
@@ -154,23 +137,22 @@ const PlayersUpdate = () => {
           type="text"
           name="field_position"
         ></input>
-        <div>{formik.errors.field_position}</div>
+        <div className="error-message">{formik.errors.field_position}</div>
 
-        <label>Rol</label>
+        <label>¿Es jugador fijo?</label>
         <select
-          name="role"
-          value={formik.values.role}
-          onChange={formik.handleChange("role")}
-          onBlur={formik.handleBlur("role")}
+          name="is_permanent"
+          value={formik.values.is_permanent}
+          onChange={formik.handleChange("is_permanent")}
+          onBlur={formik.handleBlur("is_permanent")}
         >
           <option value="">Selecciona la opción</option>
-          <option value="team">Jugador fijo</option>
-          <option value="extra">Refuerzo</option>
-          <option value="supporter">Hinchada</option>
+          <option value="true">Si</option>
+          <option value="false">No</option>
         </select>
 
         <label>Bio (max 1.000 caracteres)</label>
-        <div className="update-player-form-bio">
+        <div className="create-player-form-bio">
           <textarea
             name="bio"
             value={formik.values.bio}
@@ -180,7 +162,6 @@ const PlayersUpdate = () => {
             rows={5}
             cols={50}
           />
-
           <p>{formik.values.bio ? formik.values.bio?.length : 0}/1000</p>
         </div>
         <label>Entrevista</label>
@@ -190,10 +171,10 @@ const PlayersUpdate = () => {
           modules={toolbarReactQuill}
         />
 
-        <button type="submit">Editar jugador</button>
+        <button type="submit">Crear jugador</button>
       </form>
     </div>
   );
 };
 
-export default PlayersUpdate;
+export default InterviewsCreate;

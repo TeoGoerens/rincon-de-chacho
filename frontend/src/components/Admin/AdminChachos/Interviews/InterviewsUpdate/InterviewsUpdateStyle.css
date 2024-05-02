@@ -1,0 +1,128 @@
+/* ---------- Update player container ---------- */
+.update-player-container {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* ---------- Error message ---------- */
+.error-message {
+  color: red;
+  font-size: 0.85rem;
+}
+
+/* ---------- Update player title ---------- */
+.update-player-title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.update-player-title h2 {
+  font-family: var(--secondary-font);
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.return-link {
+  text-decoration: none;
+  font-size: 0.8rem;
+  height: 100%;
+  background-color: var(--fourth-color);
+  color: white;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+}
+
+/* ---------- Update player form ---------- */
+.update-player-form {
+  margin-top: 1.5rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 70%;
+}
+
+.update-player-form label {
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+}
+
+.update-player-form input,
+.update-player-form select {
+  font-size: 0.85rem;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-weight: 700;
+}
+
+.update-player-form-bio {
+  position: relative;
+}
+
+.update-player-form-bio textarea {
+  width: 100%;
+  resize: none;
+  font-size: 0.85rem;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-weight: 700;
+}
+
+.update-player-form-bio p {
+  position: absolute;
+  bottom: 10px;
+  right: 20px;
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+}
+
+.quill {
+  border: 1px solid;
+  border-color: var(--third-color);
+  border-radius: 10px;
+}
+
+.ql-toolbar.ql-snow,
+.ql-container.ql-snow {
+  border: none;
+}
+
+.ql-editor {
+  background-color: var(--third-color) !important;
+  border-end-end-radius: 10px;
+  border-end-start-radius: 10px;
+  padding: 0.5rem;
+  height: 200px;
+}
+
+.update-player-form button {
+  margin-top: 1.5rem;
+  margin-inline: auto;
+  width: 200px;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 10px;
+  transition: all ease 0.3s;
+}
+
+.update-player-form button:hover {
+  scale: 1.05;
+}
+
+/* ---------- Media queries ---------- */
+@media only screen and (max-width: 750px) {
+  .update-player-form {
+    width: 100%;
+  }
+}

@@ -16,6 +16,10 @@
   align-self: flex-start;
 }
 
+.chachos-squad-container h2:not(:first-child) {
+  margin-top: 2rem;
+}
+
 /* ---------- Chachos squad main table ---------- */
 .chachos-squad-main-table {
   background-color: white;

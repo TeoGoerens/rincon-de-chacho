@@ -12,7 +12,7 @@ import * as Yup from "yup";
 import { toolbarReactQuill } from "../../../../../helpers/reactQuillModules";
 
 //Import CSS & styles
-import "./PlayersUpdateStyle.css";
+import "./InterviewsUpdateStyle.css";
 
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
@@ -32,6 +32,10 @@ const formSchema = Yup.object({
   last_name: Yup.string().required(
     "Por favor chacal escribi el apellido del jugador"
   ),
+  nickname: Yup.string().required(
+    "Por favor chacal escribi el apodo del jugador"
+  ),
+  email: Yup.string().required("Por favor chacal escribi el mail del jugador"),
   field_position: Yup.string().required(
     "Por favor chacal escribi la posicion del jugador"
   ),
@@ -41,7 +45,7 @@ const formSchema = Yup.object({
 //COMPONENT
 //----------------------------------------
 
-const PlayersUpdate = () => {
+const InterviewsUpdate = () => {
   const { id } = useParams();
 
   //Dispatch const creation
@@ -58,8 +62,10 @@ const PlayersUpdate = () => {
   const shirt = storeData?.player?.player?.shirt;
   const first_name = storeData?.player?.player?.first_name;
   const last_name = storeData?.player?.player?.last_name;
+  const nickname = storeData?.player?.player?.nickname;
+  const email = storeData?.player?.player?.email;
   const field_position = storeData?.player?.player?.field_position;
-  const role = storeData?.player?.player?.role;
+  const is_permanent = storeData?.player?.player?.is_permanent;
   const bio = storeData?.player?.player?.bio;
   const interviewFromDB = storeData?.player?.player?.interview;
 
@@ -81,8 +87,10 @@ const PlayersUpdate = () => {
       shirt,
       first_name,
       last_name,
+      nickname,
+      email,
       field_position,
-      role,
+      is_permanent,
       bio,
     },
     onSubmit: (values) => {
@@ -92,8 +100,10 @@ const PlayersUpdate = () => {
           shirt: values.shirt,
           first_name: values.first_name,
           last_name: values.last_name,
+          nickname: values.nickname,
+          email: values.email,
           field_position: values.field_position,
-          role: values.role,
+          is_permanent: values.is_permanent,
           bio: values.bio,
           interview: interview,
           id,
@@ -146,6 +156,24 @@ const PlayersUpdate = () => {
           name="last_name"
         ></input>
         <div>{formik.errors.last_name}</div>
+        <label>Apodo</label>
+        <input
+          value={formik.values.nickname}
+          onChange={formik.handleChange("nickname")}
+          onBlur={formik.handleBlur("nickname")}
+          type="text"
+          name="nickname"
+        ></input>
+        <div>{formik.errors.nickname}</div>
+        <label>Email</label>
+        <input
+          value={formik.values.email}
+          onChange={formik.handleChange("email")}
+          onBlur={formik.handleBlur("email")}
+          type="text"
+          name="email"
+        ></input>
+        <div>{formik.errors.email}</div>
         <label>Posicion</label>
         <input
           value={formik.values.field_position}
@@ -156,17 +184,16 @@ const PlayersUpdate = () => {
         ></input>
         <div>{formik.errors.field_position}</div>
 
-        <label>Rol</label>
+        <label>¿Es jugador fijo?</label>
         <select
-          name="role"
-          value={formik.values.role}
-          onChange={formik.handleChange("role")}
-          onBlur={formik.handleBlur("role")}
+          name="is_permanent"
+          value={formik.values.is_permanent}
+          onChange={formik.handleChange("is_permanent")}
+          onBlur={formik.handleBlur("is_permanent")}
         >
           <option value="">Selecciona la opción</option>
-          <option value="team">Jugador fijo</option>
-          <option value="extra">Refuerzo</option>
-          <option value="supporter">Hinchada</option>
+          <option value="true">Si</option>
+          <option value="false">No</option>
         </select>
 
         <label>Bio (max 1.000 caracteres)</label>
@@ -196,4 +223,4 @@ const PlayersUpdate = () => {
   );
 };
 
-export default PlayersUpdate;
+export default InterviewsUpdate;

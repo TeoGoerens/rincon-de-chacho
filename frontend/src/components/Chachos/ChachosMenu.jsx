@@ -48,7 +48,7 @@ const ChachosMenu = () => {
         to="/chachos/squad"
         className={activeIndex === 2 ? "chachos-menu-active-link" : ""}
       >
-        Plantel
+        Nosotros
       </Link>
     </div>
   );

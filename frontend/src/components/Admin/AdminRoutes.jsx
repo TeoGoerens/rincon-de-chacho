@@ -19,6 +19,9 @@ import TournamentRoundsIndex from "./AdminChachos/TournamentRounds/TournamentRou
 import TournamentRoundsCreate from "./AdminChachos/TournamentRounds/TournamentRoundsCreate";
 import TournamentRoundsDetail from "./AdminChachos/TournamentRounds/TournamentRoundsDetail";
 import TournamentRoundsUpdate from "./AdminChachos/TournamentRounds/TournamentRoundsUpdate";
+import InterviewsIndex from "./AdminChachos/Interviews/InterviewsIndex";
+import InterviewsCreate from "./AdminChachos/Interviews/InterviewsCreate/InterviewsCreate";
+import InterviewsUpdate from "./AdminChachos/Interviews/InterviewsUpdate/InterviewsUpdate";
 
 const AdminRoutes = () => {
   return (
@@ -70,10 +73,10 @@ const AdminRoutes = () => {
             path="tournament-rounds/update/:id"
             Component={TournamentRoundsUpdate}
           />
-          <Route
-            path="statistics"
-            element={<h1>Admin Chachos Estadisticas</h1>}
-          />
+          {/* Interviews routes */}
+          <Route path="interviews" Component={InterviewsIndex} />
+          <Route path="interviews/create" Component={InterviewsCreate} />
+          <Route path="interviews/update/:id" Component={InterviewsUpdate} />
         </Route>
       </Routes>
     </>

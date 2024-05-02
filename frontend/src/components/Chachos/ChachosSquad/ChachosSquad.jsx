@@ -29,8 +29,12 @@ const ChachosSquad = () => {
   const chachosSquad = players?.players;
 
   //Filter players that have bio or interview values and sort based on updatedAt timestamps
-  const filteredSquad = chachosSquad?.filter(
-    (player) => player?.is_permanent === true
+  const teamSquad = chachosSquad?.filter((player) => player?.role === "team");
+
+  const extraSquad = chachosSquad?.filter((player) => player?.role === "extra");
+
+  const supporterSquad = chachosSquad?.filter(
+    (player) => player?.role === "supporter"
   );
 
   //Dispatch action from store with useEffect()
@@ -58,7 +62,87 @@ const ChachosSquad = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredSquad?.map((player) => (
+              {teamSquad?.map((player) => (
+                <tr key={player._id}>
+                  <td>
+                    <p>{player.shirt}</p>
+                  </td>
+                  <td>
+                    <p>
+                      {player.first_name} {player.last_name}
+                    </p>
+                  </td>
+                  <td>
+                    {player.bio ? (
+                      <Link className="view-profile" to={`${player._id}`}>
+                        Ver
+                      </Link>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Refuerzos clave</h2>
+        {appError || serverError ? (
+          <h5>
+            {appError} {serverError}
+          </h5>
+        ) : null}
+
+        <div className="chachos-squad-main-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Camiseta</th>
+                <th>Jugador</th>
+                <th>Perfil</th>
+              </tr>
+            </thead>
+            <tbody>
+              {extraSquad?.map((player) => (
+                <tr key={player._id}>
+                  <td>
+                    <p>{player.shirt}</p>
+                  </td>
+                  <td>
+                    <p>
+                      {player.first_name} {player.last_name}
+                    </p>
+                  </td>
+                  <td>
+                    {player.bio ? (
+                      <Link className="view-profile" to={`${player._id}`}>
+                        Ver
+                      </Link>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Hinchada</h2>
+        {appError || serverError ? (
+          <h5>
+            {appError} {serverError}
+          </h5>
+        ) : null}
+
+        <div className="chachos-squad-main-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Camiseta</th>
+                <th>Nombre</th>
+                <th>Perfil</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supporterSquad?.map((player) => (
                 <tr key={player._id}>
                   <td>
                     <p>{player.shirt}</p>

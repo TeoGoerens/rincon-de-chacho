@@ -12,7 +12,7 @@ const AdminChachosPanel = () => {
         <Link to="/admin/chachos/football-categories">Categorias</Link>
         <Link to="/admin/chachos/tournaments">Torneos</Link>
         <Link to="/admin/chachos/tournament-rounds">Fechas</Link>
-        <Link to="/admin/chachos/statistics">Estadisticas</Link>
+        <Link to="/admin/chachos/interviews">Entrevistas</Link>
       </div>
     </>
   );

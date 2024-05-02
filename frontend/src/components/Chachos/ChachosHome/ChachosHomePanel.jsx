@@ -113,7 +113,7 @@ const ChachosHomePanel = () => {
                 {whitePearls.map((player) => (
                   <li key={player._id} className="player-item">
                     <p>{player.timesPearl}</p>
-                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                    <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
               </ul>
@@ -125,7 +125,7 @@ const ChachosHomePanel = () => {
                 {vanillaPearls.map((player) => (
                   <li key={player._id} className="player-item">
                     <p>{player.timesPearl}</p>
-                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                    <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
               </ul>
@@ -140,7 +140,7 @@ const ChachosHomePanel = () => {
                 {ocherPearls.map((player) => (
                   <li key={player._id} className="player-item">
                     <p>{player.timesPearl}</p>
-                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                    <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
               </ul>
@@ -152,7 +152,7 @@ const ChachosHomePanel = () => {
                 {blackPearls.map((player) => (
                   <li key={player._id} className="player-item">
                     <p>{player.timesPearl}</p>
-                    <span>{`${player.first_name} ${player.last_name} (${player.shirt})`}</span>
+                    <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
               </ul>

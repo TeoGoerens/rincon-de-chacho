@@ -29,10 +29,6 @@ const formSchema = Yup.object({
   last_name: Yup.string().required(
     "Por favor chacal escribi el apellido del jugador"
   ),
-  nickname: Yup.string().required(
-    "Por favor chacal escribi el apodo del jugador"
-  ),
-  email: Yup.string().required("Por favor chacal escribi el mail del jugador"),
   field_position: Yup.string().required(
     "Por favor chacal escribi la posicion del jugador"
   ),
@@ -111,24 +107,6 @@ const PlayersCreate = () => {
           name="last_name"
         ></input>
         <div className="error-message">{formik.errors.last_name}</div>
-        <label>Apodo</label>
-        <input
-          value={formik.values.nickname}
-          onChange={formik.handleChange("nickname")}
-          onBlur={formik.handleBlur("nickname")}
-          type="text"
-          name="nickname"
-        ></input>
-        <div className="error-message">{formik.errors.nickname}</div>
-        <label>Email</label>
-        <input
-          value={formik.values.email}
-          onChange={formik.handleChange("email")}
-          onBlur={formik.handleBlur("email")}
-          type="text"
-          name="email"
-        ></input>
-        <div className="error-message">{formik.errors.email}</div>
         <label>Posición</label>
         <input
           value={formik.values.field_position}
@@ -138,17 +116,17 @@ const PlayersCreate = () => {
           name="field_position"
         ></input>
         <div className="error-message">{formik.errors.field_position}</div>
-
-        <label>¿Es jugador fijo?</label>
+        <label>Rol</label>
         <select
-          name="is_permanent"
-          value={formik.values.is_permanent}
-          onChange={formik.handleChange("is_permanent")}
-          onBlur={formik.handleBlur("is_permanent")}
+          name="role"
+          value={formik.values.role}
+          onChange={formik.handleChange("role")}
+          onBlur={formik.handleBlur("role")}
         >
           <option value="">Selecciona la opción</option>
-          <option value="true">Si</option>
-          <option value="false">No</option>
+          <option value="team">Jugador fijo</option>
+          <option value="extra">Refuerzo</option>
+          <option value="supporter">Hinchada</option>
         </select>
 
         <label>Bio (max 1.000 caracteres)</label>
