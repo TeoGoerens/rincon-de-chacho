@@ -16,18 +16,14 @@ const playerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-      required: true,
-    },
-    nickname: { type: String },
     field_position: {
       type: String,
       required: true,
     },
-    is_permanent: {
-      type: Boolean,
-      default: true,
+    role: {
+      type: String,
+      enum: ["team", "extra", "supporter"],
+      required: true,
     },
     bio: { type: String },
     interview: { type: String },

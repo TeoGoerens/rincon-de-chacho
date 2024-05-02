@@ -35,12 +35,10 @@ export default class PlayerController {
         shirt: req.body.shirt,
         first_name: req.body.first_name,
         last_name: req.body.last_name,
-        nickname: req.body.nickname,
-        email: req.body.email,
         field_position: req.body.field_position,
         bio: req.body.bio,
         interview: req.body.interview,
-        is_permanent: req.body.is_permanent == "false" ? false : true,
+        role: req.body.role,
       };
 
       const playerLoaded = await repository.baseCreate(player, "shirt");
@@ -61,12 +59,10 @@ export default class PlayerController {
         shirt: req.body.shirt,
         first_name: req.body.first_name,
         last_name: req.body.last_name,
-        nickname: req.body.nickname,
-        email: req.body.email,
         field_position: req.body.field_position,
         bio: req.body.bio,
         interview: req.body.interview,
-        is_permanent: req.body.is_permanent == "false" ? false : true,
+        role: req.body.role,
       };
 
       const playerUpdated = await repository.baseUpdateById(
