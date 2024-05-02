@@ -40,22 +40,10 @@ const ChachosHomePanel = () => {
   const allTournamentRound = storeData?.tournamentRounds?.tournamentRounds;
   const gamesByPlayer = gamesPlayed(allTournamentRound);
 
-  const whitePearls = pearlsCount(allTournamentRound, "white_pearl").slice(
-    0,
-    3
-  );
-  const vanillaPearls = pearlsCount(allTournamentRound, "vanilla_pearl").slice(
-    0,
-    3
-  );
-  const ocherPearls = pearlsCount(allTournamentRound, "ocher_pearl").slice(
-    0,
-    3
-  );
-  const blackPearls = pearlsCount(allTournamentRound, "black_pearl").slice(
-    0,
-    3
-  );
+  const whitePearls = pearlsCount(allTournamentRound, "white_pearl");
+  const vanillaPearls = pearlsCount(allTournamentRound, "vanilla_pearl");
+  const ocherPearls = pearlsCount(allTournamentRound, "ocher_pearl");
+  const blackPearls = pearlsCount(allTournamentRound, "black_pearl");
 
   const { appError, serverError } = storeData;
 
