@@ -71,8 +71,18 @@ const ChachosSquadPlayerDetails = () => {
             <img src={imgSource} alt="Jugador" />
           </div>
 
-          {selectedPlayer?.shirt === 15 ? (
+          <div className="chachos-player-details-interview">
+            <div
+              dangerouslySetInnerHTML={{ __html: selectedPlayer?.interview }}
+            />
+          </div>
+
+          {selectedPlayer?.shirt === 10 ? (
             <div className="chachos-player-details-others">
+              <h4 className="chachos-player-details-others-title">
+                Videos ilustrativos
+              </h4>
+
               <iframe
                 src="https://www.youtube.com/embed/LUID0jSh2Ic?si=AmlSjSn8iDr9_oPg"
                 title="YouTube video player"
@@ -81,14 +91,26 @@ const ChachosSquadPlayerDetails = () => {
                 referrerpolicy="strict-origin-when-cross-origin"
                 allowfullscreen
               ></iframe>
+
+              <iframe
+                src="https://www.youtube.com/embed/TIC5RW2cxbs?si=JH46QZVrHmo-cKiI"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+
+              <iframe
+                src="https://www.youtube.com/embed/09sWYhMaL9Q?si=hFE_c9VWG_0wLrag"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
             </div>
           ) : null}
-
-          <div className="chachos-player-details-interview">
-            <div
-              dangerouslySetInnerHTML={{ __html: selectedPlayer?.interview }}
-            />
-          </div>
         </div>
       </div>
     </>
