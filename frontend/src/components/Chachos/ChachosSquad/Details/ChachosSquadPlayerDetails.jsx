@@ -71,6 +71,19 @@ const ChachosSquadPlayerDetails = () => {
             <img src={imgSource} alt="Jugador" />
           </div>
 
+          {selectedPlayer?.shirt === 15 ? (
+            <div className="chachos-player-details-others">
+              <iframe
+                src="https://www.youtube.com/embed/LUID0jSh2Ic?si=AmlSjSn8iDr9_oPg"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+            </div>
+          ) : null}
+
           <div className="chachos-player-details-interview">
             <div
               dangerouslySetInnerHTML={{ __html: selectedPlayer?.interview }}
