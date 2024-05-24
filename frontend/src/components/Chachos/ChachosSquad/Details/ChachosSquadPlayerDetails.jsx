@@ -77,7 +77,7 @@ const ChachosSquadPlayerDetails = () => {
             />
           </div>
 
-          {selectedPlayer?.shirt === 10 ? (
+          {selectedPlayer?.shirt === 15 ? (
             <div className="chachos-player-details-others">
               <h4 className="chachos-player-details-others-title">
                 Videos ilustrativos
