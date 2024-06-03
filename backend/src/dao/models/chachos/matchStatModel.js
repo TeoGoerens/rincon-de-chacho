@@ -16,10 +16,9 @@ const matchStatSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
     },
-    played: {
-      type: Boolean,
+    minutes_played: {
+      type: Number,
       required: true,
-      default: true,
     },
     points: {
       type: Number,
@@ -41,11 +40,6 @@ const matchStatSchema = new mongoose.Schema(
       default: 0,
     },
     red_cards: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    penalty_saved: {
       type: Number,
       required: true,
       default: 0,
