@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
+import AdminMenu from "../../AdminMenu";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
@@ -40,6 +41,7 @@ const PlayersIndex = () => {
 
   return (
     <>
+      <AdminMenu />
       <Link to="/admin/chachos/players/create">Crear jugador</Link>
 
       {appError || serverError ? (

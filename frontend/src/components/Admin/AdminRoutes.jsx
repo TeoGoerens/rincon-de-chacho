@@ -1,7 +1,16 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 
-import AdminHomePanel from "./AdminHome/AdminHomePanel";
+//Admin USERS Components
+import AdminUsersPanel from "./AdminUsers/AdminUsersPanel";
+
+//Admin PRODE Components
+import AdminProdePanel from "./AdminProde/AdminProdePanel";
+
+//Admin CRONICAS Components
+import AdminCronicasPanel from "./AdminCronicas/AdminCronicasPanel";
+
+//Admin CHACHOS Components
 import AdminChachosPanel from "./AdminChachos/AdminChachosPanel";
 import FootballCategoriesIndex from "./AdminChachos/FootballCategories/FootballCategoriesIndex";
 import FootballCategoriesCreate from "./AdminChachos/FootballCategories/FootballCategoriesCreate";
@@ -16,9 +25,9 @@ import TournamentsIndex from "./AdminChachos/Tournaments/TournamentsIndex";
 import TournamentsCreate from "./AdminChachos/Tournaments/TournamentsCreate";
 import TournamentsUpdate from "./AdminChachos/Tournaments/TournamentsUpdate";
 import TournamentRoundsIndex from "./AdminChachos/TournamentRounds/TournamentRoundsIndex";
-import TournamentRoundsCreate from "./AdminChachos/TournamentRounds/TournamentRoundsCreate";
-import TournamentRoundsDetail from "./AdminChachos/TournamentRounds/TournamentRoundsDetail";
-import TournamentRoundsUpdate from "./AdminChachos/TournamentRounds/TournamentRoundsUpdate";
+import TournamentRoundsCreate from "./AdminChachos/TournamentRounds/TournamentRoundsCreate/TournamentRoundsCreate";
+import TournamentRoundsDetail from "./AdminChachos/TournamentRounds/TournamentRoundsDetail/TournamentRoundsDetail";
+import TournamentRoundsUpdate from "./AdminChachos/TournamentRounds/TournamentRoundsUpdate/TournamentRoundsUpdate";
 import InterviewsIndex from "./AdminChachos/Interviews/InterviewsIndex";
 import InterviewsCreate from "./AdminChachos/Interviews/InterviewsCreate/InterviewsCreate";
 import InterviewsUpdate from "./AdminChachos/Interviews/InterviewsUpdate/InterviewsUpdate";
@@ -27,10 +36,9 @@ const AdminRoutes = () => {
   return (
     <>
       <Routes>
-        <Route path="/" Component={AdminHomePanel} />
-        <Route path="users" element={<h1>Admin Users WIP</h1>} />
-        <Route path="prode" element={<h1>Admin Prode WIP</h1>} />
-        <Route path="cronicas" element={<h1>Admin Cronicas WIP</h1>} />
+        <Route path="users" Component={AdminUsersPanel} />
+        <Route path="prode" Component={AdminProdePanel} />
+        <Route path="cronicas" Component={AdminCronicasPanel} />
 
         <Route path="chachos/*">
           <Route index Component={AdminChachosPanel} />

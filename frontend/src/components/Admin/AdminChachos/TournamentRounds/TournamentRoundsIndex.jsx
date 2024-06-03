@@ -13,6 +13,7 @@ import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
 import ToggleOpenForVote from "../../../Layout/Buttons/ToggleOpenForVote";
+import AdminMenu from "../../AdminMenu";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
@@ -50,61 +51,64 @@ const TournamentRoundsIndex = () => {
 
   return (
     <>
-      <Link to="/admin/chachos/tournament-rounds/create">Crear fecha</Link>
+      <AdminMenu />
+      <div className="container">
+        <Link to="/admin/chachos/tournament-rounds/create">Crear fecha</Link>
 
-      {appError || serverError ? (
-        <h3>
-          {appError} {serverError}
-        </h3>
-      ) : tournamentRounds?.length <= 0 ? (
-        <h3>No se encontraron fechas en la base de datos</h3>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Rival</th>
-              <th>Resultado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tournamentRounds?.map((tournamentRound) => (
-              <tr key={tournamentRound._id}>
-                <td>
-                  <p>{formatDate(tournamentRound.match_date)}</p>
-                </td>
-                <td>
-                  <p>{tournamentRound.rival?.name}</p>
-                </td>
-                <td>
-                  <p>
-                    {tournamentRound.score_chachos} -{" "}
-                    {tournamentRound.score_rival}
-                  </p>
-                </td>
-                <td className="icon-container">
-                  <ToggleOpenForVote
-                    isOpen={tournamentRound.open_for_vote}
-                    onClick={toggleOpenForVote}
-                    id={tournamentRound._id}
-                  />
-                  <ViewButton
-                    to={`/admin/chachos/tournament-rounds/view/${tournamentRound._id}`}
-                  />
-                  <EditButton
-                    to={`/admin/chachos/tournament-rounds/update/${tournamentRound._id}`}
-                  />
-                  <DeleteButton
-                    onClick={handleDelete}
-                    id={tournamentRound._id}
-                  />
-                </td>
+        {appError || serverError ? (
+          <h3>
+            {appError} {serverError}
+          </h3>
+        ) : tournamentRounds?.length <= 0 ? (
+          <h3>No se encontraron fechas en la base de datos</h3>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Rival</th>
+                <th>Resultado</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {tournamentRounds?.map((tournamentRound) => (
+                <tr key={tournamentRound._id}>
+                  <td>
+                    <p>{formatDate(tournamentRound.match_date)}</p>
+                  </td>
+                  <td>
+                    <p>{tournamentRound.rival?.name}</p>
+                  </td>
+                  <td>
+                    <p>
+                      {tournamentRound.score_chachos} -{" "}
+                      {tournamentRound.score_rival}
+                    </p>
+                  </td>
+                  <td className="icon-container">
+                    <ToggleOpenForVote
+                      isOpen={tournamentRound.open_for_vote}
+                      onClick={toggleOpenForVote}
+                      id={tournamentRound._id}
+                    />
+                    <ViewButton
+                      to={`/admin/chachos/tournament-rounds/view/${tournamentRound._id}`}
+                    />
+                    <EditButton
+                      to={`/admin/chachos/tournament-rounds/update/${tournamentRound._id}`}
+                    />
+                    <DeleteButton
+                      onClick={handleDelete}
+                      id={tournamentRound._id}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </>
   );
 };

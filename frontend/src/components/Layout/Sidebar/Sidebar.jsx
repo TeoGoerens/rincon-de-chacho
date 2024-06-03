@@ -103,7 +103,7 @@ function Sidebar({ sidebarOpen, handleToggleSidebar }) {
           {isAdmin ? (
             <li>
               <Link
-                to="/admin"
+                to="/admin/users"
                 className="aside-link"
                 onClick={handleToggleSidebar}
               >

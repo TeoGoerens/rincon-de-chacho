@@ -3,24 +3,25 @@ import React, { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 
 //Import CSS & styles
-import "./TournamentRoundsStyle.css";
+import "./TournamentRoundsDetailStyle.css";
 
 //Import helpers
-import { formatDate } from "../../../../helpers/dateFormatter";
+import { formatDate } from "../../../../../helpers/dateFormatter";
 
 //Import components
-import DeleteButton from "../../../Layout/Buttons/DeleteButton";
+import DeleteButton from "../../../../Layout/Buttons/DeleteButton";
+import AdminMenu from "../../../AdminMenu";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
 import {
   getTournamentRoundAction,
   consolidatePearlsAction,
-} from "../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
+} from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
 import {
   deleteVoteByIdAction,
   getVotesFromTournamentRoundAction,
-} from "../../../../redux/slices/votes/votesSlices";
+} from "../../../../../redux/slices/votes/votesSlices";
 
 //----------------------------------------
 //COMPONENT
@@ -75,6 +76,8 @@ const TournamentRoundsDetail = () => {
 
   return (
     <>
+      <AdminMenu />
+
       <Link to="/admin/chachos/tournament-rounds">Volver a fechas</Link>
 
       {appError || serverError ? (

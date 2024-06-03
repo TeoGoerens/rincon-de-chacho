@@ -7,19 +7,20 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 //Import helpers
-import { formatDateForInput } from "../../../../helpers/dateFormatter";
+import { formatDateForInput } from "../../../../../helpers/dateFormatter";
 
 //Import components
-import TournamentDropdown from "../../../Layout/Dropdown/Tournament/TournamentDropdown";
-import RivalDropdown from "../../../Layout/Dropdown/Rival/RivalDropdown";
-import PlayersToggleList from "../../../Layout/ToggleList/PlayersToggleList";
+import TournamentDropdown from "../../../../Layout/Dropdown/Tournament/TournamentDropdown";
+import RivalDropdown from "../../../../Layout/Dropdown/Rival/RivalDropdown";
+import PlayersToggleList from "../../../../Layout/ToggleList/PlayersToggleList";
+import AdminMenu from "../../../AdminMenu";
 
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
 import {
   getTournamentRoundAction,
   updateTournamentRoundAction,
-} from "../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
+} from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
 
 //Form schema
 const formSchema = Yup.object({
@@ -112,6 +113,7 @@ const TournamentRoundsUpdate = () => {
 
   return (
     <>
+      <AdminMenu />
       <h2>Editar fecha</h2>
       {appError || serverError ? (
         <h5>

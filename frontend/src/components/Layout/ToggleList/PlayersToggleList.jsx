@@ -15,6 +15,9 @@ const PlayersToggleList = ({ selectedPlayers, setSelectedPlayers }) => {
   //Select state from store
   const storeData = useSelector((store) => store.players);
   const players = storeData.players?.players;
+  const filteredPlayers = players?.filter(
+    (player) => player.role !== "supporter"
+  );
 
   //Dispatch action from store with useEffect()
   useEffect(() => {
@@ -29,8 +32,8 @@ const PlayersToggleList = ({ selectedPlayers, setSelectedPlayers }) => {
     <>
       <label>Jugadores</label>
       <div>
-        {players &&
-          players.map((player) => (
+        {filteredPlayers &&
+          filteredPlayers.map((player) => (
             <div key={player._id}>
               <div className="players_detailes">
                 <span>{player.shirt}</span> {player.first_name}{" "}

@@ -37,7 +37,9 @@ const TournamentDropdown = ({ field, form }) => {
             </option>
           ))}
       </select>
-      <div>{form.touched["tournament"] && form.errors["tournament"]}</div>
+      <div className="error-message">
+        {form.touched["tournament"] && form.errors["tournament"]}
+      </div>
     </>
   );
 };

@@ -1,13 +1,13 @@
 import React from "react";
 import AdminMenu from "../AdminMenu";
 
-const AdminHomePanel = () => {
+const AdminProdePanel = () => {
   return (
     <>
       <AdminMenu />
-      <div>Home</div>
+      <div>Prode</div>
     </>
   );
 };
 
-export default AdminHomePanel;
+export default AdminProdePanel;
