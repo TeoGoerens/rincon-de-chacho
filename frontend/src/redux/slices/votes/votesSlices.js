@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, createAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { baseURL } from "../../../helpers/baseURL";
+import { queryStringCreator } from "../../../helpers/queryStringCreator";
 
 // --------------------
 // GLOBAL ACTIONS
@@ -56,13 +57,16 @@ export const createVoteAction = createAsyncThunk(
 // ---------- GET ALL VOTES ----------
 export const getAllVotesAction = createAsyncThunk(
   "votes/get-all",
-  async (id, { rejectWithValue, getState, dispatch }) => {
+  async (filterOptions, { rejectWithValue, getState, dispatch }) => {
     try {
       //Retrieve token information from the user
       const token =
         getState().users?.userAuth?.jwt ||
         getState().users?.userAuth?.userToDisplay?.jwt ||
         null;
+
+      //Transform the filter options into a query string
+      const queryString = queryStringCreator(filterOptions);
 
       //HTTP call
       const config = {
@@ -71,7 +75,8 @@ export const getAllVotesAction = createAsyncThunk(
           "Content-Type": "application/json",
         },
       };
-      const endpoint = `${baseURL}/api/chachos/vote/`;
+      const endpoint = `${baseURL}/api/chachos/vote?${queryString}`;
+      //console.log(endpoint);
       const response = await axios.get(endpoint, config);
       return response.data;
     } catch (error) {

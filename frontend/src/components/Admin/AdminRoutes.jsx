@@ -28,9 +28,9 @@ import TournamentRoundsIndex from "./AdminChachos/TournamentRounds/TournamentRou
 import TournamentRoundsCreate from "./AdminChachos/TournamentRounds/TournamentRoundsCreate/TournamentRoundsCreate";
 import TournamentRoundsDetail from "./AdminChachos/TournamentRounds/TournamentRoundsDetail/TournamentRoundsDetail";
 import TournamentRoundsUpdate from "./AdminChachos/TournamentRounds/TournamentRoundsUpdate/TournamentRoundsUpdate";
-import InterviewsIndex from "./AdminChachos/Interviews/InterviewsIndex";
-import InterviewsCreate from "./AdminChachos/Interviews/InterviewsCreate/InterviewsCreate";
-import InterviewsUpdate from "./AdminChachos/Interviews/InterviewsUpdate/InterviewsUpdate";
+import MatchStatsIndex from "./AdminChachos/MatchStats/MatchStatsIndex";
+import MatchStatsCreate from "./AdminChachos/MatchStats/MatchStatsCreate/MatchStatsCreate";
+import MatchStatsUpdate from "./AdminChachos/MatchStats/MatchStatsUpdate/MatchStatsUpdate";
 
 const AdminRoutes = () => {
   return (
@@ -82,9 +82,9 @@ const AdminRoutes = () => {
             Component={TournamentRoundsUpdate}
           />
           {/* Interviews routes */}
-          <Route path="interviews" Component={InterviewsIndex} />
-          <Route path="interviews/create" Component={InterviewsCreate} />
-          <Route path="interviews/update/:id" Component={InterviewsUpdate} />
+          <Route path="match-stats" Component={MatchStatsIndex} />
+          <Route path="match-stats/create/:id" Component={MatchStatsCreate} />
+          <Route path="match-stats/update/:id" Component={MatchStatsUpdate} />
         </Route>
       </Routes>
     </>

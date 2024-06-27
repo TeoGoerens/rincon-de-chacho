@@ -9,6 +9,7 @@ const ViewButton = ({ to }) => {
   return (
     <Link to={to}>
       <span className="material-icons view-button">visibility</span>
+      <span className="tooltip-text">Ver</span>
     </Link>
   );
 };

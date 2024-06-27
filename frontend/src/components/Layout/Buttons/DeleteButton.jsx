@@ -23,6 +23,7 @@ const DeleteButton = ({ onClick, id }) => {
     <>
       <button onClick={handleOpenModal}>
         <span className="material-icons delete-button">delete</span>
+        <span className="tooltip-text">Eliminar</span>
       </button>
 
       {confirmationOpen && (

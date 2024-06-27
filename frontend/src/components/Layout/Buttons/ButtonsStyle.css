@@ -1,5 +1,6 @@
 /* BUTTON RESET */
-button {
+button,
+a {
   background: none;
   border: none;
   padding: 0;
@@ -8,16 +9,18 @@ button {
   color: inherit;
 }
 
-button span {
+button span,
+a span {
   font-size: 24px;
   margin: 0;
 }
 
 a {
   position: relative;
+  text-decoration: none;
 }
 
-a .tooltip-text {
+.tooltip-text {
   display: none;
   position: fixed;
   font-size: 0.7rem;
@@ -26,12 +29,9 @@ a .tooltip-text {
   color: white;
   font-weight: 400;
   border-radius: 20px;
-
   height: 24px;
-}
-
-a:hover span {
-  display: initial;
+  z-index: 10000;
+  margin-left: 0.3rem;
 }
 
 a img {
@@ -51,25 +51,40 @@ a img {
   color: white;
 }
 
+/* CREATE STAT BUTTON / LINK */
+.create-stat-button {
+  color: green;
+  margin: 0 0.2rem;
+}
+
 /* VIEW BUTTON / LINK */
 .view-button {
   color: #3498db;
+  margin: 0 0.2rem;
 }
 
 /* EDIT BUTTON / LINK */
 .edit-button {
   color: #f39c12;
+  margin: 0 0.2rem;
 }
 
 /* DELETE BUTTON / LINK */
 .delete-button {
   color: #e74c3c;
+  margin: 0 0.2rem;
 }
 
 /* HOVER EFFECTS */
 button:hover span,
-a:hover span {
+a:hover > span {
   scale: 1.1;
+  transition: all ease 0.3s;
+}
+
+a:hover span:nth-child(2),
+button:hover span:nth-child(2) {
+  display: inline-block;
 }
 
 /* ---------- DELETE MODAL ---------- */

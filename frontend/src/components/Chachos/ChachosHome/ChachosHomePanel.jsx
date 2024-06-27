@@ -1,5 +1,5 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 //Import CSS & styles
 import "./ChachosHomePanelStyles.css";
@@ -8,6 +8,7 @@ import "./ChachosHomePanelStyles.css";
 import { consolidateEvaluation } from "../../../helpers/consolidateEvaluation";
 import { gamesPlayed } from "../../../helpers/gamesPlayed";
 import { pearlsCount } from "../../../helpers/countPlayerPearlsinTournamentRounds";
+import { regroupPlayerStats } from "../../../helpers/regroupPlayerStats";
 
 //Import components
 import ChachosMenu from "../ChachosMenu";
@@ -15,11 +16,14 @@ import firstPlaceSource from "../../../assets/images/first-place.png";
 import secondPlaceSource from "../../../assets/images/second-place.png";
 import secondToLastPlaceSource from "../../../assets/images/clown.png";
 import lastPlaceSource from "../../../assets/images/black-star.png";
+import TournamentDropdown from "../../Layout/Dropdown/Tournament/TournamentDropdown";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTournamentRoundsAction } from "../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
 import { getAllVotesAction } from "../../../redux/slices/votes/votesSlices";
+import { getMatchStatsFilteredAction } from "../../../redux/slices/match-stats/matchStatsSlices";
+import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tournamentsSlices";
 
 //----------------------------------------
 //COMPONENT
@@ -28,6 +32,10 @@ import { getAllVotesAction } from "../../../redux/slices/votes/votesSlices";
 const ChachosHomePanel = () => {
   //Dispatch const creation
   const dispatch = useDispatch();
+
+  //Define variables
+  const [filterOptions, setFilterOptions] = useState({});
+  const [regroupedPlayersStats, setRegroupedPlayersStats] = useState([]);
 
   //Select state from votes store
   const voteStoreData = useSelector((store) => store.votes);
@@ -47,16 +55,59 @@ const ChachosHomePanel = () => {
 
   const { appError, serverError } = storeData;
 
+  //Select tournament information from store
+  const tournamentStoreData = useSelector((store) => store.tournaments);
+  const allTournaments = tournamentStoreData?.tournaments?.tournaments;
+
+  //Select match stats information from store
+  const matchStatsStoreData = useSelector((store) => store.stats);
+  const allMatchStats =
+    matchStatsStoreData?.filteredMatchStats?.filteredMatchStats;
+
+  useEffect(() => {
+    if (
+      allMatchStats &&
+      Array.isArray(allMatchStats) &&
+      allMatchStats.length > 0
+    ) {
+      const newStatsLayout = regroupPlayerStats(allMatchStats);
+      setRegroupedPlayersStats(newStatsLayout);
+    }
+  }, [allMatchStats]);
+  //const regroupedStats = regroupPlayerStats(allMatchStats);
+  console.log(regroupedPlayersStats);
+
+  // Function to handle dropdown change
+  const handleTournamentChange = (event) => {
+    const filterSupport = { tournament: event.target.value };
+    setFilterOptions(filterSupport);
+  };
+
+  //
   //Dispatch action from store with useEffect()
   useEffect(() => {
-    dispatch(getAllVotesAction());
+    dispatch(getAllVotesAction(filterOptions));
     dispatch(getAllTournamentRoundsAction());
-  }, [dispatch]);
+    dispatch(getAllTournamentsAction());
+    dispatch(getMatchStatsFilteredAction(filterOptions));
+  }, [dispatch, filterOptions]);
 
   return (
     <>
       <ChachosMenu />
       <div className="container chachos-home-panel-container">
+        <select name="tournament" onChange={handleTournamentChange}>
+          <option value="" label="Selecciona un torneo" />
+          {allTournaments &&
+            allTournaments.map((tournament) => (
+              <option key={tournament._id} value={tournament._id}>
+                {tournament.name}
+              </option>
+            ))}
+        </select>
+
+        {allMatchStats?.map((stat) => stat.minutes_played)}
+
         <h2>Performance Plantel</h2>
         {appError || serverError ? (
           <h5>

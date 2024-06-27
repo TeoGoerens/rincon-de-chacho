@@ -35,23 +35,22 @@ const PlayersToggleList = ({ selectedPlayers, setSelectedPlayers }) => {
         {filteredPlayers &&
           filteredPlayers.map((player) => (
             <div key={player._id}>
-              <div className="players_detailes">
+              <div className="players_details">
                 <span>{player.shirt}</span> {player.first_name}{" "}
                 {player.last_name}
+                <ToggleButton
+                  selected={selectedPlayers.includes(player._id)}
+                  onClick={() => {
+                    if (selectedPlayers.includes(player._id)) {
+                      setSelectedPlayers(
+                        selectedPlayers.filter((id) => id !== player._id)
+                      );
+                    } else {
+                      setSelectedPlayers([...selectedPlayers, player._id]);
+                    }
+                  }}
+                />
               </div>
-
-              <ToggleButton
-                selected={selectedPlayers.includes(player._id)}
-                onClick={() => {
-                  if (selectedPlayers.includes(player._id)) {
-                    setSelectedPlayers(
-                      selectedPlayers.filter((id) => id !== player._id)
-                    );
-                  } else {
-                    setSelectedPlayers([...selectedPlayers, player._id]);
-                  }
-                }}
-              />
             </div>
           ))}
       </div>

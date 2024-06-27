@@ -9,6 +9,7 @@ const EditButton = ({ to }) => {
   return (
     <Link to={to}>
       <span className="material-icons edit-button">edit</span>
+      <span className="tooltip-text">Editar</span>
     </Link>
   );
 };

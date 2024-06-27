@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, createAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { baseURL } from "../../../helpers/baseURL";
 import { simplifyVotesInformation } from "../../../helpers/simplifiedVotesForAxios";
+import { simplifyPointsInformation } from "../../../helpers/simplifiedPointsForAxios";
 
 // --------------------
 // GLOBAL ACTIONS
@@ -178,6 +179,9 @@ export const updateTournamentRoundAction = createAsyncThunk(
           tournament: tournamentRound?.tournament,
           rival: tournamentRound?.rival,
           match_date: tournamentRound?.match_date,
+          month:
+            new Date(Date.parse(tournamentRound?.match_date)).getMonth() + 1,
+          year: new Date(Date.parse(tournamentRound?.match_date)).getFullYear(),
           score_chachos: tournamentRound?.score_chachos,
           score_rival: tournamentRound?.score_rival,
           players: tournamentRound?.players,
@@ -208,9 +212,12 @@ export const consolidatePearlsAction = createAsyncThunk(
         getState().users?.userAuth?.jwt ||
         getState().users?.userAuth?.userToDisplay?.jwt ||
         null;
+
       const fullVotes =
         getState().votes?.votesFromRound?.allVotesForRound || null;
+
       const votes = simplifyVotesInformation(fullVotes);
+      const points = simplifyPointsInformation(fullVotes);
 
       //HTTP call
       const config = {
@@ -225,6 +232,7 @@ export const consolidatePearlsAction = createAsyncThunk(
         endpoint,
         {
           votes,
+          points,
         },
         config
       );

@@ -46,9 +46,9 @@ const AdminChachosPanel = () => {
         </Link>
         <Link
           className="admin-chachos-panel-option"
-          to="/admin/chachos/interviews"
+          to="/admin/chachos/match-stats"
         >
-          Entrevistas
+          Estadísticas
         </Link>
       </div>
     </>
