@@ -1,25 +1,10 @@
 import MatchStatRepository from "../../repository/chachos/matchStatRepository.js";
 import TournamentRoundRepository from "../../repository/chachos/tournamentRoundRepository.js";
 const repository = new MatchStatRepository();
+const tournamentRoundRepository = new TournamentRoundRepository();
 
 export default class MatchStatController {
-  // ---------- GET MATCH STAT BY A SPECIFIED ID ----------
-  getMatchStatById = async (req, res, next) => {
-    try {
-      const matchStatId = req.params.pid;
-
-      const matchStat = await repository.getMatchStatById(matchStatId);
-
-      res.status(200).json({
-        message: "Match stat has been properly retrieved for the current round",
-        matchStat,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  // ---------- GET MATCH STAT OF ALL PLAYERS BY A SPECIFIED ROUND ID ----------
+  // ---------- GET MATCH STAT OF ALL PLAYERS BY A SPECIFIED ROUND ----------
   getMatchStatByRound = async (req, res, next) => {
     try {
       const tournamentRoundId = req.params.pid;
@@ -38,20 +23,33 @@ export default class MatchStatController {
     }
   };
 
-  // ---------- GET ALL VOTES FOR ROUND ----------
-  getAllVotesForRound = async (req, res, next) => {
+  // ---------- GET MATCH STATS FILTERED ----------
+  getMatchStatsFiltered = async (req, res, next) => {
     try {
-      const tournamentRoundId = req.params.pid;
-      const userId = req.user.id;
+      let filter = {};
 
-      const allVotesForRound = await repository.getAllVotesForRound(
-        tournamentRoundId,
-        userId
-      );
+      //Filtro de torneo
+      const tournamentId = req.query.tournament || null;
+      tournamentId === null
+        ? (filter = filter)
+        : (filter.tournament = tournamentId);
+
+      //Filtro de ronda
+      const tournamentRoundId = req.query.round || null;
+      tournamentRoundId === null
+        ? (filter = filter)
+        : (filter.round = tournamentRoundId);
+
+      //Filtro de jugador
+      const playerId = req.query.player || null;
+      playerId === null ? (filter = filter) : (filter.player = playerId);
+
+      const filteredMatchStats = await repository.getMatchStatFiltered(filter);
 
       res.status(200).json({
-        message: "All votes have been properly retrieved",
-        allVotesForRound,
+        message:
+          "All match stats related to the provided tournament round have been properly retrieved",
+        filteredMatchStats,
       });
     } catch (error) {
       next(error);
@@ -61,40 +59,73 @@ export default class MatchStatController {
   // ---------- CREATE MATCH STAT ----------
   createMatchStat = async (req, res, next) => {
     try {
-      const playerId = "65a6cc297f343aa94e08bab9";
-      const tournamentRoundId = "65aaccb5b94a3c9f41816897";
-      const tournamentRound = await TournamentRoundRepository.findById(
+      // Definicion de variables
+      const tournamentRoundId = req.params.pid;
+      const tournamentRound = await tournamentRoundRepository.baseGetById(
         tournamentRoundId
       );
       const tournamentId = tournamentRound.tournament;
-      const matchStat = {
-        tournament: tournamentId,
-        round: tournamentRoundId,
-        player: playerId,
-        played: true,
-        goals: 1,
-        assists: 1,
-        yellow_cards: 0,
-        red_cards: 0,
-        penalty_saved: 0,
-      };
 
-      const matchStatLoaded = await repository.createMatchStat(
-        matchStat,
-        tournamentRoundId,
-        playerId
-      );
+      const matchStats = req.body;
+
+      if (
+        !matchStats ||
+        !Array.isArray(matchStats) ||
+        matchStats.length === 0
+      ) {
+        return res.status(400).json({
+          message:
+            "Invalid request body. Please provide an array of match stats.",
+        });
+      }
+
+      // Comienzo del bucle relativo al array de match stats
+      let createdMatchStats = [];
+      for (const matchStat of matchStats) {
+        try {
+          const newMatchStat = {
+            tournament: tournamentId,
+            round: tournamentRoundId,
+            match_date: tournamentRound.match_date,
+            month:
+              new Date(Date.parse(tournamentRound.match_date)).getMonth() + 1,
+            year: new Date(
+              Date.parse(tournamentRound.match_date)
+            ).getFullYear(),
+            player: matchStat.playerId,
+            minutes_played: matchStat.minutes_played,
+            goals: matchStat.goals,
+            assists: matchStat.assists,
+            yellow_cards: matchStat.yellow_cards,
+            red_cards: matchStat.red_cards,
+          };
+
+          const createdMatchStat = await repository.createMatchStat(
+            newMatchStat,
+            tournamentRoundId,
+            matchStat.playerId
+          );
+          createdMatchStats.push(createdMatchStat);
+
+          tournamentRoundRepository.baseUpdateById(tournamentRoundId, {
+            complete_stats: true,
+          });
+        } catch (error) {
+          console.error(`Error creating match stat: ${error.message}`);
+          continue;
+        }
+      }
 
       res.status(200).json({
-        message: "Match stat has been properly created",
-        matchStatLoaded,
+        message: "Match stats have been successfully created",
+        createdMatchStats,
       });
     } catch (error) {
       next(error);
     }
   };
 
-  // ---------- UPDATE VOTE ----------
+  // ---------- UPDATE MATCH STATS ----------
   updateMatchStat = async (req, res, next) => {
     try {
       const matchStatId = req.params.pid;
@@ -116,14 +147,23 @@ export default class MatchStatController {
     }
   };
 
-  // ---------- DELETE VOTE ----------
+  // ---------- DELETE MATCH STAT ----------
   deleteMatchStat = async (req, res, next) => {
     try {
-      const matchStatId = req.params.pid;
+      // Definicion de variables
+      const tournamentRoundId = req.params.pid;
 
-      const matchStatDeleted = await repository.deleteMatchStat(matchStatId);
+      const matchStatDeleted = await repository.deleteMatchStat(
+        tournamentRoundId
+      );
+
+      const updatedTournamentRound =
+        await tournamentRoundRepository.baseUpdateById(tournamentRoundId, {
+          complete_stats: false,
+        });
+
       res.status(200).json({
-        message: `Match stat with id ${matchStatId} has been properly deleted`,
+        message: `Match stats from round ${tournamentRoundId} have been properly deleted`,
         matchStatDeleted,
       });
     } catch (error) {

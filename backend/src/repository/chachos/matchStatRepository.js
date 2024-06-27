@@ -7,33 +7,21 @@ export default class MatchStatRepository extends baseRepository {
     super(MatchStat);
   }
 
-  // ---------- GET MATCH STAT BY ID ----------
-  getMatchStatById = async (matchStatId) => {
+  // ---------- GET MATCH STAT BY FILTER ----------
+  getMatchStatFiltered = async (filter) => {
     try {
-      const documentExists = await this.model.findById(matchStatId);
-      if (!documentExists) {
-        throw new Error("Element was not found in the database");
-      }
-
-      return documentExists;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  // ---------- GET MATCH STAT BY ROUND ----------
-  getMatchStatByRound = async (tournamentRoundId) => {
-    try {
-      const documentExists = await TournamentRound.findById(tournamentRoundId);
-      if (!documentExists) {
-        throw new Error("Element was not found in the database");
-      }
-
-      const roundMatchStat = await this.model.find({
-        round: tournamentRoundId,
+      const matchStatsFiltered = await this.model.find(filter).populate({
+        path: "player",
+        select: {
+          // Specify fields to include from Player model
+          first_name: 1,
+          last_name: 1,
+          shirt: 1,
+          _id: 1, // Exclude unnecessary _id field
+        },
       });
 
-      return roundMatchStat;
+      return matchStatsFiltered;
     } catch (error) {
       throw error;
     }
@@ -86,21 +74,26 @@ export default class MatchStatRepository extends baseRepository {
   };
 
   // ---------- DELETE VOTE ----------
-  deleteMatchStat = async (matchStatId) => {
+  deleteMatchStat = async (tournamentRoundId) => {
     try {
       //Search in database based on dynamic filter options
-      const documentExists = await this.model.findOne({
-        _id: matchStatId,
+      const documentExists = await this.model.find({
+        round: {
+          $eq: tournamentRoundId,
+        },
       });
 
       if (!documentExists) {
         throw new Error(
-          `This match stat document does not currently exist in database`
+          `This round do not have any match stats related to it in database`
         );
       }
-      const document = await this.model.deleteOne({
-        _id: matchStatId,
+      const document = await this.model.deleteMany({
+        round: {
+          $eq: tournamentRoundId,
+        },
       });
+
       return document;
     } catch (error) {
       throw error;

@@ -24,23 +24,28 @@ export default class VoteRepository extends baseRepository {
   };
 
   // ---------- GET ALL VOTES ----------
-  getAllVotes = async () => {
+  getAllVotes = async (tournamentId) => {
     try {
-      //Return all votes
-      const allVotes = await this.model
-        .find()
-        .populate([
-          "voter",
-          "round",
-          "white_pearl",
-          "vanilla_pearl",
-          "ocher_pearl",
-          "black_pearl",
-        ])
-        .populate({
-          path: "evaluation",
-          populate: { path: "player", model: "Player" },
-        });
+      let filter = {};
+
+      // Si tournamentId no es un string vacío, filtrar por tournamentId
+      if (tournamentId && tournamentId.trim() !== "") {
+        // Encontrar todos los TournamentRounds que corresponden al tournamentId
+        const rounds = await TournamentRound.find({ tournament: tournamentId });
+
+        // Extraer los IDs de los TournamentRounds
+        const roundIds = rounds.map((round) => round._id);
+
+        // Filtrar los votos por los IDs de los TournamentRounds
+        filter = { round: { $in: roundIds } };
+      }
+
+      // Obtener todos los votos con el filtro (si existe)
+      const allVotes = await Vote.find(filter).populate({
+        path: "evaluation",
+        populate: { path: "player", model: "Player" },
+      });
+
       return allVotes;
     } catch (error) {
       throw error;

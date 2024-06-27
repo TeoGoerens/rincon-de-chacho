@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import validateUniquePearls from "../../helpers/validateUniquePearls.js";
 import VoteRepository from "../../repository/chachos/voteRepository.js";
 const repository = new VoteRepository();
@@ -6,7 +7,9 @@ export default class VoteController {
   // ---------- GET ALL VOTES ----------
   getAllVotes = async (req, res, next) => {
     try {
-      const allVotes = await repository.getAllVotes();
+      const tournamentId = req.query.tournament || "";
+
+      const allVotes = await repository.getAllVotes(tournamentId);
 
       res.status(200).json({
         message:

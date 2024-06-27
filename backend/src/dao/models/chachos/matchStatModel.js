@@ -12,6 +12,19 @@ const matchStatSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tournament Round",
     },
+    match_date: {
+      type: Date,
+      required: true,
+      default: Date.now(),
+    },
+    month: {
+      type: Number,
+      required: true,
+    },
+    year: {
+      type: Number,
+      required: true,
+    },
     player: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",

@@ -19,6 +19,14 @@ const tournamentRoundSchema = new mongoose.Schema(
       required: true,
       default: Date.now(),
     },
+    month: {
+      type: Number,
+      required: true,
+    },
+    year: {
+      type: Number,
+      required: true,
+    },
     score_chachos: {
       type: Number,
       required: true,
@@ -74,6 +82,10 @@ const tournamentRoundSchema = new mongoose.Schema(
       },
     ],
     open_for_vote: {
+      type: Boolean,
+      default: false,
+    },
+    complete_stats: {
       type: Boolean,
       default: false,
     },

@@ -1,5 +1,6 @@
 import TournamentRound from "../../dao/models/chachos/tournamentRoundModel.js";
 import User from "../../dao/models/userModel.js";
+import MatchStat from "../../dao/models/chachos/matchStatModel.js";
 import baseRepository from "../baseRepository.js";
 import transport from "../../config/email/nodemailer.js";
 
@@ -88,5 +89,109 @@ export default class TournamentRoundRepository extends baseRepository {
     await Promise.all(
       mailOptionsList.map((mailOptions) => transport.sendMail(mailOptions))
     );
+  };
+
+  // ---------- UPDATE MATCH STATS FROM VOTES ----------
+  updateMatchStatsFromVotes = async (
+    tournamentRoundId,
+    whitePearl,
+    vanillaPearl,
+    ocherPearl,
+    blackPearl
+  ) => {
+    try {
+      //Update white pearl
+      const whitePearlUpdate = await MatchStat.find({
+        round: tournamentRoundId,
+        player: whitePearl,
+      });
+      if (!whitePearlUpdate.length) {
+        throw new Error(
+          "Match stat for player chosen as white pearl has not been created"
+        );
+      } else {
+        whitePearlUpdate[0].white_pearl = true;
+        await whitePearlUpdate[0].save();
+      }
+
+      //Update vanilla pearl
+      const vanillaPearlUpdate = await MatchStat.find({
+        round: tournamentRoundId,
+        player: vanillaPearl,
+      });
+      if (!vanillaPearlUpdate.length) {
+        throw new Error(
+          "Match stat for player chosen as vanilla pearl has not been created"
+        );
+      } else {
+        vanillaPearlUpdate[0].vanilla_pearl = true;
+        await vanillaPearlUpdate[0].save();
+      }
+
+      //Update ocher pearl
+      const ocherPearlUpdate = await MatchStat.find({
+        round: tournamentRoundId,
+        player: ocherPearl,
+      });
+      if (!ocherPearlUpdate.length) {
+        throw new Error(
+          "Match stat for player chosen as ocher pearl has not been created"
+        );
+      } else {
+        ocherPearlUpdate[0].ocher_pearl = true;
+        await ocherPearlUpdate[0].save();
+      }
+
+      //Update black pearl
+      const blackPearlUpdate = await MatchStat.find({
+        round: tournamentRoundId,
+        player: blackPearl,
+      });
+      if (!blackPearlUpdate.length) {
+        throw new Error(
+          "Match stat for player chosen as white pearl has not been created"
+        );
+      } else {
+        blackPearlUpdate[0].black_pearl = true;
+        await blackPearlUpdate[0].save();
+      }
+
+      return [
+        whitePearlUpdate,
+        vanillaPearlUpdate,
+        ocherPearlUpdate,
+        blackPearlUpdate,
+      ];
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // ---------- UPDATE MATCH STATS FROM POINTS ----------
+  updateMatchStatsFromPoints = async (tournamentRoundId, pointsArray) => {
+    try {
+      //Creo una variable para almacenar los match stats actualizados
+      let updatedMatchStats = [];
+
+      //Recorro el array de puntos y actualizo la coleccion match stat
+      for (const element of pointsArray) {
+        const matchStatToUpdate = await MatchStat.find({
+          round: tournamentRoundId,
+          player: element.player,
+        });
+        if (!matchStatToUpdate.length) {
+          throw new Error("Match stat for player chosen has not been created");
+        } else {
+          matchStatToUpdate[0].points = element.averagePoints;
+          await matchStatToUpdate[0].save();
+
+          updatedMatchStats.push(matchStatToUpdate[0]);
+        }
+      }
+
+      return updatedMatchStats;
+    } catch (error) {
+      throw error;
+    }
   };
 }

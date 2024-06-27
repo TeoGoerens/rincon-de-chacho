@@ -7,18 +7,17 @@ const router = Router();
 const controller = new MatchStatController();
 
 // ---------- GET ROUTES ----------
-router.get("/:pid", authMiddleware, controller.getMatchStatById);
+
 router.get(
   "/tournament-round/:pid",
   authMiddleware,
   controller.getMatchStatByRound
 );
-//Estadisticas por campeonat (promedio puntaje)
-//Estadisticas globales (promedio puntaje)
+router.get("/filtered", authMiddleware, controller.getMatchStatsFiltered);
 
 // ---------- POST ROUTES ----------
 router.post(
-  "/",
+  "/:pid",
   authMiddleware,
   adminAuthMiddleware,
   controller.createMatchStat
@@ -40,6 +39,5 @@ router.delete(
   adminAuthMiddleware,
   controller.deleteMatchStat
 );
-//Borrar estadistica por round
 
 export default router;

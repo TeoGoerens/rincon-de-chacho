@@ -88,10 +88,13 @@ export default class TournamentRoundController {
   // ---------- CREATE TOURNAMENT ROUND ----------
   createTournamentRound = async (req, res, next) => {
     try {
+      const parsedDate = new Date(Date.parse(req.body.match_date));
       const tournamentRound = {
         tournament: req.body.tournament,
         rival: req.body.rival,
         match_date: req.body.match_date,
+        month: parsedDate.getMonth() + 1,
+        year: parsedDate.getFullYear(),
         score_chachos: req.body.score_chachos,
         score_rival: req.body.score_rival,
         players: req.body.players,
@@ -152,23 +155,47 @@ export default class TournamentRoundController {
       //Get information from endpoint and body
       const tournamentRoundId = req.params.pid;
       const votes = req.body.votes;
+      const pointsArray = req.body.points;
 
       //Search for the tournament round information on database
       const tournamentRound = await repository.baseGetById(tournamentRoundId);
 
       //Votes information consolidation
       const consolidatedVotes = consolidatePearls(votes);
+      const whitePearl = consolidatedVotes.white_pearl;
+      const vanillaPearl = consolidatedVotes.vanilla_pearl;
+      const ocherPearl = consolidatedVotes.ocher_pearl;
+      const blackPearl = consolidatedVotes.black_pearl;
+
+      //Update pearls information on match stats collection
+      const updatedMatchStatsFromVotes =
+        await repository.updateMatchStatsFromVotes(
+          tournamentRoundId,
+          whitePearl,
+          vanillaPearl,
+          ocherPearl,
+          blackPearl
+        );
+
+      //Update points information on match stats collection
+      const updatedMatchStatsFromPoints =
+        await repository.updateMatchStatsFromPoints(
+          tournamentRoundId,
+          pointsArray
+        );
 
       //Update tournament round information in database
-      tournamentRound.white_pearl = consolidatedVotes.white_pearl;
-      tournamentRound.vanilla_pearl = consolidatedVotes.vanilla_pearl;
-      tournamentRound.ocher_pearl = consolidatedVotes.ocher_pearl;
-      tournamentRound.black_pearl = consolidatedVotes.black_pearl;
+      tournamentRound.white_pearl = whitePearl;
+      tournamentRound.vanilla_pearl = vanillaPearl;
+      tournamentRound.ocher_pearl = ocherPearl;
+      tournamentRound.black_pearl = blackPearl;
       await tournamentRound.save();
 
       res.status(200).json({
         message: `Pearls have been properly consolidated`,
         tournamentRound,
+        updatedMatchStatsFromVotes,
+        updatedMatchStatsFromPoints,
       });
     } catch (error) {
       next(error);
@@ -179,11 +206,14 @@ export default class TournamentRoundController {
   updateTournamentRoundById = async (req, res, next) => {
     try {
       const tournamentRoundId = req.params.pid;
+      const parsedDate = new Date(Date.parse(req.body.match_date));
 
       const newTournamentRoundInfo = {
         tournament: req.body.tournament,
         rival: req.body.rival,
         match_date: req.body.match_date,
+        month: parsedDate.getMonth() + 1,
+        year: parsedDate.getFullYear(),
         score_chachos: req.body.score_chachos,
         score_rival: req.body.score_rival,
         players: req.body.players,
