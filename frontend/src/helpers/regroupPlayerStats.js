@@ -11,6 +11,7 @@ export const regroupPlayerStats = (playersStats) => {
         id_player: playerId,
         first_name: current.player.first_name,
         last_name: current.player.last_name,
+        matches_played: 0,
         minutes_played: 0,
         goals: 0,
         assists: 0,
@@ -34,6 +35,7 @@ export const regroupPlayerStats = (playersStats) => {
     // Agregar puntos si no son 0 o null
     if (current.points !== 0 && current.points !== null) {
       acc[playerId].points.push(current.points);
+      acc[playerId].matches_played += 1;
     }
 
     // Contar perlas

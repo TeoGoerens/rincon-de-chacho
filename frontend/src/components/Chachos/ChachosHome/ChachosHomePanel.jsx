@@ -9,6 +9,7 @@ import { consolidateEvaluation } from "../../../helpers/consolidateEvaluation";
 import { gamesPlayed } from "../../../helpers/gamesPlayed";
 import { pearlsCount } from "../../../helpers/countPlayerPearlsinTournamentRounds";
 import { regroupPlayerStats } from "../../../helpers/regroupPlayerStats";
+import { matchStatsSort } from "../../../helpers/matchStatsSort";
 
 //Import components
 import ChachosMenu from "../ChachosMenu";
@@ -37,6 +38,20 @@ const ChachosHomePanel = () => {
   const [filterOptions, setFilterOptions] = useState({});
   const [regroupedPlayersStats, setRegroupedPlayersStats] = useState([]);
 
+  // Function to handle dropdown change
+  const handleTournamentChange = (event) => {
+    const filterSupport = { tournament: event.target.value };
+    setFilterOptions(filterSupport);
+  };
+
+  //Dispatch action from store with useEffect()
+  useEffect(() => {
+    dispatch(getAllVotesAction(filterOptions));
+    dispatch(getAllTournamentRoundsAction());
+    dispatch(getAllTournamentsAction());
+    dispatch(getMatchStatsFilteredAction(filterOptions));
+  }, [dispatch, filterOptions]);
+
   //Select state from votes store
   const voteStoreData = useSelector((store) => store.votes);
   const allVotes = voteStoreData?.allVotes?.allVotes;
@@ -64,6 +79,7 @@ const ChachosHomePanel = () => {
   const allMatchStats =
     matchStatsStoreData?.filteredMatchStats?.filteredMatchStats;
 
+  //Change the layout of match stats array
   useEffect(() => {
     if (
       allMatchStats &&
@@ -74,23 +90,66 @@ const ChachosHomePanel = () => {
       setRegroupedPlayersStats(newStatsLayout);
     }
   }, [allMatchStats]);
-  //const regroupedStats = regroupPlayerStats(allMatchStats);
-  console.log(regroupedPlayersStats);
 
-  // Function to handle dropdown change
-  const handleTournamentChange = (event) => {
-    const filterSupport = { tournament: event.target.value };
-    setFilterOptions(filterSupport);
-  };
+  //Match stats array sorted by points
+  const matchStatsSortedByPoints = matchStatsSort(
+    regroupedPlayersStats,
+    "points"
+  );
 
-  //
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllVotesAction(filterOptions));
-    dispatch(getAllTournamentRoundsAction());
-    dispatch(getAllTournamentsAction());
-    dispatch(getMatchStatsFilteredAction(filterOptions));
-  }, [dispatch, filterOptions]);
+  //Match stats array sorted by goals
+  const matchStatsSortedByGoals = matchStatsSort(
+    regroupedPlayersStats,
+    "goals"
+  );
+
+  //Match stats array sorted by assists
+  const matchStatsSortedByAssists = matchStatsSort(
+    regroupedPlayersStats,
+    "assists"
+  );
+
+  //Match stats array sorted by minutes played
+  const matchStatsSortedByMinutes = matchStatsSort(
+    regroupedPlayersStats,
+    "minutes_played"
+  );
+
+  //Match stats array sorted by yellow cards
+  const matchStatsSortedByYellowCards = matchStatsSort(
+    regroupedPlayersStats,
+    "yellow_cards"
+  );
+
+  //Match stats array sorted by red cards
+  const matchStatsSortedByRedCards = matchStatsSort(
+    regroupedPlayersStats,
+    "red_cards"
+  );
+
+  //Match stats array sorted by white pearl
+  const matchStatsSortedByWhitePearls = matchStatsSort(
+    regroupedPlayersStats,
+    "white_pearl"
+  ).filter((stat) => stat.white_pearl !== 0);
+
+  //Match stats array sorted by vanilla pearl
+  const matchStatsSortedByVanillaPearls = matchStatsSort(
+    regroupedPlayersStats,
+    "vanilla_pearl"
+  ).filter((stat) => stat.vanilla_pearl !== 0);
+
+  //Match stats array sorted by ocher pearl
+  const matchStatsSortedByOcherPearls = matchStatsSort(
+    regroupedPlayersStats,
+    "ocher_pearl"
+  ).filter((stat) => stat.ocher_pearl !== 0);
+
+  //Match stats array sorted by black pearl
+  const matchStatsSortedByBlackPearls = matchStatsSort(
+    regroupedPlayersStats,
+    "black_pearl"
+  ).filter((stat) => stat.black_pearl !== 0);
 
   return (
     <>
@@ -127,16 +186,11 @@ const ChachosHomePanel = () => {
                 </tr>
               </thead>
               <tbody>
-                {sortedAllEvaluation.map((player, index) => (
+                {matchStatsSortedByPoints.map((player, index) => (
                   <tr key={player._id}>
                     <td>{index + 1}</td>
                     <td>{`${player.first_name} ${player.last_name}`}</td>
-                    <td>
-                      {gamesByPlayer &&
-                        gamesByPlayer.find(
-                          (element) => element._id === player._id
-                        )?.gamesPlayed}
-                    </td>
+                    <td>{player.matches_played}</td>
                     <td>{player.points.toFixed(2)}</td>
                   </tr>
                 ))}
@@ -149,9 +203,9 @@ const ChachosHomePanel = () => {
               <img src={firstPlaceSource} alt="First Place Badge" />
               <h5>Perla Blanca</h5>
               <ul>
-                {whitePearls.map((player) => (
+                {matchStatsSortedByWhitePearls.map((player) => (
                   <li key={player._id} className="player-item">
-                    <p>{player.timesPearl}</p>
+                    <p>{player.white_pearl}</p>
                     <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
@@ -161,9 +215,9 @@ const ChachosHomePanel = () => {
               <img src={secondPlaceSource} alt="Second Place Badge" />
               <h5>Perla Vainilla</h5>
               <ul>
-                {vanillaPearls.map((player) => (
+                {matchStatsSortedByVanillaPearls.map((player) => (
                   <li key={player._id} className="player-item">
-                    <p>{player.timesPearl}</p>
+                    <p>{player.vanilla_pearl}</p>
                     <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
@@ -176,9 +230,9 @@ const ChachosHomePanel = () => {
               />
               <h5>Perla Ocre</h5>
               <ul>
-                {ocherPearls.map((player) => (
+                {matchStatsSortedByOcherPearls.map((player) => (
                   <li key={player._id} className="player-item">
-                    <p>{player.timesPearl}</p>
+                    <p>{player.ocher_pearl}</p>
                     <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
@@ -188,9 +242,9 @@ const ChachosHomePanel = () => {
               <img src={lastPlaceSource} alt="Last Place Badge" />
               <h5>Perla Negra</h5>
               <ul>
-                {blackPearls.map((player) => (
+                {matchStatsSortedByBlackPearls.map((player) => (
                   <li key={player._id} className="player-item">
-                    <p>{player.timesPearl}</p>
+                    <p>{player.black_pearl}</p>
                     <span>{`${player.first_name} ${player.last_name}`}</span>
                   </li>
                 ))}
