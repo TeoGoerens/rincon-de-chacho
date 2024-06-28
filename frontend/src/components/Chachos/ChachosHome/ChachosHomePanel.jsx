@@ -97,6 +97,9 @@ const ChachosHomePanel = () => {
     "points"
   );
 
+  console.log(matchStatsSortedByPoints);
+  console.log(matchStatsSortedByWhitePearls);
+
   //Match stats array sorted by goals
   const matchStatsSortedByGoals = matchStatsSort(
     regroupedPlayersStats,
