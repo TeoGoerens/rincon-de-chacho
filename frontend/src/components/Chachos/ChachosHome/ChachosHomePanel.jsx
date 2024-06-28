@@ -17,12 +17,9 @@ import firstPlaceSource from "../../../assets/images/first-place.png";
 import secondPlaceSource from "../../../assets/images/second-place.png";
 import secondToLastPlaceSource from "../../../assets/images/clown.png";
 import lastPlaceSource from "../../../assets/images/black-star.png";
-import TournamentDropdown from "../../Layout/Dropdown/Tournament/TournamentDropdown";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
-import { getAllTournamentRoundsAction } from "../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
-import { getAllVotesAction } from "../../../redux/slices/votes/votesSlices";
 import { getMatchStatsFilteredAction } from "../../../redux/slices/match-stats/matchStatsSlices";
 import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tournamentsSlices";
 
@@ -46,29 +43,9 @@ const ChachosHomePanel = () => {
 
   //Dispatch action from store with useEffect()
   useEffect(() => {
-    dispatch(getAllVotesAction(filterOptions));
-    dispatch(getAllTournamentRoundsAction());
     dispatch(getAllTournamentsAction());
     dispatch(getMatchStatsFilteredAction(filterOptions));
   }, [dispatch, filterOptions]);
-
-  //Select state from votes store
-  const voteStoreData = useSelector((store) => store.votes);
-  const allVotes = voteStoreData?.allVotes?.allVotes;
-  const allEvaluation = consolidateEvaluation(allVotes);
-  const sortedAllEvaluation = allEvaluation.sort((a, b) => b.points - a.points);
-
-  //Select state from tournament rounds store
-  const storeData = useSelector((store) => store.tournamentRounds);
-  const allTournamentRound = storeData?.tournamentRounds?.tournamentRounds;
-  const gamesByPlayer = gamesPlayed(allTournamentRound);
-
-  const whitePearls = pearlsCount(allTournamentRound, "white_pearl");
-  const vanillaPearls = pearlsCount(allTournamentRound, "vanilla_pearl");
-  const ocherPearls = pearlsCount(allTournamentRound, "ocher_pearl");
-  const blackPearls = pearlsCount(allTournamentRound, "black_pearl");
-
-  const { appError, serverError } = storeData;
 
   //Select tournament information from store
   const tournamentStoreData = useSelector((store) => store.tournaments);
@@ -78,6 +55,7 @@ const ChachosHomePanel = () => {
   const matchStatsStoreData = useSelector((store) => store.stats);
   const allMatchStats =
     matchStatsStoreData?.filteredMatchStats?.filteredMatchStats;
+  const { appError, serverError } = matchStatsStoreData;
 
   //Change the layout of match stats array
   useEffect(() => {
@@ -151,6 +129,7 @@ const ChachosHomePanel = () => {
     "black_pearl"
   ).filter((stat) => stat.black_pearl !== 0);
 
+  console.log(allMatchStats);
   console.log(matchStatsSortedByPoints);
   console.log(matchStatsSortedByWhitePearls);
 
