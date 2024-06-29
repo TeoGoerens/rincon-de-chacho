@@ -1,4 +1,13 @@
 export const regroupPlayerStats = (playersStats) => {
+  // Check if playersStats is empty array
+  if (
+    !playersStats ||
+    !Array.isArray(playersStats) ||
+    playersStats.length === 0
+  ) {
+    return []; // Return empty array if input is not a valid array or empty
+  }
+
   const groupedPlayersStats = playersStats.reduce((acc, current) => {
     const playerId = current.player.id;
 
