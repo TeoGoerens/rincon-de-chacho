@@ -204,7 +204,7 @@ const ChachosHomePanel = () => {
               {matchStatsSortedByAssists?.slice(1).map((player, index) => (
                 <p>
                   {index + 2}. {player.first_name} {player.last_name}
-                  <span>{player.goals}</span>
+                  <span>{player.assists}</span>
                 </p>
               ))}
             </div>
