@@ -187,14 +187,14 @@ const ChachosHomePanel = () => {
                 {matchStatsSortedByAssists[0]?.last_name}
               </p>
               <div className="chachos-stats-content-card-top-goals">
-                <span>{matchStatsSortedByAssists[0]?.goals}</span>
+                <span>{matchStatsSortedByAssists[0]?.assists}</span>
                 <p>
                   en {matchStatsSortedByAssists[0]?.matches_played} partidos
                 </p>
               </div>
               <div className="chachos-stats-content-card-top-average">
                 {(
-                  matchStatsSortedByAssists[0]?.goals /
+                  matchStatsSortedByAssists[0]?.assists /
                   matchStatsSortedByAssists[0]?.matches_played
                 ).toFixed(2)}{" "}
                 por partido
