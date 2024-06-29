@@ -63,7 +63,7 @@ const ChachosHomePanel = () => {
     ) {
       setRegroupedPlayersStats(regroupPlayerStats(allMatchStats));
     }
-  }, [allMatchStats]);
+  }, [allMatchStats, filterOptions]);
 
   //Match stats array sorted by points
   const matchStatsSortedByPoints = useMemo(
