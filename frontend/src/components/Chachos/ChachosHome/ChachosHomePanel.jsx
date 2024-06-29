@@ -1,5 +1,5 @@
 //Import React & Hooks
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
 //Import CSS & styles
 import "./ChachosHomePanelStyles.css";
@@ -71,13 +71,13 @@ const ChachosHomePanel = () => {
   const matchStatsSortedByGoals = matchStatsSort(
     regroupedPlayersStats,
     "goals"
-  );
+  ).filter((stat) => stat.goals !== 0);
 
   //Match stats array sorted by assists
   const matchStatsSortedByAssists = matchStatsSort(
     regroupedPlayersStats,
     "assists"
-  );
+  ).filter((stat) => stat.assists !== 0);
 
   //Match stats array sorted by minutes played
   const matchStatsSortedByMinutes = matchStatsSort(
@@ -89,13 +89,13 @@ const ChachosHomePanel = () => {
   const matchStatsSortedByYellowCards = matchStatsSort(
     regroupedPlayersStats,
     "yellow_cards"
-  );
+  ).filter((stat) => stat.yellow_cards !== 0);
 
   //Match stats array sorted by red cards
   const matchStatsSortedByRedCards = matchStatsSort(
     regroupedPlayersStats,
     "red_cards"
-  );
+  ).filter((stat) => stat.red_cards !== 0);
 
   //Match stats array sorted by white pearl
   const matchStatsSortedByWhitePearls = matchStatsSort(
@@ -125,7 +125,12 @@ const ChachosHomePanel = () => {
     <>
       <ChachosMenu />
       <div className="container chachos-home-panel-container">
-        <select name="tournament" onChange={handleTournamentChange}>
+        {/*         Menu desplegable para elegir el torneo que filtre la informacion debajo */}
+        <select
+          className="chachos-home-panel-container-select"
+          name="tournament"
+          onChange={handleTournamentChange}
+        >
           <option value="" label="Selecciona un torneo" />
           {allTournaments &&
             allTournaments.map((tournament) => (
@@ -135,8 +140,6 @@ const ChachosHomePanel = () => {
             ))}
         </select>
 
-        {allMatchStats?.map((stat) => stat.minutes_played)}
-
         <h2>Performance Plantel</h2>
         {appError || serverError ? (
           <h5>
@@ -144,8 +147,73 @@ const ChachosHomePanel = () => {
           </h5>
         ) : null}
 
-        <div className="chachos-panel-content">
-          <div className="chachos-panel-main-table">
+        {/*         Tablas de goleadores y asistencias */}
+
+        <div className="chachos-stats-content">
+          <div className="chachos-stats-content-card">
+            <div className="chachos-stats-content-card-top">
+              <h5>Goles</h5>
+              <p>
+                {matchStatsSortedByGoals[0]?.first_name}{" "}
+                {matchStatsSortedByGoals[0]?.last_name}
+              </p>
+              <div className="chachos-stats-content-card-top-goals">
+                <span>{matchStatsSortedByGoals[0]?.goals}</span>
+                <p>en {matchStatsSortedByGoals[0]?.matches_played} partidos</p>
+              </div>
+              <div className="chachos-stats-content-card-top-average">
+                {(
+                  matchStatsSortedByGoals[0]?.goals /
+                  matchStatsSortedByGoals[0]?.matches_played
+                ).toFixed(2)}{" "}
+                por partido
+              </div>
+            </div>
+            <div className="chachos-stats-content-card-rest">
+              {matchStatsSortedByGoals?.slice(1).map((player, index) => (
+                <p>
+                  {index + 2}. {player.first_name} {player.last_name}
+                  <span>{player.goals}</span>
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <div className="chachos-stats-content-card">
+            <div className="chachos-stats-content-card-top">
+              <h5>Asistencias</h5>
+              <p>
+                {matchStatsSortedByAssists[0]?.first_name}{" "}
+                {matchStatsSortedByAssists[0]?.last_name}
+              </p>
+              <div className="chachos-stats-content-card-top-goals">
+                <span>{matchStatsSortedByAssists[0]?.goals}</span>
+                <p>
+                  en {matchStatsSortedByAssists[0]?.matches_played} partidos
+                </p>
+              </div>
+              <div className="chachos-stats-content-card-top-average">
+                {(
+                  matchStatsSortedByAssists[0]?.goals /
+                  matchStatsSortedByAssists[0]?.matches_played
+                ).toFixed(2)}{" "}
+                por partido
+              </div>
+            </div>
+            <div className="chachos-stats-content-card-rest">
+              {matchStatsSortedByAssists?.slice(1).map((player, index) => (
+                <p>
+                  {index + 2}. {player.first_name} {player.last_name}
+                  <span>{player.goals}</span>
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/*         Tablas de puntajes y perlas */}
+        <div className="chachos-points-content">
+          <div className="chachos-points-main-table">
             <table>
               <thead>
                 <tr>
@@ -156,7 +224,7 @@ const ChachosHomePanel = () => {
                 </tr>
               </thead>
               <tbody>
-                {matchStatsSortedByPoints.map((player, index) => (
+                {matchStatsSortedByPoints?.map((player, index) => (
                   <tr key={player._id}>
                     <td>{index + 1}</td>
                     <td>{`${player.first_name} ${player.last_name}`}</td>
@@ -168,7 +236,7 @@ const ChachosHomePanel = () => {
             </table>
           </div>
 
-          <div className="chachos-panel-cards">
+          <div className="chachos-points-cards">
             <div className="top-players-card">
               <img src={firstPlaceSource} alt="First Place Badge" />
               <h5>Perla Blanca</h5>

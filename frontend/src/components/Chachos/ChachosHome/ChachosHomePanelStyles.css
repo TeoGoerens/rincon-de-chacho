@@ -3,7 +3,19 @@
   margin-bottom: 3rem;
 }
 
-/* ---------- Chachos home panel title ---------- */
+/* ---------- Chachos home container ---------- */
+.chachos-home-panel-container-select {
+  font-size: 0.85rem;
+  border: 1px solid;
+  border-color: var(--third-color);
+  background-color: var(--third-color);
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-weight: 700;
+  margin-top: 1rem;
+}
+
+/* ---------- Chachos home points title ---------- */
 .chachos-home-panel-container h2 {
   margin: 1rem 0 2rem;
   font-family: var(--secondary-font);
@@ -12,14 +24,146 @@
   text-transform: uppercase;
 }
 
-/* ---------- Chachos home panel content ---------- */
-.chachos-panel-content {
+/* ---------- Chachos home stats content ---------- */
+.chachos-stats-content {
+  display: flex;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.chachos-stats-content-card {
+  background-color: white;
+  display: flex;
+  border-radius: 20px;
+  width: 50%;
+  min-width: 300px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  transition: all ease 0.3s;
+}
+
+.chachos-stats-content-card:hover {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
+}
+
+.chachos-stats-content-card-top {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--secondary-color), transparent 50%);
+  border-radius: 20px;
+  width: 50%;
+  padding: 1rem;
+  transition: all ease 0.3s;
+}
+
+.chachos-stats-content-card:hover .chachos-stats-content-card-top {
+  background-color: color-mix(in srgb, var(--secondary-color), transparent 0%);
+}
+
+.chachos-stats-content-card:hover .chachos-stats-content-card-top * {
+  color: white;
+  transition: all ease 0.3s; /* Add transition for text color */
+}
+
+.chachos-stats-content-card-top h5 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  text-align: center;
+  font-weight: 400;
+  background-color: white;
+  padding: 0.3rem;
+  border-radius: 10px;
+}
+
+.chachos-stats-content-card:hover .chachos-stats-content-card-top h5 {
+  color: inherit;
+}
+
+.chachos-stats-content-card-top > p {
+  font-size: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.chachos-stats-content-card-top-goals {
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--secondary-color), transparent 0%);
+  aspect-ratio: 1/1;
+  width: 130px;
+  margin: 1rem auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chachos-stats-content-card-top-goals span {
+  font-weight: 900;
+  text-align: center;
+  font-size: 3.5rem;
+  color: white;
+}
+
+.chachos-stats-content-card-top-goals p {
+  font-weight: 300;
+  font-size: 0.85rem;
+  text-align: center;
+  color: white;
+}
+
+.chachos-stats-content-card-top-average {
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals {
+  background-color: white;
+  transition: all ease 0.3s;
+}
+
+.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals,
+.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals span,
+.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals p {
+  color: var(--primary-color);
+}
+
+.chachos-stats-content-card-rest {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  width: 50%;
+  font-size: 0.85rem;
+}
+
+.chachos-stats-content-card-rest p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chachos-stats-content-card-rest span {
+  font-weight: 900;
+  background-color: var(--third-color);
+  border-radius: 50%;
+  width: 25px;
+  aspect-ratio: 1/1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Chachos home points content ---------- */
+.chachos-points-content {
   display: flex;
   gap: 2rem;
 }
 
-/* ---------- Chachos home panel main table ---------- */
-.chachos-panel-main-table {
+/* ---------- Chachos home points main table ---------- */
+.chachos-points-main-table {
   background-color: white;
   font-size: 0.85rem;
   border-radius: 20px;
@@ -31,37 +175,37 @@
   transition: all ease 0.3s;
 }
 
-.chachos-panel-main-table:hover {
+.chachos-points-main-table:hover {
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
 }
 
-.chachos-panel-main-table table {
+.chachos-points-main-table table {
   width: 100%;
 }
 
-.chachos-panel-main-table thead {
+.chachos-points-main-table thead {
   background-color: var(--primary-color);
 }
 
-.chachos-panel-main-table thead tr th {
+.chachos-points-main-table thead tr th {
   color: white;
 }
 
-.chachos-panel-main-table tbody tr:nth-child(even) {
+.chachos-points-main-table tbody tr:nth-child(even) {
   background-color: color-mix(in srgb, var(--third-color), transparent 75%);
 }
 
-.chachos-panel-main-table tbody tr:hover {
+.chachos-points-main-table tbody tr:hover {
   background-color: var(--third-color);
   font-weight: 800;
 }
 
-.chachos-panel-main-table tbody tr td {
+.chachos-points-main-table tbody tr td {
   text-align: center;
 }
 
-/* ---------- Chachos home panel cards ---------- */
-.chachos-panel-cards {
+/* ---------- Chachos home points cards ---------- */
+.chachos-points-cards {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -137,15 +281,23 @@
 
 /* ---------- Media queries ---------- */
 @media only screen and (max-width: 750px) {
-  .chachos-panel-content {
+  .chachos-stats-content {
     flex-direction: column;
   }
 
-  .chachos-panel-main-table {
+  .chachos-points-content {
+    flex-direction: column;
+  }
+
+  .chachos-stats-content-card {
     width: 100%;
   }
 
-  .chachos-panel-cards {
+  .chachos-points-main-table {
+    width: 100%;
+  }
+
+  .chachos-points-cards {
     width: 100%;
   }
 }
