@@ -1,5 +1,5 @@
 //Import React & Hooks
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 //Import CSS & styles
 import "./ChachosHomePanelStyles.css";
@@ -66,9 +66,9 @@ const ChachosHomePanel = () => {
   }, [allMatchStats]);
 
   //Match stats array sorted by points
-  const matchStatsSortedByPoints = matchStatsSort(
-    regroupedPlayersStats,
-    "points"
+  const matchStatsSortedByPoints = useMemo(
+    () => matchStatsSort(regroupedPlayersStats, "points"),
+    [regroupedPlayersStats]
   );
 
   //Match stats array sorted by goals
