@@ -57,7 +57,7 @@
 }
 
 .chachos-stats-content-card:hover .chachos-stats-content-card-top {
-  background-color: color-mix(in srgb, var(--secondary-color), transparent 0%);
+  background-color: #457b9d;
 }
 
 .chachos-stats-content-card:hover .chachos-stats-content-card-top * {
@@ -90,7 +90,7 @@
 
 .chachos-stats-content-card-top-goals {
   border-radius: 50%;
-  background-color: color-mix(in srgb, var(--secondary-color), transparent 0%);
+  background-color: #457b9d;
   aspect-ratio: 1/1;
   width: 130px;
   margin: 1rem auto;
