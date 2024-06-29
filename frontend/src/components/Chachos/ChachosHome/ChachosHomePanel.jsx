@@ -61,8 +61,7 @@ const ChachosHomePanel = () => {
       Array.isArray(allMatchStats) &&
       allMatchStats.length > 0
     ) {
-      const newStatsLayout = regroupPlayerStats(allMatchStats);
-      setRegroupedPlayersStats(newStatsLayout);
+      setRegroupedPlayersStats(regroupPlayerStats(allMatchStats));
     }
   }, [allMatchStats]);
 
@@ -127,8 +126,8 @@ const ChachosHomePanel = () => {
   ).filter((stat) => stat.black_pearl !== 0);
 
   console.log(allMatchStats);
+  console.log(regroupedPlayersStats);
   console.log(matchStatsSortedByPoints);
-  console.log(matchStatsSortedByWhitePearls);
 
   return (
     <>
