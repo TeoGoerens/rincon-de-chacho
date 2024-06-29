@@ -56,19 +56,15 @@ const ChachosHomePanel = () => {
 
   //Change the layout of match stats array
   useEffect(() => {
-    if (
-      allMatchStats &&
-      Array.isArray(allMatchStats) &&
-      allMatchStats.length > 0
-    ) {
+    if (allMatchStats && Array.isArray(allMatchStats)) {
       setRegroupedPlayersStats(regroupPlayerStats(allMatchStats));
     }
   }, [allMatchStats, filterOptions]);
 
   //Match stats array sorted by points
-  const matchStatsSortedByPoints = useMemo(
-    () => matchStatsSort(regroupedPlayersStats, "points"),
-    [regroupedPlayersStats]
+  const matchStatsSortedByPoints = matchStatsSort(
+    regroupedPlayersStats,
+    "points"
   );
 
   //Match stats array sorted by goals
@@ -124,10 +120,6 @@ const ChachosHomePanel = () => {
     regroupedPlayersStats,
     "black_pearl"
   ).filter((stat) => stat.black_pearl !== 0);
-
-  console.log(allMatchStats);
-  console.log(regroupedPlayersStats);
-  console.log(matchStatsSortedByPoints);
 
   return (
     <>
