@@ -5,9 +5,6 @@ import React, { useEffect, useState } from "react";
 import "./ChachosHomePanelStyles.css";
 
 //Import helpers
-import { consolidateEvaluation } from "../../../helpers/consolidateEvaluation";
-import { gamesPlayed } from "../../../helpers/gamesPlayed";
-import { pearlsCount } from "../../../helpers/countPlayerPearlsinTournamentRounds";
 import { regroupPlayerStats } from "../../../helpers/regroupPlayerStats";
 import { matchStatsSort } from "../../../helpers/matchStatsSort";
 
@@ -28,36 +25,48 @@ import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tourn
 //----------------------------------------
 
 const ChachosHomePanel = () => {
-  //Dispatch const creation
   const dispatch = useDispatch();
-
-  //Define variables
   const [filterOptions, setFilterOptions] = useState({});
   const [regroupedPlayersStats, setRegroupedPlayersStats] = useState([]);
+  const [matchStatsSortedByPoints, setMatchStatsSortedByPoints] = useState([]);
+  const [matchStatsSortedByGoals, setMatchStatsSortedByGoals] = useState([]);
+  const [matchStatsSortedByAssists, setMatchStatsSortedByAssists] = useState(
+    []
+  );
+  const [matchStatsSortedByMinutes, setMatchStatsSortedByMinutes] = useState(
+    []
+  );
+  const [matchStatsSortedByYellowCards, setMatchStatsSortedByYellowCards] =
+    useState([]);
+  const [matchStatsSortedByRedCards, setMatchStatsSortedByRedCards] = useState(
+    []
+  );
+  const [matchStatsSortedByWhitePearls, setMatchStatsSortedByWhitePearls] =
+    useState([]);
+  const [matchStatsSortedByVanillaPearls, setMatchStatsSortedByVanillaPearls] =
+    useState([]);
+  const [matchStatsSortedByOcherPearls, setMatchStatsSortedByOcherPearls] =
+    useState([]);
+  const [matchStatsSortedByBlackPearls, setMatchStatsSortedByBlackPearls] =
+    useState([]);
 
-  // Function to handle dropdown change
   const handleTournamentChange = (event) => {
     const filterSupport = { tournament: event.target.value };
     setFilterOptions(filterSupport);
   };
 
-  //Dispatch action from store with useEffect()
   useEffect(() => {
     dispatch(getAllTournamentsAction());
     dispatch(getMatchStatsFilteredAction(filterOptions));
   }, [dispatch, filterOptions]);
 
-  //Select tournament information from store
   const tournamentStoreData = useSelector((store) => store.tournaments);
   const allTournaments = tournamentStoreData?.tournaments?.tournaments;
-
-  //Select match stats information from store
   const matchStatsStoreData = useSelector((store) => store.stats);
   const allMatchStats =
     matchStatsStoreData?.filteredMatchStats?.filteredMatchStats;
   const { appError, serverError } = matchStatsStoreData;
 
-  //Change the layout of match stats array
   useEffect(() => {
     if (
       allMatchStats &&
@@ -69,65 +78,48 @@ const ChachosHomePanel = () => {
     }
   }, [allMatchStats]);
 
-  //Match stats array sorted by points
-  const matchStatsSortedByPoints = matchStatsSort(
-    regroupedPlayersStats,
-    "points"
-  );
-
-  //Match stats array sorted by goals
-  const matchStatsSortedByGoals = matchStatsSort(
-    regroupedPlayersStats,
-    "goals"
-  );
-
-  //Match stats array sorted by assists
-  const matchStatsSortedByAssists = matchStatsSort(
-    regroupedPlayersStats,
-    "assists"
-  );
-
-  //Match stats array sorted by minutes played
-  const matchStatsSortedByMinutes = matchStatsSort(
-    regroupedPlayersStats,
-    "minutes_played"
-  );
-
-  //Match stats array sorted by yellow cards
-  const matchStatsSortedByYellowCards = matchStatsSort(
-    regroupedPlayersStats,
-    "yellow_cards"
-  );
-
-  //Match stats array sorted by red cards
-  const matchStatsSortedByRedCards = matchStatsSort(
-    regroupedPlayersStats,
-    "red_cards"
-  );
-
-  //Match stats array sorted by white pearl
-  const matchStatsSortedByWhitePearls = matchStatsSort(
-    regroupedPlayersStats,
-    "white_pearl"
-  ).filter((stat) => stat.white_pearl !== 0);
-
-  //Match stats array sorted by vanilla pearl
-  const matchStatsSortedByVanillaPearls = matchStatsSort(
-    regroupedPlayersStats,
-    "vanilla_pearl"
-  ).filter((stat) => stat.vanilla_pearl !== 0);
-
-  //Match stats array sorted by ocher pearl
-  const matchStatsSortedByOcherPearls = matchStatsSort(
-    regroupedPlayersStats,
-    "ocher_pearl"
-  ).filter((stat) => stat.ocher_pearl !== 0);
-
-  //Match stats array sorted by black pearl
-  const matchStatsSortedByBlackPearls = matchStatsSort(
-    regroupedPlayersStats,
-    "black_pearl"
-  ).filter((stat) => stat.black_pearl !== 0);
+  useEffect(() => {
+    if (regroupedPlayersStats.length > 0) {
+      setMatchStatsSortedByPoints(
+        matchStatsSort(regroupedPlayersStats, "points")
+      );
+      setMatchStatsSortedByGoals(
+        matchStatsSort(regroupedPlayersStats, "goals")
+      );
+      setMatchStatsSortedByAssists(
+        matchStatsSort(regroupedPlayersStats, "assists")
+      );
+      setMatchStatsSortedByMinutes(
+        matchStatsSort(regroupedPlayersStats, "minutes_played")
+      );
+      setMatchStatsSortedByYellowCards(
+        matchStatsSort(regroupedPlayersStats, "yellow_cards")
+      );
+      setMatchStatsSortedByRedCards(
+        matchStatsSort(regroupedPlayersStats, "red_cards")
+      );
+      setMatchStatsSortedByWhitePearls(
+        matchStatsSort(regroupedPlayersStats, "white_pearl").filter(
+          (stat) => stat.white_pearl !== 0
+        )
+      );
+      setMatchStatsSortedByVanillaPearls(
+        matchStatsSort(regroupedPlayersStats, "vanilla_pearl").filter(
+          (stat) => stat.vanilla_pearl !== 0
+        )
+      );
+      setMatchStatsSortedByOcherPearls(
+        matchStatsSort(regroupedPlayersStats, "ocher_pearl").filter(
+          (stat) => stat.ocher_pearl !== 0
+        )
+      );
+      setMatchStatsSortedByBlackPearls(
+        matchStatsSort(regroupedPlayersStats, "black_pearl").filter(
+          (stat) => stat.black_pearl !== 0
+        )
+      );
+    }
+  }, [regroupedPlayersStats]);
 
   console.log(allMatchStats);
   console.log(matchStatsSortedByPoints);
