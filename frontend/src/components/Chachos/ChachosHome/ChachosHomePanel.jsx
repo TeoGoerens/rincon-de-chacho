@@ -31,7 +31,6 @@ const ChachosHomePanel = () => {
   //Define variables
   const [filterOptions, setFilterOptions] = useState({});
   const [regroupedPlayersStats, setRegroupedPlayersStats] = useState([]);
-  const [matchStatsSortedByPoints, setMatchStatsSortedByPoints] = useState([]);
 
   // Function to handle dropdown change
   const handleTournamentChange = (event) => {
@@ -64,13 +63,14 @@ const ChachosHomePanel = () => {
     ) {
       const newStatsLayout = regroupPlayerStats(allMatchStats);
       setRegroupedPlayersStats(newStatsLayout);
-
-      //Match stats array sorted by points
-      setMatchStatsSortedByPoints(
-        matchStatsSort(regroupedPlayersStats, "points")
-      );
     }
-  }, [allMatchStats, filterOptions, regroupedPlayersStats]);
+  }, [allMatchStats]);
+
+  //Match stats array sorted by points
+  const matchStatsSortedByPoints = matchStatsSort(
+    regroupedPlayersStats,
+    "points"
+  );
 
   //Match stats array sorted by goals
   const matchStatsSortedByGoals = matchStatsSort(

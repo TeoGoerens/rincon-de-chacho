@@ -1,8 +1,4 @@
 export const regroupPlayerStats = (playersStats) => {
-  if (!Array.isArray(playersStats)) {
-    throw new Error("El argumento debe ser un array de objetos");
-  }
-
   const groupedPlayersStats = playersStats.reduce((acc, current) => {
     const playerId = current.player.id;
 
