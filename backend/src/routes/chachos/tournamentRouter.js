@@ -13,12 +13,7 @@ router.get(
   adminAuthMiddleware,
   controller.getTournamentById
 );
-router.get(
-  "/",
-  authMiddleware,
-  adminAuthMiddleware,
-  controller.getAllTournaments
-);
+router.get("/", authMiddleware, controller.getAllTournaments);
 
 // ---------- POST ROUTES ----------
 router.post(

@@ -19,7 +19,8 @@ export default class TournamentController {
   getAllTournaments = async (req, res, next) => {
     try {
       const tournaments = await repository.baseGetAll({
-        sortBy: "year",
+        sortBy: "updatedAt",
+        sortOrder: "desc",
         populateBy: "category",
       });
 
