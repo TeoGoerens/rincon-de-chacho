@@ -34,7 +34,7 @@ const MatchStatsIndex = () => {
   //Dispatch action from store with useEffect()
   useEffect(() => {
     dispatch(getAllTournamentRoundsAction());
-  }, [dispatch, tournamentRounds]);
+  }, [dispatch]);
 
   const handleDelete = (id) => {
     dispatch(deleteMatchStatsForARoundAction(id));
