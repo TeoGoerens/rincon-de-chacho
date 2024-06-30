@@ -27,15 +27,16 @@
 /* ---------- Chachos home stats content ---------- */
 .chachos-stats-content {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 2rem;
   gap: 2rem;
 }
 
 .chachos-stats-content-card {
   background-color: white;
+  flex: 0 0 calc(50% - 2rem);
   display: flex;
   border-radius: 20px;
-  width: 50%;
   min-width: 300px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   transition: all ease 0.3s;
@@ -57,7 +58,7 @@
 }
 
 .chachos-stats-content-card:hover .chachos-stats-content-card-top {
-  background-color: #457b9d;
+  background-color: var(--secondary-color);
 }
 
 .chachos-stats-content-card:hover .chachos-stats-content-card-top * {
@@ -90,7 +91,7 @@
 
 .chachos-stats-content-card-top-goals {
   border-radius: 50%;
-  background-color: #457b9d;
+  background-color: var(--secondary-color);
   aspect-ratio: 1/1;
   width: 130px;
   margin: 1rem auto;
@@ -285,6 +286,15 @@
     flex-direction: column;
   }
 
+  .chachos-stats-content-card {
+    flex-direction: column;
+  }
+
+  .chachos-stats-content-card-top,
+  .chachos-stats-content-card-rest {
+    width: 100%;
+  }
+
   .chachos-points-content {
     flex-direction: column;
   }
@@ -305,7 +315,6 @@
 @media only screen and (max-width: 500px) {
   .top-players-card h5 {
     font-size: 0.85rem;
-    width: 90px;
   }
 
   .top-players-card ul li:first-child p,

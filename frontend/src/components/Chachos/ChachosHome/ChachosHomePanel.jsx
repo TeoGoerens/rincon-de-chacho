@@ -7,6 +7,7 @@ import "./ChachosHomePanelStyles.css";
 //Import helpers
 import { regroupPlayerStats } from "../../../helpers/regroupPlayerStats";
 import { matchStatsSort } from "../../../helpers/matchStatsSort";
+import { countUniqueValues } from "../../../helpers/countUniqueValues";
 
 //Import components
 import ChachosMenu from "../ChachosMenu";
@@ -60,6 +61,12 @@ const ChachosHomePanel = () => {
       setRegroupedPlayersStats(regroupPlayerStats(allMatchStats));
     }
   }, [allMatchStats, filterOptions]);
+
+  //Match stats array sorted by matches played
+  const matchStatsSortedByMatchesPlayed = matchStatsSort(
+    regroupedPlayersStats,
+    "matches_played"
+  );
 
   //Match stats array sorted by points
   const matchStatsSortedByPoints = matchStatsSort(
@@ -147,9 +154,44 @@ const ChachosHomePanel = () => {
           </h5>
         ) : null}
 
-        {/*         Tablas de goleadores y asistencias */}
+        {/*         Tablas de presencias, goleadores y asistencias */}
 
         <div className="chachos-stats-content">
+          <div className="chachos-stats-content-card">
+            <div className="chachos-stats-content-card-top">
+              <h5>Presencias</h5>
+              <p>
+                {matchStatsSortedByMatchesPlayed[0]?.first_name}{" "}
+                {matchStatsSortedByMatchesPlayed[0]?.last_name}
+              </p>
+              <div className="chachos-stats-content-card-top-goals">
+                <span>
+                  {matchStatsSortedByMatchesPlayed[0]?.matches_played}
+                </span>
+                <p>de {countUniqueValues(allMatchStats, "round")} partidos</p>
+              </div>
+              <div className="chachos-stats-content-card-top-average">
+                {(
+                  (matchStatsSortedByMatchesPlayed[0]?.matches_played /
+                    countUniqueValues(allMatchStats, "round")) *
+                  100
+                ).toFixed(0)}
+                {"% "}
+                de asistencia
+              </div>
+            </div>
+            <div className="chachos-stats-content-card-rest">
+              {matchStatsSortedByMatchesPlayed
+                ?.slice(1, 10)
+                .map((player, index) => (
+                  <p>
+                    {index + 2}. {player.first_name} {player.last_name}
+                    <span>{player.matches_played}</span>
+                  </p>
+                ))}
+            </div>
+          </div>
+
           <div className="chachos-stats-content-card">
             <div className="chachos-stats-content-card-top">
               <h5>Goles</h5>
@@ -170,7 +212,7 @@ const ChachosHomePanel = () => {
               </div>
             </div>
             <div className="chachos-stats-content-card-rest">
-              {matchStatsSortedByGoals?.slice(1).map((player, index) => (
+              {matchStatsSortedByGoals?.slice(1, 10).map((player, index) => (
                 <p>
                   {index + 2}. {player.first_name} {player.last_name}
                   <span>{player.goals}</span>
@@ -201,12 +243,47 @@ const ChachosHomePanel = () => {
               </div>
             </div>
             <div className="chachos-stats-content-card-rest">
-              {matchStatsSortedByAssists?.slice(1).map((player, index) => (
+              {matchStatsSortedByAssists?.slice(1, 10).map((player, index) => (
                 <p>
                   {index + 2}. {player.first_name} {player.last_name}
                   <span>{player.assists}</span>
                 </p>
               ))}
+            </div>
+          </div>
+
+          <div className="chachos-stats-content-card">
+            <div className="chachos-stats-content-card-top">
+              <h5>Amarillas</h5>
+              <p>
+                {matchStatsSortedByYellowCards[0]?.first_name}{" "}
+                {matchStatsSortedByYellowCards[0]?.last_name}
+              </p>
+              <div className="chachos-stats-content-card-top-goals">
+                <span>{matchStatsSortedByYellowCards[0]?.assists}</span>
+                <p>
+                  en {matchStatsSortedByYellowCards[0]?.matches_played} partidos
+                </p>
+              </div>
+              <div className="chachos-stats-content-card-top-average">
+                {(
+                  (matchStatsSortedByYellowCards[0]?.yellow_cards /
+                    matchStatsSortedByYellowCards[0]?.matches_played) *
+                  100
+                ).toFixed(0)}
+                {"% "}
+                de amonestaciones
+              </div>
+            </div>
+            <div className="chachos-stats-content-card-rest">
+              {matchStatsSortedByYellowCards
+                ?.slice(1, 10)
+                .map((player, index) => (
+                  <p>
+                    {index + 2}. {player.first_name} {player.last_name}
+                    <span>{player.yellow_cards}</span>
+                  </p>
+                ))}
             </div>
           </div>
         </div>
