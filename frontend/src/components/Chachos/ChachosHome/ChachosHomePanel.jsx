@@ -260,7 +260,7 @@ const ChachosHomePanel = () => {
                 {matchStatsSortedByYellowCards[0]?.last_name}
               </p>
               <div className="chachos-stats-content-card-top-goals">
-                <span>{matchStatsSortedByYellowCards[0]?.assists}</span>
+                <span>{matchStatsSortedByYellowCards[0]?.yellow_cards}</span>
                 <p>
                   en {matchStatsSortedByYellowCards[0]?.matches_played} partidos
                 </p>
