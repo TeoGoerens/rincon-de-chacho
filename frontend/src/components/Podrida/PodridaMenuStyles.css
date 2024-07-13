@@ -1,0 +1,23 @@
+.podrida-menu-container {
+  z-index: 800;
+  font-size: 1rem;
+  display: flex;
+  gap: 1rem;
+  padding-left: 1rem;
+  position: sticky;
+  top: 80px;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+.podrida-menu-container a {
+  text-decoration: none;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 10px;
+}
+
+.podrida-menu-container .podrida-menu-active-link {
+  font-weight: 700;
+  background-color: var(--third-color);
+}

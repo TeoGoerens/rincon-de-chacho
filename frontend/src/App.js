@@ -14,6 +14,7 @@ import PhotoGallery from "./components/PhotoGallery/PhotoGallery";
 import CurrentlyWorking from "./components/Layout/SoonTag/CurrentlyWorking";
 import ForgotPassword from "./components/Users/PasswordManagement/ForgotPassword";
 import ResetPassword from "./components/Users/PasswordManagement/ResetPassword";
+import PodridaRoutes from "./components/Podrida/PodridaRoutes";
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
         <Route Component={AuthProtectedRoutes}>
           <Route path="/home" Component={Home} />
           <Route path="/photo-gallery" Component={PhotoGallery} />
-          <Route path="/podrida" Component={CurrentlyWorking} />
+          <Route path="/podrida/*" Component={PodridaRoutes} />
           <Route path="/prode" Component={CurrentlyWorking} />
           <Route path="/cronicas" Component={CurrentlyWorking} />
           <Route path="/chachos/*" Component={ChachosRoutes} />

@@ -1,10 +1,12 @@
-/* ---------- Chachos home container ---------- */
-.chachos-home-panel-container {
+/* ---------- podrida home container ---------- */
+.podrida-home-panel-container {
   margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ---------- Chachos home container ---------- */
-.chachos-home-panel-container-select {
+/* ---------- podrida home container ---------- */
+.podrida-home-panel-container-select {
   font-size: 0.85rem;
   border: 1px solid;
   border-color: var(--third-color);
@@ -12,11 +14,10 @@
   border-radius: 10px;
   padding: 0.5rem;
   font-weight: 700;
-  margin-top: 1rem;
 }
 
-/* ---------- Chachos home points title ---------- */
-.chachos-home-panel-container h2 {
+/* ---------- podrida home points title ---------- */
+.podrida-home-panel-container h2 {
   margin: 1rem 0 2rem;
   font-family: var(--secondary-font);
   font-size: 1.2rem;
@@ -24,8 +25,8 @@
   text-transform: uppercase;
 }
 
-/* ---------- Chachos home stats content ---------- */
-.chachos-stats-content {
+/* ---------- podrida home stats content ---------- */
+.podrida-stats-content {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -33,7 +34,7 @@
   gap: 2rem;
 }
 
-.chachos-stats-content-card {
+.podrida-stats-content-card {
   background-color: white;
   flex: 0 0 calc(50% - 1rem);
   display: flex;
@@ -43,11 +44,11 @@
   transition: all ease 0.3s;
 }
 
-.chachos-stats-content-card:hover {
+.podrida-stats-content-card:hover {
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
 }
 
-.chachos-stats-content-card-top {
+.podrida-stats-content-card-top {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -58,16 +59,16 @@
   transition: all ease 0.3s;
 }
 
-.chachos-stats-content-card:hover .chachos-stats-content-card-top {
+.podrida-stats-content-card:hover .podrida-stats-content-card-top {
   background-color: var(--secondary-color);
 }
 
-.chachos-stats-content-card:hover .chachos-stats-content-card-top * {
+.podrida-stats-content-card:hover .podrida-stats-content-card-top * {
   color: white;
   transition: all ease 0.3s; /* Add transition for text color */
 }
 
-.chachos-stats-content-card-top h5 {
+.podrida-stats-content-card-top h5 {
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 5px;
@@ -78,11 +79,11 @@
   border-radius: 10px;
 }
 
-.chachos-stats-content-card:hover .chachos-stats-content-card-top h5 {
+.podrida-stats-content-card:hover .podrida-stats-content-card-top h5 {
   color: inherit;
 }
 
-.chachos-stats-content-card-top > p {
+.podrida-stats-content-card-top > p {
   font-size: 1rem;
   margin-top: 1rem;
   text-align: center;
@@ -90,7 +91,7 @@
   font-weight: 700;
 }
 
-.chachos-stats-content-card-top-goals {
+.podrida-stats-content-card-top-goals {
   border-radius: 50%;
   background-color: var(--secondary-color);
   aspect-ratio: 1/1;
@@ -101,37 +102,37 @@
   justify-content: center;
 }
 
-.chachos-stats-content-card-top-goals span {
+.podrida-stats-content-card-top-goals span {
   font-weight: 900;
   text-align: center;
   font-size: 3.5rem;
   color: white;
 }
 
-.chachos-stats-content-card-top-goals p {
+.podrida-stats-content-card-top-goals p {
   font-weight: 300;
   font-size: 0.85rem;
   text-align: center;
   color: white;
 }
 
-.chachos-stats-content-card-top-average {
+.podrida-stats-content-card-top-average {
   font-size: 0.85rem;
   text-align: center;
 }
 
-.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals {
+.podrida-stats-content-card:hover .podrida-stats-content-card-top-goals {
   background-color: white;
   transition: all ease 0.3s;
 }
 
-.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals,
-.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals span,
-.chachos-stats-content-card:hover .chachos-stats-content-card-top-goals p {
+.podrida-stats-content-card:hover .podrida-stats-content-card-top-goals,
+.podrida-stats-content-card:hover .podrida-stats-content-card-top-goals span,
+.podrida-stats-content-card:hover .podrida-stats-content-card-top-goals p {
   color: var(--primary-color);
 }
 
-.chachos-stats-content-card-rest {
+.podrida-stats-content-card-rest {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -140,13 +141,13 @@
   font-size: 0.85rem;
 }
 
-.chachos-stats-content-card-rest p {
+.podrida-stats-content-card-rest p {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.chachos-stats-content-card-rest span {
+.podrida-stats-content-card-rest span {
   font-weight: 900;
   background-color: var(--third-color);
   border-radius: 50%;
@@ -158,18 +159,18 @@
   justify-content: center;
 }
 
-/* ---------- Chachos home points content ---------- */
-.chachos-points-content {
+/* ---------- podrida home points content ---------- */
+.podrida-points-content {
   display: flex;
   gap: 2rem;
 }
 
-/* ---------- Chachos home points main table ---------- */
-.chachos-points-main-table {
+/* ---------- podrida home points main table ---------- */
+.podrida-points-main-table {
   background-color: white;
   font-size: 0.85rem;
   border-radius: 20px;
-  overflow: hidden;
+  overflow-x: scroll;
   display: inline-block;
   width: 50%;
   height: 100%;
@@ -177,37 +178,37 @@
   transition: all ease 0.3s;
 }
 
-.chachos-points-main-table:hover {
+.podrida-points-main-table:hover {
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
 }
 
-.chachos-points-main-table table {
+.podrida-points-main-table table {
   width: 100%;
 }
 
-.chachos-points-main-table thead {
+.podrida-points-main-table thead {
   background-color: var(--primary-color);
 }
 
-.chachos-points-main-table thead tr th {
+.podrida-points-main-table thead tr th {
   color: white;
 }
 
-.chachos-points-main-table tbody tr:nth-child(even) {
+.podrida-points-main-table tbody tr:nth-child(even) {
   background-color: color-mix(in srgb, var(--third-color), transparent 75%);
 }
 
-.chachos-points-main-table tbody tr:hover {
+.podrida-points-main-table tbody tr:hover {
   background-color: var(--third-color);
   font-weight: 800;
 }
 
-.chachos-points-main-table tbody tr td {
+.podrida-points-main-table tbody tr td {
   text-align: center;
 }
 
-/* ---------- Chachos home points cards ---------- */
-.chachos-points-cards {
+/* ---------- podrida home points cards ---------- */
+.podrida-points-cards {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -283,32 +284,32 @@
 
 /* ---------- Media queries ---------- */
 @media only screen and (max-width: 750px) {
-  .chachos-stats-content {
+  .podrida-stats-content {
     flex-direction: column;
   }
 
-  .chachos-stats-content-card {
+  .podrida-stats-content-card {
     flex-direction: column;
   }
 
-  .chachos-stats-content-card-top,
-  .chachos-stats-content-card-rest {
+  .podrida-stats-content-card-top,
+  .podrida-stats-content-card-rest {
     width: 100%;
   }
 
-  .chachos-points-content {
+  .podrida-points-content {
     flex-direction: column;
   }
 
-  .chachos-stats-content-card {
+  .podrida-stats-content-card {
     width: 100%;
   }
 
-  .chachos-points-main-table {
+  .podrida-points-main-table {
     width: 100%;
   }
 
-  .chachos-points-cards {
+  .podrida-points-cards {
     width: 100%;
   }
 }

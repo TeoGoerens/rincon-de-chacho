@@ -36,7 +36,7 @@ const ChachosMenu = () => {
         to="/chachos"
         className={activeIndex === 0 ? "chachos-menu-active-link" : ""}
       >
-        Estadisticas
+        Estadísticas
       </Link>
       <Link
         to="/chachos/tournament-rounds"
