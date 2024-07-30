@@ -1,0 +1,344 @@
+/* ---------- card container ---------- */
+.card-container {
+  height: 85%;
+  width: 85%;
+  position: absolute;
+  cursor: pointer;
+}
+
+.card-container .face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  background-color: white;
+  border-radius: 10px;
+  transition: 1s;
+}
+
+/* ---------- card container front ---------- */
+.card-container .front {
+  transform: perspective(1000px) rotateY(0deg);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-container:hover .front {
+  transform: perspective(1000px) rotateY(180deg);
+}
+
+.card-container .front .front-ribbon {
+  height: 150px;
+  width: 50px;
+  position: absolute;
+  top: -16px;
+  right: 16px;
+  display: flex;
+  justify-content: center;
+  z-index: 15;
+}
+
+.card-container .front .front-ribbon p {
+  color: white;
+  font-family: var(--secondary-font);
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  margin-top: 30px;
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.card-container .front .front-ribbon::before {
+  content: "";
+  height: 13px;
+  width: 12px;
+  position: absolute;
+  left: -12px;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.card-container .front .front-ribbon::after {
+  content: "";
+  height: 20px;
+  width: 50px;
+  position: absolute;
+  bottom: -20px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 10%, 0 100%);
+}
+
+.card-container .front .front-img-container {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.card-container .front .front-img-container img {
+  width: 150px;
+  z-index: 20;
+}
+
+.card-container .front .front-img-container .front-img-container-background {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  filter: blur(20px);
+  position: absolute;
+  z-index: 10;
+}
+
+.card-container .front .front-data-container {
+  background-color: red;
+  width: 100%;
+  height: calc(100% - 200px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-container .front .front-data-container img {
+  width: 100px;
+  position: absolute;
+  top: -35px;
+}
+
+.card-container .front .front-data-container h4 {
+  color: white;
+  font-size: 0.7rem;
+  font-family: var(--secondary-font);
+  letter-spacing: 2px;
+  font-weight: 400;
+  text-align: center;
+  padding: 0.5rem;
+  margin-top: 3.5rem;
+}
+
+.card-container .front .front-data-container h3 {
+  color: white;
+  font-size: 1.2rem;
+  font-family: var(--primary-font);
+  letter-spacing: 5px;
+  font-weight: 500;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 0.5rem;
+}
+
+/* ---------- card container back ---------- */
+
+.card-container .back {
+  transform: perspective(1000px) rotateY(180deg);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
+  border: 3px red solid;
+}
+
+.card-container:hover .back {
+  transform: perspective(1000px) rotateY(360deg);
+}
+
+/* --------------------------------------- */
+/* ---------- CUSTOMIZED STYLES ---------- */
+/* --------------------------------------- */
+
+/* ---------- Red class ---------- */
+.card-container .front-red {
+  border: 3px solid red;
+}
+
+.card-container .front .front-ribbon-red {
+  background-color: red;
+}
+
+.card-container .front .front-ribbon-red::before {
+  background-color: rgb(180, 0, 0);
+}
+
+.card-container .front .front-ribbon-red::after {
+  background-color: red;
+}
+
+.card-container
+  .front
+  .front-img-container
+  .front-img-container-background-red {
+  background-color: red;
+}
+
+.card-container .front .front-data-container-red {
+  background-color: red;
+}
+
+/* ---------- Orange class ---------- */
+.card-container .front-orange {
+  border: 3px solid orange;
+}
+
+.card-container .front .front-ribbon-orange {
+  background-color: orange;
+}
+
+.card-container .front .front-ribbon-orange::before {
+  background-color: rgb(215, 140, 0);
+}
+
+.card-container .front .front-ribbon-orange::after {
+  background-color: orange;
+}
+
+.card-container
+  .front
+  .front-img-container
+  .front-img-container-background-orange {
+  background-color: orange;
+}
+
+.card-container .front .front-data-container-orange {
+  background-color: orange;
+}
+
+/* ---------- Grey class ---------- */
+.card-container .front-grey {
+  border: 3px solid grey;
+}
+
+.card-container .front .front-ribbon-grey {
+  background-color: grey;
+}
+
+.card-container .front .front-ribbon-grey::before {
+  background-color: black;
+}
+
+.card-container .front .front-ribbon-grey::after {
+  background-color: grey;
+}
+
+.card-container
+  .front
+  .front-img-container
+  .front-img-container-background-grey {
+  background-color: grey;
+}
+
+.card-container .front .front-data-container-grey {
+  background-color: grey;
+}
+
+/* ---------- Green class ---------- */
+.card-container .front-green {
+  border: 3px solid green;
+}
+
+.card-container .front .front-ribbon-green {
+  background-color: green;
+}
+
+.card-container .front .front-ribbon-green::before {
+  background-color: rgb(0, 80, 0);
+}
+
+.card-container .front .front-ribbon-green::after {
+  background-color: green;
+}
+
+.card-container
+  .front
+  .front-img-container
+  .front-img-container-background-green {
+  background-color: green;
+}
+
+.card-container .front .front-data-container-green {
+  background-color: green;
+}
+
+/* ---------- Blue class ---------- */
+.card-container .front-blue {
+  border: 3px solid blue;
+}
+
+.card-container .front .front-ribbon-blue {
+  background-color: blue;
+}
+
+.card-container .front .front-ribbon-blue::before {
+  background-color: rgb(0, 0, 150);
+}
+
+.card-container .front .front-ribbon-blue::after {
+  background-color: blue;
+}
+
+.card-container
+  .front
+  .front-img-container
+  .front-img-container-background-blue {
+  background-color: blue;
+}
+
+.card-container .front .front-data-container-blue {
+  background-color: blue;
+}
+
+/* ---------- Violet class ---------- */
+.card-container .front-violet {
+  border: 3px solid darkorchid;
+}
+
+.card-container .front .front-ribbon-violet {
+  background-color: darkorchid;
+}
+
+.card-container .front .front-ribbon-violet::before {
+  background-color: rgb(105, 35, 140);
+}
+
+.card-container .front .front-ribbon-violet::after {
+  background-color: darkorchid;
+}
+
+.card-container
+  .front
+  .front-img-container
+  .front-img-container-background-violet {
+  background-color: darkorchid;
+}
+
+.card-container .front .front-data-container-violet {
+  background-color: darkorchid;
+}
+
+/* ---------- Brown class ---------- */
+.card-container .front-brown {
+  border: 3px solid brown;
+}
+
+.card-container .front .front-ribbon-brown {
+  background-color: brown;
+}
+
+.card-container .front .front-ribbon-brown::before {
+  background-color: rgb(125, 35, 35);
+}
+
+.card-container .front .front-ribbon-brown::after {
+  background-color: brown;
+}
+
+.card-container
+  .front
+  .front-img-container
+  .front-img-container-background-brown {
+  background-color: brown;
+}
+
+.card-container .front .front-data-container-brown {
+  background-color: brown;
+}

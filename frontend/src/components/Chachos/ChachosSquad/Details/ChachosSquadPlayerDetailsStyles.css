@@ -94,6 +94,14 @@
   max-width: 960px; /* Ancho máximo para pantallas grandes */
 }
 
+.chachos-player-details-others video {
+  margin-top: 1rem;
+  width: 100%;
+  height: 450px;
+  min-width: 320px; /* Ancho mínimo para celulares */
+  max-width: 960px; /* Ancho máximo para pantallas grandes */
+}
+
 /* ---------- Chachos player detail interview ---------- */
 .chachos-player-details-interview {
   grid-area: interview;

@@ -9,6 +9,7 @@ import player99ImageSource from "../../../../assets/photos/players/player-99.jpe
 import player22ImageSource from "../../../../assets/photos/players/player-22.jpeg";
 import player8ImageSource from "../../../../assets/photos/players/player-8.jpeg";
 import player200ImageSource from "../../../../assets/photos/players/player-200.jpeg";
+import player5ImageSource from "../../../../assets/photos/players/player-5.jpeg";
 
 const chachosSquadImages = [
   {
@@ -54,6 +55,10 @@ const chachosSquadImages = [
   {
     img: player200ImageSource,
     shirt: 200,
+  },
+  {
+    img: player5ImageSource,
+    shirt: 5,
   },
 ];
 

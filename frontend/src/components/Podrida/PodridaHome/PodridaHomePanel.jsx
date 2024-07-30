@@ -1,5 +1,11 @@
 //Import React & Hooks
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
+//Import libraries
+import { SwiperContainer, SwiperSlide } from "swiper/element/bundle";
+import "swiper/element/bundle";
+import "swiper/css";
+import "swiper/css/pagination";
 
 //Import CSS & styles
 import "./PodridaHomePanelStyles.css";
@@ -7,19 +13,33 @@ import "./PodridaHomePanelStyles.css";
 //Import helpers
 import { regroupPlayerStats } from "../../../helpers/regroupPlayerStats";
 import { matchStatsSort } from "../../../helpers/matchStatsSort";
-import { countUniqueValues } from "../../../helpers/countUniqueValues";
 
 //Import components
 import PodridaMenu from "../PodridaMenu";
-import firstPlaceSource from "../../../assets/images/first-place.png";
-import secondPlaceSource from "../../../assets/images/second-place.png";
-import secondToLastPlaceSource from "../../../assets/images/clown.png";
-import lastPlaceSource from "../../../assets/images/black-star.png";
+import RecordsSlide from "../../Layout/Podrida/RecordsSlide/RecordsSlide";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
 import { getMatchStatsFilteredAction } from "../../../redux/slices/match-stats/matchStatsSlices";
 import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tournamentsSlices";
+
+//Import assets - MEDALS
+import matchesMedal from "../../../assets/images/podrida/medals/matches.png";
+import titlesMedal from "../../../assets/images/podrida/medals/titles.png";
+import lastsMedal from "../../../assets/images/podrida/medals/lasts.png";
+import pointsMedal from "../../../assets/images/podrida/medals/points.png";
+import accuracyMedal from "../../../assets/images/podrida/medals/accuracy.png";
+import requestsMedal from "../../../assets/images/podrida/medals/requests.png";
+import highlightsMedal from "../../../assets/images/podrida/medals/highlights.png";
+
+//Import assets - CHARACTERS
+import marioImage from "../../../assets/images/podrida/mario.png";
+import yoshiImage from "../../../assets/images/podrida/yoshi.png";
+import peachImage from "../../../assets/images/podrida/peach.png";
+import luigiImage from "../../../assets/images/podrida/luigi.png";
+import goombaImage from "../../../assets/images/podrida/goomba.png";
+import warioImage from "../../../assets/images/podrida/wario.png";
+import bowserImage from "../../../assets/images/podrida/bowser.png";
 
 //----------------------------------------
 //COMPONENT
@@ -128,6 +148,41 @@ const PodridaHomePanel = () => {
     "black_pearl"
   ).filter((stat) => stat.black_pearl !== 0);
 
+  //Swiper set up and params
+  const swiperElRef = useRef(null);
+
+  useEffect(() => {
+    const swiperParams = {
+      modules: [SwiperContainer.Pagination],
+      pagination: {
+        clickable: true, // Hace que los bullets sean clickeables
+        dynamicBullets: true, // Puedes activar bullets dinámicos si lo deseas
+      },
+      loop: true,
+      spaceBetween: 5,
+      breakpoints: {
+        0: {
+          slidesPerView: 1,
+        },
+        800: {
+          slidesPerView: 2,
+        },
+        1200: {
+          slidesPerView: 3,
+        },
+      },
+    };
+    Object.assign(swiperElRef.current, swiperParams);
+    swiperElRef.current.initialize();
+  }, []);
+
+  const handlePrevSlide = () => {
+    swiperElRef.current.swiper.slidePrev();
+  };
+  const handleNextSlide = () => {
+    swiperElRef.current.swiper.slideNext();
+  };
+
   return (
     <>
       <PodridaMenu />
@@ -137,40 +192,80 @@ const PodridaHomePanel = () => {
             {appError} {serverError}
           </h5>
         ) : null}
-        <h2>Récords históricos</h2>
 
-        <div className="podrida-stats-content-card">
-          <div className="podrida-stats-content-card-top">
-            <h5>Asistencias</h5>
-            <p>
-              {matchStatsSortedByAssists[0]?.first_name}{" "}
-              {matchStatsSortedByAssists[0]?.last_name}
-            </p>
-            <div className="podrida-stats-content-card-top-goals">
-              <span>{matchStatsSortedByAssists[0]?.assists}</span>
-              <p>en {matchStatsSortedByAssists[0]?.matches_played} partidos</p>
-            </div>
-            <div className="podrida-stats-content-card-top-average">
-              {(
-                matchStatsSortedByAssists[0]?.assists /
-                matchStatsSortedByAssists[0]?.matches_played
-              ).toFixed(2)}{" "}
-              por partido
-            </div>
-          </div>
-          <div className="podrida-stats-content-card-rest">
-            {matchStatsSortedByAssists?.slice(1, 10).map((player, index) => (
-              <p>
-                {index + 2}. {player.first_name} {player.last_name}
-                <span>{player.assists}</span>
-              </p>
-            ))}
-          </div>
+        {/* <<<-------------------- SWIPER APPLIED TO HISTORICAL RECORDS -------------------->>> */}
+        <h2>Récords históricos</h2>
+        <div className="podrida-swiper-container">
+          <swiper-container ref={swiperElRef} class="podrida-swiper">
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="red"
+                category="Mayor cantidad de partidas jugadas"
+                medal={matchesMedal}
+                character={marioImage}
+              />
+            </swiper-slide>
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="orange"
+                category="Mayor cantidad de titulos"
+                medal={titlesMedal}
+                character={peachImage}
+              />
+            </swiper-slide>
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="grey"
+                category="Mayor cantidad de últimos puestos"
+                medal={lastsMedal}
+                character={bowserImage}
+              />
+            </swiper-slide>
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="green"
+                category="Mayor cantidad de highlights"
+                medal={highlightsMedal}
+                character={yoshiImage}
+              />
+            </swiper-slide>
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="blue"
+                category="Puntos en una partida"
+                medal={pointsMedal}
+                character={warioImage}
+              />
+            </swiper-slide>
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="violet"
+                category="Basas pedidas en una partida"
+                medal={requestsMedal}
+                character={goombaImage}
+              />
+            </swiper-slide>
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="brown"
+                category="% cumplimiento en una partida"
+                medal={accuracyMedal}
+                character={luigiImage}
+              />
+            </swiper-slide>
+          </swiper-container>
+          <button onClick={handlePrevSlide} className="podrida-swiper-btn-back">
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <button onClick={handleNextSlide} className="podrida-swiper-btn-next">
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </button>
         </div>
 
+        {/* <<<-------------------- TABLE REFLECTING PODRIDA RANKING -------------------->>> */}
         <h2>Ranking</h2>
 
-        {/*         Menu desplegable para elegir el año que filtre la informacion debajo */}
+        {/* ----- Menu desplegable para elegir año ----- */}
         <select
           className="podrida-home-panel-container-select"
           name="tournament"
@@ -185,7 +280,7 @@ const PodridaHomePanel = () => {
             ))}
         </select>
 
-        {/*         Menu desplegable para elegir el tipo de partida que filtre la informacion debajo */}
+        {/* ----- Menu desplegable para elegir tipo de partida ----- */}
         <select
           className="podrida-home-panel-container-select"
           name="tournament"
@@ -200,7 +295,7 @@ const PodridaHomePanel = () => {
             ))}
         </select>
 
-        {/*         Tablas de partidas jugadas y ranking */}
+        {/* ----- Tabla de partidas jugadas y ranking ----- */}
         <div className="podrida-points-main-table">
           <table>
             <thead>
@@ -229,8 +324,10 @@ const PodridaHomePanel = () => {
           </table>
         </div>
 
+        {/* <<<-------------------- TABLE REFLECTING HISTORICAL STATS -------------------->>> */}
         <h2>Centro de estadísticas</h2>
 
+        {/* ----- Menu desplegable para elegir tipo de estadistica ----- */}
         <select
           className="podrida-home-panel-container-select"
           name="tournament"

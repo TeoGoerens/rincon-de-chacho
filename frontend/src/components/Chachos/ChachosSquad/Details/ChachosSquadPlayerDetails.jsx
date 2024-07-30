@@ -9,6 +9,7 @@ import "./ChachosSquadPlayerDetailsStyles.css";
 
 //Import components
 import chachosSquadImages from "./ChachosSquadPlayerDetailsSupport";
+import player5VideoSource from "../../../../assets/videos/players/player-5.mp4";
 
 //Import Redux
 import { useDispatch, useSelector } from "react-redux";
@@ -109,6 +110,17 @@ const ChachosSquadPlayerDetails = () => {
                 referrerpolicy="strict-origin-when-cross-origin"
                 allowfullscreen
               ></iframe>
+            </div>
+          ) : null}
+
+          {selectedPlayer?.shirt === 5 ? (
+            <div className="chachos-player-details-others">
+              <h4 className="chachos-player-details-others-title">
+                Ahora si, la entrevista
+              </h4>
+              <video width="400" controls>
+                <source src={`${player5VideoSource}`} type="video/mp4" />
+              </video>
             </div>
           ) : null}
         </div>

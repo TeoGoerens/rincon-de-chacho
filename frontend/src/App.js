@@ -1,7 +1,5 @@
 import "./App.css";
-//import Navbar from "./components/Navbar/Navbar";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import Navbar from "./components/Layout/Navbar/Navbar";
 import UserRegister from "./components/Users/Register/userRegister";
 import UserLogin from "./components/Users/Login/userLogin";
@@ -15,6 +13,13 @@ import CurrentlyWorking from "./components/Layout/SoonTag/CurrentlyWorking";
 import ForgotPassword from "./components/Users/PasswordManagement/ForgotPassword";
 import ResetPassword from "./components/Users/PasswordManagement/ResetPassword";
 import PodridaRoutes from "./components/Podrida/PodridaRoutes";
+
+/* --------------- SUPPORTING LIBRARIES --------------- */
+import { register } from "swiper/element/bundle";
+import "swiper/element/bundle";
+import "swiper/css";
+import "swiper/css/pagination";
+register();
 
 function App() {
   return (
