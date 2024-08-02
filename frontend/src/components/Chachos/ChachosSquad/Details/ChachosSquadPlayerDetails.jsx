@@ -117,6 +117,7 @@ const ChachosSquadPlayerDetails = () => {
               <h4 className="chachos-player-details-others-title">
                 Ahora si, la entrevista
               </h4>
+
               <video width="400" controls>
                 <source
                   src="https://rincon-de-chacho-assets.s3.us-east-2.amazonaws.com/chachos/videos/player-5.mp4"
