@@ -115,12 +115,23 @@ const ChachosSquadPlayerDetails = () => {
           {selectedPlayer?.shirt === 5 ? (
             <div className="chachos-player-details-others">
               <h4 className="chachos-player-details-others-title">
-                Ahora si, la entrevista
+                Si sos un chacal vago, te dejamos la versión corta de la
+                entrevista:
               </h4>
 
               <video width="400" controls>
                 <source
                   src="https://rincon-de-chacho-assets.s3.us-east-2.amazonaws.com/chachos/videos/player-5.mp4"
+                  type="video/mp4"
+                />
+              </video>
+              <h4 className="chachos-player-details-others-title">
+                Si te quedaste con ganas de más, acá tenés la entrevista entera:
+              </h4>
+
+              <video width="400" controls>
+                <source
+                  src="https://rincon-de-chacho-assets.s3.us-east-2.amazonaws.com/chachos/videos/player+5+(long).mp4"
                   type="video/mp4"
                 />
               </video>
