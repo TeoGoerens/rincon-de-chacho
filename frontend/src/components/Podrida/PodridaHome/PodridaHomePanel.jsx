@@ -232,6 +232,14 @@ const PodridaHomePanel = () => {
             <swiper-slide class="podrida-swiper-slide">
               <RecordsSlide
                 customClass="blue"
+                category="Mayor % de cumplimiento"
+                medal={accuracyMedal}
+                character={luigiImage}
+              />
+            </swiper-slide>
+            <swiper-slide class="podrida-swiper-slide">
+              <RecordsSlide
+                customClass="violet"
                 category="Puntos en una partida"
                 medal={pointsMedal}
                 character={warioImage}
@@ -239,18 +247,10 @@ const PodridaHomePanel = () => {
             </swiper-slide>
             <swiper-slide class="podrida-swiper-slide">
               <RecordsSlide
-                customClass="violet"
+                customClass="brown"
                 category="Basas pedidas en una partida"
                 medal={requestsMedal}
                 character={goombaImage}
-              />
-            </swiper-slide>
-            <swiper-slide class="podrida-swiper-slide">
-              <RecordsSlide
-                customClass="brown"
-                category="% cumplimiento en una partida"
-                medal={accuracyMedal}
-                character={luigiImage}
               />
             </swiper-slide>
           </swiper-container>
