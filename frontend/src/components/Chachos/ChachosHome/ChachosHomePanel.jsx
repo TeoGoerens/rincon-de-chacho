@@ -1,5 +1,11 @@
 //Import React & Hooks
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
+//Import libraries
+import { SwiperContainer, SwiperSlide } from "swiper/element/bundle";
+import "swiper/element/bundle";
+import "swiper/css";
+import "swiper/css/pagination";
 
 //Import CSS & styles
 import "./ChachosHomePanelStyles.css";
@@ -128,6 +134,41 @@ const ChachosHomePanel = () => {
     "black_pearl"
   ).filter((stat) => stat.black_pearl !== 0);
 
+  //Swiper set up and params
+  const swiperElRef = useRef(null);
+
+  useEffect(() => {
+    const swiperParams = {
+      modules: [SwiperContainer.Pagination],
+      pagination: {
+        clickable: true, // Hace que los bullets sean clickeables
+        dynamicBullets: true, // Puedes activar bullets dinámicos si lo deseas
+      },
+      loop: true,
+      spaceBetween: 2,
+      breakpoints: {
+        0: {
+          slidesPerView: 1,
+        },
+        800: {
+          slidesPerView: 2,
+        },
+        1200: {
+          slidesPerView: 3,
+        },
+      },
+    };
+    Object.assign(swiperElRef.current, swiperParams);
+    swiperElRef.current.initialize();
+  }, []);
+
+  const handlePrevSlide = () => {
+    swiperElRef.current.swiper.slidePrev();
+  };
+  const handleNextSlide = () => {
+    swiperElRef.current.swiper.slideNext();
+  };
+
   return (
     <>
       <ChachosMenu />
@@ -147,7 +188,7 @@ const ChachosHomePanel = () => {
             ))}
         </select>
 
-        <h2>Performance Plantel</h2>
+        <h2>Top 10 por categoria</h2>
         {appError || serverError ? (
           <h5>
             {appError} {serverError}
@@ -156,139 +197,540 @@ const ChachosHomePanel = () => {
 
         {/*         Tablas de presencias, goleadores y asistencias */}
 
-        <div className="chachos-stats-content">
-          <div className="chachos-stats-content-card">
-            <div className="chachos-stats-content-card-top">
-              <h5>Presencias</h5>
-              <p>
-                {matchStatsSortedByMatchesPlayed[0]?.first_name}{" "}
-                {matchStatsSortedByMatchesPlayed[0]?.last_name}
-              </p>
-              <div className="chachos-stats-content-card-top-goals">
-                <span>
-                  {matchStatsSortedByMatchesPlayed[0]?.matches_played}
-                </span>
-                <p>de {countUniqueValues(allMatchStats, "round")} partidos</p>
-              </div>
-              <div className="chachos-stats-content-card-top-average">
-                {(
-                  (matchStatsSortedByMatchesPlayed[0]?.matches_played /
-                    countUniqueValues(allMatchStats, "round")) *
-                  100
-                ).toFixed(0)}
-                {"% "}
-                de asistencia
-              </div>
-            </div>
-            <div className="chachos-stats-content-card-rest">
-              {matchStatsSortedByMatchesPlayed
-                ?.slice(1, 10)
-                .map((player, index) => (
-                  <p>
-                    {index + 2}. {player.first_name} {player.last_name}
-                    <span>{player.matches_played}</span>
-                  </p>
-                ))}
-            </div>
-          </div>
+        <div className="chachos-swiper-container">
+          <swiper-container ref={swiperElRef} class="chachos-swiper">
+            <swiper-slide class="chachos-swiper-slide">
+              <div className="chachos-stats-content-card">
+                <h3>PRESENCIAS</h3>
+                <div className="chachos-stats-content-card-top">
+                  <div className="top-player">
+                    <div className="player">
+                      <div className="player-info">
+                        <span className="player-rank">1</span>
+                        <div className="player-name">
+                          <h4>
+                            {matchStatsSortedByMatchesPlayed[0]?.first_name}{" "}
+                            {matchStatsSortedByMatchesPlayed[0]?.last_name}{" "}
+                            <i class="fa-solid fa-trophy"></i>
+                          </h4>
+                          <p>
+                            {matchStatsSortedByMatchesPlayed[0]?.field_position}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="player-stat">
+                        <span class="material-symbols-outlined">
+                          front_hand
+                        </span>
+                        <strong>
+                          {matchStatsSortedByMatchesPlayed[0]?.matches_played}
+                        </strong>
+                      </div>
+                    </div>
 
-          <div className="chachos-stats-content-card">
-            <div className="chachos-stats-content-card-top">
-              <h5>Goles</h5>
-              <p>
-                {matchStatsSortedByGoals[0]?.first_name}{" "}
-                {matchStatsSortedByGoals[0]?.last_name}
-              </p>
-              <div className="chachos-stats-content-card-top-goals">
-                <span>{matchStatsSortedByGoals[0]?.goals}</span>
-                <p>en {matchStatsSortedByGoals[0]?.matches_played} partidos</p>
-              </div>
-              <div className="chachos-stats-content-card-top-average">
-                {(
-                  matchStatsSortedByGoals[0]?.goals /
-                  matchStatsSortedByGoals[0]?.matches_played
-                ).toFixed(2)}{" "}
-                por partido
-              </div>
-            </div>
-            <div className="chachos-stats-content-card-rest">
-              {matchStatsSortedByGoals?.slice(1, 10).map((player, index) => (
-                <p>
-                  {index + 2}. {player.first_name} {player.last_name}
-                  <span>{player.goals}</span>
-                </p>
-              ))}
-            </div>
-          </div>
+                    <div className="top-player-average">
+                      <h6>
+                        <i class="fa-solid fa-star"></i> De un total de{" "}
+                        {countUniqueValues(allMatchStats, "round")} partidos:{" "}
+                        <strong>
+                          {(
+                            (matchStatsSortedByMatchesPlayed[0]
+                              ?.matches_played /
+                              countUniqueValues(allMatchStats, "round")) *
+                            100
+                          ).toFixed(0)}
+                          {"% "}
+                          de asistencia
+                        </strong>
+                      </h6>
+                    </div>
+                  </div>
 
-          <div className="chachos-stats-content-card">
-            <div className="chachos-stats-content-card-top">
-              <h5>Asistencias</h5>
-              <p>
-                {matchStatsSortedByAssists[0]?.first_name}{" "}
-                {matchStatsSortedByAssists[0]?.last_name}
-              </p>
-              <div className="chachos-stats-content-card-top-goals">
-                <span>{matchStatsSortedByAssists[0]?.assists}</span>
-                <p>
-                  en {matchStatsSortedByAssists[0]?.matches_played} partidos
-                </p>
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">2</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByMatchesPlayed[1]?.first_name}{" "}
+                          {matchStatsSortedByMatchesPlayed[1]?.last_name}{" "}
+                          <i class="fa-solid fa-medal"></i>
+                        </h4>
+                        <p>
+                          {matchStatsSortedByMatchesPlayed[1]?.field_position}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">front_hand</span>
+                      <strong>
+                        {matchStatsSortedByMatchesPlayed[1]?.matches_played}
+                      </strong>
+                    </div>
+                  </div>
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">3</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByMatchesPlayed[2]?.first_name}{" "}
+                          {matchStatsSortedByMatchesPlayed[2]?.last_name}{" "}
+                          <i class="fa-solid fa-award"></i>
+                        </h4>
+                        <p>
+                          {matchStatsSortedByMatchesPlayed[2]?.field_position}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">front_hand</span>
+                      <strong>
+                        {matchStatsSortedByMatchesPlayed[2]?.matches_played}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+                <div className="chachos-stats-content-card-rest">
+                  {matchStatsSortedByMatchesPlayed
+                    ?.slice(3, 10)
+                    .map((player, index) => (
+                      <div className="player" key={index}>
+                        <div className="player-info">
+                          <span className="player-rank">{index + 4}</span>
+                          <div className="player-name">
+                            <h4>
+                              {player.first_name} {player.last_name}
+                            </h4>
+                          </div>
+                        </div>
+                        <div className="player-stat">
+                          <span class="material-symbols-outlined">
+                            front_hand
+                          </span>
+                          <strong>{player.matches_played}</strong>
+                        </div>
+                      </div>
+                    ))}
+                </div>
               </div>
-              <div className="chachos-stats-content-card-top-average">
-                {(
-                  matchStatsSortedByAssists[0]?.assists /
-                  matchStatsSortedByAssists[0]?.matches_played
-                ).toFixed(2)}{" "}
-                por partido
-              </div>
-            </div>
-            <div className="chachos-stats-content-card-rest">
-              {matchStatsSortedByAssists?.slice(1, 10).map((player, index) => (
-                <p>
-                  {index + 2}. {player.first_name} {player.last_name}
-                  <span>{player.assists}</span>
-                </p>
-              ))}
-            </div>
-          </div>
+            </swiper-slide>
+            <swiper-slide class="chachos-swiper-slide">
+              <div className="chachos-stats-content-card">
+                <h3>GOLEADORES</h3>
+                <div className="chachos-stats-content-card-top">
+                  <div className="top-player">
+                    <div className="player">
+                      <div className="player-info">
+                        <span className="player-rank">1</span>
+                        <div className="player-name">
+                          <h4>
+                            {matchStatsSortedByGoals[0]?.first_name}{" "}
+                            {matchStatsSortedByGoals[0]?.last_name}{" "}
+                            <i class="fa-solid fa-trophy"></i>
+                          </h4>
+                          <p>{matchStatsSortedByGoals[0]?.field_position}</p>
+                        </div>
+                      </div>
+                      <div className="player-stat">
+                        <span class="material-symbols-outlined">
+                          sports_soccer
+                        </span>
+                        <strong>{matchStatsSortedByGoals[0]?.goals}</strong>
+                      </div>
+                    </div>
 
-          <div className="chachos-stats-content-card">
-            <div className="chachos-stats-content-card-top">
-              <h5>Amarillas</h5>
-              <p>
-                {matchStatsSortedByYellowCards[0]?.first_name}{" "}
-                {matchStatsSortedByYellowCards[0]?.last_name}
-              </p>
-              <div className="chachos-stats-content-card-top-goals">
-                <span>{matchStatsSortedByYellowCards[0]?.yellow_cards}</span>
-                <p>
-                  en {matchStatsSortedByYellowCards[0]?.matches_played} partidos
-                </p>
+                    <div className="top-player-average">
+                      <h6>
+                        <i class="fa-solid fa-star"></i> Promedio por partido:{" "}
+                        <strong>
+                          {(
+                            matchStatsSortedByGoals[0]?.goals /
+                            matchStatsSortedByGoals[0]?.matches_played
+                          ).toFixed(2)}
+                        </strong>
+                      </h6>
+                    </div>
+                  </div>
+
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">2</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByGoals[1]?.first_name}{" "}
+                          {matchStatsSortedByGoals[1]?.last_name}{" "}
+                          <i class="fa-solid fa-medal"></i>
+                        </h4>
+                        <p>{matchStatsSortedByGoals[1]?.field_position}</p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">
+                        sports_soccer
+                      </span>
+                      <strong>{matchStatsSortedByGoals[1]?.goals}</strong>
+                    </div>
+                  </div>
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">3</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByGoals[2]?.first_name}{" "}
+                          {matchStatsSortedByGoals[2]?.last_name}{" "}
+                          <i class="fa-solid fa-award"></i>
+                        </h4>
+                        <p>{matchStatsSortedByGoals[2]?.field_position}</p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">
+                        sports_soccer
+                      </span>
+                      <strong>{matchStatsSortedByGoals[2]?.goals}</strong>
+                    </div>
+                  </div>
+                </div>
+                <div className="chachos-stats-content-card-rest">
+                  {matchStatsSortedByGoals
+                    ?.slice(3, 10)
+                    .map((player, index) => (
+                      <div className="player" key={index}>
+                        <div className="player-info">
+                          <span className="player-rank">{index + 4}</span>
+                          <div className="player-name">
+                            <h4>
+                              {player.first_name} {player.last_name}
+                            </h4>
+                          </div>
+                        </div>
+                        <div className="player-stat">
+                          <span class="material-symbols-outlined">
+                            sports_soccer
+                          </span>
+                          <strong>{player.goals}</strong>
+                        </div>
+                      </div>
+                    ))}
+                </div>
               </div>
-              <div className="chachos-stats-content-card-top-average">
-                {(
-                  (matchStatsSortedByYellowCards[0]?.yellow_cards /
-                    matchStatsSortedByYellowCards[0]?.matches_played) *
-                  100
-                ).toFixed(0)}
-                {"% "}
-                de amonestaciones
+            </swiper-slide>
+            <swiper-slide class="chachos-swiper-slide">
+              <div className="chachos-stats-content-card">
+                <h3>ASISTENCIAS</h3>
+                <div className="chachos-stats-content-card-top">
+                  <div className="top-player">
+                    <div className="player">
+                      <div className="player-info">
+                        <span className="player-rank">1</span>
+                        <div className="player-name">
+                          <h4>
+                            {matchStatsSortedByAssists[0]?.first_name}{" "}
+                            {matchStatsSortedByAssists[0]?.last_name}{" "}
+                            <i class="fa-solid fa-trophy"></i>
+                          </h4>
+                          <p>{matchStatsSortedByAssists[0]?.field_position}</p>
+                        </div>
+                      </div>
+                      <div className="player-stat">
+                        <span class="material-symbols-outlined">
+                          psychology
+                        </span>
+                        <strong>{matchStatsSortedByAssists[0]?.assists}</strong>
+                      </div>
+                    </div>
+
+                    <div className="top-player-average">
+                      <h6>
+                        <i class="fa-solid fa-star"></i> Promedio por partido:{" "}
+                        <strong>
+                          {(
+                            matchStatsSortedByAssists[0]?.assists /
+                            matchStatsSortedByAssists[0]?.matches_played
+                          ).toFixed(2)}
+                        </strong>
+                      </h6>
+                    </div>
+                  </div>
+
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">2</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByAssists[1]?.first_name}{" "}
+                          {matchStatsSortedByAssists[1]?.last_name}{" "}
+                          <i class="fa-solid fa-medal"></i>
+                        </h4>
+                        <p>{matchStatsSortedByAssists[1]?.field_position}</p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">psychology</span>
+                      <strong>{matchStatsSortedByAssists[1]?.assists}</strong>
+                    </div>
+                  </div>
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">3</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByAssists[2]?.first_name}{" "}
+                          {matchStatsSortedByAssists[2]?.last_name}{" "}
+                          <i class="fa-solid fa-award"></i>
+                        </h4>
+                        <p>{matchStatsSortedByAssists[2]?.field_position}</p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">psychology</span>
+                      <strong>{matchStatsSortedByAssists[2]?.assists}</strong>
+                    </div>
+                  </div>
+                </div>
+                <div className="chachos-stats-content-card-rest">
+                  {matchStatsSortedByAssists
+                    ?.slice(3, 10)
+                    .map((player, index) => (
+                      <div className="player" key={index}>
+                        <div className="player-info">
+                          <span className="player-rank">{index + 4}</span>
+                          <div className="player-name">
+                            <h4>
+                              {player.first_name} {player.last_name}
+                            </h4>
+                          </div>
+                        </div>
+                        <div className="player-stat">
+                          <span class="material-symbols-outlined">
+                            psychology
+                          </span>
+                          <strong>{player.assists}</strong>
+                        </div>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-            <div className="chachos-stats-content-card-rest">
-              {matchStatsSortedByYellowCards
-                ?.slice(1, 10)
-                .map((player, index) => (
-                  <p>
-                    {index + 2}. {player.first_name} {player.last_name}
-                    <span>{player.yellow_cards}</span>
-                  </p>
-                ))}
-            </div>
-          </div>
+            </swiper-slide>
+            <swiper-slide class="chachos-swiper-slide">
+              <div className="chachos-stats-content-card">
+                <h3>AMARILLAS</h3>
+                <div className="chachos-stats-content-card-top">
+                  <div className="top-player">
+                    <div className="player">
+                      <div className="player-info">
+                        <span className="player-rank">1</span>
+                        <div className="player-name">
+                          <h4>
+                            {matchStatsSortedByYellowCards[0]?.first_name}{" "}
+                            {matchStatsSortedByYellowCards[0]?.last_name}{" "}
+                            <i class="fa-solid fa-trophy"></i>
+                          </h4>
+                          <p>
+                            {matchStatsSortedByYellowCards[0]?.field_position}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="player-stat">
+                        <span class="material-symbols-outlined">warning</span>
+                        <strong>
+                          {matchStatsSortedByYellowCards[0]?.yellow_cards}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div className="top-player-average">
+                      <h6>
+                        <i class="fa-solid fa-star"></i> Promedio:{" "}
+                        <strong>
+                          1 cada{" "}
+                          {(
+                            matchStatsSortedByYellowCards[0]?.matches_played /
+                            matchStatsSortedByYellowCards[0]?.yellow_cards
+                          ).toFixed(1)}{" "}
+                          partidos
+                        </strong>
+                      </h6>
+                    </div>
+                  </div>
+
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">2</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByYellowCards[1]?.first_name}{" "}
+                          {matchStatsSortedByYellowCards[1]?.last_name}{" "}
+                          <i class="fa-solid fa-medal"></i>
+                        </h4>
+                        <p>
+                          {matchStatsSortedByYellowCards[1]?.field_position}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">warning</span>
+                      <strong>
+                        {matchStatsSortedByYellowCards[1]?.yellow_cards}
+                      </strong>
+                    </div>
+                  </div>
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">3</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByYellowCards[2]?.first_name}{" "}
+                          {matchStatsSortedByYellowCards[2]?.last_name}{" "}
+                          <i class="fa-solid fa-award"></i>
+                        </h4>
+                        <p>
+                          {matchStatsSortedByYellowCards[2]?.field_position}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">warning</span>
+                      <strong>
+                        {matchStatsSortedByYellowCards[2]?.yellow_cards}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+                <div className="chachos-stats-content-card-rest">
+                  {matchStatsSortedByYellowCards
+                    ?.slice(3, 10)
+                    .map((player, index) => (
+                      <div className="player" key={index}>
+                        <div className="player-info">
+                          <span className="player-rank">{index + 4}</span>
+                          <div className="player-name">
+                            <h4>
+                              {player.first_name} {player.last_name}
+                            </h4>
+                          </div>
+                        </div>
+                        <div className="player-stat">
+                          <span class="material-symbols-outlined">warning</span>
+                          <strong>{player.yellow_cards}</strong>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </swiper-slide>
+            <swiper-slide class="chachos-swiper-slide">
+              <div className="chachos-stats-content-card">
+                <h3>ROJAS</h3>
+                <div className="chachos-stats-content-card-top">
+                  <div className="top-player">
+                    <div className="player">
+                      <div className="player-info">
+                        <span className="player-rank">1</span>
+                        <div className="player-name">
+                          <h4>
+                            {matchStatsSortedByRedCards[0]?.first_name}{" "}
+                            {matchStatsSortedByRedCards[0]?.last_name}{" "}
+                            <i class="fa-solid fa-trophy"></i>
+                          </h4>
+                          <p>{matchStatsSortedByRedCards[0]?.field_position}</p>
+                        </div>
+                      </div>
+                      <div className="player-stat">
+                        <span class="material-symbols-outlined">close</span>
+                        <strong>
+                          {matchStatsSortedByRedCards[0]?.red_cards}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div className="top-player-average">
+                      <h6>
+                        <i class="fa-solid fa-star"></i> Promedio:{" "}
+                        <strong>
+                          1 cada{" "}
+                          {(
+                            matchStatsSortedByRedCards[0]?.matches_played /
+                            matchStatsSortedByRedCards[0]?.red_cards
+                          ).toFixed(1)}{" "}
+                          partidos
+                        </strong>
+                      </h6>
+                    </div>
+                  </div>
+
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">2</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByRedCards[1]?.first_name}{" "}
+                          {matchStatsSortedByRedCards[1]?.last_name}{" "}
+                          <i class="fa-solid fa-medal"></i>
+                        </h4>
+                        <p>{matchStatsSortedByRedCards[1]?.field_position}</p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">close</span>
+                      <strong>
+                        {matchStatsSortedByRedCards[1]?.red_cards}
+                      </strong>
+                    </div>
+                  </div>
+                  <div className="player">
+                    <div className="player-info">
+                      <span className="player-rank">3</span>
+                      <div className="player-name">
+                        <h4>
+                          {matchStatsSortedByRedCards[2]?.first_name}{" "}
+                          {matchStatsSortedByRedCards[2]?.last_name}{" "}
+                          <i class="fa-solid fa-award"></i>
+                        </h4>
+                        <p>{matchStatsSortedByRedCards[2]?.field_position}</p>
+                      </div>
+                    </div>
+                    <div className="player-stat">
+                      <span class="material-symbols-outlined">close</span>
+                      <strong>
+                        {matchStatsSortedByRedCards[2]?.red_cards}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+                <div className="chachos-stats-content-card-rest">
+                  {matchStatsSortedByRedCards
+                    ?.slice(3, 10)
+                    .map((player, index) => (
+                      <div className="player" key={index}>
+                        <div className="player-info">
+                          <span className="player-rank">{index + 4}</span>
+                          <div className="player-name">
+                            <h4>
+                              {player.first_name} {player.last_name}
+                            </h4>
+                          </div>
+                        </div>
+                        <div className="player-stat">
+                          <span class="material-symbols-outlined">close</span>
+                          <strong>{player.red_cards}</strong>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </swiper-slide>
+          </swiper-container>
+
+          <button onClick={handlePrevSlide} className="chachos-swiper-btn-back">
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <button onClick={handleNextSlide} className="chachos-swiper-btn-next">
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </button>
         </div>
 
         {/*         Tablas de puntajes y perlas */}
+        <h2>Puntajes y perlas</h2>
         <div className="chachos-points-content">
           <div className="chachos-points-main-table">
             <table>

@@ -16,6 +16,7 @@ export const regroupPlayerStats = (playersStats) => {
         id_player: playerId,
         first_name: current.player.first_name,
         last_name: current.player.last_name,
+        field_position: current.player.field_position,
         matches_played: 0,
         minutes_played: 0,
         goals: 0,
