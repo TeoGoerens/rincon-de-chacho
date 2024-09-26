@@ -230,7 +230,7 @@ const ChachosHomePanel = () => {
 
                     <div className="top-player-average">
                       <h6>
-                        <i class="fa-solid fa-star"></i> De un total de{" "}
+                        <i class="fa-solid fa-star"></i> De{" "}
                         {countUniqueValues(allMatchStats, "round")} partidos:{" "}
                         <strong>
                           {(
