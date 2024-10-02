@@ -1,0 +1,200 @@
+/* -------------------------------------------- */
+/* --------------- CRONICA TITLE -------------- */
+/* -------------------------------------------- */
+
+.cronica-title {
+  margin: 1rem auto 0rem;
+}
+
+.cronica-title h1 {
+  font-size: 3rem;
+  font-family: var(--secondary-font);
+  font-weight: normal;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.cronica-title h1 span {
+  font-size: 3.5rem;
+  font-family: var(--accent-font);
+  font-weight: bolder;
+  text-transform: none;
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  background-clip: text;
+  color: transparent;
+}
+
+.cronica-title h3 {
+  font-size: 0.9rem;
+  font-family: var(--secondary-font);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  text-align: center;
+}
+
+.cronica-title .cronica-title-border {
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  height: 5px;
+  width: 150px;
+  margin: 1.5rem auto 0rem;
+}
+
+/* --------------------------------------------- */
+/* --------------- CRONICA NEWEST -------------- */
+/* --------------------------------------------- */
+
+.cronica-newest {
+  width: clamp(300px, 100%, 800px);
+  margin: 2.5rem auto 0rem;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cronica-newest article {
+}
+
+.cronica-newest article .cronica-image {
+  position: relative;
+  max-height: 300px;
+}
+
+.cronica-newest article .cronica-image span {
+  font-size: 0.8rem;
+  position: absolute;
+  right: 0.8rem;
+  top: 0.8rem;
+  color: white;
+  background-color: var(--fourth-color);
+  padding: 0.3rem 0.5rem;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.cronica-newest article .cronica-image span i {
+  color: white;
+  margin-right: 0.3rem;
+}
+
+.cronica-newest article .cronica-image img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+.cronica-newest article .cronica-details {
+  background-color: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cronica-newest article .cronica-details .cronica-details-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.cronica-newest article .cronica-details .cronica-details-title h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-family: var(--secondary-font);
+}
+
+.cronica-newest article .cronica-details .cronica-details-title span {
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  padding: 0.35rem 1rem;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.cronica-newest article .cronica-details > p {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  font-family: var(--secondary-font);
+  font-weight: 300;
+}
+
+.cronica-newest article .cronica-details .cronica-icons {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  align-items: center;
+  column-gap: 1rem;
+  row-gap: 0.5rem;
+  background-color: rgba(229, 46, 113, 0.1);
+  padding: 1rem 0.5rem;
+  border-radius: 10px;
+}
+
+.cronica-newest article .cronica-details .cronica-icons .cronica-icons-content {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.cronica-newest
+  article
+  .cronica-details
+  .cronica-icons
+  .cronica-icons-content
+  p {
+  font-size: 0.9rem;
+}
+
+.cronica-newest article .cronica-details .cronica-read-btn {
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  padding: 0.35rem 1rem;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  width: 110px;
+  text-align: center;
+  align-self: center;
+  margin-top: 2rem;
+}
+
+/* --------------------------------------------- */
+/* --------------- CRONICA OLDER --------------- */
+/* --------------------------------------------- */
+
+.cronica-older {
+  margin-bottom: 3rem;
+}
+
+/* --------------------------------------------- */
+/* --------------- CRONICA OLDER --------------- */
+/* --------------------------------------------- */
+
+.cronica-older {
+  margin-bottom: 3rem;
+}
+
+/* --------------------------------------------- */
+/* --------------- MEDIA QUERIES --------------- */
+/* --------------------------------------------- */
+
+@media only screen and (max-width: 750px) {
+  .cronica-newest article .cronica-details .cronica-icons {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .cronica-newest
+    article
+    .cronica-details
+    .cronica-icons
+    .cronica-icons-content:nth-child(4) {
+    grid-column: 2/3;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .cronica-newest article .cronica-details .cronica-icons {
+    grid-template-columns: 1fr 1fr;
+  }
+}

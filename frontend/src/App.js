@@ -13,6 +13,7 @@ import CurrentlyWorking from "./components/Layout/SoonTag/CurrentlyWorking";
 import ForgotPassword from "./components/Users/PasswordManagement/ForgotPassword";
 import ResetPassword from "./components/Users/PasswordManagement/ResetPassword";
 import PodridaRoutes from "./components/Podrida/PodridaRoutes";
+import CronicaRoutes from "./components/Cronicas/CronicaRoutes";
 
 /* --------------- SUPPORTING LIBRARIES --------------- */
 import { register } from "swiper/element/bundle";
@@ -39,7 +40,7 @@ function App() {
           <Route path="/photo-gallery" Component={PhotoGallery} />
           <Route path="/podrida/*" Component={PodridaRoutes} />
           <Route path="/prode" Component={CurrentlyWorking} />
-          <Route path="/cronicas" Component={CurrentlyWorking} />
+          <Route path="/cronicas/*" Component={CronicaRoutes} />
           <Route path="/chachos/*" Component={ChachosRoutes} />
 
           {/* Admin protected routes */}
