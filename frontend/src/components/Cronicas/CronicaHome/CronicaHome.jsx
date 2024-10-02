@@ -9,6 +9,9 @@ import "./CronicaHomeStyles.css";
 
 //Import components
 import photoLake from "../../../assets/photos/cronicas/bosque.jpg";
+import imageTrophy from "../../../assets/images/cronicas/trophy.png";
+import ImagePencil from "../../../assets/images/cronicas/pencil.png";
+import ImageEnvelope from "../../../assets/images/cronicas/envelope.png";
 
 //Import Redux
 
@@ -19,6 +22,9 @@ import photoLake from "../../../assets/photos/cronicas/bosque.jpg";
 const CronicaHome = () => {
   return (
     <div className="container">
+      {/* -------------------------------------------------------------------------- */}
+      {/* ----------------Cronica Title ---------------------------------------------*/}
+      {/* -------------------------------------------------------------------------- */}
       <section className="cronica-title">
         <h1>
           Las Crónicas de <span>Chacho</span>
@@ -26,6 +32,10 @@ const CronicaHome = () => {
         <h3>Un recorrido único a través de los años</h3>
         <div className="cronica-title-border"></div>
       </section>
+
+      {/* -------------------------------------------------------------------------- */}
+      {/* ----------------Cronica Newest --------------------------------------------*/}
+      {/* -------------------------------------------------------------------------- */}
       <section className="cronica-newest">
         <article>
           <div className="cronica-image">
@@ -69,39 +79,49 @@ const CronicaHome = () => {
           </div>
         </article>
       </section>
+
+      {/* -------------------------------------------------------------------------- */}
+      {/* ----------------Cronica Interactive ---------------------------------------*/}
+      {/* -------------------------------------------------------------------------- */}
       <section className="cronica-interactive">
-        <h2>No dejes de ser parte</h2>
+        <h2>No dejes de ser parte...</h2>
         <div className="cronica-interactive-content">
           <div className="cronica-interactive-content-card">
-            <i class="fa-regular fa-comment"></i>
+            <img src={imageTrophy} alt="Trofeo" />
             <h3>Ranking de aportes</h3>
-            <p>Ver como estas de acuerdo a tu participación y contribuciones</p>
+            <p>
+              Cada una de tus participaciones es muy valiosa para la página.
+              Sumá puntos y ganá importantes premios
+            </p>
             <Link to="/photo-gallery" className="cronica-interactive-btn">
-              Ver
+              Mirá
             </Link>
           </div>
           <div className="cronica-interactive-content-card">
-            <i class="fa-regular fa-comment"></i>
+            <img src={ImagePencil} alt="Lapiz" />
             <h3>Tu contribución suma</h3>
             <p>
-              Compartí anécdotas para incluir en la próxima crónica, mandá una
-              solicitada o nominá a algún miembro del grupo para los premios de
-              fin de año
+              Ya sean anécdotas para incluir en la próxima crónica, solicitadas
+              o nominaciones... Asegurate de dejar tu huella
             </p>
             <Link to="/photo-gallery" className="cronica-interactive-btn">
               Participá
             </Link>
           </div>
           <div className="cronica-interactive-content-card">
-            <i class="fa-regular fa-comment"></i>
+            <img src={ImageEnvelope} alt="Sobre" />
             <h3>Opiná y votá</h3>
-            <p>Ver como estas de acuerdo a tu participación y contribuciones</p>
+            <p>Valorá las propuestas ajenas y participá en encuestas </p>
             <Link to="/photo-gallery" className="cronica-interactive-btn">
               Votá
             </Link>
           </div>
         </div>
       </section>
+
+      {/* -------------------------------------------------------------------------- */}
+      {/* ----------------Cronica Older ---------------------------------------------*/}
+      {/* -------------------------------------------------------------------------- */}
       <section className="cronica-older"></section>
     </div>
   );

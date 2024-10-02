@@ -52,9 +52,6 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.cronica-newest article {
-}
-
 .cronica-newest article .cronica-image {
   position: relative;
   max-height: 300px;
@@ -160,11 +157,78 @@
 }
 
 /* --------------------------------------------- */
-/* --------------- CRONICA OLDER --------------- */
+/* --------------- CRONICA INTERACTIVE --------- */
 /* --------------------------------------------- */
 
-.cronica-older {
-  margin-bottom: 3rem;
+.cronica-interactive {
+  margin-top: 3rem;
+}
+
+.cronica-interactive h2 {
+  font-size: 2rem;
+  font-family: var(--accent-font);
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.cronica-interactive .cronica-interactive-content {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.cronica-interactive
+  .cronica-interactive-content
+  .cronica-interactive-content-card {
+  min-width: 300px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cronica-interactive
+  .cronica-interactive-content
+  .cronica-interactive-content-card
+  img {
+  width: 100px;
+}
+
+.cronica-interactive
+  .cronica-interactive-content
+  .cronica-interactive-content-card
+  h3 {
+  font-family: var(--secondary-font);
+}
+
+.cronica-interactive
+  .cronica-interactive-content
+  .cronica-interactive-content-card
+  p {
+  text-align: center;
+  font-size: 0.85rem;
+  font-family: var(--secondary-font);
+}
+
+.cronica-interactive
+  .cronica-interactive-content
+  .cronica-interactive-content-card
+  .cronica-interactive-btn {
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  padding: 0.35rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  color: white;
+  display: inline-block;
+  width: 110px;
+  text-align: center;
+  margin-top: 2rem;
+  font-weight: bold;
 }
 
 /* --------------------------------------------- */
@@ -179,6 +243,19 @@
 /* --------------- MEDIA QUERIES --------------- */
 /* --------------------------------------------- */
 
+@media only screen and (max-width: 1200px) {
+  .cronica-interactive .cronica-interactive-content {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cronica-interactive
+    .cronica-interactive-content
+    .cronica-interactive-content-card:nth-child(3) {
+    grid-column: 1 / 3;
+    justify-self: center;
+  }
+}
+
 @media only screen and (max-width: 750px) {
   .cronica-newest article .cronica-details .cronica-icons {
     grid-template-columns: 1fr 1fr 1fr;
@@ -191,10 +268,16 @@
     .cronica-icons-content:nth-child(4) {
     grid-column: 2/3;
   }
-}
 
-@media only screen and (max-width: 500px) {
-  .cronica-newest article .cronica-details .cronica-icons {
-    grid-template-columns: 1fr 1fr;
+  .cronica-interactive .cronica-interactive-content {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 300px;
+  }
+
+  .cronica-interactive
+    .cronica-interactive-content
+    .cronica-interactive-content-card:nth-child(3) {
+    grid-column: 1 / 1;
+    justify-self: auto;
   }
 }
