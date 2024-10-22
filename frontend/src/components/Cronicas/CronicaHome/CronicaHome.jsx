@@ -1,5 +1,5 @@
 //Import React & Hooks
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 //Import CSS & styles
@@ -73,7 +73,7 @@ const CronicaHome = () => {
                 <p>65</p>
               </div>
             </div>
-            <Link to="/photo-gallery" className="cronica-read-btn">
+            <Link to="/cronicas/1" className="cronica-read-btn">
               Leer más
             </Link>
           </div>
@@ -84,7 +84,7 @@ const CronicaHome = () => {
       {/* ----------------Cronica Interactive ---------------------------------------*/}
       {/* -------------------------------------------------------------------------- */}
       <section className="cronica-interactive">
-        <h2>No dejes de ser parte...</h2>
+        <h2>No dejes de ser parte</h2>
         <div className="cronica-interactive-content">
           <div className="cronica-interactive-content-card">
             <img src={imageTrophy} alt="Trofeo" />
@@ -111,7 +111,11 @@ const CronicaHome = () => {
           <div className="cronica-interactive-content-card">
             <img src={ImageEnvelope} alt="Sobre" />
             <h3>Opiná y votá</h3>
-            <p>Valorá las propuestas ajenas y participá en encuestas </p>
+            <p>
+              Valorá las propuestas ajenas, deja tu like o apela al derecho a
+              replica y respondé encuestas para hacer la próxima crónica más
+              colaborativa
+            </p>
             <Link to="/photo-gallery" className="cronica-interactive-btn">
               Votá
             </Link>
@@ -122,7 +126,299 @@ const CronicaHome = () => {
       {/* -------------------------------------------------------------------------- */}
       {/* ----------------Cronica Older ---------------------------------------------*/}
       {/* -------------------------------------------------------------------------- */}
-      <section className="cronica-older"></section>
+      <section className="cronica-older">
+        <h2>Crónicas pasadas</h2>
+        <div className="cronica-older-filter">
+          <select
+          /*  value={filterYear} */
+          /* onChange={(e) => setFilterYear(e.target.value)} */
+          >
+            <option value="All">Todos los años</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            {/* Añade más años según necesites */}
+          </select>
+
+          <div className="cronica-older-filter-search-bar">
+            <input
+              type="text"
+              placeholder="Buscar por título..."
+              /*  value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} */
+            />
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+        </div>
+        <div className="cronica-older-content">
+          <article>
+            <div className="cronica-image">
+              <img src={photoLake} alt="Foto crónica" />
+            </div>
+            <div className="cronica-details">
+              <div className="cronica-details-title">
+                <h3>Los desafios del año 2022</h3>
+                <span className="cronica-year">2022</span>
+              </div>
+
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Impedit, ratione. Necessitatibus corporis sit vel neque eligendi
+                qui doloribus asperiores fuga?
+              </p>
+              <div className="cronica-icons">
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-calendar-days"></i>
+                  <p>20/10/2023</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-eye"></i>
+                  <p>126</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-heart"></i>
+                  <p>23</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-comment"></i>
+                  <p>65</p>
+                </div>
+              </div>
+              <Link to="/photo-gallery" className="cronica-read-btn">
+                Leer más
+              </Link>
+            </div>
+          </article>
+          <article>
+            <div className="cronica-image">
+              <img src={photoLake} alt="Foto crónica" />
+            </div>
+            <div className="cronica-details">
+              <div className="cronica-details-title">
+                <h3>Locuras sin limite</h3>
+                <span className="cronica-year">2021</span>
+              </div>
+
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Impedit, ratione. Necessitatibus corporis sit vel neque eligendi
+                qui doloribus asperiores fuga?
+              </p>
+              <div className="cronica-icons">
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-calendar-days"></i>
+                  <p>20/10/2023</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-eye"></i>
+                  <p>126</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-heart"></i>
+                  <p>23</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-comment"></i>
+                  <p>65</p>
+                </div>
+              </div>
+              <Link to="/photo-gallery" className="cronica-read-btn">
+                Leer más
+              </Link>
+            </div>
+          </article>
+          <article>
+            <div className="cronica-image">
+              <img src={photoLake} alt="Foto crónica" />
+            </div>
+            <div className="cronica-details">
+              <div className="cronica-details-title">
+                <h3>Un mundo virtual y encierros</h3>
+                <span className="cronica-year">2020</span>
+              </div>
+
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Impedit, ratione. Necessitatibus corporis sit vel neque eligendi
+                qui doloribus asperiores fuga?
+              </p>
+              <div className="cronica-icons">
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-calendar-days"></i>
+                  <p>20/10/2023</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-eye"></i>
+                  <p>126</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-heart"></i>
+                  <p>23</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-comment"></i>
+                  <p>65</p>
+                </div>
+              </div>
+              <Link to="/photo-gallery" className="cronica-read-btn">
+                Leer más
+              </Link>
+            </div>
+          </article>
+          <article>
+            <div className="cronica-image">
+              <img src={photoLake} alt="Foto crónica" />
+            </div>
+            <div className="cronica-details">
+              <div className="cronica-details-title">
+                <h3>La ultima joda bien vivida</h3>
+                <span className="cronica-year">2019</span>
+              </div>
+
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Impedit, ratione. Necessitatibus corporis sit vel neque eligendi
+                qui doloribus asperiores fuga?
+              </p>
+              <div className="cronica-icons">
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-calendar-days"></i>
+                  <p>20/10/2023</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-eye"></i>
+                  <p>126</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-heart"></i>
+                  <p>23</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-comment"></i>
+                  <p>65</p>
+                </div>
+              </div>
+              <Link to="/photo-gallery" className="cronica-read-btn">
+                Leer más
+              </Link>
+            </div>
+          </article>
+          <article>
+            <div className="cronica-image">
+              <img src={photoLake} alt="Foto crónica" />
+            </div>
+            <div className="cronica-details">
+              <div className="cronica-details-title">
+                <h3>Euforia mundialista. Yo te sigo adonde vayas</h3>
+                <span className="cronica-year">2018</span>
+              </div>
+
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Impedit, ratione. Necessitatibus corporis sit vel neque eligendi
+                qui doloribus asperiores fuga?
+              </p>
+              <div className="cronica-icons">
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-calendar-days"></i>
+                  <p>20/10/2023</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-eye"></i>
+                  <p>126</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-heart"></i>
+                  <p>23</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-comment"></i>
+                  <p>65</p>
+                </div>
+              </div>
+              <Link to="/photo-gallery" className="cronica-read-btn">
+                Leer más
+              </Link>
+            </div>
+          </article>
+          <article>
+            <div className="cronica-image">
+              <img src={photoLake} alt="Foto crónica" />
+            </div>
+            <div className="cronica-details">
+              <div className="cronica-details-title">
+                <h3>Fin de ciclo. Abriendo el abanico de posibilidades</h3>
+                <span className="cronica-year">2017</span>
+              </div>
+
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Impedit, ratione. Necessitatibus corporis sit vel neque eligendi
+                qui doloribus asperiores fuga?
+              </p>
+              <div className="cronica-icons">
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-calendar-days"></i>
+                  <p>20/10/2023</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-eye"></i>
+                  <p>126</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-heart"></i>
+                  <p>23</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-comment"></i>
+                  <p>65</p>
+                </div>
+              </div>
+              <Link to="/photo-gallery" className="cronica-read-btn">
+                Leer más
+              </Link>
+            </div>
+          </article>
+          <article>
+            <div className="cronica-image">
+              <img src={photoLake} alt="Foto crónica" />
+            </div>
+            <div className="cronica-details">
+              <div className="cronica-details-title">
+                <h3>Que estas esperando para hacer tu movida?</h3>
+                <span className="cronica-year">2016</span>
+              </div>
+
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Impedit, ratione. Necessitatibus corporis sit vel neque eligendi
+                qui doloribus asperiores fuga?
+              </p>
+              <div className="cronica-icons">
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-calendar-days"></i>
+                  <p>20/10/2023</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-eye"></i>
+                  <p>126</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-solid fa-heart"></i>
+                  <p>23</p>
+                </div>
+                <div className="cronica-icons-content">
+                  <i class="fa-regular fa-comment"></i>
+                  <p>65</p>
+                </div>
+              </div>
+              <Link to="/photo-gallery" className="cronica-read-btn">
+                Leer más
+              </Link>
+            </div>
+          </article>
+        </div>
+      </section>
     </div>
   );
 };
