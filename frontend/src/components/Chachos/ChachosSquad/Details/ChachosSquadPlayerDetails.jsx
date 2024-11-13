@@ -156,6 +156,22 @@ const ChachosSquadPlayerDetails = () => {
               </video>
             </div>
           ) : null}
+
+          {selectedPlayer?.shirt === 19 ? (
+            <div className="chachos-player-details-others">
+              <h4 className="chachos-player-details-others-title">
+                Tomate un rato para divertirte con la entrevista a nuestro
+                capitán:
+              </h4>
+
+              <video width="400" controls>
+                <source
+                  src="https://rincon-de-chacho-assets.s3.us-east-2.amazonaws.com/chachos/videos/entrevista-german.mp4"
+                  type="video/mp4"
+                />
+              </video>
+            </div>
+          ) : null}
         </div>
       </div>
     </>
