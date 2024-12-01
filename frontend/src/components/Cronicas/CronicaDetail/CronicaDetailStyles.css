@@ -1,0 +1,354 @@
+/* -------------------------------------------- */
+/* --------------- CRONICA TITLE -------------- */
+/* -------------------------------------------- */
+
+.cronica-detail-title {
+  margin: 1rem auto 0rem;
+}
+
+.cronica-detail-title h1 {
+  font-size: 2.5rem;
+  font-family: var(--secondary-font);
+  font-weight: normal;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.cronica-detail-title h1 span {
+  font-size: 2.5rem;
+  font-family: var(--accent-font);
+  font-weight: bolder;
+  text-transform: none;
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  background-clip: text;
+  color: transparent;
+}
+
+.cronica-detail-title h3 {
+  font-size: 0.9rem;
+  font-family: var(--secondary-font);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  text-align: center;
+}
+
+.cronica-detail-title .cronica-detail-title-border {
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  height: 5px;
+  width: 150px;
+  margin: 1.5rem auto 0rem;
+}
+
+/* --------------------------------------------- */
+/* --------------- CRONICA DETAIL -------------- */
+/* --------------------------------------------- */
+
+.cronica-detail {
+  width: clamp(300px, 100%, 800px);
+  margin: 2.5rem auto 0rem;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cronica-detail article .cronica-detail-image {
+  position: relative;
+  max-height: 400px;
+}
+
+.cronica-detail article .cronica-detail-image span {
+  position: absolute;
+  right: 0.8rem;
+  top: 0.8rem;
+  cursor: pointer;
+  margin-left: 1rem;
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  padding: 0.35rem 1rem;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+.cronica-detail article .cronica-detail-image img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+/* --------------------------------------------- */
+/* --------------- CRONICA INFORMATION --------- */
+/* --------------------------------------------- */
+.cronica-author {
+  width: clamp(300px, 100%, 800px);
+  margin: 0.4rem auto 0rem;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid lightgray;
+  padding: 0.5rem 1rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.cronica-author img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, lightgray, white, white);
+}
+
+.cronica-author .cronica-author-details {
+  display: flex;
+  gap: 0.7rem;
+  flex-direction: column;
+}
+
+.cronica-author .cronica-author-details .cronica-author-details-kpi {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.cronica-author
+  .cronica-author-details
+  .cronica-author-details-kpi
+  .cronica-author-details-kpi-icon {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  align-items: center;
+}
+
+.cronica-author
+  .cronica-author-details
+  .cronica-author-details-kpi
+  .cronica-author-details-kpi-icon
+  i,
+.cronica-author
+  .cronica-author-details
+  .cronica-author-details-kpi
+  .cronica-author-details-kpi-icon
+  p {
+  color: gray;
+}
+
+/* --------------------------------------------- */
+/* --------------- CRONICA BODY ---------------- */
+/* --------------------------------------------- */
+.cronica-body {
+  width: clamp(300px, 100%, 800px);
+  margin: 3rem auto 0rem;
+}
+
+/* --------------------------------------------- */
+/* --------------- COMMENTS -------------------- */
+/* --------------------------------------------- */
+.cronica-comments {
+  width: clamp(300px, 100%, 800px);
+  margin: 3rem auto 2rem;
+}
+
+.cronica-comments .cronica-comments-form {
+  width: 100%;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cronica-comments .cronica-comments-form textarea {
+  resize: none;
+  width: 100%;
+  height: 100px;
+  overflow-y: scroll;
+  border-radius: 5px;
+  border: 1px solid lightgray;
+  padding: 0.5rem;
+}
+
+.cronica-comments .cronica-comments-form button {
+  cursor: pointer;
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  padding: 0.35rem 1rem;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  width: 150px;
+  align-self: flex-end;
+}
+
+.cronica-comments .cronica-comments-details {
+  margin: 2rem auto;
+}
+
+.cronica-comments .cronica-comments-details .cronica-comments-details-example {
+  background-color: white;
+  border: 1px solid lightgray;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+/* --------------- COMMENT HEAD -------------------- */
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-head
+  .comment-author {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-head
+  .comment-author
+  img {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-head
+  p {
+  font-size: 0.7rem;
+  color: gray;
+}
+
+/* --------------- COMMENT BODY -------------------- */
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-body
+  p {
+  border-top: 1px solid lightgray;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  font-size: 0.85rem;
+}
+
+/* --------------- COMMENT REACTIONS -------------------- */
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-buttons {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-buttons
+  .comment-reaction {
+  display: flex;
+  gap: 0.3rem;
+}
+
+/* --------------- MY REPLY -------------------- */
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-myreply {
+  margin-top: 1.5rem;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-myreply
+  form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-myreply
+  form
+  textarea {
+  resize: none;
+  width: 100%;
+  height: 100px;
+  overflow-y: scroll;
+  border-radius: 5px;
+  border: 1px solid lightgray;
+  padding: 0.5rem;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-myreply
+  form
+  button {
+  font-size: 0.8rem;
+  cursor: pointer;
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  padding: 0.35rem 1rem;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  width: 100px;
+  align-self: flex-end;
+}
+
+/* --------------- COMMENT REPLIES -------------------- */
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-replies {
+  margin: 2.5rem 0 0 4rem;
+  padding-left: 1rem;
+  border-left: 5px solid lightgray;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-replies
+  .cronica-comments-details-example-reply {
+  margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------- */
+/* --------------- MEDIA QUERIES --------------- */
+/* --------------------------------------------- */
+
+@media only screen and (max-width: 1200px) {
+}
+
+@media only screen and (max-width: 750px) {
+  .cronica-author .cronica-author-details .cronica-author-details-kpi .to-hide {
+    display: none;
+  }
+
+  @media only screen and (max-width: 500px) {
+  }
+}

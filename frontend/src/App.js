@@ -1,5 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ScrollToTop from "../src/components/Layout/ScrollToTop/ScrollToTop";
 import Navbar from "./components/Layout/Navbar/Navbar";
 import UserRegister from "./components/Users/Register/userRegister";
 import UserLogin from "./components/Users/Login/userLogin";
@@ -25,6 +26,7 @@ register();
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Navbar />
 
       <Routes>
