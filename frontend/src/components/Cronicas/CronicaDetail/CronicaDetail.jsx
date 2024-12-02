@@ -148,24 +148,24 @@ const CronicaDetail = () => {
               <div className="comment-reaction">
                 <button>
                   <i class="fa-solid fa-thumbs-up"></i>
+                  <p>10</p>
                 </button>
-                <p>10</p>
               </div>
               <div className="comment-reaction">
                 <button>
                   <i class="fa-regular fa-thumbs-down"></i>
+                  <p>10</p>
                 </button>
-                <p>10</p>
               </div>
               <div className="comment-reaction">
                 <button onClick={() => toggleReply(id)}>
                   <i class="fa-solid fa-reply"></i>
+                  <p>
+                    {activeReplyId === id
+                      ? "Deshabilitar respuesta"
+                      : "Habilitar respuesta"}
+                  </p>
                 </button>
-                <p>
-                  {activeReplyId === id
-                    ? "Deshabilitar respuesta"
-                    : "Habilitar respuesta"}
-                </p>
               </div>
             </div>
 
@@ -207,14 +207,14 @@ const CronicaDetail = () => {
                   <div className="comment-reaction">
                     <button>
                       <i class="fa-solid fa-thumbs-up"></i>
+                      <p>10</p>
                     </button>
-                    <p>10</p>
                   </div>
                   <div className="comment-reaction">
                     <button>
                       <i class="fa-regular fa-thumbs-down"></i>
+                      <p>10</p>
                     </button>
-                    <p>10</p>
                   </div>
                 </div>
               </div>
@@ -237,14 +237,14 @@ const CronicaDetail = () => {
                   <div className="comment-reaction">
                     <button>
                       <i class="fa-solid fa-thumbs-up"></i>
+                      <p>10</p>
                     </button>
-                    <p>10</p>
                   </div>
                   <div className="comment-reaction">
                     <button>
                       <i class="fa-regular fa-thumbs-down"></i>
+                      <p>10</p>
                     </button>
-                    <p>10</p>
                   </div>
                 </div>
               </div>
