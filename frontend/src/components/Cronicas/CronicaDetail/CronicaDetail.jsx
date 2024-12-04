@@ -21,6 +21,11 @@ import defaultUser from "../../../assets/photos/users/default-user.jpg";
 const CronicaDetail = () => {
   const { id } = useParams();
 
+  const [liked, setLiked] = useState(false);
+  const toggleLiked = () => {
+    setLiked(!liked);
+  };
+
   const [activeReplyId, setActiveReplyId] = useState(null);
   const toggleReply = (id) => {
     setActiveReplyId((prevId) => (prevId === id ? null : id));
@@ -32,6 +37,9 @@ const CronicaDetail = () => {
       {/* ----------------Cronica Title ---------------------------------------------*/}
       {/* -------------------------------------------------------------------------- */}
       <section className="cronica-detail-title">
+        <Link className="back-btn" to="/cronicas">
+          <i class="fa-solid fa-arrow-left"></i> Volver a crónicas
+        </Link>
         <h1>
           Lorem ipsum dolor sit amet <span>{id}</span>
         </h1>
@@ -71,6 +79,21 @@ const CronicaDetail = () => {
               <i class="fa-solid fa-clock"></i>
               <p>23 minutos de lectura</p>
             </div>
+          </div>
+          <div className="cronica-like-btn">
+            <button
+              onClick={toggleLiked}
+              className={liked ? "liked-btn" : "non-liked-btn"}
+            >
+              <i
+                className={
+                  liked
+                    ? "fa-solid fa-heart liked-btn"
+                    : "fa-solid fa-heart-crack non-liked-btn"
+                }
+              ></i>
+              {liked ? "¡Me gusta!" : "¿Me gusta?"}
+            </button>
           </div>
         </div>
       </section>
