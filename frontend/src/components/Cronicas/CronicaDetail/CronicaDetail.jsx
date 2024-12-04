@@ -92,7 +92,7 @@ const CronicaDetail = () => {
                     : "fa-solid fa-heart-crack non-liked-btn"
                 }
               ></i>
-              {liked ? "¡Me gusta!" : "¿Me gusta?"}
+              {liked ? "¡Me gusta!" : "¿Me gusta??"}
             </button>
           </div>
         </div>
