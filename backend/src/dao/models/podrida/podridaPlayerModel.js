@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { mongoConnections } from "../../connection.js";
-const { dbPodrida } = mongoConnections;
+import { mongoConnection } from "../../connection.js";
 
 const podridaPlayerSchema = new mongoose.Schema(
   {
@@ -20,5 +19,8 @@ const podridaPlayerSchema = new mongoose.Schema(
   }
 );
 
-const PodridaPlayer = dbPodrida.model("Podrida Player", podridaPlayerSchema);
+const PodridaPlayer = mongoConnection.model(
+  "Podrida Player",
+  podridaPlayerSchema
+);
 export default PodridaPlayer;

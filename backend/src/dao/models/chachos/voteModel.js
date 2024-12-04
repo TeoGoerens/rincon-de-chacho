@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
 import User from "../userModel.js";
-import { mongoConnections } from "../../connection.js";
-const { dbChachos } = mongoConnections;
+import { mongoConnection } from "../../connection.js";
 
 const voteSchema = new mongoose.Schema(
   {
     voter: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: User,
+      ref: "User",
     },
     round: {
       type: mongoose.Schema.Types.ObjectId,
@@ -51,5 +50,5 @@ const voteSchema = new mongoose.Schema(
   }
 );
 
-const Vote = dbChachos.model("Vote", voteSchema);
+const Vote = mongoConnection.model("Vote", voteSchema);
 export default Vote;

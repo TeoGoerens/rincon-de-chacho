@@ -17,6 +17,7 @@ export default class MatchStatRepository extends baseRepository {
           first_name: 1,
           last_name: 1,
           shirt: 1,
+          field_position: 1,
           _id: 1, // Exclude unnecessary _id field
         },
       });

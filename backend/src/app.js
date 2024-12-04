@@ -29,8 +29,12 @@ import rivalTeamRouter from "./routes/chachos/rivalTeamRouter.js";
 import tournamentRoundRouter from "./routes/chachos/tournamentRoundRouter.js";
 import voteRouter from "./routes/chachos/voteRouter.js";
 import matchStatRouter from "./routes/chachos/matchStatRouter.js";
+import cronicaRouter from "./routes/cronica/cronicaRouter.js";
 
+//Ruta users
 app.use("/api/users", userRouter);
+
+//Ruta chachos
 app.use("/api/chachos/player", playerRouter);
 app.use("/api/chachos/tournament", tournamentRouter);
 app.use("/api/chachos/football-category", footballCategoryRouter);
@@ -38,6 +42,10 @@ app.use("/api/chachos/rival-team", rivalTeamRouter);
 app.use("/api/chachos/tournament-round", tournamentRoundRouter);
 app.use("/api/chachos/vote", voteRouter);
 app.use("/api/chachos/match-stat", matchStatRouter);
+
+//Ruta cronica
+app.use("/api/cronicas", cronicaRouter);
+
 // Ruta principal
 app.get("*", (req, res) => {
   const indexPath = join(__dirname, "../../frontend/build/index.html");
