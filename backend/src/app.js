@@ -30,6 +30,7 @@ import tournamentRoundRouter from "./routes/chachos/tournamentRoundRouter.js";
 import voteRouter from "./routes/chachos/voteRouter.js";
 import matchStatRouter from "./routes/chachos/matchStatRouter.js";
 import cronicaRouter from "./routes/cronica/cronicaRouter.js";
+import cronicaCommentRouter from "./routes/cronica/cronicaCommentRouter.js";
 
 //Ruta users
 app.use("/api/users", userRouter);
@@ -44,7 +45,8 @@ app.use("/api/chachos/vote", voteRouter);
 app.use("/api/chachos/match-stat", matchStatRouter);
 
 //Ruta cronica
-app.use("/api/cronicas", cronicaRouter);
+app.use("/api/cronica", cronicaRouter);
+app.use("/api/cronica/comment", cronicaCommentRouter);
 
 // Ruta principal
 app.get("*", (req, res) => {

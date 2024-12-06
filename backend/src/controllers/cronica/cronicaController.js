@@ -37,34 +37,13 @@ export default class CronicaController {
   // ---------- CREATE CRONICA ----------
   createCronica = async (req, res, next) => {
     try {
-      //Informacion de la cronica cargada en el body y en req.files
-      const { title, subtitle, year, body } = req.body;
-      const heroImage = req.files.heroImage?.[0]?.location || "";
-      const images = (req.files.images || []).map((file) => ({
-        url: file.location,
-        caption: req.body[`imageCaption_${file.originalname}`] || "",
-      }));
-      const audios = (req.files.audios || []).map((file) => ({
-        url: file.location,
-        caption: req.body[`audioCaption_${file.originalname}`] || "",
-      }));
-      const videos = (req.files.videos || []).map((file) => ({
-        url: file.location,
-        caption: req.body[`videoCaption_${file.originalname}`] || "",
-      }));
+      const cronicaBody = req.body;
+      const cronicaFiles = req.files;
 
-      const newCronica = {
-        title,
-        subtitle,
-        year,
-        body,
-        heroImage,
-        images,
-        audios,
-        videos,
-      };
-
-      const cronicaLoaded = await repository.baseCreate(newCronica, "title");
+      const cronicaLoaded = await repository.createCronica(
+        cronicaBody,
+        cronicaFiles
+      );
 
       res.status(200).json({
         message: "Cronica has been properly created",

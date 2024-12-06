@@ -34,6 +34,7 @@ const cronicaSchema = new mongoose.Schema(
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
+        ref: "User", // Usuarios que dieron like
       },
     ],
     images: [

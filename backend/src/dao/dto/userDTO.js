@@ -10,6 +10,6 @@ export default class userDTO {
     this.is_admin = user.is_admin;
     this.role = user.role;
     this.last_login = user.last_login;
-    this.jwt = generateToken(user._id);
+    this.jwt = generateToken(user._id, user.is_admin);
   }
 }
