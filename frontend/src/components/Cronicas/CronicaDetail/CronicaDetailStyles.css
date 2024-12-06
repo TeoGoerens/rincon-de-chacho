@@ -266,6 +266,16 @@
   .cronica-comments-details
   .cronica-comments-details-example
   .cronica-comments-details-example-head
+  .comment-author
+  .comment-author-name
+  p {
+  margin-top: 0.3rem;
+}
+
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-head
   p {
   font-size: 0.7rem;
   color: gray;
