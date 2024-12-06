@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Cronica from "../../dao/models/cronicas/cronicaModel.js";
 import baseRepository from "../baseRepository.js";
 
@@ -8,6 +9,83 @@ export default class CronicaRepository extends baseRepository {
   constructor() {
     super(Cronica);
   }
+
+  getAllCronicas = async () => {
+    try {
+      const cronicas = await Cronica.aggregate([
+        // 1. Buscar todas las crónicas
+        {
+          $lookup: {
+            from: "cronica comments", // Nombre de la colección de comentarios
+            localField: "_id", // Campo en la colección de crónicas
+            foreignField: "cronicaId", // Campo en la colección de comentarios
+            as: "comments", // Alias para los comentarios relacionados
+          },
+        },
+        // 2. Contar los comentarios relacionados
+        {
+          $addFields: {
+            commentCount: { $size: "$comments" },
+          },
+        },
+        // 3. Eliminar el campo `comments` si no lo necesitas en el resultado
+        {
+          $project: {
+            comments: 0, // No incluir los comentarios completos en el resultado
+          },
+        },
+        // 4. Ordenar por fecha de publicación (opcional)
+        {
+          $sort: { publishedDate: -1 },
+        },
+      ]);
+
+      return cronicas;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  getCronicaById = async (cronicaId) => {
+    try {
+      // Validar que el id sea válido
+      if (!mongoose.Types.ObjectId.isValid(cronicaId)) {
+        throw new Error("El ID de la crónica no es válido");
+      }
+
+      const result = await Cronica.aggregate([
+        {
+          $match: { _id: new mongoose.Types.ObjectId(cronicaId) }, // Filtrar solo la crónica deseada
+        },
+        {
+          $lookup: {
+            from: "cronica comments", // Nombre de la colección de comentarios
+            localField: "_id",
+            foreignField: "cronicaId",
+            as: "comments", // Une los comentarios a la crónica
+          },
+        },
+        {
+          $addFields: {
+            commentCount: { $size: "$comments" }, // Calcula el número de comentarios
+          },
+        },
+        {
+          $project: {
+            comments: 0, // Excluye el array de comentarios si no lo necesitas
+          },
+        },
+      ]);
+
+      if (!result || result.length === 0) {
+        throw new Error("La crónica no fue encontrada");
+      }
+
+      return result[0]; // Retorna la crónica con el campo commentCount
+    } catch (error) {
+      throw error;
+    }
+  };
 
   createCronica = async (cronicaBody, cronicaFiles) => {
     // Recolectar archivos subidos para limpieza en caso de error

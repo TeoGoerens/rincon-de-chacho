@@ -47,6 +47,7 @@ export default class baseRepository {
           query = query.populate(options.populateBy);
         }
       }
+
       const documents = await query.exec();
       return documents;
     } catch (error) {

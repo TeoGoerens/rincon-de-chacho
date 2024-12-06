@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { mongoConnection } from "../../connection.js";
+// Importo el modelo CronicaComment para la creacion del campo virtual
+import CronicaComment from "./cronicaCommentModel.js";
 
 const cronicaSchema = new mongoose.Schema(
   {

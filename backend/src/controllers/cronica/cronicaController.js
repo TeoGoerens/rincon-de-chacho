@@ -6,7 +6,7 @@ export default class CronicaController {
   getCronicaById = async (req, res, next) => {
     try {
       const cronicaId = req.params.id;
-      const cronica = await repository.baseGetById(cronicaId);
+      const cronica = await repository.getCronicaById(cronicaId);
 
       res.status(200).json({
         message: `Cronica with id ${cronicaId} has been properly retrieved`,
@@ -20,10 +20,7 @@ export default class CronicaController {
   // ---------- GET ALL CRONICAS ----------
   getAllCronicas = async (req, res, next) => {
     try {
-      const cronicas = await repository.baseGetAll({
-        sortBy: "publishedDate",
-        sortOrder: "desc",
-      });
+      const cronicas = await repository.getAllCronicas();
 
       res.status(200).json({
         message: "All cronicas have been properly retrieved",
