@@ -138,6 +138,7 @@ button:hover span:nth-child(2) {
   color: green;
   border: 1px solid green;
   background-color: white;
+  justify-content: center;
 }
 
 .delete-confirmation-modal button:first-child:hover {
@@ -149,6 +150,7 @@ button:hover span:nth-child(2) {
   color: red;
   border: 1px solid red;
   background-color: white;
+  justify-content: center;
 }
 
 .delete-confirmation-modal button:last-child:hover {

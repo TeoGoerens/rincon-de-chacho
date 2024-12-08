@@ -1,7 +1,7 @@
 //Import React & Hooks
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "./CronicaDetailStyles.css";
@@ -10,13 +10,25 @@ import "./CronicaDetailStyles.css";
 import { formatDate } from "../../../helpers/dateFormatter.js";
 
 //Import React Query functions
-import fetchCronicaById from "../../../reactquery/fetchCronicaById.js";
-import fetchAllCommentsFromACronica from "../../../reactquery/fetchAllCommentsFromACronica.js";
+import { getUserId } from "../../../reactquery/getUserInformation.js";
+import { getUserRole } from "../../../reactquery/getUserInformation.js";
+import fetchCronicaById from "../../../reactquery/cronica/fetchCronicaById.js";
+import fetchAllCommentsFromACronica from "../../../reactquery/cronica/fetchAllCommentsFromACronica.js";
+import updateCronicaLikesById from "../../../reactquery/cronica/updateCronicaLikesById.js";
+import createCommentOnACronica from "../../../reactquery/cronica/createCommentOnACronica.js";
+import createReplyOnAComment from "../../../reactquery/cronica/createReplyOnAComment.js";
+import updateCommentLike from "../../../reactquery/cronica/updateCommentLike.js";
+import updateCommentDislike from "../../../reactquery/cronica/updateCommentDislike.js";
+import updateReplyLike from "../../../reactquery/cronica/updateReplyLike.js";
+import updateReplyDislike from "../../../reactquery/cronica/updateReplyDislike.js";
+import deleteCommentFromCronica from "../../../reactquery/cronica/deleteCommentFromCronica.js";
+import deleteReplyFromComment from "../../../reactquery/cronica/deleteReplyFromComment.js";
+import updateCommentOnCronica from "../../../reactquery/cronica/updateCommentOnCronica.js";
 
 //Import components
-import photoLake from "../../../assets/photos/cronicas/bosque.jpg";
 import authorPhoto from "../../../assets/photos/chacho-home.png";
 import defaultUser from "../../../assets/photos/users/default-user.jpg";
+import DeleteButton from "../../Layout/Buttons/DeleteButton.jsx";
 
 //Import Redux
 
@@ -28,19 +40,20 @@ const CronicaDetail = () => {
   // Informacion del query string acerca del id de la cronica
   const { id } = useParams();
 
-  // Funcionalidad de LIKE en la cronica
-  const [liked, setLiked] = useState(false);
-  const toggleLiked = () => {
-    setLiked(!liked);
-  };
+  // React Query para invalidar o refrescar queries
+  const queryClient = useQueryClient();
 
-  // Funcionalidad para habilitar la respuesta a un comentario dado
-  const [activeReplyId, setActiveReplyId] = useState(null);
-  const toggleReply = (commentId) => {
-    setActiveReplyId((prevId) => (prevId === commentId ? null : commentId));
-  };
+  // Definicion de variables
+  const [liked, setLiked] = useState(false); // Permite activar LIKE a la cronica
+  const [activeReplyId, setActiveReplyId] = useState(null); // Permita activar & habilitar la respuesta a un comentario
+  const [newComment, setNewComment] = useState(""); // Estado para el nuevo comentario
+  const [newReply, setNewReply] = useState(""); // Estado para la nueva respuesta
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedComment, setEditedComment] = useState("");
+  const userId = getUserId();
+  const userIsAdmin = getUserRole();
 
-  // Query para obtener los datos de la crónica
+  // Query para obtener la crónica
   const {
     data: cronicaData,
     isLoading: isLoadingCronica,
@@ -51,7 +64,17 @@ const CronicaDetail = () => {
     queryFn: () => fetchCronicaById(id),
   });
 
-  // Query para obtener los comentarios de la crónica
+  // Efecto para setear el "liked" cuando llega la data
+  useEffect(() => {
+    if (
+      cronicaData?.cronica?.likes &&
+      Array.isArray(cronicaData.cronica.likes)
+    ) {
+      setLiked(cronicaData.cronica.likes.includes(userId));
+    }
+  }, [cronicaData, userId]);
+
+  // Query para obtener comentarios
   const {
     data: commentsData,
     isLoading: isLoadingComments,
@@ -62,15 +85,164 @@ const CronicaDetail = () => {
     queryFn: () => fetchAllCommentsFromACronica(id),
   });
 
+  // Mutación para actualizar likes
+  const likeMutation = useMutation({
+    mutationFn: () => updateCronicaLikesById(id),
+    onSuccess: (updatedCronica) => {
+      // Si el endpoint retorna la cronica actualizada
+      if (updatedCronica && Array.isArray(updatedCronica.likes)) {
+        setLiked(updatedCronica.likes.includes(userId));
+      }
+      // Invalida la query para re-fetch si lo deseas
+      queryClient.invalidateQueries(["fetchCronicaById", id]);
+    },
+    onError: (error) => {
+      console.error("Error al actualizar los likes:", error.message);
+    },
+  });
+
+  // Mutacion para crear comentario
+  const commentMutation = useMutation({
+    mutationFn: ({ cronicaId, comment }) =>
+      createCommentOnACronica({ cronicaId, comment }),
+    onSuccess: () => {
+      // Invalida la query de comentarios para recargar la lista
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+      setNewComment(""); // Limpia el campo una vez publicado el comentario
+    },
+    onError: (error) => {
+      console.error("Error al crear el comentario:", error.message);
+    },
+  });
+
+  // Mutacion para crear reply
+  const replyMutation = useMutation({
+    mutationFn: ({ commentId, reply }) =>
+      createReplyOnAComment({ commentId, reply }),
+    onSuccess: () => {
+      // Invalida la query de comentarios para recargar la lista
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+      setNewReply(""); // Limpia el campo una vez publicado el comentario
+    },
+    onError: (error) => {
+      console.error("Error al crear la respuesta:", error.message);
+    },
+  });
+
+  // Mutación para actualizar likes en comentarios
+  const commentLikeMutation = useMutation({
+    mutationFn: (commentId) => updateCommentLike(commentId),
+    onSuccess: (updatedComment) => {
+      // Invalida la query de comentarios para recargar la lista
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error(
+        "Error al actualizar los likes del comentario:",
+        error.message
+      );
+    },
+  });
+
+  // Mutación para actualizar dislikes en comentarios
+  const commentDislikeMutation = useMutation({
+    mutationFn: (commentId) => updateCommentDislike(commentId),
+    onSuccess: (updatedComment) => {
+      // Invalida la query de comentarios para recargar la lista
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error(
+        "Error al actualizar los dislikes del comentario:",
+        error.message
+      );
+    },
+  });
+
+  // Mutación para actualizar likes en replies
+  const replyLikeMutation = useMutation({
+    mutationFn: (commentId, replyId) => updateReplyLike(commentId, replyId),
+    onSuccess: (updatedReply) => {
+      // Invalida la query de comentarios para recargar la lista
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error(
+        "Error al actualizar los likes de la respuesta:",
+        error.message
+      );
+    },
+  });
+
+  // Mutación para actualizar dislikes en replies
+  const replyDislikeMutation = useMutation({
+    mutationFn: (commentId, replyId) => updateReplyDislike(commentId, replyId),
+    onSuccess: (updatedReply) => {
+      // Invalida la query de comentarios para recargar la lista
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error(
+        "Error al actualizar los dislikes de la respuesta:",
+        error.message
+      );
+    },
+  });
+
+  // Mutación para eliminar un comentario
+  const deleteCommentMutation = useMutation({
+    mutationFn: ({ commentId }) => deleteCommentFromCronica({ commentId }),
+    onSuccess: () => {
+      // Una vez borrado, invalida la query para refrescar la lista de comentarios
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error("Error al eliminar el comentario:", error.message);
+    },
+  });
+
+  // Mutación para eliminar una respuesta
+  const deleteReplyMutation = useMutation({
+    mutationFn: ({ commentId, replyId }) =>
+      deleteReplyFromComment({ commentId, replyId }),
+    onSuccess: () => {
+      // Una vez borrado, invalida la query para refrescar la lista de comentarios
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error("Error al eliminar el comentario:", error.message);
+    },
+  });
+
+  // Evaluacion de estados durante carga y error
   if (isLoadingCronica || isLoadingComments) return <p>Cargando...</p>;
   if (isErrorCronica || isErrorComments)
     return <p>Error: {cronicaError?.message || commentsError?.message}</p>;
 
+  // Definicion de funciones para botones
+  const toggleLiked = () => {
+    likeMutation.mutate(); // Ejecuta la mutación al hacer clic
+  };
+
+  const toggleReply = (commentId) => {
+    setActiveReplyId((prevId) => (prevId === commentId ? null : commentId));
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return; // Evita enviar comentarios vacíos
+    commentMutation.mutate({ cronicaId: id, comment: newComment });
+  };
+
+  const handleReplySubmit = (e, commentId) => {
+    e.preventDefault();
+    if (!newReply.trim()) return; // Evita enviar comentarios vacíos
+    replyMutation.mutate({ commentId: commentId, reply: newReply });
+  };
+
+  // Redefinicion de variables para simplicidad en el codigo
   const cronica = cronicaData?.cronica || {};
   const comments = commentsData?.commentsByCronica || [];
-
-  console.log(cronica);
-  console.log(comments);
 
   return (
     <div className="container">
@@ -118,7 +290,7 @@ const CronicaDetail = () => {
             </div>
             <div className="cronica-author-details-kpi-icon to-hide">
               <i className="fa-solid fa-heart"></i>
-              <p>{cronica.likes.length}</p>
+              <p>{cronica.likes?.length}</p>
             </div>
           </div>
           <div className="cronica-like-btn">
@@ -151,13 +323,15 @@ const CronicaDetail = () => {
         <h4>{cronica.commentCount} comentarios</h4>
 
         {/* ---------------- Comentario -------------------------------------------------*/}
-        <form className="cronica-comments-form" action="">
+        <form className="cronica-comments-form" onSubmit={handleCommentSubmit}>
           <textarea
-            name=""
-            id=""
             placeholder="Agregá tu comentario..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
           ></textarea>
-          <button type="submit">Publicar</button>
+          <button type="submit" disabled={commentMutation.isLoading}>
+            {commentMutation.isLoading ? "Publicando..." : "Publicar"}
+          </button>
         </form>
 
         {/* ---------------- Todos los comentarios -------------------------------------------------*/}
@@ -188,39 +362,81 @@ const CronicaDetail = () => {
               {/* ---------------- Reacciones al comentario -------------------------------------------------*/}
               <div className="cronica-comments-details-example-buttons">
                 <div className="comment-reaction">
-                  <button>
+                  <button
+                    onClick={() =>
+                      commentLikeMutation.mutate({ commentId: comment._id })
+                    }
+                    className={
+                      comment.likes.includes(userId) ? "btn-like-active" : ""
+                    }
+                  >
                     <i className="fa-solid fa-thumbs-up"></i>
                     <p>{comment.likes.length}</p>
                   </button>
                 </div>
                 <div className="comment-reaction">
-                  <button>
+                  <button
+                    onClick={() =>
+                      commentDislikeMutation.mutate({ commentId: comment._id })
+                    }
+                    className={
+                      comment.dislikes.includes(userId) ? "btn-like-active" : ""
+                    }
+                  >
                     <i className="fa-regular fa-thumbs-down"></i>
                     <p>{comment.dislikes.length}</p>
                   </button>
                 </div>
                 <div className="comment-reaction">
-                  <button onClick={() => toggleReply(id)}>
+                  <button onClick={() => toggleReply(comment._id)}>
                     <i className="fa-solid fa-reply"></i>
                     <p>
-                      {activeReplyId === id
+                      {activeReplyId === comment._id
                         ? "Deshabilitar respuesta"
                         : "Habilitar respuesta"}
                     </p>
                   </button>
                 </div>
+
+                {comment.userId._id === userId && (
+                  <div className="comment-reaction">
+                    {/* Botón para editar el comentario */}
+                    <button
+                      onClick={() => {
+                        /* Lógica para editar comentario */
+                      }}
+                    >
+                      <i className="fa-solid fa-pen"></i>
+                    </button>
+                  </div>
+                )}
+
+                {(comment.userId._id === userId || userIsAdmin === true) && (
+                  <div className="comment-reaction">
+                    {/* Botón para eliminar el comentario */}
+                    <DeleteButton
+                      customCSSClass="delete-btn-custom"
+                      onClick={deleteCommentMutation.mutate}
+                      id={{ commentId: comment._id }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* ---------------- Mi respuesta al comentario -------------------------------------------------*/}
-              {activeReplyId === id && (
+              {activeReplyId === comment._id && (
                 <div className="cronica-comments-details-example-myreply">
-                  <form action="">
+                  <form onSubmit={(e) => handleReplySubmit(e, comment._id)}>
                     <textarea
-                      name=""
-                      id=""
                       placeholder="Escribe tu respuesta..."
+                      value={newReply}
+                      onChange={(e) => setNewReply(e.target.value)}
                     ></textarea>
-                    <button type="submit">Responder</button>
+                    <button type="submit" disabled={replyMutation.isLoading}>
+                      {replyMutation.isLoading
+                        ? "Respondiendo..."
+                        : "Responder"}
+                    </button>
                   </form>
                 </div>
               )}
@@ -244,24 +460,72 @@ const CronicaDetail = () => {
                         </div>
                       </div>
 
-                      <p>{formatDate(reply.date)}</p>
+                      <p className="response-date">{formatDate(reply.date)}</p>
                     </div>
                     <div className="cronica-comments-details-example-body">
                       <p>{reply.reply}</p>
                     </div>
                     <div className="cronica-comments-details-example-buttons">
                       <div className="comment-reaction">
-                        <button>
+                        <button
+                          onClick={() =>
+                            replyLikeMutation.mutate({
+                              commentId: comment._id,
+                              replyId: reply._id,
+                            })
+                          }
+                          className={
+                            reply.likes.includes(userId)
+                              ? "btn-like-active"
+                              : ""
+                          }
+                        >
                           <i className="fa-solid fa-thumbs-up"></i>
                           <p>{reply.likes.length}</p>
                         </button>
                       </div>
                       <div className="comment-reaction">
-                        <button>
+                        <button
+                          onClick={() =>
+                            replyDislikeMutation.mutate({
+                              commentId: comment._id,
+                              replyId: reply._id,
+                            })
+                          }
+                          className={
+                            reply.dislikes.includes(userId)
+                              ? "btn-like-active"
+                              : ""
+                          }
+                        >
                           <i className="fa-regular fa-thumbs-down"></i>
                           <p>{reply.dislikes.length}</p>
                         </button>
                       </div>
+                      {reply.userId._id === userId && (
+                        <div className="comment-reaction">
+                          {/* Botón para editar el comentario */}
+                          <button
+                            onClick={() => {
+                              /* Lógica para editar comentario */
+                            }}
+                          >
+                            <i className="fa-solid fa-pen"></i>
+                          </button>
+                        </div>
+                      )}
+
+                      {(reply.userId._id === userId ||
+                        userIsAdmin === true) && (
+                        <div className="comment-reaction">
+                          {/* Botón para eliminar el comentario */}
+                          <DeleteButton
+                            customCSSClass="delete-btn-custom"
+                            onClick={deleteReplyMutation.mutate}
+                            id={{ commentId: comment._id, replyId: reply._id }}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

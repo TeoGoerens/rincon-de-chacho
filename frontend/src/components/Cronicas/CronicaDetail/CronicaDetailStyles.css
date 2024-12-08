@@ -1,4 +1,25 @@
 /* -------------------------------------------- */
+/* --------------- DYNAMIC CLASSES -------------- */
+/* -------------------------------------------- */
+.btn-like-active i,
+.btn-like-active p {
+  color: var(--fourth-color);
+}
+
+/* --------------------------------------------------------------------- */
+/* --------------- CUSTOM STYLES FROM IMPORTED COMPONENTS -------------- */
+/* --------------------------------------------------------------------- */
+.delete-btn-custom {
+  margin: 0;
+}
+
+.delete-btn-custom i {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--fourth-color);
+}
+
+/* -------------------------------------------- */
 /* --------------- CRONICA TITLE -------------- */
 /* -------------------------------------------- */
 
@@ -302,6 +323,7 @@
   margin-top: 1rem;
   font-size: 0.85rem;
   display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -394,6 +416,14 @@
 
 @media only screen and (max-width: 750px) {
   .cronica-author .cronica-author-details .cronica-author-details-kpi .to-hide {
+    display: none;
+  }
+
+  .cronica-comments
+    .cronica-comments-details
+    .cronica-comments-details-example
+    .cronica-comments-details-example-head
+    .response-date {
     display: none;
   }
 

@@ -1,19 +1,19 @@
 //Import React & Hooks
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "./CronicaHomeStyles.css";
 
 //Import React Query functions
-import fetchAllCronicas from "../../../reactquery/fetchAllCronicas.js";
+import fetchAllCronicas from "../../../reactquery/cronica/fetchAllCronicas";
+import updateCronicaViewsById from "../../../reactquery/cronica/updateCronicaViewsById";
 
 //Import helpers
 import { formatDate } from "../../../helpers/dateFormatter";
 
 //Import components
-import photoLake from "../../../assets/photos/cronicas/bosque.jpg";
 import imageTrophy from "../../../assets/images/cronicas/trophy.png";
 import ImagePencil from "../../../assets/images/cronicas/pencil.png";
 import ImageEnvelope from "../../../assets/images/cronicas/envelope.png";
@@ -23,6 +23,8 @@ import ImageEnvelope from "../../../assets/images/cronicas/envelope.png";
 //----------------------------------------
 
 const CronicaHome = () => {
+  const navigate = useNavigate();
+
   // Utilizar React Query para manejar el estado de la petición de Cronicas
   const {
     data: cronicasData,
@@ -32,6 +34,17 @@ const CronicaHome = () => {
   } = useQuery({
     queryKey: ["fetchAllCronicas"],
     queryFn: fetchAllCronicas,
+  });
+
+  const { mutate: incrementViews } = useMutation({
+    mutationFn: (id) => updateCronicaViewsById(id),
+    onSuccess: (updatedCronica) => {
+      // Una vez incrementadas las views con éxito, navegas al detalle
+      navigate(`/cronicas/${updatedCronica.cronicaUpdated._id}`);
+    },
+    onError: (error) => {
+      console.error("Error al actualizar las vistas:", error.message);
+    },
   });
 
   // Manejar estados de carga y error de ambas queries
@@ -96,12 +109,12 @@ const CronicaHome = () => {
                   <p>{cronicasData.cronicas[0]?.commentCount}</p>
                 </div>
               </div>
-              <Link
-                to={`/cronicas/${cronicasData.cronicas[0]?._id}`}
+              <button
                 className="cronica-read-btn"
+                onClick={() => incrementViews(cronicasData.cronicas[0]?._id)}
               >
                 Leer más
-              </Link>
+              </button>
             </div>
           </article>
         ) : (
@@ -211,12 +224,12 @@ const CronicaHome = () => {
                     <p>{cronica.commentCount}</p>
                   </div>
                 </div>
-                <Link
-                  to={`/cronicas/${cronica._id}`}
+                <button
+                  onClick={() => incrementViews(cronica._id)}
                   className="cronica-read-btn"
                 >
                   Leer más
-                </Link>
+                </button>
               </div>
             </article>
           ))}

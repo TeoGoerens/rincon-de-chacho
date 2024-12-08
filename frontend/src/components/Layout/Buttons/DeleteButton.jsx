@@ -4,7 +4,7 @@ import React, { useState } from "react";
 //Import CSS & styles
 import "./ButtonsStyle.css";
 
-const DeleteButton = ({ onClick, id }) => {
+const DeleteButton = ({ onClick, id, customCSSClass }) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -21,8 +21,8 @@ const DeleteButton = ({ onClick, id }) => {
   };
   return (
     <>
-      <button onClick={handleOpenModal}>
-        <span className="material-icons delete-button">delete</span>
+      <button onClick={handleOpenModal} className={customCSSClass}>
+        <i class="fa-solid fa-trash"></i>
         <span className="tooltip-text">Eliminar</span>
       </button>
 

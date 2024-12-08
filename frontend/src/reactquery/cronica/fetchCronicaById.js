@@ -1,13 +1,10 @@
 import axios from "axios";
-import { baseURL } from "../helpers/baseURL.js";
-import store from "../redux/store/store.js";
+import { baseURL } from "../../helpers/baseURL";
+import { getUserJWT } from "../getUserInformation";
 
-const fetchAllCronicas = async () => {
+const fetchCronicaById = async (cronicaId) => {
   // Retrieve jwt from the user
-  const token =
-    store.getState().users?.userAuth?.jwt ||
-    store.getState().users?.userAuth?.userToDisplay?.jwt ||
-    null;
+  const token = getUserJWT();
 
   if (!token) {
     throw new Error(
@@ -16,7 +13,7 @@ const fetchAllCronicas = async () => {
   }
 
   // Retrieve infromation from API endpoint
-  const endpoint = `${baseURL}/api/cronica`;
+  const endpoint = `${baseURL}/api/cronica/${cronicaId}`;
 
   // AXIOS fetching request
   const response = await axios.get(endpoint, {
@@ -28,4 +25,4 @@ const fetchAllCronicas = async () => {
   return response.data;
 };
 
-export default fetchAllCronicas;
+export default fetchCronicaById;
