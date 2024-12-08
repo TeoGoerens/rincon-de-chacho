@@ -23,6 +23,11 @@ export default class CronicaCommentRepository extends baseRepository {
         throw new Error(`The requested cronica has no associated comments`);
       }
 
+      // Ordenar las replies de cada comentario por fecha descendente
+      commentsByCronica.forEach((comment) => {
+        comment.replies.sort((a, b) => b.date - a.date);
+      });
+
       return commentsByCronica;
     } catch (error) {
       throw error;

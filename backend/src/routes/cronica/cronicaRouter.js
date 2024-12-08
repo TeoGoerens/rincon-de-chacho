@@ -29,19 +29,9 @@ router.put(
   controller.updateCronicaById
 );
 
-router.put(
-  "/:id/likes",
-  authMiddleware,
-  adminAuthMiddleware,
-  controller.updateCronicaLikesById
-);
+router.put("/:id/likes", authMiddleware, controller.updateCronicaLikesById);
 
-router.put(
-  "/:id/views",
-  authMiddleware,
-  adminAuthMiddleware,
-  controller.updateCronicaViewsById
-);
+router.put("/:id/views", authMiddleware, controller.updateCronicaViewsById);
 
 // ---------- DELETE ROUTES ----------
 router.delete(
