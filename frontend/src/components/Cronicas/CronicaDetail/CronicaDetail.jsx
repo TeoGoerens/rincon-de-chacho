@@ -24,6 +24,7 @@ import updateReplyDislike from "../../../reactquery/cronica/updateReplyDislike.j
 import deleteCommentFromCronica from "../../../reactquery/cronica/deleteCommentFromCronica.js";
 import deleteReplyFromComment from "../../../reactquery/cronica/deleteReplyFromComment.js";
 import updateCommentOnCronica from "../../../reactquery/cronica/updateCommentOnCronica.js";
+import updateReplyOnComment from "../../../reactquery/cronica/updateReplyOnComment.js";
 
 //Import components
 import authorPhoto from "../../../assets/photos/chacho-home.png";
@@ -50,6 +51,8 @@ const CronicaDetail = () => {
   const [newReply, setNewReply] = useState(""); // Estado para la nueva respuesta
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedComment, setEditedComment] = useState("");
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editedReply, setEditedReply] = useState("");
   const userId = getUserId();
   const userIsAdmin = getUserRole();
 
@@ -214,6 +217,32 @@ const CronicaDetail = () => {
     },
   });
 
+  // Mutación para actualizar un comentario
+  const updateCommentMutation = useMutation({
+    mutationFn: ({ commentId, comment }) =>
+      updateCommentOnCronica({ commentId, comment }),
+    onSuccess: () => {
+      // Una vez borrado, invalida la query para refrescar la lista de comentarios
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error("Error al actualizar el comentario:", error.message);
+    },
+  });
+
+  // Mutación para actualizar una reply
+  const updateReplyMutation = useMutation({
+    mutationFn: ({ commentId, replyId, reply }) =>
+      updateReplyOnComment({ commentId, replyId, reply }),
+    onSuccess: () => {
+      // Una vez borrado, invalida la query para refrescar la lista de comentarios
+      queryClient.invalidateQueries(["fetchAllCommentsFromACronica", id]);
+    },
+    onError: (error) => {
+      console.error("Error al actualizar la reply:", error.message);
+    },
+  });
+
   // Evaluacion de estados durante carga y error
   if (isLoadingCronica || isLoadingComments) return <p>Cargando...</p>;
   if (isErrorCronica || isErrorComments)
@@ -238,6 +267,7 @@ const CronicaDetail = () => {
     e.preventDefault();
     if (!newReply.trim()) return; // Evita enviar comentarios vacíos
     replyMutation.mutate({ commentId: commentId, reply: newReply });
+    setActiveReplyId(null);
   };
 
   // Redefinicion de variables para simplicidad en el codigo
@@ -356,7 +386,15 @@ const CronicaDetail = () => {
 
               {/* ---------------- Cuerpo del comentario -------------------------------------------------*/}
               <div className="cronica-comments-details-example-body">
-                <p>{comment.comment}</p>
+                {editingCommentId === comment._id ? (
+                  <textarea
+                    value={editedComment}
+                    onChange={(e) => setEditedComment(e.target.value)}
+                    autoFocus
+                  />
+                ) : (
+                  <p>{comment.comment}</p>
+                )}
               </div>
 
               {/* ---------------- Reacciones al comentario -------------------------------------------------*/}
@@ -389,8 +427,20 @@ const CronicaDetail = () => {
                 </div>
                 <div className="comment-reaction">
                   <button onClick={() => toggleReply(comment._id)}>
-                    <i className="fa-solid fa-reply"></i>
-                    <p>
+                    <i
+                      className={`fa-solid fa-reply ${
+                        activeReplyId === comment._id
+                          ? "non-reply-btn"
+                          : "reply-btn"
+                      }`}
+                    ></i>
+                    <p
+                      className={
+                        activeReplyId === comment._id
+                          ? "non-reply-btn"
+                          : "reply-btn"
+                      }
+                    >
                       {activeReplyId === comment._id
                         ? "Deshabilitar respuesta"
                         : "Habilitar respuesta"}
@@ -399,28 +449,56 @@ const CronicaDetail = () => {
                 </div>
 
                 {comment.userId._id === userId && (
-                  <div className="comment-reaction">
-                    {/* Botón para editar el comentario */}
-                    <button
-                      onClick={() => {
-                        /* Lógica para editar comentario */
-                      }}
-                    >
-                      <i className="fa-solid fa-pen"></i>
-                    </button>
+                  <div className="comment-reaction editing-btn-menu">
+                    {editingCommentId === comment._id ? (
+                      <>
+                        <button
+                          className="editing-btn-menu-save"
+                          onClick={() => {
+                            // Guardar cambios
+                            updateCommentMutation.mutate({
+                              commentId: comment._id,
+                              comment: editedComment,
+                            });
+                            setEditingCommentId(null);
+                          }}
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          className="editing-btn-menu-cancel"
+                          onClick={() => {
+                            // Cancelar edición
+                            setEditingCommentId(null);
+                          }}
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingCommentId(comment._id);
+                          setEditedComment(comment.comment);
+                        }}
+                      >
+                        <i className="fa-solid fa-pen editing-btn"></i>
+                      </button>
+                    )}
                   </div>
                 )}
-
-                {(comment.userId._id === userId || userIsAdmin === true) && (
-                  <div className="comment-reaction">
-                    {/* Botón para eliminar el comentario */}
-                    <DeleteButton
-                      customCSSClass="delete-btn-custom"
-                      onClick={deleteCommentMutation.mutate}
-                      id={{ commentId: comment._id }}
-                    />
-                  </div>
-                )}
+                {editingCommentId === comment._id
+                  ? null
+                  : (comment.userId._id === userId || userIsAdmin === true) && (
+                      <div className="comment-reaction">
+                        {/* Botón para eliminar el comentario */}
+                        <DeleteButton
+                          customCSSClass="delete-btn-custom"
+                          onClick={deleteCommentMutation.mutate}
+                          id={{ commentId: comment._id }}
+                        />
+                      </div>
+                    )}
               </div>
 
               {/* ---------------- Mi respuesta al comentario -------------------------------------------------*/}
@@ -463,7 +541,17 @@ const CronicaDetail = () => {
                       <p className="response-date">{formatDate(reply.date)}</p>
                     </div>
                     <div className="cronica-comments-details-example-body">
-                      <p>{reply.reply}</p>
+                      {editingReplyId === reply._id ? (
+                        <textarea
+                          value={editedReply}
+                          onChange={(e) => {
+                            setEditedReply(e.target.value);
+                          }}
+                          autoFocus
+                        />
+                      ) : (
+                        <p>{reply.reply}</p>
+                      )}
                     </div>
                     <div className="cronica-comments-details-example-buttons">
                       <div className="comment-reaction">
@@ -502,30 +590,70 @@ const CronicaDetail = () => {
                           <p>{reply.dislikes.length}</p>
                         </button>
                       </div>
+
                       {reply.userId._id === userId && (
-                        <div className="comment-reaction">
-                          {/* Botón para editar el comentario */}
-                          <button
-                            onClick={() => {
-                              /* Lógica para editar comentario */
-                            }}
-                          >
-                            <i className="fa-solid fa-pen"></i>
-                          </button>
-                        </div>
+                        <>
+                          {editingReplyId === reply._id ? (
+                            <>
+                              <div className="comment-reaction">
+                                <button
+                                  className="editing-btn-menu-save"
+                                  onClick={() => {
+                                    // Guardar cambios a través de la mutación
+                                    updateReplyMutation.mutate({
+                                      commentId: comment._id,
+                                      replyId: reply._id,
+                                      reply: editedReply,
+                                    });
+                                    setEditingReplyId(null); // Cerrar el textarea de inmediato
+                                  }}
+                                >
+                                  Guardar
+                                </button>
+                              </div>
+                              <div className="comment-reaction">
+                                <button
+                                  className="editing-btn-menu-cancel"
+                                  onClick={() => {
+                                    // Cancelar edición
+                                    setEditingReplyId(null);
+                                  }}
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="comment-reaction">
+                              <button
+                                onClick={() => {
+                                  setEditingReplyId(reply._id);
+                                  setEditedReply(reply.reply);
+                                }}
+                              >
+                                <i className="fa-solid fa-pen editing-btn"></i>
+                              </button>
+                            </div>
+                          )}
+                        </>
                       )}
 
-                      {(reply.userId._id === userId ||
-                        userIsAdmin === true) && (
-                        <div className="comment-reaction">
-                          {/* Botón para eliminar el comentario */}
-                          <DeleteButton
-                            customCSSClass="delete-btn-custom"
-                            onClick={deleteReplyMutation.mutate}
-                            id={{ commentId: comment._id, replyId: reply._id }}
-                          />
-                        </div>
-                      )}
+                      {editingReplyId === reply._id
+                        ? null
+                        : (reply.userId._id === userId ||
+                            userIsAdmin === true) && (
+                            <div className="comment-reaction">
+                              {/* Botón para eliminar el comentario */}
+                              <DeleteButton
+                                customCSSClass="delete-btn-custom"
+                                onClick={deleteReplyMutation.mutate}
+                                id={{
+                                  commentId: comment._id,
+                                  replyId: reply._id,
+                                }}
+                              />
+                            </div>
+                          )}
                     </div>
                   </div>
                 ))}

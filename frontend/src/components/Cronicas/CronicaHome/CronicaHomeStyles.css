@@ -316,60 +316,6 @@
   display: inline-block;
 }
 
-.cronica-older .cronica-older-filter {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.cronica-older .cronica-older-filter select {
-  padding: 0.3rem;
-  border-radius: 10px;
-  width: 200px;
-  background-color: white;
-  font-family: var(--secondary-font);
-  font-weight: 500;
-  border: 2px solid #e52e71;
-}
-
-.cronica-older .cronica-older-filter select:focus {
-  outline: none;
-  border: 2px solid #e52e71;
-}
-
-.cronica-older .cronica-older-filter .cronica-older-filter-search-bar {
-  position: relative;
-  display: inline-flex;
-  width: clamp(300px, 100%, 500px);
-}
-
-.cronica-older .cronica-older-filter .cronica-older-filter-search-bar input {
-  padding: 0.3rem 3rem 0.3rem 0.3rem;
-  border-radius: 10px;
-  width: 100%;
-  background-color: white;
-  font-family: var(--secondary-font);
-  font-weight: 500;
-  border: 2px solid #e52e71;
-}
-
-.cronica-older
-  .cronica-older-filter
-  .cronica-older-filter-search-bar
-  input:focus {
-  outline: none;
-  border: 2px solid #e52e71;
-}
-
-.cronica-older .cronica-older-filter .cronica-older-filter-search-bar i {
-  position: absolute;
-  top: 50%;
-  right: 1rem;
-  transform: translateY(-50%);
-  color: #e52e71;
-}
-
 .cronica-older .cronica-older-content {
   margin-top: 2.5rem;
   display: flex;

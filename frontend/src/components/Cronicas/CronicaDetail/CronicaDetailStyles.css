@@ -314,6 +314,20 @@
   font-size: 0.85rem;
 }
 
+.cronica-comments
+  .cronica-comments-details
+  .cronica-comments-details-example
+  .cronica-comments-details-example-body
+  textarea {
+  border: 1px solid lightgray;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  font-size: 0.85rem;
+  resize: none;
+  width: 100%;
+  background-color: rgb(255, 255, 220);
+}
+
 /* --------------- COMMENT REACTIONS -------------------- */
 
 .cronica-comments
@@ -335,6 +349,38 @@
   button {
   display: flex;
   gap: 0.3rem;
+}
+
+.comment-reaction .editing-btn {
+  color: orange;
+}
+
+.comment-reaction .reply-btn {
+  color: green;
+}
+
+.comment-reaction .non-reply-btn {
+  color: var(--fourth-color);
+}
+
+.editing-btn-menu {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editing-btn-menu-save {
+  margin-left: 3rem;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.3rem;
+  border-radius: 5px;
+}
+
+.editing-btn-menu-cancel {
+  background-color: var(--fourth-color);
+  color: white;
+  padding: 0.3rem;
+  border-radius: 5px;
 }
 
 /* --------------- MY REPLY -------------------- */
@@ -425,6 +471,10 @@
     .cronica-comments-details-example-head
     .response-date {
     display: none;
+  }
+
+  .editing-btn-menu-save {
+    margin-left: 0rem;
   }
 
   @media only screen and (max-width: 500px) {

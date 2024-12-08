@@ -17,6 +17,7 @@ import { formatDate } from "../../../helpers/dateFormatter";
 import imageTrophy from "../../../assets/images/cronicas/trophy.png";
 import ImagePencil from "../../../assets/images/cronicas/pencil.png";
 import ImageEnvelope from "../../../assets/images/cronicas/envelope.png";
+import CurrentlyWorking from "../../Layout/SoonTag/CurrentlyWorking";
 
 //----------------------------------------
 //COMPONENT
@@ -130,36 +131,35 @@ const CronicaHome = () => {
         <div className="cronica-interactive-content">
           <div className="cronica-interactive-content-card">
             <img src={imageTrophy} alt="Trofeo" />
-            <h3>Ranking de aportes</h3>
+            <h3>Los Premios de Chacho</h3>
             <p>
-              Cada una de tus participaciones es muy valiosa para la página.
-              Sumá puntos y ganá importantes premios
+              Nominá al más pollerudo del año, al borracho o al lírico. Además,
+              mirá quiénes fueron los históricos ganadores
             </p>
-            <Link to="/photo-gallery" className="cronica-interactive-btn">
-              Mirá
+            <Link to="/cronicas/premios" className="cronica-interactive-btn">
+              Nominá
             </Link>
           </div>
           <div className="cronica-interactive-content-card">
             <img src={ImagePencil} alt="Lapiz" />
-            <h3>Tu contribución suma</h3>
+            <h3>Solicitada Especial</h3>
             <p>
-              Ya sean anécdotas para incluir en la próxima crónica, solicitadas
-              o nominaciones... Asegurate de dejar tu huella
+              Dejá tu huella en la crónica del próximo año pidiéndole a Chacho
+              que tenga presente acontencimientos memorables
             </p>
-            <Link to="/photo-gallery" className="cronica-interactive-btn">
+            <Link to="/cronicas/solicitada" className="cronica-interactive-btn">
               Participá
             </Link>
           </div>
           <div className="cronica-interactive-content-card">
             <img src={ImageEnvelope} alt="Sobre" />
-            <h3>Opiná y votá</h3>
+            <h3>La Pizarra Digital</h3>
             <p>
-              Valorá las propuestas ajenas, deja tu like o apela al derecho a
-              replica y respondé encuestas para hacer la próxima crónica más
-              colaborativa
+              Consultá quiénes son los soldados que nunca fallan a eventos
+              especiales como cumpleaños o viajes con amigos
             </p>
-            <Link to="/photo-gallery" className="cronica-interactive-btn">
-              Votá
+            <Link to="/cronicas/pizarra" className="cronica-interactive-btn">
+              Mirá
             </Link>
           </div>
         </div>
@@ -170,28 +170,6 @@ const CronicaHome = () => {
       {/* -------------------------------------------------------------------------- */}
       <section className="cronica-older">
         <h2>Crónicas pasadas</h2>
-        <div className="cronica-older-filter">
-          <select
-          /*  value={filterYear} */
-          /* onChange={(e) => setFilterYear(e.target.value)} */
-          >
-            <option value="All">Todos los años</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            {/* Añade más años según necesites */}
-          </select>
-
-          <div className="cronica-older-filter-search-bar">
-            <input
-              type="text"
-              placeholder="Buscar por título..."
-              /*  value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)} */
-            />
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </div>
-        </div>
 
         <div className="cronica-older-content">
           {cronicasData?.cronicas?.slice(1).map((cronica) => (
