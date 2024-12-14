@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Cronica from "../../dao/models/cronicas/cronicaModel.js";
+import CronicaComment from "../../dao/models/cronicas/cronicaCommentModel.js";
 import baseRepository from "../baseRepository.js";
 
 // Helper para eliminar archivos de S3
@@ -359,6 +360,64 @@ export default class CronicaRepository extends baseRepository {
       }
 
       return updatedCronica;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  deleteCronicaById = async (cronicaId) => {
+    try {
+      // 1. Obtener la crónica antes de borrarla para tener acceso a sus archivos
+      const cronicaExists = await Cronica.findById(cronicaId);
+      if (!cronicaExists) {
+        throw new Error(`The requested cronica was not found`);
+      }
+
+      // 2. Borrar todos los comentarios asociados a esta crónica
+      const commentsDeleted = await CronicaComment.deleteMany({
+        cronicaId: cronicaId,
+      });
+
+      // 3. Recolectar todos los archivos a eliminar de S3
+      const filesToDelete = [];
+
+      // Hero Image
+      if (cronicaExists.heroImage) {
+        const heroImageKey = cronicaExists.heroImage.split(".com/")[1];
+        filesToDelete.push({ Key: heroImageKey });
+      }
+
+      // Images
+      if (cronicaExists.images && cronicaExists.images.length > 0) {
+        cronicaExists.images.forEach((image) => {
+          const imageKey = image.url.split(".com/")[1];
+          filesToDelete.push({ Key: imageKey });
+        });
+      }
+
+      // Audios
+      if (cronicaExists.audios && cronicaExists.audios.length > 0) {
+        cronicaExists.audios.forEach((audio) => {
+          const audioKey = audio.url.split(".com/")[1];
+          filesToDelete.push({ Key: audioKey });
+        });
+      }
+
+      // Videos
+      if (cronicaExists.videos && cronicaExists.videos.length > 0) {
+        cronicaExists.videos.forEach((video) => {
+          const videoKey = video.url.split(".com/")[1];
+          filesToDelete.push({ Key: videoKey });
+        });
+      }
+
+      // 4. Ahora que ya tenemos los archivos a eliminar y hemos borrado los comentarios, procedemos a borrar el documento de la crónica
+      const cronicaDeleted = await Cronica.findOneAndDelete({ _id: cronicaId });
+
+      // 5. Borrar archivos de S3 asociados a la crónica
+      await deleteFilesFromS3(filesToDelete);
+
+      return cronicaDeleted;
     } catch (error) {
       throw error;
     }

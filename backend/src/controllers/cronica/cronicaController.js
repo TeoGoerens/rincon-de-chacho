@@ -113,7 +113,9 @@ export default class CronicaController {
   deleteCronicaById = async (req, res, next) => {
     try {
       const cronicaId = req.params.id;
-      const cronicaDeleted = await repository.baseDeleteById(cronicaId);
+
+      const cronicaDeleted = await repository.deleteCronicaById(cronicaId);
+
       res.status(200).json({
         message: `Cronica with id ${cronicaId} has been properly deleted`,
         cronicaDeleted,
