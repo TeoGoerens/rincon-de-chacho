@@ -1,0 +1,120 @@
+.admin-cronicas-container {
+  display: flex;
+  margin-top: 1rem;
+}
+
+.admin-cronicas-container-menu {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1 1;
+  min-width: 200px;
+  background-color: white;
+  border: 1px solid lightgray;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.admin-cronicas-container-menu h3 {
+  padding: 2rem;
+  text-align: center;
+}
+
+.admin-cronicas-container-menu-links {
+  margin: 3rem 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-cronicas-container-menu-links i {
+  width: 20px;
+}
+
+.admin-cronicas-container-menu-links p {
+  margin-left: 0.7rem;
+}
+
+.admin-cronicas-container-menu-links a {
+  display: flex;
+  width: 80%;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+  border-radius: 5px;
+}
+
+.admin-cronicas-container-menu-links a.active {
+  background-color: var(--primary-color);
+}
+
+.admin-cronicas-container-menu-links a.active i,
+.admin-cronicas-container-menu-links a.active p {
+  color: white;
+}
+
+.admin-cronicas-container-menu-links a.active:hover {
+  background-color: var(--primary-color);
+}
+
+.admin-cronicas-container-menu-links:not(.active):hover {
+  background-color: lightgray;
+  transition: all ease-in-out 0.4s;
+}
+
+.admin-cronicas-container-content {
+  display: flex;
+  flex: 3 1;
+  background-color: lightgray;
+  padding: 2rem 1rem 1rem 1rem;
+  width: 100%;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* ---------------------------------------------------------------------------- */
+/* --------------------  MEDIA QUERIES  --------------------------------------- */
+/* ---------------------------------------------------------------------------- */
+
+@media only screen and (max-width: 750px) {
+  .admin-cronicas-container {
+    flex-direction: column;
+  }
+
+  .admin-cronicas-container-menu {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 0px;
+  }
+
+  .admin-cronicas-container-menu h3 {
+    display: none;
+  }
+
+  .admin-cronicas-container-menu-links {
+    margin: 0;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 40px;
+  }
+
+  .admin-cronicas-container-menu-links a {
+    width: auto;
+  }
+
+  .admin-cronicas-container-menu-links a i {
+    text-align: center;
+  }
+
+  .admin-cronicas-container-menu-links a p {
+    display: none;
+  }
+
+  .admin-cronicas-container-content {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 10px;
+  }
+}

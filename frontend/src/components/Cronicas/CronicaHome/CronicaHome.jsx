@@ -17,7 +17,6 @@ import { formatDate } from "../../../helpers/dateFormatter";
 import imageTrophy from "../../../assets/images/cronicas/trophy.png";
 import ImagePencil from "../../../assets/images/cronicas/pencil.png";
 import ImageEnvelope from "../../../assets/images/cronicas/envelope.png";
-import CurrentlyWorking from "../../Layout/SoonTag/CurrentlyWorking";
 
 //----------------------------------------
 //COMPONENT

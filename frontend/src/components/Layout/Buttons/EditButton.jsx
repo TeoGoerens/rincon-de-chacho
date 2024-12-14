@@ -5,10 +5,10 @@ import { Link } from "react-router-dom";
 //Import CSS & styles
 import "./ButtonsStyle.css";
 
-const EditButton = ({ to }) => {
+const EditButton = ({ to, customCSSClass }) => {
   return (
-    <Link to={to}>
-      <span className="material-icons edit-button">edit</span>
+    <Link to={to} className={customCSSClass}>
+      <i class="fa-solid fa-pen-to-square"></i>
       <span className="tooltip-text">Editar</span>
     </Link>
   );

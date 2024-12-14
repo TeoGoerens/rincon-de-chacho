@@ -50,8 +50,8 @@ function App() {
             <Route path="/chachos/*" Component={ChachosRoutes} />
 
             {/* Admin protected routes */}
-            <Route Component={AdminProtectedRoutes}>
-              <Route path="/admin/*" Component={AdminRoutes} />
+            <Route element={<AdminProtectedRoutes />}>
+              <Route path="/admin/*" element={<AdminRoutes />} />
             </Route>
           </Route>
           {/* Catch all remaining routes */}

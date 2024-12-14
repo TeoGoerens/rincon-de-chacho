@@ -9,6 +9,7 @@ import AdminProdePanel from "./AdminProde/AdminProdePanel";
 
 //Admin CRONICAS Components
 import AdminCronicasPanel from "./AdminCronicas/AdminCronicasPanel";
+import CronicaIndex from "./AdminCronicas/Cronicas/CronicaIndex";
 
 //Admin CHACHOS Components
 import AdminChachosPanel from "./AdminChachos/AdminChachosPanel";
@@ -31,60 +32,88 @@ import TournamentRoundsUpdate from "./AdminChachos/TournamentRounds/TournamentRo
 import MatchStatsIndex from "./AdminChachos/MatchStats/MatchStatsIndex";
 import MatchStatsCreate from "./AdminChachos/MatchStats/MatchStatsCreate/MatchStatsCreate";
 import MatchStatsUpdate from "./AdminChachos/MatchStats/MatchStatsUpdate/MatchStatsUpdate";
+import CreateCronica from "./AdminCronicas/Cronicas/CreateCronica";
 
 const AdminRoutes = () => {
   return (
     <>
       <Routes>
-        <Route path="users" Component={AdminUsersPanel} />
-        <Route path="prode" Component={AdminProdePanel} />
-        <Route path="cronicas" Component={AdminCronicasPanel} />
+        <Route path="users" element={<AdminUsersPanel />} />
+        <Route path="prode" element={<AdminProdePanel />} />
 
+        {/* --------------- ADMIN CRONICAS --------------- */}
+
+        <Route path="cronicas/crear" element={<CreateCronica />} />
+
+        <Route path="cronicas/*" element={<AdminCronicasPanel />}>
+          {/* Ruta por defecto de cronicas */}
+          <Route index element={<CronicaIndex />} />
+
+          {/* Cronicas routes */}
+          <Route
+            path="premios"
+            element={<h2>Aca estaria el dashboard de premios</h2>}
+          />
+          {/* Cronicas routes */}
+          <Route
+            path="solicitada"
+            element={<h2>Aca estaria el dashboard de solicitada</h2>}
+          />
+          {/* Cronicas routes */}
+          <Route
+            path="pizarra"
+            element={<h2>Aca estaria el dashboard de pizarra</h2>}
+          />
+        </Route>
+        {/* --------------- ADMIN CHACHOS --------------- */}
         <Route path="chachos/*">
-          <Route index Component={AdminChachosPanel} />
+          <Route index element={<AdminChachosPanel />} />
           {/* Players routes */}
-          <Route path="players" Component={PlayersIndex} />
-          <Route path="players/create" Component={PlayersCreate} />
-          <Route path="players/update/:id" Component={PlayersUpdate} />
+          <Route path="players" element={<PlayersIndex />} />
+          <Route path="players/create" element={<PlayersCreate />} />
+          <Route path="players/update/:id" element={<PlayersUpdate />} />
           {/* Teams routes */}
-          <Route path="teams" Component={TeamsIndex} />
-          <Route path="teams/create" Component={TeamsCreate} />
-          <Route path="teams/update/:id" Component={TeamsUpdate} />
+          <Route path="teams" element={<TeamsIndex />} />
+          <Route path="teams/create" element={<TeamsCreate />} />
+          <Route path="teams/update/:id" element={<TeamsUpdate />} />
           {/* Football Categories routes */}
           <Route
             path="football-categories"
-            Component={FootballCategoriesIndex}
+            element={<FootballCategoriesIndex />}
           />
           <Route
             path="football-categories/create"
-            Component={FootballCategoriesCreate}
+            element={<FootballCategoriesCreate />}
           />
           <Route
             path="football-categories/update/:id"
-            Component={FootballCategoriesUpdate}
+            element={<FootballCategoriesUpdate />}
           />
           {/* Tournaments routes */}
-          <Route path="tournaments" Component={TournamentsIndex} />
-          <Route path="tournaments/create" Component={TournamentsCreate} />
-          <Route path="tournaments/update/:id" Component={TournamentsUpdate} />
+          <Route path="tournaments" element={<TournamentsIndex />} />
+          <Route path="tournaments/create" element={<TournamentsCreate />} />
+          <Route
+            path="tournaments/update/:id"
+            element={<TournamentsUpdate />}
+          />
           {/* Tournament Rounds routes */}
-          <Route path="tournament-rounds" Component={TournamentRoundsIndex} />
+          <Route path="tournament-rounds" element={<TournamentRoundsIndex />} />
           <Route
             path="tournament-rounds/create"
-            Component={TournamentRoundsCreate}
+            element={<TournamentRoundsCreate />}
           />
           <Route
             path="tournament-rounds/view/:id"
-            Component={TournamentRoundsDetail}
+            element={<TournamentRoundsDetail />}
           />{" "}
           <Route
             path="tournament-rounds/update/:id"
-            Component={TournamentRoundsUpdate}
+            element={<TournamentRoundsUpdate />}
           />
           {/* Interviews routes */}
-          <Route path="match-stats" Component={MatchStatsIndex} />
-          <Route path="match-stats/create/:id" Component={MatchStatsCreate} />
-          <Route path="match-stats/update/:id" Component={MatchStatsUpdate} />
+          <Route path="match-stats" element={<MatchStatsIndex />} />
+          <Route path="match-stats/create/:id" element={<MatchStatsCreate />} />
+          <Route path="match-stats/update/:id" element={<MatchStatsUpdate />} />
         </Route>
       </Routes>
     </>

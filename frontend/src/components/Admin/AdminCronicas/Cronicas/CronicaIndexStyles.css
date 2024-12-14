@@ -1,0 +1,63 @@
+.cronica-index-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.cronica-index-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cronica-index-head a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  background-color: var(--primary-color);
+  padding-block: 0.3rem;
+  padding-inline: 0.5rem;
+  border-radius: 5px;
+}
+
+.cronica-index-head a i,
+.cronica-index-head a p {
+  color: white;
+}
+
+.cronica-index-content {
+  margin-top: 2.5rem;
+}
+
+.cronica-index-content table {
+  background-color: white;
+  border-radius: 0px;
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.cronica-index-content table thead {
+  border-bottom: 2px solid black;
+  background-color: rgb(240, 240, 240);
+}
+
+.cronica-index-content table tbody tr:not(:last-child) {
+  border-bottom: 1px solid black;
+}
+
+.cronica-index-content table .cronica-index-table-actions {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.cronica-index-content table .cronica-index-table-actions a i {
+  font-size: 1rem;
+  color: orange;
+}
+
+.cronica-index-content table .cronica-index-table-actions button i {
+  font-size: 1rem;
+}
