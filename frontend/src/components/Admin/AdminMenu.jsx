@@ -43,7 +43,7 @@ const AdminMenu = () => {
               : ""
           }
         >
-          Cronicas
+          Crónicas
         </Link>
         <Link
           to="/admin/chachos"

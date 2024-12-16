@@ -17,7 +17,7 @@ const AdminCronicasPanel = () => {
       <div className="container">
         <div className="admin-cronicas-container">
           <div className="admin-cronicas-container-menu">
-            <h3>Admin Cronicas</h3>
+            <h3>Admin Crónicas</h3>
             <div className="admin-cronicas-container-menu-links">
               <NavLink
                 to=""
@@ -25,7 +25,7 @@ const AdminCronicasPanel = () => {
                 className={({ isActive }) => (isActive ? "active" : "")}
               >
                 <i class="fa-regular fa-newspaper"></i>
-                <p>Cronicas</p>
+                <p>Crónicas</p>
               </NavLink>
               <NavLink
                 to="premios"

@@ -87,7 +87,6 @@ function Sidebar({ sidebarOpen, handleToggleSidebar }) {
             >
               <span className="material-symbols-outlined">edit_note</span>
               <p>Cronicas</p>
-              <SoonTag />
             </Link>
           </li>
           <li>

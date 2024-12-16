@@ -51,10 +51,10 @@ const CronicaIndex = () => {
   return (
     <div className="cronica-index-container">
       <div className="cronica-index-head">
-        <h3>Cronicas</h3>
+        <h3>Crónicas</h3>
         <Link to="crear">
           <i class="fa-solid fa-plus"></i>
-          <p>Nueva cronica</p>
+          <p>Nueva crónica</p>
         </Link>
       </div>
       <div className="cronica-index-content">
@@ -62,7 +62,7 @@ const CronicaIndex = () => {
           <thead>
             <tr>
               <th>Año</th>
-              <th>Titulo</th>
+              <th>Título</th>
               <th>Fecha</th>
               <th>Acciones</th>
             </tr>
@@ -75,7 +75,7 @@ const CronicaIndex = () => {
                 <td>{formatDate(cronica.publishedDate)}</td>
                 <td>
                   <div className="cronica-index-table-actions">
-                    <EditButton to={"editar"} />
+                    <EditButton to={`editar/${cronica._id}`} />
                     <DeleteButton
                       customCSSClass="delete-btn-custom"
                       onClick={deleteCronicaMutation.mutate}

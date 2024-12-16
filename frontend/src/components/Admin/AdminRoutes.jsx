@@ -33,6 +33,7 @@ import MatchStatsIndex from "./AdminChachos/MatchStats/MatchStatsIndex";
 import MatchStatsCreate from "./AdminChachos/MatchStats/MatchStatsCreate/MatchStatsCreate";
 import MatchStatsUpdate from "./AdminChachos/MatchStats/MatchStatsUpdate/MatchStatsUpdate";
 import CreateCronica from "./AdminCronicas/Cronicas/CreateCronica";
+import UpdateCronica from "./AdminCronicas/Cronicas/UpdateCronica";
 
 const AdminRoutes = () => {
   return (
@@ -44,6 +45,7 @@ const AdminRoutes = () => {
         {/* --------------- ADMIN CRONICAS --------------- */}
 
         <Route path="cronicas/crear" element={<CreateCronica />} />
+        <Route path="cronicas/editar/:id" element={<UpdateCronica />} />
 
         <Route path="cronicas/*" element={<AdminCronicasPanel />}>
           {/* Ruta por defecto de cronicas */}

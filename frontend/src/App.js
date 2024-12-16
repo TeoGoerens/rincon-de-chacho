@@ -22,6 +22,9 @@ import { register } from "swiper/element/bundle";
 import "swiper/element/bundle";
 import "swiper/css";
 import "swiper/css/pagination";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 register();
 /* --------------- QUERY CLIENT --------------- */
 const queryClient = new QueryClient();
@@ -32,6 +35,7 @@ function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Navbar />
+        <ToastContainer />
 
         <Routes>
           {/* Public routes */}

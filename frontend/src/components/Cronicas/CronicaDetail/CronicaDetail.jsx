@@ -344,7 +344,58 @@ const CronicaDetail = () => {
       {/* -------------------------------------------------------------------------- */}
       {/* ----------------Cronica Body ----------------------------------------------*/}
       {/* -------------------------------------------------------------------------- */}
-      <section className="cronica-body">{cronica.body}</section>
+      <section
+        className="cronica-body"
+        dangerouslySetInnerHTML={{ __html: cronica.body }}
+      ></section>
+
+      {cronica.images && cronica.images.length > 0 && (
+        <section className="cronica-images">
+          <h3>Imágenes adicionales</h3>
+          <div className="cronica-images-content">
+            {cronica.images.map((img, index) => (
+              <figure key={index}>
+                <img src={img.url} alt={img.caption} />
+                <figcaption>{img.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {cronica.audios && cronica.audios.length > 0 && (
+        <section className="cronica-audios">
+          <h3>Audios</h3>
+          <div className="cronica-audios-content">
+            {cronica.audios.map((audio, index) => (
+              <figure key={index}>
+                <audio controls>
+                  <source src={audio.url} type="audio/mpeg" />
+                  Tu navegador no soporta el elemento audio.
+                </audio>
+                <figcaption>{audio.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {cronica.videos && cronica.videos.length > 0 && (
+        <section className="cronica-videos">
+          <h3>Videos</h3>
+          <div className="cronica-videos-content">
+            {cronica.videos.map((video, index) => (
+              <figure key={index}>
+                <video controls width="320" height="240">
+                  <source src={video.url} type="video/mp4" />
+                  Tu navegador no soporta el elemento video.
+                </video>
+                <figcaption>{video.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* -------------------------------------------------------------------------- */}
       {/* ---------------- Comments -------------------------------------------------*/}

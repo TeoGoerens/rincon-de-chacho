@@ -1,51 +1,41 @@
 // Import React dependencies
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 // Imports CSS & helpers
-import "./CreateCronicaStyles.css";
+import "./UpdateCronicaStyles.css";
 
 //Import React Query functions
-import createCronica from "../../../../reactquery/cronica/createCronica";
+import fetchCronicaById from "../../../../reactquery/cronica/fetchCronicaById";
+import updateCronica from "../../../../reactquery/cronica/updateCronica";
 
 // Import components
 import AdminMenu from "../../AdminMenu";
 
-// import React Quill & options configurations
+// Import React Quill & configurations
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Estilos por defecto de Quill
-// -----------> Opciones para la barra de herramientas (toolbar)
+import "react-quill/dist/quill.snow.css";
 const modules = {
   toolbar: [
-    // Selección de fuente
     [{ font: [] }],
-    // Tamaños de encabezado
     [{ header: [1, 2, 3, 4, 5, 6, false] }],
-    // Formato básico de texto: negrita, cursiva, subrayado, tachado, cita
     ["bold", "italic", "underline", "strike", "blockquote"],
-    // Color de texto y fondo
     [{ color: [] }, { background: [] }],
-    // Subíndice y superíndice
     [{ script: "sub" }, { script: "super" }],
-    // Listas ordenadas y no ordenadas, indentación
     [
       { list: "ordered" },
       { list: "bullet" },
       { indent: "-1" },
       { indent: "+1" },
     ],
-    // Alineación
     [{ align: [] }],
-    // Insertar enlaces, imágenes y videos
     ["link", "image", "video"],
-    // Botón para limpiar formato
     ["clean"],
   ],
 };
 
-// -----------> Formatos soportados por el editor
 const formats = [
   "font",
   "header",
@@ -66,12 +56,22 @@ const formats = [
   "video",
 ];
 
-const CreateCronica = () => {
-  // Instancia de QueryClient
+const UpdateCronica = () => {
+  const { id: cronicaId } = useParams();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  // Definicion de variables
+  const {
+    data: cronicaData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["fetchCronicaById", cronicaId],
+    queryFn: () => fetchCronicaById(cronicaId),
+    enabled: !!cronicaId,
+  });
+
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [year, setYear] = useState("");
@@ -81,30 +81,47 @@ const CreateCronica = () => {
   const [audios, setAudios] = useState([]);
   const [videos, setVideos] = useState([]);
 
-  // Creacion de mutation para llamar al endpoint POST de CreateCronica
-  const mutation = useMutation({
-    mutationFn: createCronica,
-    onSuccess: (data) => {
-      // data contiene la respuesta del backend, por ejemplo: { message: "Cronica creada correctamente", cronicaLoaded: {...} }
-      const successMessage = data?.message || "Crónica creada con éxito!";
+  // Una vez que la data de la crónica está cargada, prellenar el formulario
+  useEffect(() => {
+    if (cronicaData?.cronica) {
+      const { title, subtitle, year, body, heroImage, images, audios, videos } =
+        cronicaData.cronica;
+      setTitle(title || "");
+      setSubtitle(subtitle || "");
+      setYear(year || "");
+      setBody(body || "");
 
-      // Mostrar notificación exitosa
+      // Hero image no la prellenamos con file, pues no tenemos un file input con valor inicial
+      // El user deberá elegir una nueva si quiere cambiarla.
+
+      // Para imágenes, audios y videos:
+      // Podemos mostrarlas como vacías inicialmente o crear una lógica especial:
+      // Supongamos que si ya hay imágenes, audios o videos, le damos la opción de reemplazarlas completamente.
+      // Por simplicidad, las dejamos vacías: el admin deberá subir nuevos files si quiere reemplazar.
+
+      setImages([]);
+      setAudios([]);
+      setVideos([]);
+    }
+  }, [cronicaData]);
+
+  const mutation = useMutation({
+    mutationFn: ({ cronicaId, formData }) =>
+      updateCronica({ cronicaId, formData }),
+    onSuccess: (data) => {
+      const successMessage = data?.message || "Crónica actualizada con éxito!";
       toast.success(successMessage, {
         position: "top-right",
         autoClose: 3000,
         pauseOnHover: true,
       });
-
-      // Invalida la cache para refrescar el listado de crónicas
       queryClient.invalidateQueries(["fetchAllCronicas"]);
-
-      // Redirigir después de 3 segundos
       setTimeout(() => {
         navigate("/admin/cronicas");
       }, 4000);
     },
     onError: (error) => {
-      console.error("Error al crear la crónica:", error.message);
+      console.error("Error al actualizar la crónica:", error.message);
     },
   });
 
@@ -147,25 +164,10 @@ const CreateCronica = () => {
     formData.append("year", year);
     formData.append("body", body);
 
-    // HeroImage
-    formData.append("heroImage", heroImage);
-
-    // Para cada imagen, audio o video, el backend espera una convención:
-    // - Para imágenes: field name "images"
-    // - Para audios: field name "audios"
-    // - Para videos: field name "videos"
-    //
-    // Además, el backend busca un caption con la key: imageCaption_originalname del file.
-    // Para esto, debemos usar el `originalname` en backend, pero desde frontend no lo tenemos.
-    // El backend usa `originalname` del file upload de multer. Nosotros podemos mapear el epígrafe
-    // con la `file.name` del File input. Ejemplo:
-    //   caption key = `imageCaption_${file.name}`
-    //
-    // Luego el backend debe interpretar estos captions.
-    // En caso de que el backend ya esté preparado para eso:
-    // images, audios, videos son arrays: formData.append("images", file), etc.
-    // y para captions: formData.append(`imageCaption_${file.name}`, caption)
-    // Ajusta esto según la lógica de tu backend.
+    // Si se selecciona una nueva heroImage, la agregamos
+    if (heroImage) {
+      formData.append("heroImage", heroImage);
+    }
 
     // Imágenes
     images.forEach((imgObj) => {
@@ -191,23 +193,24 @@ const CreateCronica = () => {
       }
     });
 
-    mutation.mutate(formData);
+    mutation.mutate({ cronicaId, formData });
   };
+
+  if (isLoading) return <p>Cargando datos de la crónica...</p>;
+  if (isError) return <p>Error: {error.message}</p>;
 
   return (
     <>
       <AdminMenu />
 
       <div className="container">
-        {/*    Titulo para crear nueva crónica */}
         <div className="create-cronica-head">
-          <h2>Crear una nueva crónica</h2>
+          <h2>Actualizar crónica</h2>
           <Link className="back-btn" to="/admin/cronicas">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+            <i className="fa-solid fa-arrow-left"></i> Volver
           </Link>
         </div>
 
-        {/*         Formulario para crear nueva crónica */}
         <form className="create-cronica-form" onSubmit={handleSubmit}>
           <div className="create-cronica-form-field">
             <label>Título:</label>
@@ -251,12 +254,11 @@ const CreateCronica = () => {
           </div>
 
           <div className="create-cronica-form-field">
-            <label>Hero Image:</label>
+            <label>Hero Image (opcional si querés cambiar):</label>
             <input
               type="file"
               onChange={(e) => setHeroImage(e.target.files[0])}
               accept="image/*"
-              required
             />
           </div>
 
@@ -264,7 +266,7 @@ const CreateCronica = () => {
 
           <div className="create-cronica-form-multimedia">
             <div className="create-cronica-form-multimedia-head">
-              <h3>Imágenes adicionales:</h3>
+              <h3>Imágenes adicionales (opcional):</h3>
               <button type="button" onClick={handleAddImage}>
                 Agregar otra imagen
               </button>
@@ -300,7 +302,7 @@ const CreateCronica = () => {
 
           <div className="create-cronica-form-multimedia">
             <div className="create-cronica-form-multimedia-head">
-              <h3>Audios</h3>
+              <h3>Audios (opcional):</h3>
               <button type="button" onClick={handleAddAudio}>
                 Agregar otro audio
               </button>
@@ -335,7 +337,7 @@ const CreateCronica = () => {
 
           <div className="create-cronica-form-multimedia">
             <div className="create-cronica-form-multimedia-head">
-              <h3>Videos</h3>
+              <h3>Videos (opcional):</h3>
               <button type="button" onClick={handleAddVideo}>
                 Agregar otro video
               </button>
@@ -374,7 +376,7 @@ const CreateCronica = () => {
             type="submit"
             disabled={mutation.isLoading}
           >
-            {mutation.isLoading ? "Creando..." : "Crear Crónica"}
+            {mutation.isLoading ? "Actualizando..." : "Actualizar Crónica"}
           </button>
         </form>
       </div>
@@ -382,4 +384,4 @@ const CreateCronica = () => {
   );
 };
 
-export default CreateCronica;
+export default UpdateCronica;
