@@ -6,6 +6,10 @@ import baseRepository from "../baseRepository.js";
 // Helper para eliminar archivos de S3
 import deleteFilesFromS3 from "../../helpers/deleteFilesFromS3.js";
 
+// Import information for mail sending
+import User from "../../dao/models/userModel.js";
+import transport from "../../config/email/nodemailer.js";
+
 export default class CronicaRepository extends baseRepository {
   constructor() {
     super(Cronica);
@@ -182,6 +186,34 @@ export default class CronicaRepository extends baseRepository {
       // Guardar el objeto creado en la base de datos
       const cronicaLoaded = await Cronica.create(newCronica);
 
+      /*  // Una vez creada la crónica, enviar correo a todos los usuarios
+      const allUsers = await User.find({}, "email");
+      const userEmails = allUsers.map((user) => user.email);
+
+      const subject = "¡Nueva crónica disponible!";
+      const htmlContent = `
+        <p>Hola,</p>
+        <p>¡Chacho tiene una novedad para compartir con vos!</p>
+       <p>Se acaba de publicar una nueva crónica: <strong>${cronicaLoaded.title}</strong>.</p>
+       <p>Año: ${cronicaLoaded.year}<br>
+       Descripción: ${cronicaLoaded.subtitle}</p>
+       <p><a href="https://elrincondechacho.com/cronicas/${cronicaLoaded._id}">Haz clic aquí para leerla</a></p>
+       <p>¡No te la pierdas!</p>
+      `;
+
+      // Envío de correos en paralelo con Promise.all
+      // Nota: Esto mantendrá el request abierto hasta que se completen todos los envíos
+      await Promise.all(
+        userEmails.map((email) =>
+          transport.sendMail({
+            from: process.env.NODEMAILER_USER,
+            to: email,
+            subject: subject,
+            html: htmlContent,
+          })
+        )
+      );
+ */
       return cronicaLoaded;
     } catch (error) {
       // Limpiar archivos subidos en caso de error

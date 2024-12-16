@@ -10,11 +10,14 @@ dotenv.config();
 const deleteFilesFromS3 = async (files) => {
   try {
     for (const file of files) {
-      const key = file?.location
+      let key = file?.location
         ? file.location.split(".com/")[1] // Si tiene location, extraer el Key
         : file?.Key; // Si tiene Key, usarlo directamente
 
       if (key) {
+        // Decodificar la Key para reemplazar %20 por espacios
+        key = decodeURIComponent(key);
+
         await s3.send(
           new DeleteObjectCommand({
             Bucket: process.env.AWS_S3_BUCKET_NAME,

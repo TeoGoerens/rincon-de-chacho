@@ -43,7 +43,7 @@ export default class CronicaController {
       );
 
       res.status(200).json({
-        message: "Cronica has been properly created",
+        message: "La crónica ha sido creada exitosamente",
         cronicaLoaded,
       });
     } catch (error) {
@@ -65,7 +65,7 @@ export default class CronicaController {
       );
 
       res.status(200).json({
-        message: `Cronica with id ${cronicaId} has been updated`,
+        message: `La crónica ha sido actualizada correctamente`,
         cronicaUpdated,
       });
     } catch (error) {
