@@ -8,9 +8,6 @@ const router = Router();
 const controller = new CronicaController();
 
 // ---------- GET ROUTES ----------
-router.get("/test", (req, res) => {
-  res.status(200).json({ message: "Ruta test funcionando" });
-});
 router.get("/", authMiddleware, controller.getAllCronicas);
 router.get("/:id", authMiddleware, controller.getCronicaById);
 
