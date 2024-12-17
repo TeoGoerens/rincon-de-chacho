@@ -16,10 +16,6 @@ import { dirname, join } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-if (process.env.npm_lifecycle_event === "start") {
-  app.use(express.static(join(__dirname, "../../frontend/build")));
-}
-
 // ---------- ROUTER CONFIGURATION ----------
 import userRouter from "./routes/userRouter.js";
 import playerRouter from "./routes/chachos/playerRouter.js";
@@ -47,6 +43,10 @@ app.use("/api/chachos/match-stat", matchStatRouter);
 //Ruta cronica
 app.use("/api/cronica", cronicaRouter);
 app.use("/api/cronica/comment", cronicaCommentRouter);
+
+if (process.env.npm_lifecycle_event === "start") {
+  app.use(express.static(join(__dirname, "../../frontend/build")));
+}
 
 // Ruta principal
 app.get("*", (req, res) => {

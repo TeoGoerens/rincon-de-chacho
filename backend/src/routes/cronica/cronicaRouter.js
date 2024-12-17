@@ -13,7 +13,7 @@ router.get("/:id", authMiddleware, controller.getCronicaById);
 
 // ---------- POST ROUTES ----------
 router.post(
-  "",
+  "/",
   authMiddleware,
   adminAuthMiddleware,
   uploadMultipleFilesCronica,
