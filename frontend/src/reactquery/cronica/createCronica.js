@@ -14,7 +14,7 @@ const createCronica = async (formData) => {
 
   // Endpoint to create a comment
   const endpoint = `${baseURL}/api/cronica`;
-  console.log(endpoint);
+
   // POST request to the server
   const response = await axios.post(endpoint, formData, {
     headers: {
@@ -23,7 +23,6 @@ const createCronica = async (formData) => {
     },
   });
 
-  console.log(response);
   return response.data;
 };
 

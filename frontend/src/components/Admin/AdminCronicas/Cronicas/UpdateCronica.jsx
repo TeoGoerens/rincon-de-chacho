@@ -84,8 +84,7 @@ const UpdateCronica = () => {
   // Una vez que la data de la crónica está cargada, prellenar el formulario
   useEffect(() => {
     if (cronicaData?.cronica) {
-      const { title, subtitle, year, body, heroImage, images, audios, videos } =
-        cronicaData.cronica;
+      const { title, subtitle, year, body } = cronicaData.cronica;
       setTitle(title || "");
       setSubtitle(subtitle || "");
       setYear(year || "");
@@ -203,7 +202,14 @@ const UpdateCronica = () => {
     <>
       <AdminMenu />
 
-      <div className="container">
+      {/* Spinner Overlay */}
+      {mutation.isPending && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
+
+      <div className={`container ${mutation.isPending ? "blurred" : ""}`}>
         <div className="create-cronica-head">
           <h2>Actualizar crónica</h2>
           <Link className="back-btn" to="/admin/cronicas">
