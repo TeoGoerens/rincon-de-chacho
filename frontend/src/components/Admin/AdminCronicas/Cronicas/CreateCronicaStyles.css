@@ -1,4 +1,45 @@
 /* -------------------------------------------- */
+/* --------------- SPINNER -------------------- */
+/* -------------------------------------------- */
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Fondo opaco */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 1000; /* Asegura que esté sobre otros elementos */
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 6px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efecto blur en contenido principal */
+.blurred {
+  filter: blur(5px);
+  pointer-events: none; /* Desactiva la interacción */
+  user-select: none; /* Evita selección de texto */
+  opacity: 0.5;
+}
+
+/* -------------------------------------------- */
 /* --------------- CREATE CRONICA HEAD -------- */
 /* -------------------------------------------- */
 

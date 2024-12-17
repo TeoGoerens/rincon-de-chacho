@@ -17,6 +17,7 @@ import PodridaRoutes from "./components/Podrida/PodridaRoutes";
 import CronicaRoutes from "./components/Cronicas/CronicaRoutes";
 /* --------------- REACT QUERY --------------- */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 /* --------------- SUPPORTING LIBRARIES --------------- */
 import { register } from "swiper/element/bundle";
 import "swiper/element/bundle";
@@ -24,6 +25,8 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+/* --------------- HELPERS --------------- */
+import { baseURL } from "./helpers/baseURL.js";
 
 register();
 /* --------------- QUERY CLIENT --------------- */
@@ -32,6 +35,10 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      {/* React Query Devtools siempre está montado */}
+      {baseURL === "http://localhost:8080" && (
+        <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+      )}
       <BrowserRouter>
         <ScrollToTop />
         <Navbar />

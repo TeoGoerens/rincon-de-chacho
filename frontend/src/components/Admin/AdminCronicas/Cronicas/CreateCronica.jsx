@@ -98,7 +98,7 @@ const CreateCronica = () => {
       // Invalida la cache para refrescar el listado de crónicas
       queryClient.invalidateQueries(["fetchAllCronicas"]);
 
-      // Redirigir después de 3 segundos
+      // Redirigir después de 4 segundos
       setTimeout(() => {
         navigate("/admin/cronicas");
       }, 4000);
@@ -198,7 +198,14 @@ const CreateCronica = () => {
     <>
       <AdminMenu />
 
-      <div className="container">
+      {/* Spinner Overlay */}
+      {mutation.isPending && (
+        <div className="spinner-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
+
+      <div className={`container ${mutation.isPending ? "blurred" : ""}`}>
         {/*    Titulo para crear nueva crónica */}
         <div className="create-cronica-head">
           <h2>Crear una nueva crónica</h2>
