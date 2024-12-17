@@ -14,25 +14,9 @@ router.get("/:id", authMiddleware, controller.getCronicaById);
 // ---------- POST ROUTES ----------
 router.post(
   "/",
-  (req, res, next) => {
-    console.log("Paso 1: Entró a la ruta");
-    next();
-  },
   authMiddleware,
-  (req, res, next) => {
-    console.log("Paso 2: Pasó authMiddleware");
-    next();
-  },
   adminAuthMiddleware,
-  (req, res, next) => {
-    console.log("Paso 3: Pasó adminAuthMiddleware");
-    next();
-  },
   uploadMultipleFilesCronica,
-  (req, res, next) => {
-    console.log("Paso 4: Subida de archivos completada");
-    next();
-  },
   controller.createCronica
 );
 

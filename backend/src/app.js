@@ -44,6 +44,7 @@ app.use("/api/chachos/match-stat", matchStatRouter);
 app.use("/api/cronica", cronicaRouter);
 app.use("/api/cronica/comment", cronicaCommentRouter);
 
+// Configuracion archivos estaticos
 if (process.env.npm_lifecycle_event === "start") {
   app.use(express.static(join(__dirname, "../../frontend/build")));
 }
