@@ -45,10 +45,7 @@ app.use("/api/cronica", cronicaRouter);
 app.use("/api/cronica/comment", cronicaCommentRouter);
 
 // Configuracion archivos estaticos
-if (process.env.npm_lifecycle_event === "start") {
-  app.use(express.static(join(__dirname, "../../frontend/build")));
-}
-
+app.use(express.static(join(__dirname, "../../frontend/build")));
 // Ruta principal
 app.get("*", (req, res) => {
   const indexPath = join(__dirname, "../../frontend/build/index.html");
