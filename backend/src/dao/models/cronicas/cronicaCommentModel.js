@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { mongoConnection } from "../../connection.js";
 
 const replySchema = new mongoose.Schema({
   userId: {
@@ -63,6 +62,6 @@ const commentSchema = new mongoose.Schema({
   },
 });
 
-const CronicaComment = mongoConnection.model("Cronica Comment", commentSchema);
+const CronicaComment = mongoose.model("Cronica Comment", commentSchema);
 
 export default CronicaComment;

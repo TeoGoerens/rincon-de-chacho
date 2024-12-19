@@ -14,6 +14,10 @@ export const s3 = new S3Client({
   region: process.env.AWS_REGION,
 });
 
+// Obtener entorno
+const environment =
+  process.env.npm_lifecycle_event === "start" ? "production" : "development";
+
 // Middleware Multer para solicitudes con archivos
 const uploadWithFiles = multer({
   storage: multerS3({
@@ -23,15 +27,26 @@ const uploadWithFiles = multer({
       cb(null, { fieldName: file.fieldname });
     },
     key: (req, file, cb) => {
-      const uniqueKey = `cronicas/${Date.now()}_${file.originalname}`;
+      const folder =
+        environment === "production"
+          ? "cronicas/production"
+          : "cronicas/development";
+      const uniqueKey = `${folder}/${Date.now()}_${file.originalname}`;
       cb(null, uniqueKey);
     },
   }),
+
+  // ----------- LÍMITES AJUSTADOS -----------
+  limits: {
+    fileSize: 5000 * 1024 * 1024, // 50 MB por archivo
+    fieldSize: 10 * 1024 * 1024, // 10 MB para campos no archivo
+    files: 50, // Aumentado a 50 archivos en total
+  },
 }).fields([
   { name: "heroImage", maxCount: 1 },
-  { name: "images", maxCount: 10 },
-  { name: "audios", maxCount: 5 },
-  { name: "videos", maxCount: 5 },
+  { name: "images", maxCount: 50 },
+  { name: "audios", maxCount: 50 },
+  { name: "videos", maxCount: 50 },
 ]);
 
 // Middleware Multer para solicitudes sin archivos

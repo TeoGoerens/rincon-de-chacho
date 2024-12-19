@@ -2,25 +2,23 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-const initMongoDB = () => {
+export const initMongoDB = async () => {
+  const isDev = process.env.npm_lifecycle_event === "dev";
+  const MONGO_ATLAS_URL = isDev
+    ? process.env.MONGO_ATLAS_URL_DEV
+    : process.env.MONGO_ATLAS_URL_PROD;
+
   try {
-    const isDev = process.env.npm_lifecycle_event === "dev";
-    const MONGO_ATLAS_URL = isDev
-      ? process.env.MONGO_ATLAS_URL_DEV
-      : process.env.MONGO_ATLAS_URL_PROD;
+    // Configuración avanzada de conexión con timeouts incrementados
+    await mongoose.connect(`${MONGO_ATLAS_URL}/app`, {
+      serverSelectionTimeoutMS: 30000, // Tiempo máximo para seleccionar un servidor
+      connectTimeoutMS: 30000, // Tiempo máximo para conectar
+      socketTimeoutMS: 30000, // Tiempo máximo de inactividad del socket
+    });
 
-    const dbMongo = mongoose.createConnection(`${MONGO_ATLAS_URL}/app?`);
-    /* const dbChachos = mongoose.createConnection(`${MONGO_ATLAS_URL}/chachos?`);
-    const dbPodrida = mongoose.createConnection(`${MONGO_ATLAS_URL}/podrida?`);
-    const dbCronicas = mongoose.createConnection(
-      `${MONGO_ATLAS_URL}/cronicas?`
-    ); */
-    console.log("Connected to Mongo DBs");
-
-    return dbMongo;
+    console.log("✅ Connected to MongoDB successfully");
   } catch (error) {
-    console.log(`An error occured => ${error}`);
+    console.error("❌ MongoDB connection failed:", error.message);
+    throw error; // Permite manejar este error donde sea llamado
   }
 };
-
-export const mongoConnection = await initMongoDB();

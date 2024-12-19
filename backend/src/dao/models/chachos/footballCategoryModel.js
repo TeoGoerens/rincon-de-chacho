@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { mongoConnection } from "../../connection.js";
 
 const footballCategorySchema = new mongoose.Schema(
   {
@@ -19,7 +18,7 @@ const footballCategorySchema = new mongoose.Schema(
   }
 );
 
-const FootballCategory = mongoConnection.model(
+const FootballCategory = mongoose.model(
   "Football Category",
   footballCategorySchema
 );

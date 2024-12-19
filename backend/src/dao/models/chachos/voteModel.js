@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import User from "../userModel.js";
-import { mongoConnection } from "../../connection.js";
 
 const voteSchema = new mongoose.Schema(
   {
@@ -50,5 +48,5 @@ const voteSchema = new mongoose.Schema(
   }
 );
 
-const Vote = mongoConnection.model("Vote", voteSchema);
+const Vote = mongoose.model("Vote", voteSchema);
 export default Vote;

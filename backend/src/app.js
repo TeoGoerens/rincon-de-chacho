@@ -1,13 +1,15 @@
 // ---------- GENERAL IMPORTS & CONFIGURATIONS ----------
 import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import { initMongoDB } from "./dao/connection.js";
+import errorHandler from "./middlewares/error/errorHandler.js";
+import routingErrorHandler from "./middlewares/error/errorRouting.js";
+
+dotenv.config();
 const app = express();
 
-import dotenv from "dotenv";
-dotenv.config();
-
-import cors from "cors";
 app.use(cors());
-
 app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,38 +30,50 @@ import matchStatRouter from "./routes/chachos/matchStatRouter.js";
 import cronicaRouter from "./routes/cronica/cronicaRouter.js";
 import cronicaCommentRouter from "./routes/cronica/cronicaCommentRouter.js";
 
-//Ruta users
-app.use("/api/users", userRouter);
+// ---------- FUNCION DE INICIO DEL SERVIDOR ----------
+const startServer = async () => {
+  try {
+    // Inicializar conexión a MongoDB
+    await initMongoDB();
+    console.log("✅ MongoDB connected successfully");
 
-//Ruta chachos
-app.use("/api/chachos/player", playerRouter);
-app.use("/api/chachos/tournament", tournamentRouter);
-app.use("/api/chachos/football-category", footballCategoryRouter);
-app.use("/api/chachos/rival-team", rivalTeamRouter);
-app.use("/api/chachos/tournament-round", tournamentRoundRouter);
-app.use("/api/chachos/vote", voteRouter);
-app.use("/api/chachos/match-stat", matchStatRouter);
+    // ---------- CONFIGURAR RUTAS ----------
+    app.use("/api/users", userRouter);
+    app.use("/api/chachos/player", playerRouter);
+    app.use("/api/chachos/tournament", tournamentRouter);
+    app.use("/api/chachos/football-category", footballCategoryRouter);
+    app.use("/api/chachos/rival-team", rivalTeamRouter);
+    app.use("/api/chachos/tournament-round", tournamentRoundRouter);
+    app.use("/api/chachos/vote", voteRouter);
+    app.use("/api/chachos/match-stat", matchStatRouter);
+    app.use("/api/cronica", cronicaRouter);
+    app.use("/api/cronica/comment", cronicaCommentRouter);
 
-//Ruta cronica
-app.use("/api/cronica", cronicaRouter);
-app.use("/api/cronica/comment", cronicaCommentRouter);
+    // Configuración de archivos estáticos
+    if (process.env.npm_lifecycle_event === "start") {
+      app.use(express.static(join(__dirname, "../../frontend/build")));
+    }
 
-// Configuracion archivos estaticos
-app.use(express.static(join(__dirname, "../../frontend/build")));
-// Ruta principal
-app.get("*", (req, res) => {
-  const indexPath = join(__dirname, "../../frontend/build/index.html");
-  res.sendFile(indexPath);
-});
+    // Ruta principal para servir el frontend en producción
+    app.get("*", (req, res) => {
+      const indexPath = join(__dirname, "../../frontend/build/index.html");
+      res.sendFile(indexPath);
+    });
 
-// ---------- ERROR MIDDLEWARE CONFIGURATIONS ----------
-import errorHandler from "./middlewares/error/errorHandler.js";
-import routingErrorHandler from "./middlewares/error/errorRouting.js";
-app.use(routingErrorHandler);
-app.use(errorHandler);
+    // ---------- ERROR MIDDLEWARE CONFIGURATIONS ----------
+    app.use(routingErrorHandler);
+    app.use(errorHandler);
 
-// ---------- PORT CONFIGURATION & SET UP ----------
-const PORT = parseInt(process.env.PORT, 10) || 8080;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    // ---------- PUERTO Y LEVANTAR SERVIDOR ----------
+    const PORT = parseInt(process.env.PORT, 10) || 8080;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Error starting the server:", error.message);
+    process.exit(1); // Detener el proceso si hay un error crítico
+  }
+};
+
+// Llamar a la función para iniciar el servidor
+startServer();
