@@ -351,7 +351,7 @@ const CronicaDetail = () => {
 
       {cronica.images && cronica.images.length > 0 && (
         <section className="cronica-images">
-          <h3>Imágenes adicionales</h3>
+          <h3>El año en fotos</h3>
           <div className="cronica-images-content">
             {cronica.images.map((img, index) => (
               <figure key={index}>
