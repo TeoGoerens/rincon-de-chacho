@@ -37,11 +37,11 @@ const uploadWithFiles = multer({
   }),
 
   // ----------- LÍMITES AJUSTADOS -----------
-  /*   limits: {
+  limits: {
     fileSize: 5000 * 1024 * 1024, // 50 MB por archivo
     fieldSize: 10 * 1024 * 1024, // 10 MB para campos no archivo
     files: 50, // Aumentado a 50 archivos en total
-  }, */
+  },
 }).fields([
   { name: "heroImage", maxCount: 1 },
   { name: "images", maxCount: 50 },

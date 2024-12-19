@@ -10,8 +10,8 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: "8mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "100mb" })); // Cambia el límite según lo necesario
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
