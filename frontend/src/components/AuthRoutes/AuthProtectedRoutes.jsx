@@ -44,7 +44,6 @@ const AuthProtectedRoutes = () => {
 
   //Compare both dates
   if (rightNow > expired_credentials_date) {
-    console.log("Te pasaste");
     dispatch(logoutUserAction());
     navigate("/");
   }
