@@ -237,9 +237,9 @@
 .cronica-images-content figure,
 .cronica-audios-content figure,
 .cronica-videos-content figure {
-  flex: 1 1 350px; /* El elemento tratará de tomar al menos 350px */
-  min-width: 350px;
-  max-width: 100%;
+  flex: 1 1 calc(50% - 1.5rem); /* Ajusta al 50% del contenedor menos el gap */
+  max-width: calc(50% - 1.5rem); /* Asegura un ancho máximo igual al cálculo */
+  min-width: calc(50% - 1.5rem); /* Consistencia entre flex y tamaños mínimos */
   border: 1px solid #eee;
   border-radius: 5px;
   overflow: hidden;
