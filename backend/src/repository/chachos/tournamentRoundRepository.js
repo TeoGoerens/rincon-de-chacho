@@ -60,7 +60,7 @@ export default class TournamentRoundRepository extends baseRepository {
       <h3>Se abrió la votación para una nueva fecha de Chachos.</h3>
       <p>No te pierdas la posibilidad de elegir las perlas y puntuar a cada uno de los jugadores.</p>
       <p>Apurate e ingresá en el link debajo para dejar tu voto:</p>
-      <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/results">Ver Fecha</a>
+      <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/vote">Ver Fecha</a>
     `,
     }));
 
