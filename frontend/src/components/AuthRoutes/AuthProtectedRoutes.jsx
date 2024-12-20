@@ -1,6 +1,6 @@
 //Import React & Hooks
 import React from "react";
-import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 //Import CSS & styles
 
@@ -23,9 +23,6 @@ const AuthProtectedRoutes = () => {
   //Dispatch const creation
   const dispatch = useDispatch();
 
-  //Navigate const creation
-  const navigate = useNavigate();
-
   //Select state from votes store
   const userStoreData = useSelector((store) => store.users);
   const userAuth = userStoreData?.userAuth;
@@ -45,7 +42,7 @@ const AuthProtectedRoutes = () => {
   //Compare both dates
   if (rightNow > expired_credentials_date) {
     dispatch(logoutUserAction());
-    navigate("/");
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   return userAuth ? (

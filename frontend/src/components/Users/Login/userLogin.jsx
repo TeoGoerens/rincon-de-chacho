@@ -1,6 +1,6 @@
 //Import React & Hooks
 import React, { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 //Import CSS & styles
 import "./userLoginStyles.css";
@@ -34,6 +34,9 @@ const UserLogin = () => {
   //Navigate const creation
   const navigate = useNavigate();
 
+  //Obtain current location
+  const location = useLocation();
+
   //Formik configuration
   const formik = useFormik({
     initialValues: {
@@ -53,9 +56,11 @@ const UserLogin = () => {
 
   useEffect(() => {
     if (userAuth) {
-      navigate("/home");
+      // Obtener la URL original o redirigir a /home**
+      const redirectTo = location.state?.from?.pathname || "/home";
+      navigate(redirectTo, { replace: true }); // Redirigir después del login
     }
-  }, [userAuth, navigate]);
+  }, [userAuth, navigate, location.state?.from?.pathname]);
 
   //Reset all errors and success messages once the component is render to avoid carry forward from other components
   useEffect(() => {
