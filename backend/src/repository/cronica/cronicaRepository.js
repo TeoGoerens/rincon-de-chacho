@@ -1,10 +1,14 @@
 import mongoose from "mongoose";
+import User from "../../dao/models/userModel.js";
 import Cronica from "../../dao/models/cronicas/cronicaModel.js";
 import CronicaComment from "../../dao/models/cronicas/cronicaCommentModel.js";
 import baseRepository from "../baseRepository.js";
 
 // Helper para eliminar archivos de S3
 import deleteFilesFromS3 from "../../helpers/deleteFilesFromS3.js";
+
+// Helper para enviar correos
+import { sendBulkEmail } from "../../helpers/sendBulkEmail.js";
 
 export default class CronicaRepository extends baseRepository {
   constructor() {
@@ -181,6 +185,48 @@ export default class CronicaRepository extends baseRepository {
 
       // Guardar el objeto creado en la base de datos
       const cronicaLoaded = await Cronica.create(newCronica);
+
+      // --- SECCIÓN DE ENVÍO DE CORREO ---
+      // 1) Buscar todos los usuarios (solo campos necesarios)
+      const registeredUsers = await User.find({}, { first_name: 1, email: 1 });
+
+      // 2) Armar el subject y el HTML (o usar generateHTML como función)
+      const subject = `La crónica ${cronicaLoaded.year} acaba de ser publicada. ¡No te la pierdas!`;
+
+      // Opción A: Uso de generateHTML como función
+      // (si querés personalizar el mail para cada usuario)
+      const generateHTML = (user) => `
+        <h1>¡Hola ${user.first_name}!</h1>
+        <p>Se acaba de publicar una nueva crónica titulada <b>${cronicaLoaded.title}</b>.</p>
+        <p>No seas vago y rememorá todo lo que pasó durante el año ${cronicaLoaded.year}</p>
+        <br>
+        <p>Haceme caso, apurate y presioná el siguiente link para ver todos los detalles, fotos, videos y dejar tus comentarios:</p>
+        <br>  
+        <a 
+          href="https://elrincondechacho.com/cronicas/${cronicaLoaded._id}" 
+        >
+          Ver crónica
+        </a>
+      `;
+
+      // 3) Llamar a sendBulkEmail
+      try {
+        await sendBulkEmail({
+          recipients: registeredUsers,
+          subject,
+          generateHTML,
+          // Podés dejar fromEmail por defecto (chacho@elrincondechacho.com)
+        });
+        console.log("Correos enviados exitosamente tras crear la crónica");
+      } catch (emailErr) {
+        console.error(
+          "Error al enviar los correos de nueva crónica:",
+          emailErr
+        );
+        // Decidí si querés lanzar el error o continuar
+        // throw emailErr;
+      }
+      // --- FIN SECCIÓN DE ENVÍO DE CORREO ---
 
       return cronicaLoaded;
     } catch (error) {

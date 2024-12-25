@@ -13,6 +13,7 @@ export default class CronicaController {
         cronica,
       });
     } catch (error) {
+      console.error("Error en getCronicaById:", error);
       next(error);
     }
   };
