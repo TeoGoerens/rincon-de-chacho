@@ -1,6 +1,9 @@
 import CronicaComment from "../../dao/models/cronicas/cronicaCommentModel.js";
 import Cronica from "../../dao/models/cronicas/cronicaModel.js";
 
+// Importar el helper para mandar correos
+import { sendBulkEmail } from "../../helpers/sendBulkEmail.js";
+
 import baseRepository from "../baseRepository.js";
 
 export default class CronicaCommentRepository extends baseRepository {
@@ -155,15 +158,46 @@ export default class CronicaCommentRepository extends baseRepository {
 
   createReplyOnAComment = async (userId, commentId, reply) => {
     try {
-      const commentExists = await CronicaComment.findById(commentId);
+      // Verificar si el comentario original existe
+      const commentExists = await CronicaComment.findById(commentId).populate(
+        "userId",
+        "email first_name"
+      );
 
       if (!commentExists) {
         throw new Error(`The requested comment was not found`);
       }
 
+      // Agregar la respuesta al comentario
       commentExists.replies.push({ userId: userId, reply: reply });
 
+      // Guardar la actualización del comentario
       const updatedComment = await commentExists.save();
+
+      // Enviar correo al autor del comentario original
+      if (commentExists.userId && commentExists.userId.email) {
+        await sendBulkEmail({
+          recipients: [
+            {
+              name: commentExists.userId.first_name,
+              email: commentExists.userId.email,
+            },
+          ],
+          subject: "Tu comentario ha recibido una respuesta",
+          generateHTML: (recipient) => `
+          <h1>¡Hola ${recipient.name}!</h1>
+          <p>Tu comentario ha recibido una nueva respuesta:</p>
+          <blockquote><em>${reply}</em></blockquote>
+          <p>Andá a verlo directamente en la página y reaccioná:</p>
+          <br> 
+          <a 
+            href="https://elrincondechacho.com/cronicas/${commentExists.cronicaId}" 
+          >
+            Ver Respuesta
+          </a>
+          `,
+        });
+      }
 
       return updatedComment;
     } catch (error) {

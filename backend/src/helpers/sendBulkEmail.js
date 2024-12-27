@@ -28,7 +28,7 @@ export async function sendBulkEmail({
   recipients,
   subject,
   generateHTML,
-  fromEmail = "chacho@elrincondechacho.com",
+  fromEmail = '"Chacho" <chacho@elrincondechacho.com>',
 }) {
   if (!Array.isArray(recipients) || recipients.length === 0) {
     throw new Error("No hay destinatarios para enviar el correo");
