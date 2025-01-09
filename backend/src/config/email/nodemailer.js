@@ -1,3 +1,6 @@
+// Esta configuración quedará de respaldo en caso que necesite volver a enviar correos a través de Nodemailer con credenciales SMTP de Amazon SES.
+// Ahora, la función sendBulkEmail.js está funcionando directamente con Amazon SES y SDK, lo que me evita usar Nodemailer
+
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
