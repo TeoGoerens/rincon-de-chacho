@@ -26,23 +26,33 @@ export default class MatchStatController {
   // ---------- GET MATCH STATS FILTERED ----------
   getMatchStatsFiltered = async (req, res, next) => {
     try {
+      // Empezamos con un objeto vacío
       let filter = {};
 
-      //Filtro de torneo
+      // 1. Filtro de torneo
       const tournamentId = req.query.tournament || null;
-      tournamentId === null
-        ? (filter = filter)
-        : (filter.tournament = tournamentId);
+      if (tournamentId !== null) {
+        filter.tournament = tournamentId;
+      }
 
-      //Filtro de ronda
+      // 2. Filtro de ronda
       const tournamentRoundId = req.query.round || null;
-      tournamentRoundId === null
-        ? (filter = filter)
-        : (filter.round = tournamentRoundId);
+      if (tournamentRoundId !== null) {
+        filter.round = tournamentRoundId;
+      }
 
-      //Filtro de jugador
+      // 3. Filtro de jugador
       const playerId = req.query.player || null;
-      playerId === null ? (filter = filter) : (filter.player = playerId);
+      if (playerId !== null) {
+        filter.player = playerId;
+      }
+
+      // 4. Filtro de año
+      const yearParam = req.query.year || null;
+      // Si yearParam no es null, convertimos a entero y lo seteamos
+      if (yearParam !== null) {
+        filter.year = parseInt(yearParam, 10);
+      }
 
       const filteredMatchStats = await repository.getMatchStatFiltered(filter);
 
