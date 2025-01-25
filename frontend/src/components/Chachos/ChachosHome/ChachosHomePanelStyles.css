@@ -3,6 +3,14 @@
   margin-bottom: 3rem;
 }
 
+/* ---------- Chachos filter selection ---------- */
+.chachos-filter-selection {
+  width: 100%;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
 /* ---------- Chachos home container ---------- */
 .chachos-home-panel-container-select {
   font-size: 0.85rem;
@@ -481,6 +489,14 @@
 }
 
 @media only screen and (max-width: 500px) {
+  .chachos-filter-selection {
+    justify-content: center;
+  }
+
+  .chachos-home-panel-container-select {
+    width: 50%;
+  }
+
   .top-players-card h5 {
     font-size: 0.85rem;
   }

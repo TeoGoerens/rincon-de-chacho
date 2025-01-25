@@ -1,5 +1,5 @@
 //Import React & Hooks
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 
 //Import libraries
 import { SwiperContainer, SwiperSlide } from "swiper/element/bundle";
@@ -35,22 +35,16 @@ const ChachosHomePanel = () => {
   //Dispatch const creation
   const dispatch = useDispatch();
 
-  //Define variables
-  const [filterOptions, setFilterOptions] = useState({});
+  // --------------------
+  // LOCAL STATES
+  // --------------------
+  const [yearFilter, setYearFilter] = useState("all");
+  const [tournamentFilter, setTournamentFilter] = useState("all");
   const [regroupedPlayersStats, setRegroupedPlayersStats] = useState([]);
 
-  // Function to handle dropdown change
-  const handleTournamentChange = (event) => {
-    const filterSupport = { tournament: event.target.value };
-    setFilterOptions(filterSupport);
-  };
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTournamentsAction());
-    dispatch(getMatchStatsFilteredAction(filterOptions));
-  }, [dispatch, filterOptions]);
-
+  // --------------------
+  // REDUX SELECTORS
+  // --------------------
   //Select tournament information from store
   const tournamentStoreData = useSelector((store) => store.tournaments);
   const allTournaments = tournamentStoreData?.tournaments?.tournaments;
@@ -61,12 +55,58 @@ const ChachosHomePanel = () => {
     matchStatsStoreData?.filteredMatchStats?.filteredMatchStats;
   const { appError, serverError } = matchStatsStoreData;
 
+  // --------------------
+  // DATA FETCH
+  // --------------------
+  // 1) Al montar, obtenemos la lista de torneos para poder armar el filtro de años y torneos.
+  useEffect(() => {
+    dispatch(getAllTournamentsAction());
+  }, [dispatch]);
+
+  // 2) Cada vez que cambien yearFilter o tournamentFilter, disparamos getMatchStatsFilteredAction
+  useEffect(() => {
+    // Armamos un objeto con los filtros (sin "all")
+    const filter = {};
+    if (yearFilter !== "all") {
+      filter.year = yearFilter;
+    }
+    if (tournamentFilter !== "all") {
+      filter.tournament = tournamentFilter;
+    }
+
+    dispatch(getMatchStatsFilteredAction(filter));
+  }, [yearFilter, tournamentFilter, dispatch]);
+
+  // --------------------
+  // LISTA DE AÑOS Y TORNEOS FILTRADOS
+  // --------------------
+  // yearsList: todos los años únicos en la BD (de los torneos existentes)
+  const yearsList = useMemo(() => {
+    if (!allTournaments) return [];
+    const uniqueYears = new Set(allTournaments.map((t) => t.year));
+    return [...uniqueYears].sort(); // orden ascendente, si querés
+  }, [allTournaments]);
+
+  // filteredTournaments: torneos filtrados por yearFilter
+  // Si yearFilter === "all", mostramos todos
+  const filteredTournamentsByYear = useMemo(() => {
+    if (!allTournaments) return [];
+    if (yearFilter === "all") return allTournaments;
+    return allTournaments.filter(
+      (tournament) => tournament.year === Number(yearFilter)
+    );
+  }, [allTournaments, yearFilter]);
+
+  // --------------------
+  // TRANSFORMAR Y ORDENAR STATS
+  // --------------------
+
   //Change the layout of match stats array
   useEffect(() => {
     if (allMatchStats && Array.isArray(allMatchStats)) {
       setRegroupedPlayersStats(regroupPlayerStats(allMatchStats));
     }
-  }, [allMatchStats, filterOptions]);
+  }, [allMatchStats]);
 
   //Match stats array sorted by matches played
   const matchStatsSortedByMatchesPlayed = matchStatsSort(
@@ -134,6 +174,9 @@ const ChachosHomePanel = () => {
     "black_pearl"
   ).filter((stat) => stat.black_pearl !== 0);
 
+  // --------------------
+  // SWIPER
+  // --------------------
   //Swiper set up and params
   const swiperElRef = useRef(null);
 
@@ -169,25 +212,52 @@ const ChachosHomePanel = () => {
     swiperElRef.current.swiper.slideNext();
   };
 
+  // --------------------
+  // RENDER
+  // --------------------
+
   return (
     <>
       <ChachosMenu />
       <div className="container chachos-home-panel-container">
-        {/*         Menu desplegable para elegir el torneo que filtre la informacion debajo */}
-        <select
-          className="chachos-home-panel-container-select"
-          name="tournament"
-          onChange={handleTournamentChange}
-        >
-          <option value="" label="Selecciona un torneo" />
-          {allTournaments &&
-            allTournaments.map((tournament) => (
+        <div className="chachos-filter-selection">
+          {/*-------------------- Selector de años --------------------*/}
+          <select
+            className="chachos-home-panel-container-select"
+            name="yearFilter"
+            value={yearFilter}
+            onChange={(e) => {
+              setYearFilter(e.target.value);
+              // Al cambiar el año, reseteamos el torneo a "all" para que no quede
+              // un torneo que quizás no pertenezca al año seleccionado.
+              setTournamentFilter("all");
+            }}
+          >
+            <option value="all" label="Todos los años" />
+            {yearsList.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+
+          {/*-------------------- Selector de torneos --------------------*/}
+          <select
+            className="chachos-home-panel-container-select"
+            name="tournamentFilter"
+            value={tournamentFilter}
+            onChange={(e) => setTournamentFilter(e.target.value)}
+          >
+            <option value="all" label="Todos los torneos" />
+            {filteredTournamentsByYear.map((tournament) => (
               <option key={tournament._id} value={tournament._id}>
                 {tournament.name}
               </option>
             ))}
-        </select>
+          </select>
+        </div>
 
+        {/*-------------------- TOP 10 de categorías --------------------*/}
         <h2>Top 10 por categoria</h2>
         {appError || serverError ? (
           <h5>
