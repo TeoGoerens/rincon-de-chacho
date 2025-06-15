@@ -32,13 +32,13 @@ const PodridaMenu = () => {
         to="/podrida"
         className={activeIndex === 0 ? "podrida-menu-active-link" : ""}
       >
-        Estadísticas
+        Resumen
       </Link>
       <Link
         to="/podrida/games"
         className={activeIndex === 1 ? "podrida-menu-active-link" : ""}
       >
-        Partidas
+        Detalle
       </Link>
     </div>
   );

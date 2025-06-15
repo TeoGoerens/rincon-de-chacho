@@ -1,5 +1,6 @@
 /* ---------- podrida home container ---------- */
 .podrida-home-panel-container {
+  margin-top: 1.5rem;
   margin-bottom: 3rem;
   display: flex;
   flex-direction: column;
