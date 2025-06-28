@@ -1,11 +1,10 @@
 //Import React & Hooks
 import React, { useEffect, useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-//Import libraries
-import { SwiperContainer, SwiperSlide } from "swiper/element/bundle";
-import "swiper/element/bundle";
-import "swiper/css";
-import "swiper/css/pagination";
+//Import React Query functions
+import fetchPodridaRecords from "../../../reactquery/podrida/fetchPodridaRecords";
+import fetchLastPodridaMatch from "../../../reactquery/podrida/fetchLastPodridaMatch";
 
 //Import CSS & styles
 import "./PodridaHomePanelStyles.css";
@@ -23,158 +22,191 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMatchStatsFilteredAction } from "../../../redux/slices/match-stats/matchStatsSlices";
 import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tournamentsSlices";
 
-//Import assets - MEDALS
-import matchesMedal from "../../../assets/images/podrida/medals/matches.png";
-import titlesMedal from "../../../assets/images/podrida/medals/titles.png";
-import lastsMedal from "../../../assets/images/podrida/medals/lasts.png";
-import pointsMedal from "../../../assets/images/podrida/medals/points.png";
-import accuracyMedal from "../../../assets/images/podrida/medals/accuracy.png";
-import requestsMedal from "../../../assets/images/podrida/medals/requests.png";
-import highlightsMedal from "../../../assets/images/podrida/medals/highlights.png";
-
-//Import assets - CHARACTERS
-import marioImage from "../../../assets/images/podrida/mario.png";
-import yoshiImage from "../../../assets/images/podrida/yoshi.png";
-import peachImage from "../../../assets/images/podrida/peach.png";
-import luigiImage from "../../../assets/images/podrida/luigi.png";
-import goombaImage from "../../../assets/images/podrida/goomba.png";
-import warioImage from "../../../assets/images/podrida/wario.png";
-import bowserImage from "../../../assets/images/podrida/bowser.png";
-
 //----------------------------------------
 //COMPONENT
 //----------------------------------------
 
 const PodridaHomePanel = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const [selectedYear, setSelectedYear] = useState("all");
 
-  //Define variables
-  const [filterOptions, setFilterOptions] = useState({});
-  const [regroupedPlayersStats, setRegroupedPlayersStats] = useState([]);
+  const {
+    data: recordsData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["fetchPodridaRecords", selectedYear],
+    queryFn: () =>
+      fetchPodridaRecords(selectedYear === "all" ? "" : selectedYear),
+  });
 
-  // Function to handle dropdown change
-  const handleTournamentChange = (event) => {
-    const filterSupport = { tournament: event.target.value };
-    setFilterOptions(filterSupport);
-  };
+  const {
+    data: lastMatch,
+    isLoading: isLoadingLastMatch,
+    isError: isErrorLastMatch,
+    error: errorLastMatch,
+  } = useQuery({
+    queryKey: ["fetchLastPodridaMatch"],
+    queryFn: fetchLastPodridaMatch,
+  });
 
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTournamentsAction());
-    dispatch(getMatchStatsFilteredAction(filterOptions));
-  }, [dispatch, filterOptions]);
+  if (isLoading) return <p>Cargando estadísticas...</p>;
+  if (isError) return <p>Error al cargar: {error.message}</p>;
 
-  //Select tournament information from store
-  const tournamentStoreData = useSelector((store) => store.tournaments);
-  const allTournaments = tournamentStoreData?.tournaments?.tournaments;
-
-  //Select match stats information from store
-  const matchStatsStoreData = useSelector((store) => store.stats);
-  const allMatchStats =
-    matchStatsStoreData?.filteredMatchStats?.filteredMatchStats;
-  const { appError, serverError } = matchStatsStoreData;
-
-  //Change the layout of match stats array
-  useEffect(() => {
-    if (allMatchStats && Array.isArray(allMatchStats)) {
-      setRegroupedPlayersStats(regroupPlayerStats(allMatchStats));
-    }
-  }, [allMatchStats, filterOptions]);
-
-  //Match stats array sorted by matches played
-  const matchStatsSortedByMatchesPlayed = matchStatsSort(
-    regroupedPlayersStats,
-    "matches_played"
-  );
-
-  //Match stats array sorted by points
-  const matchStatsSortedByPoints = matchStatsSort(
-    regroupedPlayersStats,
-    "points"
-  );
-
-  //Match stats array sorted by goals
-  const matchStatsSortedByGoals = matchStatsSort(
-    regroupedPlayersStats,
-    "goals"
-  ).filter((stat) => stat.goals !== 0);
-
-  //Match stats array sorted by assists
-  const matchStatsSortedByAssists = matchStatsSort(
-    regroupedPlayersStats,
-    "assists"
-  ).filter((stat) => stat.assists !== 0);
-
-  //Match stats array sorted by minutes played
-  const matchStatsSortedByMinutes = matchStatsSort(
-    regroupedPlayersStats,
-    "minutes_played"
-  );
-
-  //Match stats array sorted by yellow cards
-  const matchStatsSortedByYellowCards = matchStatsSort(
-    regroupedPlayersStats,
-    "yellow_cards"
-  ).filter((stat) => stat.yellow_cards !== 0);
-
-  //Match stats array sorted by red cards
-  const matchStatsSortedByRedCards = matchStatsSort(
-    regroupedPlayersStats,
-    "red_cards"
-  ).filter((stat) => stat.red_cards !== 0);
-
-  //Match stats array sorted by white pearl
-  const matchStatsSortedByWhitePearls = matchStatsSort(
-    regroupedPlayersStats,
-    "white_pearl"
-  ).filter((stat) => stat.white_pearl !== 0);
-
-  //Match stats array sorted by vanilla pearl
-  const matchStatsSortedByVanillaPearls = matchStatsSort(
-    regroupedPlayersStats,
-    "vanilla_pearl"
-  ).filter((stat) => stat.vanilla_pearl !== 0);
-
-  //Match stats array sorted by ocher pearl
-  const matchStatsSortedByOcherPearls = matchStatsSort(
-    regroupedPlayersStats,
-    "ocher_pearl"
-  ).filter((stat) => stat.ocher_pearl !== 0);
-
-  //Match stats array sorted by black pearl
-  const matchStatsSortedByBlackPearls = matchStatsSort(
-    regroupedPlayersStats,
-    "black_pearl"
-  ).filter((stat) => stat.black_pearl !== 0);
+  const { availableYears, records } = recordsData;
+  console.log(lastMatch.lastMatch);
 
   return (
     <>
       <PodridaMenu />
-      <div className="container podrida-home-panel-container">
-        {appError || serverError ? (
-          <h5>
-            {appError} {serverError}
-          </h5>
-        ) : null}
-
-        {/* ----- Menu desplegable para elegir año ----- */}
-        <select
-          className="podrida-home-panel-container-select"
-          name="tournament"
-          onChange={handleTournamentChange}
-        >
-          <option value="" label="Selecciona un año" />
-          {allTournaments &&
-            allTournaments.map((tournament) => (
-              <option key={tournament._id} value={tournament._id}>
-                {tournament.name}
+      <section className="container podrida-container">
+        {/* Filtro */}
+        <div className="filtro-container">
+          <label htmlFor="year-select">Filtrar por año:</label>
+          <select
+            id="year-select"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            {["all", ...availableYears].map((year, idx) => (
+              <option key={idx} value={year}>
+                {year === "all" ? "Todos" : year}
               </option>
             ))}
-        </select>
+          </select>
+        </div>
 
-        {/* ----- Menu desplegable para elegir año ----- */}
-      </div>
+        {/* Records */}
+        <h3 className="section-title blue">🧠 Records históricos</h3>
+        <div className="records-container">
+          {records &&
+            records.map((r, idx) => (
+              <div className={`record-card ${r.type}`} key={idx}>
+                <h4>{r.title}</h4>
+                <p>
+                  {r?.name} ({r?.value})
+                </p>
+              </div>
+            ))}
+        </div>
+
+        {/* Última partida */}
+        <h3 className="section-title yellow">🕹️ Última partida</h3>
+        <div className="ultima-partida-container">
+          <p>
+            <strong>Fecha:</strong>{" "}
+            {new Date(lastMatch?.lastMatch?.date).toLocaleDateString("es-AR")}
+          </p>
+          <ul>
+            <li>
+              <strong>Jugadores:</strong>{" "}
+              {lastMatch?.lastMatch?.players
+                .map((p) => p.player.name)
+                .join(", ")}
+            </li>
+            <li>
+              <strong>1° Puesto:</strong>{" "}
+              {lastMatch?.lastMatch?.players[0].player.name} (
+              {lastMatch?.lastMatch?.players[0].score} pts)
+            </li>
+            <li>
+              <strong>2° Puesto:</strong>{" "}
+              {lastMatch?.lastMatch?.players[1].player.name} (
+              {lastMatch?.lastMatch?.players[1].score} pts)
+            </li>
+            <li>
+              <strong>3° Puesto:</strong>{" "}
+              {lastMatch?.lastMatch?.players[2].player.name} (
+              {lastMatch?.lastMatch?.players[2].score} pts)
+            </li>
+            <li>
+              <strong>Highlight:</strong>{" "}
+              {lastMatch?.lastMatch?.highlight.player.name} (
+              {lastMatch?.lastMatch?.highlight.score})
+            </li>
+            <li>
+              <strong>Último:</strong>{" "}
+              {
+                lastMatch?.lastMatch?.players[
+                  lastMatch?.lastMatch?.players.length - 1
+                ].player.name
+              }{" "}
+              (
+              {
+                lastMatch?.lastMatch?.players[
+                  lastMatch?.lastMatch?.players.length - 1
+                ].score
+              }{" "}
+              pts)
+            </li>
+            <li>
+              <strong>Racha + larga cumpliendo:</strong>{" "}
+              {lastMatch?.lastMatch?.longestStreakOnTime.player.name} (
+              {lastMatch?.lastMatch?.longestStreakOnTime.count})
+            </li>
+            <li>
+              <strong>Racha + larga sin cumplir:</strong>{" "}
+              {lastMatch?.lastMatch?.longestStreakFailing.player.name} (
+              {lastMatch?.lastMatch?.longestStreakFailing.count})
+            </li>
+          </ul>
+        </div>
+
+        {/* Ranking */}
+        <h3 className="section-title gray">📊 Ranking de puntaje</h3>
+        {/*         <div className="ranking-container">
+          <div className="emoji-legenda">
+            <div>
+              <span className="emoji">🎯</span> 1° puesto = +3 pts
+            </div>
+            <div>
+              <span className="emoji">🥈</span> 2° puesto = +2 pts
+            </div>
+            <div>
+              <span className="emoji">🥉</span> 3° puesto = +1 pt
+            </div>
+            <div>
+              <span className="emoji">🌟</span> Highlight = +1 pt
+            </div>
+            <div>
+              <span className="emoji">💀</span> Último puesto = -1 pt
+            </div>
+          </div>
+
+          <div className="ranking-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Jugador</th>
+                  <th>PJ</th>
+                  <th title="1° puesto = 3 pts">🎯</th>
+                  <th title="2° puesto = 2 pts">🥈</th>
+                  <th title="3° puesto = 1 pt">🥉</th>
+                  <th title="Highlight = 1 pt">🌟</th>
+                  <th title="Último puesto = -1 pt">💀</th>
+                  <th title="Puntaje total">Puntos</th>
+                  <th title="Promedio de puntos por partida">Promedio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rankingStats.map((j, idx) => (
+                  <tr key={idx}>
+                    <td>{j.name}</td>
+                    <td>{j.jugadas}</td>
+                    <td>{j.primero}</td>
+                    <td>{j.segundo}</td>
+                    <td>{j.tercero}</td>
+                    <td>{j.highlights}</td>
+                    <td>{j.ultimo}</td>
+                    <td>{j.puntos}</td>
+                    <td>{j.promedio.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div> */}
+      </section>
     </>
   );
 };
