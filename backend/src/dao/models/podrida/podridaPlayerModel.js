@@ -1,26 +1,12 @@
 import mongoose from "mongoose";
-import { mongoConnection } from "../../connection.js";
 
 const podridaPlayerSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
+    name: { type: String, required: true, unique: true, trim: true },
+    email: { type: String, required: true, lowercase: true },
   },
-  {
-    toJSON: {
-      virtuals: true,
-    },
-    toObject: {
-      virtuals: true,
-    },
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const PodridaPlayer = mongoConnection.model(
-  "Podrida Player",
-  podridaPlayerSchema
-);
+const PodridaPlayer = mongoose.model("PodridaPlayer", podridaPlayerSchema);
 export default PodridaPlayer;
