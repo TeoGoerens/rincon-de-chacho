@@ -2,7 +2,7 @@ import axios from "axios";
 import { baseURL } from "../../helpers/baseURL";
 import { getUserJWT } from "../getUserInformation";
 
-const fetchLastPodridaMatch = async (year) => {
+const fetchAllPodridaMatches = async (year) => {
   const token = getUserJWT();
 
   if (!token) {
@@ -11,7 +11,7 @@ const fetchLastPodridaMatch = async (year) => {
     );
   }
 
-  const endpoint = `${baseURL}/api/podrida/match/last`;
+  const endpoint = `${baseURL}/api/podrida/match/all`;
 
   try {
     const response = await axios.get(endpoint, {
@@ -22,9 +22,9 @@ const fetchLastPodridaMatch = async (year) => {
 
     return response.data;
   } catch (error) {
-    console.error("❌ Error en fetchLastPodridaMatch:", error);
+    console.error("❌ Error en fetchAllPodridaMatches:", error);
     throw error;
   }
 };
 
-export default fetchLastPodridaMatch;
+export default fetchAllPodridaMatches;

@@ -26,14 +26,14 @@ const AdminMenu = () => {
           Usuarios
         </Link>
         <Link
-          to="/admin/prode"
+          to="/admin/podrida"
           className={
-            location.pathname.startsWith("/admin/prode")
+            location.pathname.startsWith("/admin/podrida")
               ? "admin-menu-active-link"
               : ""
           }
         >
-          Prode
+          Podrida
         </Link>
         <Link
           to="/admin/cronicas"

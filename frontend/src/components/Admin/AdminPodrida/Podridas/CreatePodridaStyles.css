@@ -1,0 +1,196 @@
+/* -------------------------------------------- */
+/* --------------- SPINNER -------------------- */
+/* -------------------------------------------- */
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Fondo opaco */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 1000; /* Asegura que esté sobre otros elementos */
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 6px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efecto blur en contenido principal */
+.blurred {
+  filter: blur(5px);
+  pointer-events: none; /* Desactiva la interacción */
+  user-select: none; /* Evita selección de texto */
+  opacity: 0.5;
+}
+
+/* -------------------------------------------- */
+/* --------------- CREATE CRONICA HEAD -------- */
+/* -------------------------------------------- */
+
+.create-cronica-head {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.create-cronica-head h2 {
+  font-size: 1.5rem;
+}
+
+.create-cronica-head .back-btn,
+.create-cronica-head .back-btn i {
+  color: var(--fourth-color);
+  font-size: 0.8rem;
+}
+
+/* -------------------------------------------- */
+/* --------------- CREATE CRONICA FORM -------- */
+/* -------------------------------------------- */
+
+.create-cronica-form {
+  background-color: white;
+  padding: 1rem;
+  margin-top: 1rem;
+  border: 1px solid lightgray;
+  border-radius: 10px;
+}
+
+/* FORM FIELD STYLES */
+.create-cronica-form .create-cronica-form-field {
+  width: 100%;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+}
+
+.create-cronica-form .create-cronica-form-field label {
+  font-weight: bold;
+  width: 120px;
+}
+
+.create-cronica-form .create-cronica-form-field input {
+  flex-grow: 1;
+  padding: 0.2rem;
+  border: 1px solid gray;
+  border-radius: 5px;
+  background-color: var(--background-color);
+}
+
+/* REACT QUILL STYLES */
+.create-cronica-form-quill {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.7rem;
+}
+
+.create-cronica-form-quill label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.create-cronica-form-quill .quill-editor {
+  border: 1px solid gray;
+  overflow: hidden;
+}
+
+.create-cronica-form-quill .quill-editor .ql-editor {
+  padding: 0.5rem;
+  background-color: var(--background-color) !important;
+}
+
+/* SEPARATOR STYLES */
+.create-cronica-form-separator {
+  border: 1px solid gray;
+  margin-block: 1.5rem;
+}
+
+/* MULTIMEDIA STYLES */
+.create-cronica-form-multimedia {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-cronica-form-multimedia .create-cronica-form-multimedia-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+  align-items: center;
+}
+
+.create-cronica-form-multimedia .create-cronica-form-multimedia-head h3 {
+  font-size: 1rem;
+}
+
+.create-cronica-form-multimedia .create-cronica-form-multimedia-head button {
+  font-size: 0.8rem;
+  border: 1px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.3rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.create-cronica-form-multimedia .create-cronica-form-multimedia-content {
+  display: flex;
+  gap: 2rem;
+  background-color: white;
+  border: none;
+}
+
+.create-cronica-form-multimedia .create-cronica-form-multimedia-content input {
+  width: 50%;
+  margin-bottom: 0.7rem;
+  padding: 0.2rem;
+  border: 1px solid gray;
+  border-radius: 5px;
+  background-color: var(--background-color);
+}
+
+.create-cronica-form .create-cronica-form-btn {
+  display: block;
+  margin: 1rem auto;
+  border: 1px solid var(--primary-color);
+  color: white;
+  background-color: var(--primary-color);
+  padding: 0.5rem;
+  border-radius: 10px;
+  width: 140px;
+}
+
+/* --------------------------------------------- */
+/* --------------- MEDIA QUERIES --------------- */
+/* --------------------------------------------- */
+
+@media only screen and (max-width: 1200px) {
+}
+
+@media only screen and (max-width: 750px) {
+  .create-cronica-form-multimedia .create-cronica-form-multimedia-content {
+    flex-direction: column;
+    gap: 0rem;
+  }
+
+  .create-cronica-form-multimedia
+    .create-cronica-form-multimedia-content
+    input {
+    width: 100%;
+  }
+}

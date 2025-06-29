@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 //Import React Query functions
 import fetchPodridaRecords from "../../../reactquery/podrida/fetchPodridaRecords";
 import fetchLastPodridaMatch from "../../../reactquery/podrida/fetchLastPodridaMatch";
+import fetchPodridaRanking from "../../../reactquery/podrida/fetchPodridaRanking";
 
 //Import CSS & styles
 import "./PodridaHomePanelStyles.css";
@@ -27,8 +28,10 @@ import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tourn
 //----------------------------------------
 
 const PodridaHomePanel = () => {
+  // Definición de la variable selectedYear para configurar el filtro anual
   const [selectedYear, setSelectedYear] = useState("all");
 
+  // UseQuery de Podrida Records
   const {
     data: recordsData,
     isLoading,
@@ -40,6 +43,7 @@ const PodridaHomePanel = () => {
       fetchPodridaRecords(selectedYear === "all" ? "" : selectedYear),
   });
 
+  // UseQuery de Podrida Last Match
   const {
     data: lastMatch,
     isLoading: isLoadingLastMatch,
@@ -50,11 +54,22 @@ const PodridaHomePanel = () => {
     queryFn: fetchLastPodridaMatch,
   });
 
+  // UseQuery de Podrida Ranking
+  const {
+    data: rankingData,
+    isLoading: isLoadingRanking,
+    isError: isErrorRanking,
+    error: rankingError,
+  } = useQuery({
+    queryKey: ["fetchPodridaRanking", selectedYear],
+    queryFn: () => fetchPodridaRanking(selectedYear),
+  });
+
+  // Definición de variables adicionales
   if (isLoading) return <p>Cargando estadísticas...</p>;
   if (isError) return <p>Error al cargar: {error.message}</p>;
 
   const { availableYears, records } = recordsData;
-  console.log(lastMatch.lastMatch);
 
   return (
     <>
@@ -154,7 +169,7 @@ const PodridaHomePanel = () => {
 
         {/* Ranking */}
         <h3 className="section-title gray">📊 Ranking de puntaje</h3>
-        {/*         <div className="ranking-container">
+        <div className="ranking-container">
           <div className="emoji-legenda">
             <div>
               <span className="emoji">🎯</span> 1° puesto = +3 pts
@@ -177,6 +192,7 @@ const PodridaHomePanel = () => {
             <table>
               <thead>
                 <tr>
+                  <th>Rank</th>
                   <th>Jugador</th>
                   <th>PJ</th>
                   <th title="1° puesto = 3 pts">🎯</th>
@@ -184,28 +200,29 @@ const PodridaHomePanel = () => {
                   <th title="3° puesto = 1 pt">🥉</th>
                   <th title="Highlight = 1 pt">🌟</th>
                   <th title="Último puesto = -1 pt">💀</th>
-                  <th title="Puntaje total">Puntos</th>
-                  <th title="Promedio de puntos por partida">Promedio</th>
+                  <th title="Puntaje total">Pts</th>
+                  <th title="Promedio de puntos por partida">Avg</th>
                 </tr>
               </thead>
               <tbody>
-                {rankingStats.map((j, idx) => (
+                {rankingData?.ranking?.map((j, idx) => (
                   <tr key={idx}>
+                    <td>{idx + 1}</td>
                     <td>{j.name}</td>
-                    <td>{j.jugadas}</td>
-                    <td>{j.primero}</td>
-                    <td>{j.segundo}</td>
-                    <td>{j.tercero}</td>
-                    <td>{j.highlights}</td>
-                    <td>{j.ultimo}</td>
-                    <td>{j.puntos}</td>
-                    <td>{j.promedio.toFixed(2)}</td>
+                    <td>{j.played === 0 ? "-" : j.played}</td>
+                    <td>{j.firsts === 0 ? "-" : j.firsts}</td>
+                    <td>{j.seconds === 0 ? "-" : j.seconds}</td>
+                    <td>{j.thirds === 0 ? "-" : j.thirds}</td>
+                    <td>{j.highlights === 0 ? "-" : j.highlights}</td>
+                    <td>{j.lasts === 0 ? "-" : j.lasts}</td>
+                    <td>{j.points === 0 ? "-" : j.points}</td>
+                    <td>{j.average === 0 ? "-" : j.average?.toFixed(1)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div> */}
+        </div>
       </section>
     </>
   );

@@ -7,6 +7,11 @@ import AdminUsersPanel from "./AdminUsers/AdminUsersPanel";
 //Admin PRODE Components
 import AdminProdePanel from "./AdminProde/AdminProdePanel";
 
+//Admin PODRIDA Components
+import AdminPodridaPanel from "./AdminPodrida/AdminPodridaPanel";
+import PodridaIndex from "./AdminPodrida/Podridas/PodridaIndex";
+import CreatePodrida from "./AdminPodrida/Podridas/CreatePodrida";
+
 //Admin CRONICAS Components
 import AdminCronicasPanel from "./AdminCronicas/AdminCronicasPanel";
 import CronicaIndex from "./AdminCronicas/Cronicas/CronicaIndex";
@@ -40,7 +45,35 @@ const AdminRoutes = () => {
     <>
       <Routes>
         <Route path="users" element={<AdminUsersPanel />} />
+
+        {/* --------------- ADMIN PRODE --------------- */}
+
         <Route path="prode" element={<AdminProdePanel />} />
+        {/* --------------- ADMIN PODRIDA --------------- */}
+
+        <Route path="podrida/*" element={<AdminPodridaPanel />}>
+          {/* Rutas de partidas */}
+          <Route index element={<PodridaIndex />} />
+          <Route path="crear" element={<CreatePodrida />} />
+          <Route
+            path="editar/:id"
+            element={<h2>Aca estaria el dashboard de premios</h2>}
+          />
+
+          {/* Rutas de jugadores */}
+          <Route
+            path="jugadores"
+            element={<h2>Aca estaria el dashboard de premios</h2>}
+          />
+          <Route
+            path="jugadores/crear"
+            element={<h2>Aca estaria el dashboard de premios</h2>}
+          />
+          <Route
+            path="jugadores/editar/:id"
+            element={<h2>Aca estaria el dashboard de premios</h2>}
+          />
+        </Route>
 
         {/* --------------- ADMIN CRONICAS --------------- */}
 
