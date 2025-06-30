@@ -11,6 +11,10 @@ import AdminProdePanel from "./AdminProde/AdminProdePanel";
 import AdminPodridaPanel from "./AdminPodrida/AdminPodridaPanel";
 import PodridaIndex from "./AdminPodrida/Podridas/PodridaIndex";
 import CreatePodrida from "./AdminPodrida/Podridas/CreatePodrida";
+import UpdatePodrida from "./AdminPodrida/Podridas/UpdatePodrida";
+import PodridaPlayerIndex from "./AdminPodrida/Podridas/PodridaPlayerIndex";
+import CreatePodridaPlayer from "./AdminPodrida/Podridas/CreatePodridaPlayer";
+import UpdatePodridaPlayer from "./AdminPodrida/Podridas/UpdatePodridaPlayer";
 
 //Admin CRONICAS Components
 import AdminCronicasPanel from "./AdminCronicas/AdminCronicasPanel";
@@ -55,23 +59,14 @@ const AdminRoutes = () => {
           {/* Rutas de partidas */}
           <Route index element={<PodridaIndex />} />
           <Route path="crear" element={<CreatePodrida />} />
-          <Route
-            path="editar/:id"
-            element={<h2>Aca estaria el dashboard de premios</h2>}
-          />
+          <Route path="editar/:id" element={<UpdatePodrida />} />
 
           {/* Rutas de jugadores */}
-          <Route
-            path="jugadores"
-            element={<h2>Aca estaria el dashboard de premios</h2>}
-          />
-          <Route
-            path="jugadores/crear"
-            element={<h2>Aca estaria el dashboard de premios</h2>}
-          />
+          <Route path="jugadores" element={<PodridaPlayerIndex />} />
+          <Route path="jugadores/crear" element={<CreatePodridaPlayer />} />
           <Route
             path="jugadores/editar/:id"
-            element={<h2>Aca estaria el dashboard de premios</h2>}
+            element={<UpdatePodridaPlayer />}
           />
         </Route>
 

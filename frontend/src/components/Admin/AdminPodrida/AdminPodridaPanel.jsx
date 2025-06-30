@@ -15,10 +15,10 @@ const AdminPodridaPanel = () => {
       <AdminMenu />
 
       <div className="container">
-        <div className="admin-cronicas-container">
-          <div className="admin-cronicas-container-menu">
+        <div className="admin-podrida-container">
+          <div className="admin-podrida-container-menu">
             <h3>Admin Podrida</h3>
-            <div className="admin-cronicas-container-menu-links">
+            <div className="admin-podrida-container-menu-links">
               <NavLink
                 to=""
                 end
@@ -37,7 +37,7 @@ const AdminPodridaPanel = () => {
             </div>
           </div>
 
-          <div className="admin-cronicas-container-content">
+          <div className="admin-podrida-container-content">
             <Outlet />
           </div>
         </div>

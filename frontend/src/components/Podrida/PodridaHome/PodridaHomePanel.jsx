@@ -110,7 +110,11 @@ const PodridaHomePanel = () => {
         <div className="ultima-partida-container">
           <p>
             <strong>Fecha:</strong>{" "}
-            {new Date(lastMatch?.lastMatch?.date).toLocaleDateString("es-AR")}
+            {lastMatch?.lastMatch?.date
+              .slice(0, 10)
+              .split("-")
+              .reverse()
+              .join("/")}
           </p>
           <ul>
             <li>

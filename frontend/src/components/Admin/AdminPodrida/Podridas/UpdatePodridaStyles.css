@@ -40,157 +40,112 @@
 }
 
 /* -------------------------------------------- */
-/* --------------- CREATE CRONICA HEAD -------- */
+/* --------------- CREATE PODRIDA HEAD -------- */
 /* -------------------------------------------- */
 
-.create-cronica-head {
-  margin-top: 1rem;
+.create-podrida-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.create-cronica-head h2 {
-  font-size: 1.5rem;
+.create-podrida-head h2 {
+  font-size: 1.17em;
 }
 
-.create-cronica-head .back-btn,
-.create-cronica-head .back-btn i {
+.create-podrida-head .back-btn,
+.create-podrida-head .back-btn i {
   color: var(--fourth-color);
   font-size: 0.8rem;
 }
 
 /* -------------------------------------------- */
-/* --------------- CREATE CRONICA FORM -------- */
+/* --------------- FORMULARIO ----------------- */
 /* -------------------------------------------- */
 
-.create-cronica-form {
-  background-color: white;
-  padding: 1rem;
+.form-create-podrida {
   margin-top: 1rem;
-  border: 1px solid lightgray;
-  border-radius: 10px;
-}
-
-/* FORM FIELD STYLES */
-.create-cronica-form .create-cronica-form-field {
-  width: 100%;
-  margin-bottom: 0.7rem;
-  display: flex;
-  align-items: center;
-}
-
-.create-cronica-form .create-cronica-form-field label {
-  font-weight: bold;
-  width: 120px;
-}
-
-.create-cronica-form .create-cronica-form-field input {
-  flex-grow: 1;
-  padding: 0.2rem;
-  border: 1px solid gray;
-  border-radius: 5px;
-  background-color: var(--background-color);
-}
-
-/* REACT QUILL STYLES */
-.create-cronica-form-quill {
   display: flex;
   flex-direction: column;
-  margin-bottom: 0.7rem;
-}
-
-.create-cronica-form-quill label {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.create-cronica-form-quill .quill-editor {
-  border: 1px solid gray;
-  overflow: hidden;
-}
-
-.create-cronica-form-quill .quill-editor .ql-editor {
-  padding: 0.5rem;
-  background-color: var(--background-color) !important;
-}
-
-/* SEPARATOR STYLES */
-.create-cronica-form-separator {
-  border: 1px solid gray;
-  margin-block: 1.5rem;
-}
-
-/* MULTIMEDIA STYLES */
-.create-cronica-form-multimedia {
-  display: flex;
-  flex-direction: column;
-}
-
-.create-cronica-form-multimedia .create-cronica-form-multimedia-head {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.7rem;
-  align-items: center;
-}
-
-.create-cronica-form-multimedia .create-cronica-form-multimedia-head h3 {
-  font-size: 1rem;
-}
-
-.create-cronica-form-multimedia .create-cronica-form-multimedia-head button {
+  gap: 0.75rem;
+  padding-bottom: 2rem;
   font-size: 0.8rem;
-  border: 1px solid var(--primary-color);
-  background-color: var(--primary-color);
-  color: white;
-  padding: 0.3rem;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
-.create-cronica-form-multimedia .create-cronica-form-multimedia-content {
+.form-create-podrida label {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.form-create-podrida input,
+.form-create-podrida select {
+  padding: 0.4rem;
+  border: 1px solid var(--light-gray, #ccc);
+  border-radius: 5px;
+  font-size: 0.8rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.player-row {
   display: flex;
-  gap: 2rem;
-  background-color: white;
-  border: none;
+  gap: 1rem;
 }
 
-.create-cronica-form-multimedia .create-cronica-form-multimedia-content input {
-  width: 50%;
-  margin-bottom: 0.7rem;
-  padding: 0.2rem;
-  border: 1px solid gray;
-  border-radius: 5px;
-  background-color: var(--background-color);
+/* Para cada jugador */
+.player-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.create-cronica-form .create-cronica-form-btn {
-  display: block;
-  margin: 1rem auto;
-  border: 1px solid var(--primary-color);
-  color: white;
+.player-input input {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Botones para agregar o quitar jugadores */
+
+.player-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.player-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Botón de envío */
+.submit-btn {
+  margin-top: 2rem;
   background-color: var(--primary-color);
-  padding: 0.5rem;
-  border-radius: 10px;
-  width: 190px;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: fit-content;
+  align-self: center;
+}
+
+.submit-btn:hover {
+  background-color: var(--secondary-color);
 }
 
 /* --------------------------------------------- */
 /* --------------- MEDIA QUERIES --------------- */
 /* --------------------------------------------- */
 
-@media only screen and (max-width: 1200px) {
-}
-
-@media only screen and (max-width: 750px) {
-  .create-cronica-form-multimedia .create-cronica-form-multimedia-content {
+@media only screen and (max-width: 600px) {
+  .player-input {
     flex-direction: column;
-    gap: 0rem;
   }
 
-  .create-cronica-form-multimedia
-    .create-cronica-form-multimedia-content
-    input {
-    width: 100%;
+  .form-create-podrida input,
+  .form-create-podrida select {
+    max-width: 100%;
   }
 }

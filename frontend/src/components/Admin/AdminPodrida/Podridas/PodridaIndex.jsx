@@ -2,17 +2,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 // Imports CSS & helpers
 import "./PodridaIndexStyles.css";
-import { formatDate } from "../../../../helpers/dateFormatter";
 import { getWinnerFromMatch } from "../../../../helpers/podrida/getWinnerFromMatch";
 import { getLoserFromMatch } from "../../../../helpers/podrida/getLoserFromMatch";
 
 //Import React Query functions
 import fetchAllPodridaMatches from "../../../../reactquery/podrida/fetchAllPodridaMatches";
-import fetchAllCronicas from "../../../../reactquery/cronica/fetchAllCronicas";
-import deleteCronica from "../../../../reactquery/cronica/deleteCronica";
+import deletePodridaMatch from "../../../../reactquery/podrida/deletePodridaMatch";
 
 // Import components
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
@@ -21,17 +20,6 @@ import EditButton from "../../../Layout/Buttons/EditButton";
 const PodridaIndex = () => {
   // React Query para invalidar o refrescar queries
   const queryClient = useQueryClient();
-
-  // Utilizar React Query para manejar el estado de la petición de Cronicas
-  const {
-    data: cronicasData,
-    isLoading: isLoadingCronicas,
-    isError: isErrorCronicas,
-    error: errorCronicas,
-  } = useQuery({
-    queryKey: ["fetchAllCronicas"],
-    queryFn: fetchAllCronicas,
-  });
 
   // Utilizar React Query para manejar el estado de la petición de Podridas
   const {
@@ -44,25 +32,17 @@ const PodridaIndex = () => {
     queryFn: fetchAllPodridaMatches,
   });
 
-  console.log(podridasData);
-
-  // Mutación para eliminar una cronica
-  const deleteCronicaMutation = useMutation({
-    mutationFn: ({ cronicaId }) => deleteCronica({ cronicaId }),
+  // Utilizar React Query para manejar el mutation que eliminará la partida
+  const deletePodridaMutation = useMutation({
+    mutationFn: ({ matchId }) => deletePodridaMatch({ matchId }),
     onSuccess: () => {
-      // Una vez borrado, invalida la query para refrescar la lista de comentarios
-      queryClient.invalidateQueries(["fetchAllCronicas"]);
+      toast.success("Partida eliminada correctamente");
+      queryClient.invalidateQueries(["fetchAllPodridaMatches"]);
     },
     onError: (error) => {
-      console.error("Error al eliminar la cronica:", error.message);
+      toast.error(`❌ Error al eliminar la partida: ${error.message}`);
     },
   });
-
-  // Manejar estados de carga y error de ambas queries
-  if (isLoadingCronicas) return <p>Cargando crónicas...</p>;
-  if (isErrorCronicas) return <p>Error en crónicas: {errorCronicas.message}</p>;
-
-  const allCronicas = cronicasData.cronicas;
 
   return (
     <div className="podrida-index-container">
@@ -86,7 +66,9 @@ const PodridaIndex = () => {
           <tbody>
             {podridasData?.matches?.map((match) => (
               <tr key={match._id}>
-                <td>{new Date(match.date).toLocaleDateString("es-AR")}</td>
+                <td>
+                  {match.date.slice(0, 10).split("-").reverse().join("/")}
+                </td>
                 <td>
                   {getWinnerFromMatch(match).name}{" "}
                   <strong>({getWinnerFromMatch(match).score})</strong>
@@ -100,8 +82,8 @@ const PodridaIndex = () => {
                     <EditButton to={`editar/${match._id}`} />
                     <DeleteButton
                       customCSSClass="delete-btn-custom"
-                      onClick={deleteCronicaMutation.mutate}
-                      id={{ cronicaId: match._id }}
+                      onClick={deletePodridaMutation.mutate}
+                      id={{ matchId: match._id }}
                     />
                   </div>
                 </td>
