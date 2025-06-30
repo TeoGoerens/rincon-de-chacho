@@ -63,7 +63,6 @@ function Sidebar({ sidebarOpen, handleToggleSidebar }) {
             >
               <span className="material-symbols-outlined">playing_cards</span>
               <p>Podrida</p>
-              <SoonTag />
             </Link>
           </li>
           <li>
