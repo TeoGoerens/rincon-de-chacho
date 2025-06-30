@@ -154,4 +154,120 @@ export default class PodridaController {
       next(error);
     }
   };
+
+  /* --------------- DELETE PODRIDA MATCH --------------- */
+  deletePodridaMatch = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const deleted = await repository.deletePodridaMatch(id);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Partida no encontrada" });
+      }
+
+      res.status(200).json({ message: "Partida eliminada con éxito" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- UPDATE PODRIDA MATCH --------------- */
+  updatePodridaMatch = async (req, res, next) => {
+    try {
+      const matchId = req.params.id;
+      const matchData = req.body;
+
+      const updatedMatch = await repository.updatePodridaMatch(
+        matchId,
+        matchData
+      );
+
+      res.status(200).json({
+        message: "Partida actualizada con éxito",
+        match: updatedMatch,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- GET PODRIDA MATCH BY ID --------------- */
+  getPodridaMatchById = async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const match = await repository.getPodridaMatchById(id);
+
+      if (!match) {
+        return res.status(404).json({ message: "Partida no encontrada" });
+      }
+
+      res.status(200).json({
+        message: "Partida obtenida correctamente",
+        match,
+      });
+    } catch (error) {
+      console.error("❌ Error al obtener partida:", error);
+      res.status(500).json({ message: "Error al obtener la partida" });
+    }
+  };
+
+  /* --------------- GET PLAYER BY ID --------------- */
+  getPodridaPlayerById = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const player = await repository.getPodridaPlayerById(id);
+
+      if (!player) {
+        return res.status(404).json({ message: "Jugador no encontrado" });
+      }
+
+      res
+        .status(200)
+        .json({ message: "Jugador obtenido correctamente", player });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- UPDATE PLAYER --------------- */
+  updatePodridaPlayer = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { name, email } = req.body;
+
+      if (!name || !email) {
+        throw new Error("Nombre y email son obligatorios para actualizar");
+      }
+
+      const updatedPlayer = await repository.updatePodridaPlayer(id, {
+        name,
+        email,
+      });
+
+      res.status(200).json({
+        message: "Jugador actualizado correctamente",
+        updatedPlayer,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- DELETE PLAYER --------------- */
+  deletePodridaPlayer = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const deleted = await repository.deletePodridaPlayer(id);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Jugador no encontrado" });
+      }
+
+      res.status(200).json({ message: "Jugador eliminado correctamente" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

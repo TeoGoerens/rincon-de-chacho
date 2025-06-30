@@ -246,4 +246,71 @@ export default class PodridaRepository extends baseRepository {
 
     return calculateRanking(matches);
   };
+
+  /* --------------- DELETE PODRIDA MATCH --------------- */
+  deletePodridaMatch = async (id) => {
+    const match = await PodridaMatch.findById(id);
+
+    if (!match) {
+      return null;
+    }
+
+    await match.deleteOne();
+    return match;
+  };
+
+  /* --------------- UPDATE PODRIDA MATCH --------------- */
+  updatePodridaMatch = async (matchId, matchData) => {
+    const match = await PodridaMatch.findById(matchId);
+    if (!match) {
+      throw new Error("La partida no existe");
+    }
+
+    // Actualizamos los campos principales
+    match.date = matchData.date;
+    match.players = matchData.players;
+    match.highlight = matchData.highlight;
+    match.longestStreakOnTime = matchData.longestStreakOnTime;
+    match.longestStreakFailing = matchData.longestStreakFailing;
+
+    await match.save();
+    return match;
+  };
+
+  /* --------------- GET PODRIDA MATCH BY ID --------------- */
+  getPodridaMatchById = async (id) => {
+    return await PodridaMatch.findById(id)
+      .populate("players.player")
+      .populate("highlight.player")
+      .populate("longestStreakOnTime.player")
+      .populate("longestStreakFailing.player");
+  };
+
+  /* --------------- GET PLAYER BY ID --------------- */
+  getPodridaPlayerById = async (id) => {
+    return await PodridaPlayer.findById(id);
+  };
+
+  /* --------------- UPDATE PLAYER --------------- */
+  updatePodridaPlayer = async (id, data) => {
+    const player = await PodridaPlayer.findById(id);
+    if (!player) {
+      throw new Error("Jugador no encontrado");
+    }
+
+    player.name = data.name;
+    player.email = data.email;
+
+    await player.save();
+    return player;
+  };
+
+  /* --------------- DELETE PLAYER --------------- */
+  deletePodridaPlayer = async (id) => {
+    const player = await PodridaPlayer.findById(id);
+    if (!player) return null;
+
+    await player.deleteOne();
+    return player;
+  };
 }
