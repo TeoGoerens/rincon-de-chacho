@@ -9,14 +9,11 @@ export const calculateMostWins = (matches) => {
     }
   });
 
-  const top = Object.entries(winCounts).sort((a, b) => b[1] - a[1])[0];
+  const sorted = Object.entries(winCounts)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
 
-  if (!top) return null;
-
-  return {
-    name: top[0],
-    value: top[1],
-  };
+  return sorted.slice(0, 3);
 };
 
 export const calculateMostLastPlaces = (matches) => {
@@ -34,14 +31,12 @@ export const calculateMostLastPlaces = (matches) => {
     }
   });
 
-  const top = Object.entries(lastPlaceCounts).sort((a, b) => b[1] - a[1])[0];
+  const topThree = Object.entries(lastPlaceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([name, value]) => ({ name, value }));
 
-  if (!top) return null;
-
-  return {
-    name: top[0],
-    value: top[1],
-  };
+  return topThree;
 };
 
 export const calculateBestWinRatio = (matches) => {
@@ -65,23 +60,26 @@ export const calculateBestWinRatio = (matches) => {
     });
   });
 
-  const ratios = Object.entries(stats).map(([name, { wins, total }]) => ({
-    name,
-    value: Math.round((wins / total) * 100), // porcentaje entero
-  }));
+  const ratios = Object.entries(stats)
+    .filter(([_, { total }]) => total > 0)
+    .map(([name, { wins, total }]) => ({
+      name,
+      value: `${Math.round((wins / total) * 100)}%`,
+    }));
 
-  if (!ratios.length) return null;
+  const topThree = ratios
+    .sort((a, b) => {
+      const aVal = parseInt(a.value);
+      const bVal = parseInt(b.value);
+      return bVal - aVal;
+    })
+    .slice(0, 3);
 
-  ratios.sort((a, b) => b.value - a.value);
-
-  return {
-    name: ratios[0].name,
-    value: `${ratios[0].value}%`,
-  };
+  return topThree;
 };
 
 export const calculateLongestStreakOnTime = (matches) => {
-  let max = null;
+  const streakMap = {};
 
   matches.forEach((match) => {
     const streak = match.longestStreakOnTime;
@@ -92,20 +90,24 @@ export const calculateLongestStreakOnTime = (matches) => {
       streak.player.name &&
       typeof streak.count === "number"
     ) {
-      if (!max || streak.count > max.value) {
-        max = {
-          name: streak.player.name,
-          value: streak.count,
-        };
+      const name = streak.player.name;
+
+      if (!streakMap[name] || streak.count > streakMap[name]) {
+        streakMap[name] = streak.count;
       }
     }
   });
 
-  return max;
+  const topThree = Object.entries(streakMap)
+    .map(([name, count]) => ({ name, value: count }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 3);
+
+  return topThree;
 };
 
 export const calculateLongestStreakFailing = (matches) => {
-  let max = null;
+  const streakMap = {};
 
   matches.forEach((match) => {
     const streak = match.longestStreakFailing;
@@ -116,20 +118,24 @@ export const calculateLongestStreakFailing = (matches) => {
       streak.player.name &&
       typeof streak.count === "number"
     ) {
-      if (!max || streak.count > max.value) {
-        max = {
-          name: streak.player.name,
-          value: streak.count,
-        };
+      const name = streak.player.name;
+
+      if (!streakMap[name] || streak.count > streakMap[name]) {
+        streakMap[name] = streak.count;
       }
     }
   });
 
-  return max;
+  const topThree = Object.entries(streakMap)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 3);
+
+  return topThree;
 };
 
 export const calculateHighestHighlight = (matches) => {
-  let max = null;
+  const highlights = [];
 
   matches.forEach((match) => {
     const highlight = match.highlight;
@@ -140,31 +146,31 @@ export const calculateHighestHighlight = (matches) => {
       highlight.player.name &&
       typeof highlight.score === "number"
     ) {
-      if (!max || highlight.score > max.value) {
-        max = {
-          name: highlight.player.name,
-          value: highlight.score,
-        };
-      }
+      highlights.push({
+        name: highlight.player.name,
+        value: highlight.score,
+      });
     }
   });
 
-  return max;
+  // Ordenamos por puntaje descendente y tomamos el top 3
+  return highlights.sort((a, b) => b.value - a.value).slice(0, 3);
 };
 
 export const calculateLongestTimeSinceFirstPlace = (matches, allPlayers) => {
   const lastWinDate = {};
 
-  // Inicializar todos los jugadores como "Nunca"
+  // Inicializamos todos los jugadores como "Nunca"
   allPlayers.forEach((player) => {
     lastWinDate[player.name] = null;
   });
 
-  // Ordenar partidas de más reciente a más antigua
+  // Ordenamos partidas de más reciente a más antigua
   const sortedMatches = [...matches].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
   );
 
+  // Recorremos para registrar la fecha más reciente en que ganaron
   for (const match of sortedMatches) {
     const winner = match.players.find((p) => p.position === 1);
     if (winner && winner.player && winner.player.name) {
@@ -177,29 +183,37 @@ export const calculateLongestTimeSinceFirstPlace = (matches, allPlayers) => {
 
   const now = new Date();
 
+  // Convertimos en array con cálculo de días o "Nunca"
   const result = Object.entries(lastWinDate).map(([name, date]) => ({
     name,
     value: date ? Math.floor((now - date) / (1000 * 60 * 60 * 24)) : "Nunca",
   }));
 
-  // Si hay al menos uno con "Nunca", devolver ese
-  const never = result.find((r) => r.value === "Nunca");
-  if (never) return never;
+  // Separar quienes nunca ganaron
+  const neverWon = result.filter((r) => r.value === "Nunca");
+  const others = result
+    .filter((r) => r.value !== "Nunca")
+    .sort((a, b) => b.value - a.value); // Ordenamos por días
 
-  // Si todos ganaron alguna vez, ordenar por mayor cantidad de días
-  result.sort((a, b) => b.value - a.value);
-  return result[0];
+  // Armamos el top 3
+  const top3 = [...neverWon.slice(0, 3)];
+
+  if (top3.length < 3) {
+    top3.push(...others.slice(0, 3 - top3.length));
+  }
+
+  return top3;
 };
 
 export const calculateLongestTimeSinceLastPlace = (matches, allPlayers) => {
   const lastLastPlaceDate = {};
 
-  // Inicializar todos los jugadores como "Nunca"
+  // Inicializamos todos los jugadores como "Nunca"
   allPlayers.forEach((player) => {
     lastLastPlaceDate[player.name] = null;
   });
 
-  // Ordenar partidas de más reciente a más antigua
+  // Ordenamos las partidas de más reciente a más antigua
   const sortedMatches = [...matches].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
   );
@@ -223,51 +237,64 @@ export const calculateLongestTimeSinceLastPlace = (matches, allPlayers) => {
     value: date ? Math.floor((now - date) / (1000 * 60 * 60 * 24)) : "Nunca",
   }));
 
-  // Priorizar jugadores que nunca salieron últimos
-  const never = result.find((r) => r.value === "Nunca");
-  if (never) return never;
+  // Separar quienes nunca salieron últimos
+  const never = result.filter((r) => r.value === "Nunca");
+  const others = result
+    .filter((r) => r.value !== "Nunca")
+    .sort((a, b) => b.value - a.value); // más días sin salir últimos
 
-  // Si todos salieron últimos alguna vez, devolver el que más días lleva sin hacerlo
-  result.sort((a, b) => b.value - a.value);
-  return result[0];
+  // Armamos el top 3
+  const top3 = [...never.slice(0, 3)];
+
+  if (top3.length < 3) {
+    top3.push(...others.slice(0, 3 - top3.length));
+  }
+
+  return top3;
 };
 
 export const calculateHighestSingleScore = (matches) => {
-  let max = null;
+  const scores = [];
 
   matches.forEach((match) => {
     match.players.forEach(({ player, score }) => {
       if (!player || !player.name || typeof score !== "number") return;
 
-      if (!max || score > max.value) {
-        max = {
-          name: player.name,
-          value: score,
-        };
-      }
+      scores.push({
+        name: player.name,
+        value: score,
+      });
     });
   });
 
-  return max;
+  if (!scores.length) return [];
+
+  scores.sort((a, b) => b.value - a.value);
+
+  // Tomamos los primeros 3
+  return scores.slice(0, 3);
 };
 
 export const calculateLowestSingleScore = (matches) => {
-  let min = null;
+  const scores = [];
 
   matches.forEach((match) => {
     match.players.forEach(({ player, score }) => {
       if (!player || !player.name || typeof score !== "number") return;
 
-      if (!min || score < min.value) {
-        min = {
-          name: player.name,
-          value: score,
-        };
-      }
+      scores.push({
+        name: player.name,
+        value: score,
+      });
     });
   });
 
-  return min;
+  if (!scores.length) return [];
+
+  scores.sort((a, b) => a.value - b.value); // Orden ascendente
+
+  // Tomamos los primeros 3
+  return scores.slice(0, 3);
 };
 
 export const calculateRanking = (matches) => {
