@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 import PodridaHomePanel from "../Podrida/PodridaHome/PodridaHomePanel";
-import PodridaGames from "./PodridaGames/PodridaGames";
+/* import PodridaGames from "./PodridaGames/PodridaGames"; */
 
 const PodridaRoutes = () => {
   return (
@@ -11,10 +11,10 @@ const PodridaRoutes = () => {
         <Route>
           <Route path="/" Component={PodridaHomePanel} />
 
-          <Route path="/games/*">
+          {/*       <Route path="/games/*">
             <Route index Component={PodridaGames} />
             <Route path=":id/details" Component={PodridaGames} />
-          </Route>
+          </Route> */}
         </Route>
       </Routes>
     </>

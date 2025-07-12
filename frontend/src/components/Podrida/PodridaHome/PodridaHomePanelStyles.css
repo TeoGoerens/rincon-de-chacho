@@ -72,16 +72,6 @@
   background: #fdecea;
 }
 
-.record-card.positivo:hover {
-  background: #1e9f50;
-  color: #fff;
-}
-
-.record-card.negativo:hover {
-  background: #c62828;
-  color: #fff;
-}
-
 .record-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
@@ -90,17 +80,54 @@
 .record-card h4 {
   margin-bottom: 0.8rem;
   font-size: 0.9rem;
-  font-weight: 400;
+  font-weight: 800;
   color: inherit;
+  text-align: center;
 }
 
-.record-card p {
-  font-size: 1rem;
-  font-weight: bold;
-  text-align: center;
-  padding: 0.2rem;
-  border-radius: 5px;
-  background-color: white;
+.record-card ul {
+  padding: 0;
+}
+
+/* Estilos para el top 3 dentro de cada tarjeta */
+.record-position {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* 🥇 Primer lugar: más grande, más llamativo */
+.record-1 {
+  font-weight: 700;
+  color: var(--text-color); /* azul oscuro */
+  padding-block: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid gray;
+}
+
+/* 🥈 Segundo lugar */
+.record-2 {
+  color: rgb(150, 150, 150);
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+
+/* 🥉 Tercer lugar */
+.record-3 {
+  color: rgb(150, 150, 150);
+  font-weight: 400;
+}
+
+/* Íconos (opcional, si querés más visual) */
+.record-1::before {
+  content: "🥇";
+}
+.record-2::before {
+  content: "🥈";
+}
+.record-3::before {
+  content: "🥉";
 }
 
 /* ULTIMA PARTIDA */
@@ -156,13 +183,15 @@
 
 .ranking-table-wrapper table {
   width: 100%;
-  min-width: 700px;
-  border-collapse: collapse;
+  table-layout: fixed;
+  border-collapse: separate; /* ⬅️ CAMBIO CLAVE */
+  border-spacing: 0;
+  padding: 0;
 }
 
 .ranking-table-wrapper th,
 .ranking-table-wrapper td {
-  padding: 0.75rem;
+  padding: 0.5rem;
   text-align: center;
   border: 1px solid #ccc;
 }
@@ -179,6 +208,48 @@
   background-color: #e6f7ff;
 }
 
+/* Sticky columnas: Rank, Jugador, Pts */
+.ranking-table-wrapper th.sticky-col,
+.ranking-table-wrapper td.sticky-col {
+  position: sticky;
+}
+
+.ranking-table-wrapper td.sticky-col {
+  background-color: white;
+}
+
+.ranking-table-wrapper th.sticky-rank,
+.ranking-table-wrapper td.sticky-rank {
+  left: 0px;
+  z-index: 3; /* superior para la primera columna */
+  width: 60px;
+}
+
+.ranking-table-wrapper th.sticky-player,
+.ranking-table-wrapper td.sticky-player {
+  left: 60px;
+  width: 150px;
+}
+
+.ranking-table-wrapper th.sticky-pts,
+.ranking-table-wrapper td.sticky-pts {
+  left: 210px;
+  width: 60px;
+  z-index: 2;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.ranking-table-wrapper td.sticky-pts {
+  background-color: #d7f0ff; /* celeste claro */
+  font-weight: bold;
+  color: #0a2d4a;
+}
+
+.ranking-table-wrapper th:nth-child(n + 4),
+.ranking-table-wrapper td:nth-child(n + 4) {
+  width: 60px;
+}
+
 /* Responsividad */
 @media (max-width: 768px) {
   .ranking-table-wrapper table {
@@ -193,6 +264,16 @@
 
   .ranking-table-wrapper th,
   .ranking-table-wrapper td {
-    padding: 0.6rem;
+    padding: 0.5rem;
+  }
+
+  .ranking-table-wrapper th:nth-child(n + 4),
+  .ranking-table-wrapper td:nth-child(n + 4) {
+    display: none;
+  }
+
+  .ranking-table-wrapper th.sticky-pts,
+  .ranking-table-wrapper td.sticky-pts {
+    box-shadow: none;
   }
 }

@@ -11,17 +11,9 @@ import fetchPodridaRanking from "../../../reactquery/podrida/fetchPodridaRanking
 import "./PodridaHomePanelStyles.css";
 
 //Import helpers
-import { regroupPlayerStats } from "../../../helpers/regroupPlayerStats";
-import { matchStatsSort } from "../../../helpers/matchStatsSort";
 
 //Import components
 import PodridaMenu from "../PodridaMenu";
-import RecordsSlide from "../../Layout/Podrida/RecordsSlide/RecordsSlide";
-
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getMatchStatsFilteredAction } from "../../../redux/slices/match-stats/matchStatsSlices";
-import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tournamentsSlices";
 
 //----------------------------------------
 //COMPONENT
@@ -98,9 +90,16 @@ const PodridaHomePanel = () => {
             records.map((r, idx) => (
               <div className={`record-card ${r.type}`} key={idx}>
                 <h4>{r.title}</h4>
-                <p>
-                  {r?.name} ({r?.value})
-                </p>
+                <ul>
+                  {r.top?.map((record, index) => (
+                    <li
+                      key={index}
+                      className={`record-position record-${index + 1}`}
+                    >
+                      {record.name} ({record.value})
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
         </div>
@@ -196,30 +195,34 @@ const PodridaHomePanel = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Rank</th>
-                  <th>Jugador</th>
+                  <th className="sticky-col sticky-rank">Rank</th>
+                  <th className="sticky-col sticky-player">Jugador</th>
+                  <th title="Puntaje total" className="sticky-col sticky-pts">
+                    Pts
+                  </th>
                   <th>PJ</th>
                   <th title="1° puesto = 3 pts">🎯</th>
                   <th title="2° puesto = 2 pts">🥈</th>
                   <th title="3° puesto = 1 pt">🥉</th>
                   <th title="Highlight = 1 pt">🌟</th>
                   <th title="Último puesto = -1 pt">💀</th>
-                  <th title="Puntaje total">Pts</th>
                   <th title="Promedio de puntos por partida">Avg</th>
                 </tr>
               </thead>
               <tbody>
                 {rankingData?.ranking?.map((j, idx) => (
                   <tr key={idx}>
-                    <td>{idx + 1}</td>
-                    <td>{j.name}</td>
+                    <td className="sticky-col sticky-rank">{idx + 1}</td>
+                    <td className="sticky-col sticky-player">{j.name}</td>
+                    <td className="sticky-col sticky-pts">
+                      {j.points === 0 ? "-" : j.points}
+                    </td>
                     <td>{j.played === 0 ? "-" : j.played}</td>
                     <td>{j.firsts === 0 ? "-" : j.firsts}</td>
                     <td>{j.seconds === 0 ? "-" : j.seconds}</td>
                     <td>{j.thirds === 0 ? "-" : j.thirds}</td>
                     <td>{j.highlights === 0 ? "-" : j.highlights}</td>
                     <td>{j.lasts === 0 ? "-" : j.lasts}</td>
-                    <td>{j.points === 0 ? "-" : j.points}</td>
                     <td>{j.average === 0 ? "-" : j.average?.toFixed(1)}</td>
                   </tr>
                 ))}
