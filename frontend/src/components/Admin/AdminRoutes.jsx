@@ -51,8 +51,22 @@ const AdminRoutes = () => {
         <Route path="users" element={<AdminUsersPanel />} />
 
         {/* --------------- ADMIN PRODE --------------- */}
-
-        <Route path="prode" element={<AdminProdePanel />} />
+        <Route path="prode/*" element={<AdminProdePanel />}>
+          <Route index element={<h2>Admin Prode — Home (WIP)</h2>} />
+          <Route
+            path="jugadores"
+            element={<h2>Admin Prode — Jugadores (WIP)</h2>}
+          />
+          <Route
+            path="torneos"
+            element={<h2>Admin Prode — Torneos (WIP)</h2>}
+          />
+          <Route path="fechas" element={<h2>Admin Prode — Fechas (WIP)</h2>} />
+          <Route
+            path="fechas/:matchdayId"
+            element={<h2>Admin Prode — Editor de Fecha (WIP)</h2>}
+          />
+        </Route>
         {/* --------------- ADMIN PODRIDA --------------- */}
 
         <Route path="podrida/*" element={<AdminPodridaPanel />}>

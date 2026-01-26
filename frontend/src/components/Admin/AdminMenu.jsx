@@ -36,6 +36,16 @@ const AdminMenu = () => {
           Podrida
         </Link>
         <Link
+          to="/admin/prode"
+          className={
+            location.pathname.startsWith("/admin/prode")
+              ? "admin-menu-active-link"
+              : ""
+          }
+        >
+          Prode
+        </Link>
+        <Link
           to="/admin/cronicas"
           className={
             location.pathname.startsWith("/admin/cronicas")

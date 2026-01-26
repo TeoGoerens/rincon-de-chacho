@@ -10,11 +10,12 @@ import Home from "./components/Home/Home";
 import AuthProtectedRoutes from "./components/AuthRoutes/AuthProtectedRoutes";
 import AdminProtectedRoutes from "./components/AuthRoutes/AdminProtectedRoutes";
 import PhotoGallery from "./components/PhotoGallery/PhotoGallery";
-import CurrentlyWorking from "./components/Layout/SoonTag/CurrentlyWorking";
 import ForgotPassword from "./components/Users/PasswordManagement/ForgotPassword";
 import ResetPassword from "./components/Users/PasswordManagement/ResetPassword";
 import PodridaRoutes from "./components/Podrida/PodridaRoutes";
 import CronicaRoutes from "./components/Cronicas/CronicaRoutes";
+import ProdeRoutes from "./components/Prode/ProdeRoutes.jsx";
+
 /* --------------- REACT QUERY --------------- */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -56,7 +57,7 @@ function App() {
             <Route path="/home" Component={Home} />
             <Route path="/photo-gallery" Component={PhotoGallery} />
             <Route path="/podrida/*" Component={PodridaRoutes} />
-            <Route path="/prode" Component={CurrentlyWorking} />
+            <Route path="/prode/*" Component={ProdeRoutes} />
             <Route path="/cronicas/*" Component={CronicaRoutes} />
             <Route path="/chachos/*" Component={ChachosRoutes} />
 
