@@ -30,6 +30,7 @@ import matchStatRouter from "./routes/chachos/matchStatRouter.js";
 import cronicaRouter from "./routes/cronica/cronicaRouter.js";
 import cronicaCommentRouter from "./routes/cronica/cronicaCommentRouter.js";
 import podridaRouter from "./routes/podrida/podridaRouter.js";
+import prodeRouter from "./routes/prode/prodeRouter.js";
 
 // ---------- FUNCION DE INICIO DEL SERVIDOR ----------
 const startServer = async () => {
@@ -50,6 +51,7 @@ const startServer = async () => {
     app.use("/api/cronica", cronicaRouter);
     app.use("/api/cronica/comment", cronicaCommentRouter);
     app.use("/api/podrida", podridaRouter);
+    app.use("/api/prode", prodeRouter);
 
     // Configuración de archivos estáticos
     if (process.env.npm_lifecycle_event === "start") {
