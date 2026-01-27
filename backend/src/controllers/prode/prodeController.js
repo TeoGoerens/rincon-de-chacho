@@ -2,6 +2,12 @@ import ProdePlayer from "../../dao/models/prode/ProdePlayerModel.js";
 import ProdeTournament from "../../dao/models/prode/ProdeTournamentModel.js";
 import ProdeMatchday from "../../dao/models/prode/ProdeMatchdayModel.js";
 
+//Import HELPERS
+import { buildTournamentSummary } from "./helpers/buildTournamentSummary.js";
+import { assertTournamentNotFinished } from "./helpers/assertTournamentNotFinished.js";
+import { buildProdeRecords } from "./helpers/buildProdeRecords.js";
+import { buildProdeH2H } from "./helpers/buildProdeH2H.js";
+
 const MONTHS = [
   "Enero",
   "Febrero",
@@ -133,8 +139,35 @@ export default class ProdeController {
     }
   };
 
+  getProdeTournamentSummary = async (req, res, next) => {
+    try {
+      const tournamentId = req.params.id;
+
+      const tournament = await ProdeTournament.findById(tournamentId).populate([
+        { path: "champion", model: "ProdePlayer" },
+        { path: "lastPlace", model: "ProdePlayer" },
+        { path: "monthlyWinners.winnerPlayerIds", model: "ProdePlayer" },
+      ]);
+
+      if (!tournament) {
+        return res.status(404).json({ message: "ProdeTournament not found" });
+      }
+
+      // ✅ helper nuevo unificado (standings + stats + champion/lastPlace ids)
+      const summary = await buildTournamentSummary(tournament._id);
+
+      return res.json({
+        tournament,
+        summary,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   updateProdeTournament = async (req, res, next) => {
     try {
+      // 1) Validación months (tu lógica original)
       if (req.body.months !== undefined) {
         const { months } = req.body;
 
@@ -153,11 +186,60 @@ export default class ProdeController {
         }
       }
 
+      // 2) Traemos torneo actual para detectar transición de status
+      const current = await ProdeTournament.findById(req.params.id);
+      if (!current)
+        return res.status(404).json({ message: "ProdeTournament not found" });
+
+      const prevStatus = current.status;
+      const nextStatus = req.body.status ?? prevStatus;
+
+      const isTransitionToFinished =
+        prevStatus !== "finished" && nextStatus === "finished";
+
+      // 3) Si se quiere cerrar el torneo => validar que todas las fechas estén played
+      if (isTransitionToFinished) {
+        const allMatchdays = await ProdeMatchday.find({
+          tournament: current._id,
+        }).select("roundNumber status");
+
+        if (!allMatchdays || allMatchdays.length === 0) {
+          return res.status(400).json({
+            message:
+              "No se puede finalizar el torneo porque no tiene fechas cargadas.",
+          });
+        }
+
+        const notPlayed = allMatchdays
+          .filter((m) => m.status !== "played")
+          .map((m) => m.roundNumber);
+
+        if (notPlayed.length > 0) {
+          return res.status(400).json({
+            message:
+              "No se puede finalizar el torneo: hay fechas que no están en played.",
+            notPlayedRounds: notPlayed.sort((a, b) => a - b),
+          });
+        }
+
+        // 4) Recalcular standings y setear champion/lastPlace automáticamente
+        const { championPlayerId, lastPlacePlayerId } =
+          await buildTournamentSummary(current._id);
+
+        req.body.champion = championPlayerId;
+        req.body.lastPlace = lastPlacePlayerId;
+      }
+
+      // 5) Update final
       const updated = await ProdeTournament.findByIdAndUpdate(
         req.params.id,
         req.body,
         { new: true, runValidators: true },
-      );
+      ).populate([
+        { path: "champion", model: "ProdePlayer" },
+        { path: "lastPlace", model: "ProdePlayer" },
+        { path: "monthlyWinners.winnerPlayerIds", model: "ProdePlayer" },
+      ]);
 
       if (!updated)
         return res.status(404).json({ message: "ProdeTournament not found" });
@@ -270,6 +352,17 @@ export default class ProdeController {
         return res.status(400).json({ message: "Invalid month" });
       }
 
+      // ✅ bloquear si torneo finished
+      if (req.body.tournament) {
+        const t = await ProdeTournament.findById(req.body.tournament);
+        if (!t)
+          return res.status(404).json({ message: "ProdeTournament not found" });
+
+        const lock = assertTournamentNotFinished(t);
+        if (!lock.ok)
+          return res.status(lock.status).json({ message: lock.message });
+      }
+
       const created = await ProdeMatchday.create(req.body);
       res.status(201).json(created);
     } catch (err) {
@@ -300,6 +393,21 @@ export default class ProdeController {
         return res.status(400).json({ message: "Invalid month" });
       }
 
+      // ✅ 1) buscar matchday
+      const matchday = await ProdeMatchday.findById(req.params.id);
+      if (!matchday)
+        return res.status(404).json({ message: "ProdeMatchday not found" });
+
+      // ✅ 2) buscar torneo asociado y lock
+      const tournamentDoc = await ProdeTournament.findById(matchday.tournament);
+      if (!tournamentDoc)
+        return res.status(404).json({ message: "ProdeTournament not found" });
+
+      const lock = assertTournamentNotFinished(tournamentDoc);
+      if (!lock.ok)
+        return res.status(lock.status).json({ message: lock.message });
+
+      // ✅ 3) patch como ya lo tenías
       const patch = {};
       if (tournament !== undefined) patch.tournament = tournament;
       if (month !== undefined) patch.month = month;
@@ -335,7 +443,14 @@ export default class ProdeController {
       if (!matchday)
         return res.status(404).json({ message: "ProdeMatchday not found" });
 
-      // Si viene status en body, lo usamos (y lo guardamos).
+      const tournamentDoc = await ProdeTournament.findById(matchday.tournament);
+      if (!tournamentDoc)
+        return res.status(404).json({ message: "ProdeTournament not found" });
+
+      const lock = assertTournamentNotFinished(tournamentDoc);
+      if (!lock.ok)
+        return res.status(lock.status).json({ message: lock.message });
+
       const finalStatus = status || matchday.status || "scheduled";
       if (!["scheduled", "played"].includes(finalStatus)) {
         return res.status(400).json({ message: "Invalid status" });
@@ -358,27 +473,38 @@ export default class ProdeController {
           else if (r === "B") bWins += 1;
           else draws += 1;
         }
-
         return { aWins, bWins, draws };
       };
 
-      const calcDuelResultFromCounts = ({ aWins, bWins }) => {
-        if (aWins > bWins) return "A";
-        if (bWins > aWins) return "B";
+      // ✅ PONDERACIÓN: GDT pesa 2, resto 1
+      const getChallengeWeight = (type) => (type === "GDT" ? 2 : 1);
+
+      // ✅ duelResult por suma ponderada (no por cantidad de wins)
+      const calcDuelResultWeighted = (challenges) => {
+        let aScore = 0;
+        let bScore = 0;
+
+        for (const c of challenges) {
+          const w = getChallengeWeight(c.type);
+
+          if (c.result === "A") aScore += w;
+          else if (c.result === "B") bScore += w;
+          // draw => 0 para ambos
+        }
+
+        if (aScore > bScore) return "A";
+        if (bScore > aScore) return "B";
         return "draw";
       };
 
       const calcPointsFromDuelResult = (duelResult) => {
-        // ✅ Regla base simple (ajustable):
-        // win=3, draw=1, lose=0
         if (duelResult === "A") return { playerA: 3, playerB: 0 };
         if (duelResult === "B") return { playerA: 0, playerB: 3 };
         return { playerA: 1, playerB: 1 };
       };
 
       const calcBonusFromCounts = ({ aWins, bWins }) => {
-        // ✅ BONUS por 3-0
-        // Si querés otra regla (por ej +2), se cambia acá.
+        // ✅ BONUS por ganar los 3 challenges
         if (aWins === 3) return { bonusA: 1, bonusB: 0 };
         if (bWins === 3) return { bonusA: 0, bonusB: 1 };
         return { bonusA: 0, bonusB: 0 };
@@ -418,7 +544,6 @@ export default class ProdeController {
           }
         }
 
-        // ✅ Si played: exigir scores y calcular resultados
         if (finalStatus === "played") {
           for (const c of d.challenges) {
             const hasScores =
@@ -431,19 +556,18 @@ export default class ProdeController {
               });
             }
 
-            // calcular result
             c.result = calcChallengeResult(c.scoreA, c.scoreB);
           }
 
           const results = d.challenges.map((c) => c.result);
           const counts = countResults(results);
 
-          d.duelResult = calcDuelResultFromCounts(counts);
+          // ✅ ACÁ está el cambio clave:
+          d.duelResult = calcDuelResultWeighted(d.challenges);
 
           const basePoints = calcPointsFromDuelResult(d.duelResult);
           const bonus = calcBonusFromCounts(counts);
 
-          // ✅ Acá está el fix: bonus se calcula SIEMPRE en el back
           d.points = {
             playerA: basePoints.playerA,
             playerB: basePoints.playerB,
@@ -451,10 +575,7 @@ export default class ProdeController {
             bonusB: bonus.bonusB,
           };
         } else {
-          // ✅ scheduled: fixture => limpiamos resultados
-          for (const c of d.challenges) {
-            c.result = null;
-          }
+          for (const c of d.challenges) c.result = null;
           d.duelResult = null;
 
           d.points = {
@@ -466,7 +587,6 @@ export default class ProdeController {
         }
       }
 
-      // No repetir jugadores en la misma fecha
       const uniquePlayers = new Set(playersInDay);
       if (uniquePlayers.size !== playersInDay.length) {
         return res.status(400).json({
@@ -475,14 +595,12 @@ export default class ProdeController {
         });
       }
 
-      // Cantidad par de jugadores (si hay duels)
       if (uniquePlayers.size > 0 && uniquePlayers.size % 2 !== 0) {
         return res.status(400).json({
           message: "Number of players in a matchday must be even",
         });
       }
 
-      // ✅ Persistimos
       matchday.duels = duels;
       matchday.status = finalStatus;
 
@@ -495,12 +613,40 @@ export default class ProdeController {
 
   deleteProdeMatchday = async (req, res, next) => {
     try {
-      const deleted = await ProdeMatchday.findByIdAndDelete(req.params.id);
-
-      if (!deleted)
+      const matchday = await ProdeMatchday.findById(req.params.id);
+      if (!matchday)
         return res.status(404).json({ message: "ProdeMatchday not found" });
 
+      const tournamentDoc = await ProdeTournament.findById(matchday.tournament);
+      if (!tournamentDoc)
+        return res.status(404).json({ message: "ProdeTournament not found" });
+
+      const lock = assertTournamentNotFinished(tournamentDoc);
+      if (!lock.ok)
+        return res.status(lock.status).json({ message: lock.message });
+
+      const deleted = await ProdeMatchday.findByIdAndDelete(req.params.id);
       res.json({ message: "ProdeMatchday deleted" });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getProdeRecords = async (req, res, next) => {
+    try {
+      const { tournamentId } = req.query; // Opcional
+      const records = await buildProdeRecords(tournamentId);
+      res.json(records);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getProdeH2H = async (req, res, next) => {
+    try {
+      const { playerId } = req.query;
+      const h2hData = await buildProdeH2H(playerId);
+      res.json(h2hData);
     } catch (err) {
       next(err);
     }

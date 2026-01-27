@@ -31,6 +31,10 @@ router.delete(
   controller.deleteProdePlayer,
 );
 
+/* ---------- RECORDS & H2H ---------- */
+router.get("/records", authMiddleware, controller.getProdeRecords);
+router.get("/h2h", authMiddleware, controller.getProdeH2H);
+
 /* ---------- TOURNAMENTS ---------- */
 router.post(
   "/tournament",
@@ -38,6 +42,12 @@ router.post(
   adminAuthMiddleware,
   controller.createProdeTournament,
 );
+router.get(
+  "/tournament/:id/summary",
+  authMiddleware,
+  controller.getProdeTournamentSummary,
+);
+
 router.get(
   "/tournament/:id",
   authMiddleware,
