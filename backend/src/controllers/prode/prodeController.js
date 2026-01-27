@@ -105,9 +105,12 @@ export default class ProdeController {
 
   getProdeTournamentById = async (req, res, next) => {
     try {
-      const item = await ProdeTournament.findById(req.params.id).populate(
-        "champion lastPlace monthlyWinners.winnerPlayerIds",
-      );
+      // ✅ populate defensivo + claro
+      const item = await ProdeTournament.findById(req.params.id).populate([
+        { path: "champion", model: "ProdePlayer" },
+        { path: "lastPlace", model: "ProdePlayer" },
+        { path: "monthlyWinners.winnerPlayerIds", model: "ProdePlayer" },
+      ]);
 
       if (!item)
         return res.status(404).json({ message: "ProdeTournament not found" });
@@ -202,7 +205,6 @@ export default class ProdeController {
       if (!tournament)
         return res.status(404).json({ message: "ProdeTournament not found" });
 
-      // Solo meses habilitados en ese torneo (como definimos)
       if (!tournament.months.includes(month)) {
         return res.status(400).json({
           message: "Month not enabled for this tournament",
@@ -254,7 +256,7 @@ export default class ProdeController {
 
       const items = await ProdeMatchday.find({
         tournament: tournamentId,
-      }).sort({ roundNumber: 1 });
+      }).sort({ roundNumber: -1 });
 
       res.json(items);
     } catch (err) {
@@ -322,15 +324,67 @@ export default class ProdeController {
 
   updateProdeMatchdayFull = async (req, res, next) => {
     try {
-      const { duels } = req.body;
+      const { duels, status } = req.body;
 
-      if (!Array.isArray(duels) || duels.length === 0) {
-        return res
-          .status(400)
-          .json({ message: "duels must be a non-empty array" });
+      // ✅ Permitimos fixture vacío: duels puede ser []
+      if (!Array.isArray(duels)) {
+        return res.status(400).json({ message: "duels must be an array" });
       }
 
-      // Validaciones MVP
+      const matchday = await ProdeMatchday.findById(req.params.id);
+      if (!matchday)
+        return res.status(404).json({ message: "ProdeMatchday not found" });
+
+      // Si viene status en body, lo usamos (y lo guardamos).
+      const finalStatus = status || matchday.status || "scheduled";
+      if (!["scheduled", "played"].includes(finalStatus)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      // ---------- helpers ----------
+      const calcChallengeResult = (a, b) => {
+        if (a > b) return "A";
+        if (b > a) return "B";
+        return "draw";
+      };
+
+      const countResults = (challengeResults) => {
+        let aWins = 0;
+        let bWins = 0;
+        let draws = 0;
+
+        for (const r of challengeResults) {
+          if (r === "A") aWins += 1;
+          else if (r === "B") bWins += 1;
+          else draws += 1;
+        }
+
+        return { aWins, bWins, draws };
+      };
+
+      const calcDuelResultFromCounts = ({ aWins, bWins }) => {
+        if (aWins > bWins) return "A";
+        if (bWins > aWins) return "B";
+        return "draw";
+      };
+
+      const calcPointsFromDuelResult = (duelResult) => {
+        // ✅ Regla base simple (ajustable):
+        // win=3, draw=1, lose=0
+        if (duelResult === "A") return { playerA: 3, playerB: 0 };
+        if (duelResult === "B") return { playerA: 0, playerB: 3 };
+        return { playerA: 1, playerB: 1 };
+      };
+
+      const calcBonusFromCounts = ({ aWins, bWins }) => {
+        // ✅ BONUS por 3-0
+        // Si querés otra regla (por ej +2), se cambia acá.
+        if (aWins === 3) return { bonusA: 1, bonusB: 0 };
+        if (bWins === 3) return { bonusA: 0, bonusB: 1 };
+        return { bonusA: 0, bonusB: 0 };
+      };
+
+      // ---------- Validaciones + normalización ----------
       const playersInDay = [];
 
       for (const d of duels) {
@@ -348,6 +402,7 @@ export default class ProdeController {
           });
         }
 
+        // Validar tipos
         const types = d.challenges.map((c) => c.type);
         const uniqueTypes = new Set(types);
 
@@ -362,10 +417,57 @@ export default class ProdeController {
             return res.status(400).json({ message: "Invalid challenge type" });
           }
         }
+
+        // ✅ Si played: exigir scores y calcular resultados
+        if (finalStatus === "played") {
+          for (const c of d.challenges) {
+            const hasScores =
+              typeof c.scoreA === "number" && typeof c.scoreB === "number";
+
+            if (!hasScores) {
+              return res.status(400).json({
+                message:
+                  "If matchday is played, each challenge must include scoreA and scoreB",
+              });
+            }
+
+            // calcular result
+            c.result = calcChallengeResult(c.scoreA, c.scoreB);
+          }
+
+          const results = d.challenges.map((c) => c.result);
+          const counts = countResults(results);
+
+          d.duelResult = calcDuelResultFromCounts(counts);
+
+          const basePoints = calcPointsFromDuelResult(d.duelResult);
+          const bonus = calcBonusFromCounts(counts);
+
+          // ✅ Acá está el fix: bonus se calcula SIEMPRE en el back
+          d.points = {
+            playerA: basePoints.playerA,
+            playerB: basePoints.playerB,
+            bonusA: bonus.bonusA,
+            bonusB: bonus.bonusB,
+          };
+        } else {
+          // ✅ scheduled: fixture => limpiamos resultados
+          for (const c of d.challenges) {
+            c.result = null;
+          }
+          d.duelResult = null;
+
+          d.points = {
+            playerA: 0,
+            playerB: 0,
+            bonusA: 0,
+            bonusB: 0,
+          };
+        }
       }
 
+      // No repetir jugadores en la misma fecha
       const uniquePlayers = new Set(playersInDay);
-
       if (uniquePlayers.size !== playersInDay.length) {
         return res.status(400).json({
           message:
@@ -373,22 +475,19 @@ export default class ProdeController {
         });
       }
 
-      if (uniquePlayers.size % 2 !== 0) {
+      // Cantidad par de jugadores (si hay duels)
+      if (uniquePlayers.size > 0 && uniquePlayers.size % 2 !== 0) {
         return res.status(400).json({
           message: "Number of players in a matchday must be even",
         });
       }
 
-      const updated = await ProdeMatchday.findByIdAndUpdate(
-        req.params.id,
-        { duels },
-        { new: true, runValidators: true },
-      );
+      // ✅ Persistimos
+      matchday.duels = duels;
+      matchday.status = finalStatus;
 
-      if (!updated)
-        return res.status(404).json({ message: "ProdeMatchday not found" });
-
-      res.json(updated);
+      const saved = await matchday.save();
+      res.json(saved);
     } catch (err) {
       next(err);
     }

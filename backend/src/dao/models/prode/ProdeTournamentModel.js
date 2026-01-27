@@ -1,23 +1,43 @@
 import mongoose from "mongoose";
 
-const monthlyWinnersSchema = new mongoose.Schema(
+const monthlyWinnerSchema = new mongoose.Schema(
   {
     month: {
       type: String,
       required: true,
+      enum: [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ],
     },
     winnerPlayerIds: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "ProdePlayer",
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ProdePlayer",
+          required: true,
+        },
+      ],
       required: true,
       validate: {
-        validator: (arr) => Array.isArray(arr) && arr.length === 4,
+        validator: function (arr) {
+          return Array.isArray(arr) && arr.length === 4;
+        },
         message: "winnerPlayerIds must have exactly 4 players",
       },
     },
     note: {
       type: String,
-      trim: true,
       default: "",
     },
   },
@@ -38,6 +58,20 @@ const prodeTournamentSchema = new mongoose.Schema(
     months: {
       type: [String],
       required: true,
+      enum: [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ],
     },
     status: {
       type: String,
@@ -47,13 +81,16 @@ const prodeTournamentSchema = new mongoose.Schema(
     champion: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProdePlayer",
+      default: null,
     },
     lastPlace: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProdePlayer",
+      default: null,
     },
+
     monthlyWinners: {
-      type: [monthlyWinnersSchema],
+      type: [monthlyWinnerSchema],
       default: [],
     },
   },

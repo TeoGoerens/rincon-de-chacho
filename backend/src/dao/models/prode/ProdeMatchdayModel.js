@@ -8,12 +8,16 @@ const challengeSchema = new mongoose.Schema(
       enum: ["GDT", "ARG", "MISC"],
       required: true,
     },
-    scoreA: { type: Number, required: true },
-    scoreB: { type: Number, required: true },
+
+    // ✅ Fixture: opcionales
+    scoreA: { type: Number, default: null },
+    scoreB: { type: Number, default: null },
+
+    // ✅ Se calcula cuando está played (o lo podés setear manual si querés)
     result: {
       type: String,
       enum: ["A", "B", "draw"],
-      required: true,
+      default: null,
     },
   },
   { _id: false },
@@ -32,18 +36,30 @@ const duelSchema = new mongoose.Schema(
       ref: "ProdePlayer",
       required: true,
     },
+
+    // ✅ Siempre 3 challenges, pero los scores pueden venir vacíos si scheduled
     challenges: {
       type: [challengeSchema],
       required: true,
+      validate: {
+        validator: function (arr) {
+          return Array.isArray(arr) && arr.length === 3;
+        },
+        message: "Each duel must have exactly 3 challenges",
+      },
     },
+
+    // ✅ Se calcula cuando played
     duelResult: {
       type: String,
       enum: ["A", "B", "draw"],
-      required: true,
+      default: null,
     },
+
+    // ✅ Defaults para no forzar results en fixture
     points: {
-      playerA: { type: Number, required: true },
-      playerB: { type: Number, required: true },
+      playerA: { type: Number, default: 0 },
+      playerB: { type: Number, default: 0 },
       bonusA: { type: Number, default: 0 },
       bonusB: { type: Number, default: 0 },
     },
@@ -72,9 +88,11 @@ const prodeMatchdaySchema = new mongoose.Schema(
       enum: ["scheduled", "played"],
       default: "scheduled",
     },
+
+    // ✅ Fixture permitido: puede estar vacío al crear
     duels: {
       type: [duelSchema],
-      required: true,
+      default: [],
     },
   },
   { timestamps: true },
