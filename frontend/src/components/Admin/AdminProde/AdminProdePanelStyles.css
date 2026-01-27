@@ -1,0 +1,70 @@
+.admin-prode-container {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.25rem;
+  width: 100%;
+  margin-top: 1.25rem;
+}
+
+.admin-prode-container-menu {
+  background: white;
+  border-radius: 10px;
+  padding: 1rem;
+  height: fit-content;
+}
+
+.admin-prode-container-menu h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.admin-prode-container-menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-prode-container-menu-links a {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.65rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.admin-prode-container-menu-links a p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.admin-prode-container-menu-links a i {
+  font-size: 1.05rem;
+}
+
+.admin-prode-container-menu-links a:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.admin-prode-container-menu-links a.active {
+  background: rgba(0, 0, 0, 0.07);
+  font-weight: 700;
+}
+
+.admin-prode-container-content {
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  padding: 1rem;
+  min-height: 300px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .admin-prode-container {
+    grid-template-columns: 1fr;
+  }
+}

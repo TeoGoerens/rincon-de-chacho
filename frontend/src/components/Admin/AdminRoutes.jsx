@@ -16,6 +16,18 @@ import PodridaPlayerIndex from "./AdminPodrida/Podridas/PodridaPlayerIndex";
 import CreatePodridaPlayer from "./AdminPodrida/Podridas/CreatePodridaPlayer";
 import UpdatePodridaPlayer from "./AdminPodrida/Podridas/UpdatePodridaPlayer";
 
+//Admin PRODE Components
+import ProdePlayersIndex from "./AdminProde/Players/ProdePlayersIndex";
+import CreateProdePlayer from "./AdminProde/Players/CreateProdePlayer";
+import UpdateProdePlayer from "./AdminProde/Players/UpdateProdePlayer";
+import ProdeTournamentsIndex from "./AdminProde/Tournaments/ProdeTournamentsIndex";
+import CreateProdeTournament from "./AdminProde/Tournaments/CreateProdeTournament";
+import UpdateProdeTournament from "./AdminProde/Tournaments/UpdateProdeTournament";
+import ProdeMatchdaysIndex from "./AdminProde/Matchdays/ProdeMatchdaysIndex";
+import CreateProdeMatchday from "./AdminProde/Matchdays/CreateProdeMatchday";
+import UpdateProdeMatchday from "./AdminProde/Matchdays/UpdateProdeMatchday";
+import UpdateProdeMatchdayFull from "./AdminProde/Matchdays/UpdateProdeMatchdayFull";
+
 //Admin CRONICAS Components
 import AdminCronicasPanel from "./AdminCronicas/AdminCronicasPanel";
 import CronicaIndex from "./AdminCronicas/Cronicas/CronicaIndex";
@@ -52,20 +64,21 @@ const AdminRoutes = () => {
 
         {/* --------------- ADMIN PRODE --------------- */}
         <Route path="prode/*" element={<AdminProdePanel />}>
-          <Route index element={<h2>Admin Prode — Home (WIP)</h2>} />
+          <Route index element={<ProdePlayersIndex />} />
+          <Route path="crear" element={<CreateProdePlayer />} />
+          <Route path="editar/:id" element={<UpdateProdePlayer />} />
+
+          <Route path="torneos" element={<ProdeTournamentsIndex />} />
+          <Route path="torneos/crear" element={<CreateProdeTournament />} />
           <Route
-            path="jugadores"
-            element={<h2>Admin Prode — Jugadores (WIP)</h2>}
+            path="torneos/editar/:id"
+            element={<UpdateProdeTournament />}
           />
-          <Route
-            path="torneos"
-            element={<h2>Admin Prode — Torneos (WIP)</h2>}
-          />
-          <Route path="fechas" element={<h2>Admin Prode — Fechas (WIP)</h2>} />
-          <Route
-            path="fechas/:matchdayId"
-            element={<h2>Admin Prode — Editor de Fecha (WIP)</h2>}
-          />
+
+          <Route path="fechas" element={<ProdeMatchdaysIndex />} />
+          <Route path="fechas/crear" element={<CreateProdeMatchday />} />
+          <Route path="fechas/editar/:id" element={<UpdateProdeMatchday />} />
+          <Route path="fechas/:id" element={<UpdateProdeMatchdayFull />} />
         </Route>
         {/* --------------- ADMIN PODRIDA --------------- */}
 

@@ -1,0 +1,480 @@
+/* =========================================================
+   PRODE BASE STYLES (GLOBAL PARA TODA LA SECCIÓN PRODE)
+   /src/components/Prode/styles/ProdeBaseStyles.css
+========================================================= */
+
+/* =========================
+   ADMIN PRODE LAYOUT
+========================= */
+
+.admin-prode-container {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.admin-prode-container-menu {
+  width: 220px;
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.admin-prode-container-menu h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-prode-container-menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-prode-container-menu-links a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 6px;
+  color: black;
+}
+
+.admin-prode-container-menu-links a.active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.admin-prode-container-content {
+  flex: 1;
+  width: 100%;
+}
+
+/* =========================
+   PRODE PAGE BASE
+========================= */
+
+.prode-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.prode-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.prode-page-header h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.prode-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.prode-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.prode-primary-btn,
+.prode-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+}
+
+.prode-primary-btn i,
+.prode-cta i {
+  color: white;
+}
+
+.prode-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background-color: rgba(0, 0, 0, 0.06);
+  color: black;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+.prode-secondary-btn:hover {
+  background-color: rgba(0, 0, 0, 0.09);
+}
+
+.prode-secondary-btn:active {
+  transform: translateY(0.5px);
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: white;
+  font-size: 0.82rem;
+  color: black;
+}
+
+.back-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.prode-table-wrapper,
+.prode-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.prode-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  font-size: 0.82rem;
+  table-layout: fixed;
+}
+
+.prode-table th,
+.prode-table td {
+  padding: 0.65rem;
+  text-align: left;
+  vertical-align: top;
+  word-wrap: break-word;
+}
+
+.prode-table thead {
+  background-color: rgb(240, 240, 240);
+  border-bottom: 2px solid black;
+}
+
+.prode-table tbody tr:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.prode-table tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.prode-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.prode-table-actions,
+.prode-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* =========================
+   PILLS (UNIFICADAS Y FIX)
+========================= */
+
+.prode-pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* pill base (sirve tanto para <span> como para <button>) */
+.prode-pill {
+  appearance: none;
+  -webkit-appearance: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #e5e7eb;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1;
+  white-space: nowrap;
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  /* si es button */
+  color: inherit;
+  text-decoration: none;
+}
+
+/* clickable */
+.prode-pill-clickable {
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 120ms ease,
+    transform 120ms ease,
+    border-color 120ms ease;
+}
+
+.prode-pill-clickable:hover {
+  background-color: #d1d5db;
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.prode-pill-clickable:active {
+  transform: translateY(0.5px);
+}
+
+/* selected */
+.prode-pill-selected {
+  background-color: #9ca3af;
+  border-color: rgba(0, 0, 0, 0.25);
+  font-weight: 700;
+}
+
+/* ✅ alias por compatibilidad (si quedó usado en algún JSX viejo) */
+.prode-pill-active {
+  background-color: #9ca3af;
+  border-color: rgba(0, 0, 0, 0.25);
+  font-weight: 700;
+}
+
+/* wrapper opcional (no resetea estilos) */
+.prode-pills-clickable {
+  /* intencionalmente vacío: evita romper pills */
+}
+
+/* =========================
+   STATUS COLORS (TORNEO)
+========================= */
+
+.prode-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.prode-status-draft {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.prode-status-active {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.prode-status-finished {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* MATCHDAY */
+.prode-status-scheduled {
+  background-color: #e0f2fe;
+  color: #075985;
+  border: 1px solid rgba(7, 89, 133, 0.18);
+}
+
+.prode-status-played {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid rgba(22, 101, 52, 0.18);
+}
+
+/* =========================
+   HELP TEXT
+========================= */
+
+.prode-help {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.prode-form-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.prode-form {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.prode-form label {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.prode-form input,
+.prode-form select {
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  font-size: 0.9rem;
+  background: white;
+}
+
+.prode-submit-btn {
+  margin-top: 0.6rem;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.prode-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Secciones dentro del form */
+.prode-form-section {
+  margin-top: 0.2rem;
+  padding-top: 0.2rem;
+}
+
+.prode-form-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.8rem;
+  margin-bottom: 0.6rem;
+}
+
+.prode-inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* =========================
+   ✅ ADDITIONS FOR MONTHLY WINNERS
+   (no rompe estilos previos)
+========================= */
+
+.prode-divider {
+  margin: 1.1rem 0;
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.prode-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.prode-textarea {
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  font-size: 0.9rem;
+  background: white;
+  resize: vertical;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .admin-prode-container {
+    flex-direction: column;
+  }
+
+  .admin-prode-container-menu {
+    width: 100%;
+  }
+
+  .admin-prode-container-menu-links {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .admin-prode-container-menu-links a {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .prode-page-header,
+  .prode-head,
+  .prode-form-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .prode-page-header h2,
+  .prode-title {
+    font-size: 1.2rem;
+  }
+
+  .prode-primary-btn,
+  .prode-cta,
+  .prode-secondary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .prode-table {
+    table-layout: auto;
+  }
+
+  .prode-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

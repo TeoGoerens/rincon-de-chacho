@@ -8,7 +8,7 @@ import "./ButtonsStyle.css";
 const EditButton = ({ to, customCSSClass }) => {
   return (
     <Link to={to} className={customCSSClass}>
-      <i class="fa-solid fa-pen-to-square"></i>
+      <i class="fa-solid fa-pen-to-square edit-button"></i>
       <span className="tooltip-text">Editar</span>
     </Link>
   );
