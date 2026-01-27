@@ -27,6 +27,8 @@ import ProdeMatchdaysIndex from "./AdminProde/Matchdays/ProdeMatchdaysIndex";
 import CreateProdeMatchday from "./AdminProde/Matchdays/CreateProdeMatchday";
 import UpdateProdeMatchday from "./AdminProde/Matchdays/UpdateProdeMatchday";
 import UpdateProdeMatchdayFull from "./AdminProde/Matchdays/UpdateProdeMatchdayFull";
+import ViewProdeMatchday from "./AdminProde/Matchdays/ViewProdeMatchday";
+import ViewProdeTournament from "./AdminProde/Tournaments/ViewProdeTournament";
 
 //Admin CRONICAS Components
 import AdminCronicasPanel from "./AdminCronicas/AdminCronicasPanel";
@@ -74,11 +76,13 @@ const AdminRoutes = () => {
             path="torneos/editar/:id"
             element={<UpdateProdeTournament />}
           />
+          <Route path="torneos/ver/:id" element={<ViewProdeTournament />} />
 
           <Route path="fechas" element={<ProdeMatchdaysIndex />} />
           <Route path="fechas/crear" element={<CreateProdeMatchday />} />
           <Route path="fechas/editar/:id" element={<UpdateProdeMatchday />} />
           <Route path="fechas/:id" element={<UpdateProdeMatchdayFull />} />
+          <Route path="fechas/:id/view" element={<ViewProdeMatchday />} />
         </Route>
         {/* --------------- ADMIN PODRIDA --------------- */}
 

@@ -41,14 +41,12 @@ const UpdateProdeMatchday = () => {
   const [tournamentId, setTournamentId] = useState("");
   const [month, setMonth] = useState("");
   const [roundNumber, setRoundNumber] = useState(1);
-  const [status, setStatus] = useState("scheduled");
 
   useEffect(() => {
     if (matchday) {
       setTournamentId(matchday.tournament?._id || matchday.tournament || "");
       setMonth(matchday.month || "");
       setRoundNumber(matchday.roundNumber || 1);
-      setStatus(matchday.status || "scheduled");
     }
   }, [matchday]);
 
@@ -95,7 +93,6 @@ const UpdateProdeMatchday = () => {
       tournament: tournamentId,
       month,
       roundNumber: Number(roundNumber),
-      status,
     };
 
     mutation.mutate(payload);
@@ -160,17 +157,6 @@ const UpdateProdeMatchday = () => {
             onChange={(e) => setRoundNumber(e.target.value)}
             required
           />
-
-          <label>Estado</label>
-          <select value={status} onChange={(e) => setStatus(e.target.value)}>
-            {(constants?.matchdayStatuses || ["scheduled", "played"]).map(
-              (s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ),
-            )}
-          </select>
 
           <button
             type="submit"

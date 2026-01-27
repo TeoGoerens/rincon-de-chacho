@@ -115,7 +115,7 @@ const UpdateProdePlayer = () => {
               value={active ? "true" : "false"}
               onChange={(e) => setActive(e.target.value === "true")}
             >
-              <option value="true">Sí</option>
+              <option value="true">Yes</option>
               <option value="false">No</option>
             </select>
           </div>

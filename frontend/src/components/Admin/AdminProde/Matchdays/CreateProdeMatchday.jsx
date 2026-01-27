@@ -29,7 +29,6 @@ const CreateProdeMatchday = () => {
   const [tournamentId, setTournamentId] = useState("");
   const [month, setMonth] = useState("");
   const [roundNumber, setRoundNumber] = useState(1);
-  const [status, setStatus] = useState("scheduled");
 
   const selectedTournament = useMemo(() => {
     if (!tournaments || tournaments.length === 0) return null;
@@ -76,7 +75,6 @@ const CreateProdeMatchday = () => {
       tournament: finalTournamentId,
       month,
       roundNumber: Number(roundNumber),
-      status,
     };
 
     mutation.mutate(payload);
@@ -145,17 +143,6 @@ const CreateProdeMatchday = () => {
             onChange={(e) => setRoundNumber(e.target.value)}
             required
           />
-
-          <label>Estado</label>
-          <select value={status} onChange={(e) => setStatus(e.target.value)}>
-            {(constants?.matchdayStatuses || ["scheduled", "played"]).map(
-              (s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ),
-            )}
-          </select>
 
           <button
             type="submit"

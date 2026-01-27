@@ -31,6 +31,15 @@ const ProdeMatchdaysIndex = () => {
 
   const tournamentIdToUse = selectedTournamentId || defaultTournamentId;
 
+  const selectedTournament = useMemo(() => {
+    if (!tournaments || tournaments.length === 0) return null;
+    return (
+      tournaments.find((t) => t._id === tournamentIdToUse) || tournaments[0]
+    );
+  }, [tournaments, tournamentIdToUse]);
+
+  const isTournamentFinished = selectedTournament?.status === "finished";
+
   const {
     data: matchdays,
     isLoading: isLoadingMatchdays,
@@ -61,10 +70,12 @@ const ProdeMatchdaysIndex = () => {
       <div className="prode-page-header">
         <h2>Fechas</h2>
 
-        <Link to="crear" className="prode-primary-btn">
-          <i className="fa-solid fa-plus"></i>
-          Nueva fecha
-        </Link>
+        {!isTournamentFinished && (
+          <Link to="crear" className="prode-primary-btn">
+            <i className="fa-solid fa-plus"></i>
+            Nueva fecha
+          </Link>
+        )}
       </div>
 
       {/* Selector Torneo */}
@@ -75,16 +86,25 @@ const ProdeMatchdaysIndex = () => {
         {isErrorTournaments && <p>❌ Error: {errorTournaments?.message}</p>}
 
         {!isLoadingTournaments && !isErrorTournaments && (
-          <select
-            value={tournamentIdToUse}
-            onChange={(e) => setSelectedTournamentId(e.target.value)}
-          >
-            {tournaments?.map((t) => (
-              <option key={t._id} value={t._id}>
-                {t.name} ({t.year})
-              </option>
-            ))}
-          </select>
+          <>
+            <select
+              value={tournamentIdToUse}
+              onChange={(e) => setSelectedTournamentId(e.target.value)}
+            >
+              {tournaments?.map((t) => (
+                <option key={t._id} value={t._id}>
+                  {t.name} ({t.year}) — {t.status}
+                </option>
+              ))}
+            </select>
+
+            {isTournamentFinished && (
+              <p className="prode-help" style={{ marginTop: "0.6rem" }}>
+                Este torneo está <strong>finished</strong>: las fechas quedan en
+                modo solo lectura.
+              </p>
+            )}
+          </>
         )}
       </div>
 
@@ -96,7 +116,7 @@ const ProdeMatchdaysIndex = () => {
           <table className="prode-table">
             <thead>
               <tr>
-                <th>Ronda</th>
+                <th>Fecha</th>
                 <th>Mes</th>
                 <th>Estado</th>
                 <th>Actualizado</th>
@@ -127,19 +147,36 @@ const ProdeMatchdaysIndex = () => {
                   </td>
                   <td>
                     <div className="prode-table-actions">
-                      <EditButton to={`editar/${md._id}`} />
-                      <Link to={`${md._id}`}>
+                      {/* ✅ View siempre */}
+                      <Link to={`${md._id}/view`} title="Ver">
                         <i
-                          class="fa-solid fa-pen-to-square"
-                          style={{ color: "#3498db", marginInline: "0.2rem" }}
+                          className="fa-solid fa-eye"
+                          style={{ color: "#111", marginInline: "0.2rem" }}
                         ></i>
-                        <span className="tooltip-text">Full Edit</span>
                       </Link>
-                      <DeleteButton
-                        customCSSClass="delete-btn-custom"
-                        onClick={deleteMutation.mutate}
-                        id={{ matchdayId: md._id }}
-                      />
+
+                      {/* ✅ Solo si no finished */}
+                      {!isTournamentFinished && (
+                        <>
+                          <EditButton to={`editar/${md._id}`} />
+
+                          <Link to={`${md._id}`} title="Full Edit">
+                            <i
+                              className="fa-solid fa-pen-to-square"
+                              style={{
+                                color: "cornflowerblue",
+                                marginInline: "0.2rem",
+                              }}
+                            ></i>
+                          </Link>
+
+                          <DeleteButton
+                            customCSSClass="delete-btn-custom"
+                            onClick={deleteMutation.mutate}
+                            id={{ matchdayId: md._id }}
+                          />
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -148,8 +185,17 @@ const ProdeMatchdaysIndex = () => {
           </table>
 
           <p className="prode-help" style={{ marginTop: "0.75rem" }}>
-            Tip: El botón amarillo edita información básica de la fecha. El
-            botón celeste edita los duelos y desafíos de una fecha.
+            Tip 1: el ícono 👁️ abre la vista solo lectura de la fecha
+          </p>
+          <p className="prode-help" style={{ marginTop: "0.25rem" }}>
+            Tip 2: el ícono de edición amarillo permite ajustar variables macro
+            de la fecha
+          </p>
+          <p
+            className="prode-help"
+            style={{ marginTop: "0.25rem", marginBottom: "2rem" }}
+          >
+            Tip 3: el ícono de edición violeta permite ajustar duelos y desafíos
           </p>
         </div>
       )}

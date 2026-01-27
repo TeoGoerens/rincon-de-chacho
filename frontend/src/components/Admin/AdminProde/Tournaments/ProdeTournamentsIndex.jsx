@@ -49,7 +49,6 @@ const ProdeTournamentsIndex = () => {
 
       {!isLoading && !isError && (
         <div className="prode-table-wrapper">
-          {/* ahora son 4 columnas */}
           <table className="prode-table">
             <thead>
               <tr>
@@ -67,31 +66,43 @@ const ProdeTournamentsIndex = () => {
                 </tr>
               )}
 
-              {tournaments?.map((tournament) => (
-                <tr key={tournament._id}>
-                  <td>{tournament.name}</td>
-                  <td>{tournament.year}</td>
+              {tournaments?.map((tournament) => {
+                const isFinished = tournament.status === "finished";
 
-                  <td>
-                    <span
-                      className={`prode-status prode-status-${tournament.status}`}
-                    >
-                      {tournament.status}
-                    </span>
-                  </td>
+                return (
+                  <tr key={tournament._id}>
+                    <td>{tournament.name}</td>
+                    <td>{tournament.year}</td>
 
-                  <td>
-                    <div className="prode-table-actions">
-                      <EditButton to={`editar/${tournament._id}`} />
-                      <DeleteButton
-                        customCSSClass="delete-btn-custom"
-                        onClick={deleteMutation.mutate}
-                        id={{ tournamentId: tournament._id }}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    <td>
+                      <span
+                        className={`prode-status prode-status-${tournament.status}`}
+                      >
+                        {tournament.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="prode-table-actions">
+                        <Link
+                          to={`ver/${tournament._id}`}
+                          title="Ver resumen del torneo"
+                        >
+                          <i className="fa-solid fa-eye"></i>
+                        </Link>
+
+                        <EditButton to={`editar/${tournament._id}`} />
+
+                        <DeleteButton
+                          customCSSClass="delete-btn-custom"
+                          onClick={deleteMutation.mutate}
+                          id={{ tournamentId: tournament._id }}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

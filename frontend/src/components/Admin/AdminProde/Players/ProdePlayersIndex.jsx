@@ -62,7 +62,11 @@ const ProdePlayersIndex = () => {
               {playersData?.map((player) => (
                 <tr key={player._id}>
                   <td>{player.name}</td>
-                  <td>{player.active ? "Sí" : "No"}</td>
+                  <td
+                    className={`prode-status ${player.active ? `prode-status-active` : `prode-status-finished`}`}
+                  >
+                    {player.active ? "Yes" : "No"}
+                  </td>
                   <td>
                     <div className="prode-table-actions">
                       <EditButton to={`editar/${player._id}`} />
