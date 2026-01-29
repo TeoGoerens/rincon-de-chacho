@@ -19,7 +19,6 @@ export const buildTournamentSummary = async (tournamentId) => {
     basePoints: 0,
     bonusPoints: 0,
     totalPoints: 0,
-    // --- NUEVO: Desglose por desafío ---
     challengesStats: {
       GDT: { played: 0, wins: 0, draws: 0, losses: 0 },
       ARG: { played: 0, wins: 0, draws: 0, losses: 0 },
@@ -74,9 +73,8 @@ export const buildTournamentSummary = async (tournamentId) => {
           }
           row.totalPoints = row.basePoints + row.bonusPoints;
 
-          // --- NUEVO: Lógica de Desafíos Individuales ---
           d.challenges.forEach((ch) => {
-            const type = ch.type; // GDT, ARG, MISC
+            const type = ch.type;
             if (row.challengesStats[type]) {
               row.challengesStats[type].played += 1;
               if (ch.result === p.key) {
@@ -93,10 +91,13 @@ export const buildTournamentSummary = async (tournamentId) => {
     }
   }
 
+  // --- LÓGICA DE ORDENAMIENTO UNIFICADA AQUÍ ---
   const finalizeTable = (map) => {
     return Array.from(map.values()).sort((x, y) => {
+      // 1° Criterio: Puntos Totales
       if (y.totalPoints !== x.totalPoints) return y.totalPoints - x.totalPoints;
-      return (x.name || "").localeCompare(y.name || "");
+      // 2° Criterio: Puntos Base (Desempate)
+      return y.basePoints - x.basePoints;
     });
   };
 
