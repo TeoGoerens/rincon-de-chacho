@@ -595,11 +595,12 @@
   margin-top: 16px;
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
 }
 
 .p-stat-card {
   padding: 14px;
+  min-width: 360px;
 }
 
 .p-stat-header-mini {
@@ -716,13 +717,11 @@
 .p-val-box.win {
   background: var(--p-win-soft);
   border-color: rgba(47, 158, 131, 0.22);
-  font-size: 1rem;
 }
 
 .p-val-box.loss {
   background: var(--p-loss-soft);
   border-color: rgba(224, 122, 122, 0.22);
-  font-size: 1rem;
 }
 
 /* -----------------------------
@@ -1110,6 +1109,7 @@
   border-radius: 16px;
   padding: 12px 14px;
   text-align: right;
+  min-width: 250px;
 }
 
 .p-value-large {
@@ -1289,4 +1289,171 @@
   justify-content: space-between;
   padding: 5px;
   border-bottom: 1px lightgray solid;
+}
+
+.p-h2h-streak {
+  display: flex;
+  gap: 8px;
+}
+
+/* ------------------------------------------------- */
+/* ------------------------------------------------- */
+/* --- ESTILOS ESPECÍFICOS PARA REGLAS Y PREMIOS --- */
+/* ------------------------------------------------- */
+/* ------------------------------------------------- */
+
+/* --- SECCIÓN REGLAS: ESTILO EDITORIAL CLARO --- */
+
+/* Contenedor con distribución limpia */
+.p-reglas-container {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 3rem;
+  margin-top: 2.5rem;
+  align-items: start;
+}
+
+/* Tipografía y Cuerpo */
+.p-reglas-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.p-reglas-section {
+  border-left: 3px solid var(--p-primary); /* Un toque de color lateral para jerarquía */
+  padding-left: 1.5rem;
+}
+
+.p-reglas-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1a1a1a; /* Texto bien oscuro para fondo claro */
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+}
+
+.p-reglas-body {
+  color: #444; /* Gris oscuro para lectura prolongada */
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.p-reglas-subtitle {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+/* Listas Minimalistas */
+.p-reglas-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.p-reglas-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.p-reglas-list li:last-child {
+  border-bottom: none;
+}
+
+.p-reglas-list li::before {
+  content: "→";
+  color: var(--p-primary);
+  font-weight: bold;
+}
+
+/* Cuadro de aviso (Veto GDT) */
+.p-reglas-warning-box {
+  background: #fdf2f2; /* Un tono muy leve de alerta */
+  border: 1px solid #f5c6cb;
+  padding: 1.25rem;
+  border-radius: 6px;
+  margin-top: 1.5rem;
+  color: #721c24;
+}
+
+/* --- SIDEBAR DE PREMIOS (Elegante y Sombreado) --- */
+
+.p-premios-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Sombra suave para resaltar sobre el blanco */
+}
+
+.p-premios-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+}
+
+.p-premios-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.p-premios-row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.p-premios-row td {
+  padding: 10px 10px;
+  font-size: 0.95rem;
+}
+
+.p-premios-pos {
+  color: #999;
+  font-weight: 600;
+  width: 40px;
+}
+
+.p-premios-val {
+  text-align: right;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Resalte para el ganador */
+.p-premios-row.champion {
+  background: #f8f9fa;
+  color: var(--p-primary);
+}
+
+.p-premios-row.champion .p-premios-val {
+  color: var(--p-primary);
+}
+
+.p-premios-footer {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 1.5rem;
+  line-height: 1.5;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .p-reglas-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .p-reglas-sidebar {
+    position: static;
+    order: -1;
+  }
 }

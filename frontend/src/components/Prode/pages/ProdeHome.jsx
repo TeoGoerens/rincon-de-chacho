@@ -169,11 +169,9 @@ const ProdeHome = () => {
             <span className="p-year">({tournament?.year})</span>
           </h1>
           <div className="p-status-row">
-            {tournament?.status && (
-              <span className={`p-tag p-tag-${tournament.status}`}>
-                {tournament.status}
-              </span>
-            )}
+            <Link className="p-btn p-btn-primary" to="/prode/reglas">
+              Conoce las reglas
+            </Link>
           </div>
         </div>
         <div className="p-hero-right">

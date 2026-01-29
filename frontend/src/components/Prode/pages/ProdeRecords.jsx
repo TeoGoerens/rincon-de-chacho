@@ -133,7 +133,12 @@ const ProdeRecords = () => {
                           {item.ratio}% efectividad
                         </div>
                       </div>
-                      <span className="p-val-box win">{item.count}</span>
+                      <span
+                        className="p-val-box win"
+                        style={{ fontSize: "1rem" }}
+                      >
+                        {item.count}
+                      </span>
                     </div>
                   ))}
                 </div>
