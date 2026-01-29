@@ -32,10 +32,13 @@ export const buildProdeRecords = async (tournamentId = null) => {
     bonusPoints: 0,
     totalPoints: 0,
     gdtWins: 0,
-    argWins: 0,
-    miscWins: 0,
+    gdtDraws: 0,
     gdtPj: 0,
+    argWins: 0,
+    argDraws: 0,
     argPj: 0,
+    miscWins: 0,
+    miscDraws: 0,
     miscPj: 0,
   });
 
@@ -78,14 +81,31 @@ export const buildProdeRecords = async (tournamentId = null) => {
 
         d.challenges?.forEach((ch) => {
           const typeKey = ch.type.toLowerCase();
-          s[`${typeKey}Pj`] += 1; // Contamos PJ por desafío
+          s[`${typeKey}Pj`] += 1;
           if (ch.result === side.key) s[`${typeKey}Wins`] += 1;
+          else if (ch.result === "draw") s[`${typeKey}Draws`] += 1;
         });
       });
     });
   });
 
   const allStats = Array.from(statsMap.values());
+
+  const calcEfficiency = (g, e, pj) => {
+    if (!pj || pj === 0) return 0;
+    return Number((((g * 3 + e) / (pj * 3)) * 100).toFixed(1));
+  };
+
+  const formattedStats = allStats
+    .filter((s) => s.pj > 0)
+    .map((s) => ({
+      name: s.name,
+      ratio: calcEfficiency(s.pg, s.pe, s.pj),
+      pg: s.pg,
+      pe: s.pe,
+      pp: s.pp,
+      pj: s.pj,
+    }));
 
   return {
     historicalTable: allStats.sort(
@@ -116,23 +136,13 @@ export const buildProdeRecords = async (tournamentId = null) => {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count),
 
-    efficiency: allStats
-      .filter((s) => s.pg > 0)
-      .map((s) => ({
-        name: s.name,
-        ratio: Number(((s.pg / s.pj) * 100).toFixed(1)),
-        count: s.pg,
-      }))
-      .sort((a, b) => b.ratio - a.ratio),
+    efficiency: [...formattedStats].sort(
+      (a, b) => b.ratio - a.ratio || b.pg - a.pg,
+    ),
 
-    inefficiency: allStats
-      .filter((s) => s.pp > 0)
-      .map((s) => ({
-        name: s.name,
-        ratio: Number(((s.pp / s.pj) * 100).toFixed(1)),
-        count: s.pp,
-      }))
-      .sort((a, b) => b.ratio - a.ratio),
+    inefficiency: [...formattedStats].sort(
+      (a, b) => a.ratio - b.ratio || b.pp - a.pp,
+    ),
 
     bonusRank: allStats
       .filter((s) => s.bonusPoints > 0)
@@ -141,31 +151,31 @@ export const buildProdeRecords = async (tournamentId = null) => {
 
     experts: {
       GDT: allStats
-        .filter((s) => s.gdtWins > 0)
+        .filter((s) => s.gdtPj > 0)
         .map((s) => ({
           name: s.name,
           count: s.gdtWins,
-          ratio: Number(((s.gdtWins / s.gdtPj) * 100).toFixed(1)),
+          ratio: calcEfficiency(s.gdtWins, s.gdtDraws, s.gdtPj),
         }))
-        .sort((a, b) => b.count - a.count || b.ratio - a.ratio)
+        .sort((a, b) => b.ratio - a.ratio || b.count - a.count)
         .slice(0, 5),
       ARG: allStats
-        .filter((s) => s.argWins > 0)
+        .filter((s) => s.argPj > 0)
         .map((s) => ({
           name: s.name,
           count: s.argWins,
-          ratio: Number(((s.argWins / s.argPj) * 100).toFixed(1)),
+          ratio: calcEfficiency(s.argWins, s.argDraws, s.argPj),
         }))
-        .sort((a, b) => b.count - a.count || b.ratio - a.ratio)
+        .sort((a, b) => b.ratio - a.ratio || b.count - a.count)
         .slice(0, 5),
       MISC: allStats
-        .filter((s) => s.miscWins > 0)
+        .filter((s) => s.miscPj > 0)
         .map((s) => ({
           name: s.name,
           count: s.miscWins,
-          ratio: Number(((s.miscWins / s.miscPj) * 100).toFixed(1)),
+          ratio: calcEfficiency(s.miscWins, s.miscDraws, s.miscPj),
         }))
-        .sort((a, b) => b.count - a.count || b.ratio - a.ratio)
+        .sort((a, b) => b.ratio - a.ratio || b.count - a.count)
         .slice(0, 5),
     },
   };

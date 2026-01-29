@@ -53,20 +53,20 @@ export const buildProdeH2H = async (playerId, tournamentId = "") => {
     mdFilter.tournament = new mongoose.Types.ObjectId(tournamentId);
   }
 
-  // CRITERIO CORREGIDO: Ordenamos por _id descendente (el ID de MongoDB incluye el timestamp)
-  // Esto garantiza que la fecha jugada más recientemente sea la primera, sin importar el roundNumber.
   const matchdays = await ProdeMatchday.find(mdFilter)
     .sort({ _id: -1 })
     .populate("duels.playerA duels.playerB");
 
   const opponentsMap = new Map();
   let totalPg = 0;
+  let totalPe = 0; // Agregado
+  let totalPp = 0; // Agregado
   let totalPj = 0;
   const playerStreak = [];
   const chStats = {
-    GDT: { pg: 0, pj: 0 },
-    ARG: { pg: 0, pj: 0 },
-    MISC: { pg: 0, pj: 0 },
+    GDT: { pg: 0, pe: 0, pp: 0, pj: 0 },
+    ARG: { pg: 0, pe: 0, pp: 0, pj: 0 },
+    MISC: { pg: 0, pe: 0, pp: 0, pj: 0 },
   };
 
   matchdays.forEach((md) => {
@@ -82,7 +82,6 @@ export const buildProdeH2H = async (playerId, tournamentId = "") => {
       const oppSide = isPlayerA ? "B" : "A";
       const opponent = isPlayerA ? duel.playerB : duel.playerA;
 
-      // Capturamos los 5 resultados más recientes de la lista ya ordenada por tiempo
       if (playerStreak.length < 5) {
         if (duel.duelResult === side) playerStreak.push("G");
         else if (duel.duelResult === "draw") playerStreak.push("E");
@@ -104,9 +103,27 @@ export const buildProdeH2H = async (playerId, tournamentId = "") => {
             totalPointsAgainst: 0,
             lastResults: [],
             challenges: {
-              GDT: { wins: 0, losses: 0, maxDiffFor: 0, maxDiffAgainst: 0 },
-              ARG: { wins: 0, losses: 0, maxDiffFor: 0, maxDiffAgainst: 0 },
-              MISC: { wins: 0, losses: 0, maxDiffFor: 0, maxDiffAgainst: 0 },
+              GDT: {
+                wins: 0,
+                draws: 0,
+                losses: 0,
+                maxDiffFor: 0,
+                maxDiffAgainst: 0,
+              },
+              ARG: {
+                wins: 0,
+                draws: 0,
+                losses: 0,
+                maxDiffFor: 0,
+                maxDiffAgainst: 0,
+              },
+              MISC: {
+                wins: 0,
+                draws: 0,
+                losses: 0,
+                maxDiffFor: 0,
+                maxDiffAgainst: 0,
+              },
             },
           });
         }
@@ -130,14 +147,15 @@ export const buildProdeH2H = async (playerId, tournamentId = "") => {
           o.lastResults.push({ res: "G" });
         } else if (duel.duelResult === "draw") {
           o.pe++;
+          totalPe++;
           o.lastResults.push({ res: "E" });
         } else {
           o.pp++;
+          totalPp++;
           o.balance--;
           o.lastResults.push({ res: "P" });
         }
 
-        // Lógica de desafíos (se mantiene igual)
         duel.challenges?.forEach((ch) => {
           const type = ch.type;
           if (chStats[type]) {
@@ -145,7 +163,11 @@ export const buildProdeH2H = async (playerId, tournamentId = "") => {
             if (ch.result === side) {
               chStats[type].pg++;
               o.challenges[type].wins++;
-            } else if (ch.result === oppSide) {
+            } else if (ch.result === "draw") {
+              chStats[type].pe++;
+              o.challenges[type].draws++;
+            } else {
+              chStats[type].pp++;
               o.challenges[type].losses++;
             }
             const diff =
@@ -160,14 +182,14 @@ export const buildProdeH2H = async (playerId, tournamentId = "") => {
     }
   });
 
-  // El reverse() es para que el usuario lea de izquierda (más viejo) a derecha (último jugado)
   const finalStreak = [...playerStreak].reverse();
 
   const opponents = Array.from(opponentsMap.values())
     .map((o) => ({
       ...o,
-      winRatio: o.pj > 0 ? ((o.pg / o.pj) * 100).toFixed(1) : "0",
-      // Para cada oponente, también mostramos sus últimos resultados en orden cronológico
+      // Aplicamos formula Eficiencia: (G*3 + E) / (PJ*3)
+      winRatio:
+        o.pj > 0 ? (((o.pg * 3 + o.pe) / (o.pj * 3)) * 100).toFixed(1) : "0",
       lastResults: o.lastResults.slice(0, 5).reverse(),
     }))
     .sort((a, b) => b.balance - a.balance || b.pg - a.pg);
@@ -176,6 +198,8 @@ export const buildProdeH2H = async (playerId, tournamentId = "") => {
     playerSummary: {
       totalPj,
       totalPg,
+      totalPe,
+      totalPp,
       monthlyWins: monthlyWinsCount,
       rankActive,
       rankHistorical,
