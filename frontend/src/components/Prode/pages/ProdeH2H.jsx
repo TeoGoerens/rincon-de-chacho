@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-
 import "../styles/ProdeUserSideStyles.css";
-
 import fetchProdeH2H from "../../../reactquery/prode/fetchProdeH2H";
 import fetchAllProdePlayers from "../../../reactquery/prode/fetchAllProdePlayers";
 
@@ -15,10 +13,40 @@ const ProdeH2H = () => {
     queryKey: ["fetchAllProdePlayers"],
     queryFn: fetchAllProdePlayers,
   });
+
   const { data: h2hData, isLoading } = useQuery({
     queryKey: ["fetchProdeH2H", selectedPlayerId],
     queryFn: () => fetchProdeH2H(selectedPlayerId),
     enabled: !!selectedPlayerId,
+    select: (data) => {
+      if (!data || !data.opponents) return data;
+
+      // Ordenar oponentes: 1° Balance DESC, 2° Victorias (PG) DESC
+      const sortedOpponents = [...data.opponents].sort((a, b) => {
+        if (b.balance !== a.balance) {
+          return b.balance - a.balance;
+        }
+        return b.pg - a.pg;
+      });
+
+      // Recalcular Hijo y Verdugo basados en el nuevo orden para que coincidan con la lista
+      const biggestVictim =
+        sortedOpponents.length > 0 ? sortedOpponents[0].opponentName : "N/A";
+      const toughestRival =
+        sortedOpponents.length > 0
+          ? sortedOpponents[sortedOpponents.length - 1].opponentName
+          : "N/A";
+
+      return {
+        ...data,
+        opponents: sortedOpponents,
+        playerSummary: {
+          ...data.playerSummary,
+          biggestVictim,
+          toughestRival,
+        },
+      };
+    },
   });
 
   const toggleExpand = (id) =>
@@ -28,8 +56,8 @@ const ProdeH2H = () => {
     <div className="prode-user-home container">
       <header className="p-hero">
         <div className="p-hero-left">
-          <span className="p-kicker">Historial de Clásicos</span>
-          <h1 className="p-main-title">Cara a Cara</h1>
+          <span className="p-kicker">Análisis de Desempeño</span>
+          <h1 className="p-main-title">Perfil & Rivalidades</h1>
           <div className="p-filter-box" style={{ marginTop: "1rem" }}>
             <select
               className="p-select"
@@ -39,7 +67,7 @@ const ProdeH2H = () => {
                 setExpandedOpponentId(null);
               }}
             >
-              <option value="">Seleccioná tu jugador...</option>
+              <option value="">Seleccioná un jugador...</option>
               {players?.map((p) => (
                 <option key={p._id} value={p._id}>
                   {p.name}
@@ -50,26 +78,113 @@ const ProdeH2H = () => {
         </div>
         <div className="p-hero-right">
           <Link className="p-btn p-btn-outline" to="/prode">
-            Volver
+            Home
+          </Link>
+          <Link className="p-btn p-btn-primary" to="/prode/h2h">
+            H2H
+          </Link>
+          <Link className="p-btn p-btn-outline" to="/prode/records">
+            Records
           </Link>
         </div>
       </header>
 
-      <div className="p-main-grid">
+      <div className="h2h-main-grid">
         <div className="p-main-col">
-          {isLoading && <p>Buscando paternidades...</p>}
-          {!selectedPlayerId && (
-            <div
-              className="p-card"
-              style={{ textAlign: "center", padding: "3rem" }}
-            >
-              <p className="p-match-info">
-                Elegí un jugador para ver el historial contra el resto.
-              </p>
-            </div>
+          {isLoading && (
+            <p className="p-match-info">Procesando estadísticas...</p>
           )}
 
-          {h2hData?.map((item) => (
+          {h2hData?.playerSummary && (
+            <section className="p-card p-profile-summary-card fade-in">
+              <div className="p-profile-header">
+                <div>
+                  <h2 className="p-profile-name">
+                    {players?.find((p) => p._id === selectedPlayerId)?.name}
+                  </h2>
+                  <div className="p-profile-ranks">
+                    <span className="p-rank-badge">
+                      🏆 Ranking Torneo: #{h2hData.playerSummary.rankActive}
+                    </span>
+                    <span className="p-rank-badge">
+                      🌎 Ranking Histórico: #
+                      {h2hData.playerSummary.rankHistorical}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-profile-main-stat">
+                  <span className="p-label">Efectividad Total</span>
+                  <span className="p-value-large">
+                    {h2hData.playerSummary.totalPj > 0
+                      ? (
+                          (h2hData.playerSummary.totalPg /
+                            h2hData.playerSummary.totalPj) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    %
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-profile-stats-grid">
+                <div className="p-profile-stat-box">
+                  <span className="p-label">Récord de Duelos</span>
+                  <span className="p-value">
+                    {h2hData.playerSummary.totalPg}G -{" "}
+                    {h2hData.playerSummary.totalPj -
+                      h2hData.playerSummary.totalPg}
+                    P
+                  </span>
+                </div>
+                <div className="p-profile-stat-box">
+                  <span className="p-label">Comidas Mensuales</span>
+                  <span
+                    className="p-value"
+                    style={{ color: "var(--p-primary)" }}
+                  >
+                    {h2hData.playerSummary.monthlyWins} 🗓️
+                  </span>
+                </div>
+                <div className="p-profile-stat-box">
+                  <span className="p-label">Mayor "Hijo"</span>
+                  <span className="p-value text-win">
+                    {h2hData.playerSummary.biggestVictim}
+                  </span>
+                </div>
+                <div className="p-profile-stat-box">
+                  <span className="p-label">Su "Verdugo"</span>
+                  <span className="p-value text-loss">
+                    {h2hData.playerSummary.toughestRival}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-profile-challenges-row">
+                {Object.entries(h2hData.playerSummary.challenges).map(
+                  ([type, data]) => (
+                    <div key={type} className="p-mini-stat">
+                      <span className="p-ch-tag">{type}</span>
+                      <span className="p-ch-val">
+                        {data.pg} / {data.pj}
+                      </span>
+                      <span className="p-ch-perc">
+                        {data.pj > 0
+                          ? ((data.pg / data.pj) * 100).toFixed(0)
+                          : 0}
+                        % efectividad
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
+            </section>
+          )}
+
+          <h3 className="p-subtitle" style={{ margin: "2rem 0 1rem" }}>
+            Historial H2H Detallado
+          </h3>
+          {h2hData?.opponents?.map((item) => (
             <div
               key={item.opponentId}
               className={`p-h2h-wrapper ${expandedOpponentId === item.opponentId ? "active" : ""}`}
@@ -81,7 +196,12 @@ const ProdeH2H = () => {
                 <div className="p-h2h-main-info">
                   <div className="p-h2h-opp-name">
                     <h3>{item.opponentName}</h3>
-                    <span className="p-subtitle">Rival</span>
+                    <span
+                      className={`p-sub-stat ${item.balance > 0 ? "text-win" : item.balance < 0 ? "text-loss" : ""}`}
+                    >
+                      Balance:{" "}
+                      {item.balance > 0 ? `+${item.balance}` : item.balance}
+                    </span>
                   </div>
                   <div className="p-h2h-brief-stats">
                     <div className="p-val-box">
@@ -108,36 +228,29 @@ const ProdeH2H = () => {
               </div>
 
               {expandedOpponentId === item.opponentId && (
-                <div className="p-card p-h2h-detail">
+                <div className="p-card p-h2h-detail fade-in">
                   <div className="p-h2h-detail-grid">
                     <div className="p-h2h-detail-section">
-                      <h4>Rendimiento</h4>
+                      <h4>Estadísticas de Duelos</h4>
                       <div className="p-h2h-stats-row">
                         <div className="p-stat-item">
-                          <span className="p-label">Efectividad</span>
+                          <span className="p-label">Win Rate</span>
                           <span className="p-value">{item.winRatio}%</span>
                         </div>
                         <div className="p-stat-item">
-                          <span className="p-label">Pts F / C</span>
+                          <span className="p-label">Puntos Favor/Contra</span>
                           <span className="p-value">
-                            {item.totalPointsFor} - {item.totalPointsAgainst}
-                          </span>
-                        </div>
-                        <div className="p-stat-item">
-                          <span className="p-label">Bonus F / C</span>
-                          <span className="p-value">
-                            +{item.bonusFor} / -{item.bonusAgainst}
+                            {item.totalPointsFor}-{item.totalPointsAgainst}
                           </span>
                         </div>
                       </div>
                       <div className="p-h2h-last-five">
-                        <span className="p-label">Últimos 5:</span>
+                        <span className="p-label">Racha:</span>
                         <div className="p-circles-row">
                           {item.lastResults.map((r, i) => (
                             <div
                               key={i}
                               className={`p-res-circle p-res-${r.res}`}
-                              title={`${r.tournament}`}
                             >
                               {r.res}
                             </div>
@@ -146,7 +259,7 @@ const ProdeH2H = () => {
                       </div>
                     </div>
                     <div className="p-h2h-detail-section">
-                      <h4>Duelos por Desafío</h4>
+                      <h4>Desafíos Específicos</h4>
                       <table className="p-h2h-subtable">
                         <thead>
                           <tr>
@@ -164,17 +277,11 @@ const ProdeH2H = () => {
                                   <strong>{type}</strong>
                                 </td>
                                 <td>
-                                  {data.wins} - {data.losses}
+                                  {data.wins}-{data.losses}
                                 </td>
-                                <td className="text-win">
-                                  {data.maxDiffFor > 0
-                                    ? `+${data.maxDiffFor}`
-                                    : "—"}
-                                </td>
+                                <td className="text-win">+{data.maxDiffFor}</td>
                                 <td className="text-loss">
-                                  {data.maxDiffAgainst > 0
-                                    ? `-${data.maxDiffAgainst}`
-                                    : "—"}
+                                  -{data.maxDiffAgainst}
                                 </td>
                               </tr>
                             ),

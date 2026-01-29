@@ -177,7 +177,10 @@ const ProdeHome = () => {
           </div>
         </div>
         <div className="p-hero-right">
-          <Link className="p-btn p-btn-primary" to="/prode/h2h">
+          <Link className="p-btn p-btn-primary" to="/prode">
+            Home
+          </Link>
+          <Link className="p-btn p-btn-outline" to="/prode/h2h">
             H2H
           </Link>
           <Link className="p-btn p-btn-outline" to="/prode/records">
@@ -198,10 +201,11 @@ const ProdeHome = () => {
                   onClick={() => toggleMonth(m)}
                   className={`p-pill ${selectedMonths.includes(m) ? "active" : ""}`}
                 >
-                  {m}
+                  {m.slice(0, 3)}
                 </button>
               ))}
             </div>
+
             <div className="p-table-scroll">
               <table className="p-table">
                 <thead>
@@ -212,9 +216,9 @@ const ProdeHome = () => {
                     <th>G</th>
                     <th>E</th>
                     <th>P</th>
-                    <th>Base</th>
-                    <th>Bonus</th>
-                    <th>Pts</th>
+                    <th>P1 (1)</th>
+                    <th>B</th>
+                    <th>P2 (2)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -236,21 +240,29 @@ const ProdeHome = () => {
                 </tbody>
               </table>
             </div>
+            <div className="p-table-hint">
+              <p>(1) Puntos base obtenidos por duelos</p>
+              <p>(2) Puntos base + puntos bonus</p>
+            </div>
           </section>
 
           {/* TRES CARDS DE DESAFÍOS */}
           <div className="p-challenges-stats-grid">
             {["GDT", "ARG", "MISC"].map((type) => {
-              const sorted = [...standings].sort(
-                (a, b) =>
-                  (b.challengesStats?.[type]?.wins || 0) -
-                  (a.challengesStats?.[type]?.wins || 0),
-              );
+              const sorted = [...standings]
+                .sort(
+                  (a, b) =>
+                    (b.challengesStats?.[type]?.wins || 0) -
+                    (a.challengesStats?.[type]?.wins || 0),
+                )
+                .slice(0, 3);
               return (
                 <div key={type} className="p-card p-stat-card">
                   <div className="p-stat-header-mini">
                     <div className="p-stat-badge">{type}</div>
-                    <span className="p-stat-title-label">Ranking Desafío</span>
+                    <span className="p-stat-title-label">
+                      Top 3 Ranking Desafío
+                    </span>
                   </div>
                   <div className="p-stat-list-container">
                     {sorted
@@ -294,11 +306,11 @@ const ProdeHome = () => {
 
         {/* COLUMNA DERECHA (ASIDE) */}
         <aside className="p-side-col">
-          {/* CUADRO DE HONOR (Ubicado aquí según pedido) */}
+          {/* MONTHLY WINNERS - COMIDA */}
           {currentMonthlyWinnerObj && (
             <section className="p-side-section p-card p-monthly-podium">
               <div className="p-side-header">
-                <h3>Cuadro de Honor - {selectedMonths[0]}</h3>
+                <h3>Ganadores de la Comida - {selectedMonths[0]}</h3>
               </div>
               <div className="p-winners-list">
                 {currentMonthlyWinnerObj.winnerPlayerIds.map(
@@ -306,7 +318,7 @@ const ProdeHome = () => {
                     <div key={`${winnerId}-${index}`} className="p-winner-item">
                       <span className="p-winner-rank">🏆</span>
                       <div className="p-winner-info">
-                        <span className="p-subtitle">Ganador {index + 1}</span>
+                        <span className="p-subtitle">{index + 1}º</span>
                         <div className="p-winner-name">
                           {resolvePlayerName(winnerId)}
                         </div>
