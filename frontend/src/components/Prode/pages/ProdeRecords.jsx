@@ -153,9 +153,7 @@ const ProdeRecords = () => {
               <div className="p-monthly-grid">
                 {records?.topMonthlyWinners?.map((item, i) => (
                   <div key={i} className="record-stat-player-row">
-                    <span className="p-stat-name-small">
-                      {`${i + 1}º ${item.name}`}
-                    </span>
+                    <span className="p-stat-name-small">{`${i + 1}º ${item.name}`}</span>
                     <span className="p-val-box win">{item.count}</span>
                   </div>
                 ))}
@@ -200,7 +198,7 @@ const ProdeRecords = () => {
                   <div className="p-player-info">
                     <span className="p-stat-name-small">{item.name}</span>
                     <span className="p-sub-stat">
-                      {item.count} duelos ganados
+                      PG {item.pg} / PE {item.pe} / PP {item.pp}
                     </span>
                   </div>
                   <span className="p-val-box win">{item.ratio}%</span>
@@ -209,7 +207,7 @@ const ProdeRecords = () => {
             </div>
           </section>
 
-          {/* INEFICIENCIA - SOLO TOP 5 */}
+          {/* INEFICIENCIA */}
           <section className="p-card p-side-card">
             <h3 className="p-side-title">💀 Top 3 Ineficiencia</h3>
             <div className="p-scroll-area">
@@ -218,7 +216,7 @@ const ProdeRecords = () => {
                   <div className="p-player-info">
                     <span className="p-stat-name-small">{item.name}</span>
                     <span className="p-sub-stat">
-                      {item.count} duelos perdidos
+                      PG {item.pg} / PE {item.pe} / PP {item.pp}
                     </span>
                   </div>
                   <span className="p-val-box loss">{item.ratio}%</span>

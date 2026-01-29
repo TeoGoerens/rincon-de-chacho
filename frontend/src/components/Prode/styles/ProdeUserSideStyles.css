@@ -459,7 +459,7 @@
   margin: 0; /* important for sticky alignment */
   padding: 0;
   min-width: 620px; /* forces scroll on mobile while keeping sticky */
-  font-size: 0.75rem;
+
   table-layout: fixed; /* important to enforce widths */
 }
 
@@ -1274,7 +1274,7 @@
   flex-direction: column;
   justify-content: center;
   font-size: 0.7rem;
-  font-weight: 300;
+  font-weight: 500;
 }
 
 .p-sub-stat span {

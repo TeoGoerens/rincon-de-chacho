@@ -124,7 +124,7 @@ const ProdeH2H = () => {
 
                 <div className="p-profile-main-stat">
                   <span className="p-label" style={{ textAlign: "center" }}>
-                    Efectividad
+                    Eficiencia
                   </span>
                   <span
                     className="p-value-large"
@@ -132,15 +132,16 @@ const ProdeH2H = () => {
                   >
                     {h2hData.playerSummary.totalPj > 0
                       ? (
-                          (h2hData.playerSummary.totalPg /
-                            h2hData.playerSummary.totalPj) *
+                          ((h2hData.playerSummary.totalPg * 3 +
+                            h2hData.playerSummary.totalPe) /
+                            (h2hData.playerSummary.totalPj * 3)) *
                           100
                         ).toFixed(1)
                       : 0}
                     %
                   </span>
                 </div>
-                {/* NUEVO BLOQUE: RACHA PERSONAL DE LOS ÚLTIMOS 5 DUELOS */}
+
                 <div
                   className="p-streak-container"
                   style={{
@@ -171,9 +172,8 @@ const ProdeH2H = () => {
                   <span className="p-label">Récord de Duelos</span>
                   <span className="p-value">
                     {h2hData.playerSummary.totalPg}G -{" "}
-                    {h2hData.playerSummary.totalPj -
-                      h2hData.playerSummary.totalPg}
-                    P
+                    {h2hData.playerSummary.totalPe}E -{" "}
+                    {h2hData.playerSummary.totalPp}P
                   </span>
                 </div>
                 <div className="p-profile-stat-box">
@@ -205,13 +205,16 @@ const ProdeH2H = () => {
                     <div key={type} className="p-mini-stat">
                       <span className="p-ch-tag">{type}</span>
                       <span className="p-ch-val">
-                        {data.pg} / {data.pj}
+                        {data.pg}-{data.pe}-{data.pp}
                       </span>
                       <span className="p-ch-perc">
                         {data.pj > 0
-                          ? ((data.pg / data.pj) * 100).toFixed(0)
+                          ? (
+                              ((data.pg * 3 + data.pe) / (data.pj * 3)) *
+                              100
+                            ).toFixed(0)
                           : 0}
-                        % efectividad
+                        % efec.
                       </span>
                     </div>
                   ),
@@ -273,7 +276,7 @@ const ProdeH2H = () => {
                       <h4>Estadísticas</h4>
                       <div className="p-h2h-stats-row">
                         <div className="p-stat-item">
-                          <span className="p-label">Win Rate</span>
+                          <span className="p-label">Eficiencia</span>
                           <span className="p-value">{item.winRatio}%</span>
                         </div>
                         <div className="p-stat-item">
@@ -303,7 +306,7 @@ const ProdeH2H = () => {
                         <thead>
                           <tr>
                             <th>Tipo</th>
-                            <th>G-P</th>
+                            <th>G-E-P</th>
                             <th>Max F</th>
                             <th>Max C</th>
                           </tr>
@@ -316,7 +319,7 @@ const ProdeH2H = () => {
                                   <strong>{type}</strong>
                                 </td>
                                 <td>
-                                  {data.wins}-{data.losses}
+                                  {data.wins}-{data.draws}-{data.losses}
                                 </td>
                                 <td className="text-win">+{data.maxDiffFor}</td>
                                 <td className="text-loss">
