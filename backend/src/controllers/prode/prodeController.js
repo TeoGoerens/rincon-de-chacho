@@ -644,8 +644,11 @@ export default class ProdeController {
 
   getProdeH2H = async (req, res, next) => {
     try {
-      const { playerId } = req.query;
-      const h2hData = await buildProdeH2H(playerId);
+      // Capturamos ambos parámetros del query string
+      const { playerId, tournamentId } = req.query;
+
+      // Los pasamos al builder (si tournamentId es undefined, el builder lo manejará)
+      const h2hData = await buildProdeH2H(playerId, tournamentId);
       res.json(h2hData);
     } catch (err) {
       next(err);
