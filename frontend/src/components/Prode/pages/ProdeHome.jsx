@@ -210,13 +210,13 @@ const ProdeHome = () => {
                   <tr>
                     <th>#</th>
                     <th>Jugador</th>
+                    <th>P1 (1)</th>
+                    <th>B</th>
+                    <th>P2 (2)</th>
                     <th>PJ</th>
                     <th>G</th>
                     <th>E</th>
                     <th>P</th>
-                    <th>P1 (1)</th>
-                    <th>B</th>
-                    <th>P2 (2)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -226,13 +226,14 @@ const ProdeHome = () => {
                         {idx + 1} <span>{rankEmoji(idx)}</span>
                       </td>
                       <td className="p-td-name">{row.name}</td>
+
+                      <td>{row.basePoints}</td>
+                      <td>{row.bonusPoints}</td>
+                      <td>{row.totalPoints}</td>
                       <td>{row.played}</td>
                       <td>{row.wins}</td>
                       <td>{row.draws}</td>
                       <td>{row.losses}</td>
-                      <td>{row.basePoints}</td>
-                      <td>{row.bonusPoints}</td>
-                      <td className="p-td-total">{row.totalPoints}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -248,11 +249,24 @@ const ProdeHome = () => {
           <div className="p-challenges-stats-grid">
             {["GDT", "ARG", "MISC"].map((type) => {
               const sorted = [...standings]
-                .sort(
-                  (a, b) =>
-                    (b.challengesStats?.[type]?.wins || 0) -
-                    (a.challengesStats?.[type]?.wins || 0),
-                )
+                .sort((a, b) => {
+                  const statsA = a.challengesStats?.[type] || {
+                    wins: 0,
+                    draws: 0,
+                  };
+                  const statsB = b.challengesStats?.[type] || {
+                    wins: 0,
+                    draws: 0,
+                  };
+
+                  // 1° Criterio: Partidos Ganados (de mayor a menor)
+                  if (statsB.wins !== statsA.wins) {
+                    return statsB.wins - statsA.wins;
+                  }
+
+                  // 2° Criterio (Desempate): Partidos Empatados (de mayor a menor)
+                  return statsB.draws - statsA.draws;
+                })
                 .slice(0, 3);
               return (
                 <div key={type} className="p-card p-stat-card">
@@ -329,6 +343,15 @@ const ProdeHome = () => {
                 <p className="p-monthly-note">
                   <strong>Nota:</strong> {currentMonthlyWinnerObj.note}
                 </p>
+              )}
+
+              {currentMonthlyWinnerObj.monthlyLoser && (
+                <div className="p-monthly-loser-section">
+                  <p>Organizador:</p>
+                  <span className="p-loser-name">
+                    {currentMonthlyWinnerObj.monthlyLoser.name || "Jugador"} 😢
+                  </span>
+                </div>
               )}
             </section>
           )}

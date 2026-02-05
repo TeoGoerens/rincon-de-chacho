@@ -133,6 +133,7 @@ const UpdateProdeTournament = () => {
   const [selectedMWMonth, setSelectedMWMonth] = useState("");
   const [mwWinners, setMwWinners] = useState(["", "", "", ""]); // puestos 1..4
   const [mwNote, setMwNote] = useState("");
+  const [mwLoser, setMwLoser] = useState("");
 
   // Mes default: primer mes habilitado del torneo
   useEffect(() => {
@@ -167,9 +168,11 @@ const UpdateProdeTournament = () => {
         normalized[3] || "",
       ]);
       setMwNote(existing.note || "");
+      setMwLoser(existing.monthlyLoser?._id || existing.monthlyLoser || "");
     } else {
       setMwWinners(["", "", "", ""]);
       setMwNote("");
+      setMwLoser("");
     }
   }, [tournament, selectedMWMonth]);
 
@@ -247,6 +250,7 @@ const UpdateProdeTournament = () => {
       month: selectedMWMonth,
       winnerPlayerIds: mwWinners,
       note: mwNote?.trim() || "",
+      monthlyLoser: mwLoser || null,
     });
   };
 
@@ -513,6 +517,33 @@ const UpdateProdeTournament = () => {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* --- NUEVA SECCIÓN PARA EL PERDEDOR --- */}
+              <div
+                style={{
+                  marginBlock: "1.5rem",
+                  padding: "1rem",
+                  backgroundColor: "#fff5f5",
+                  borderRadius: "8px",
+                  border: "1px solid #feb2b2",
+                }}
+              >
+                <label style={{ color: "#c53030", fontWeight: "bold" }}>
+                  💩 Perdedor del Mes (Organiza la comida)
+                </label>
+                <select
+                  value={mwLoser}
+                  onChange={(e) => setMwLoser(e.target.value)}
+                  style={{ borderColor: "#fc8181" }}
+                >
+                  <option value="">Nadie seleccionado</option>
+                  {players?.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <label>Nota (opcional)</label>

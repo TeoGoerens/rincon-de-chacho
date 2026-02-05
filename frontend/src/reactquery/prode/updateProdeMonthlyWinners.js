@@ -7,6 +7,7 @@ const updateProdeMonthlyWinners = async ({
   month,
   winnerPlayerIds,
   note,
+  monthlyLoser,
 }) => {
   const token = getUserJWT();
 
@@ -30,7 +31,7 @@ const updateProdeMonthlyWinners = async ({
   try {
     const response = await axios.put(
       endpoint,
-      { month, winnerPlayerIds, note },
+      { month, winnerPlayerIds, note, monthlyLoser },
       {
         headers: { Authorization: `Bearer ${token}` },
       },

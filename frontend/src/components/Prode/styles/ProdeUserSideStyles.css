@@ -538,41 +538,18 @@
   text-overflow: ellipsis;
 }
 
-/* Numeric columns (3..8) — fixed 40px, centered, tighter */
-.p-table th:nth-child(n + 3):nth-child(-n + 8),
-.p-table td:nth-child(n + 3):nth-child(-n + 8) {
-  width: 100% - 120px;
+.p-table td:nth-child(n + 3) {
   text-align: center;
 }
 
-/* Total column (9) — highlight */
-.p-table th:nth-child(9),
-.p-table td:nth-child(9) {
-  width: 64px; /* a touch wider than 40px so it breathes */
-  text-align: center;
-  padding-left: 8px;
-  padding-right: 8px;
-}
-
-.p-table td:nth-child(9) {
+.p-table td:nth-child(5) {
   background: rgba(91, 124, 250, 0.08);
-}
-
-.p-td-total {
   font-weight: 950;
   font-family: var(--p-mono);
-  color: var(--p-total-text);
+
   background: var(--p-total-bg);
-  border-radius: 10px;
-  border: 1px solid var(--p-total-border);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 48px;
-  padding: 4px 8px;
 }
 
-/* Ensure total cell keeps highlight even on hover row */
 .p-table tbody tr:hover td:nth-child(9) {
   background: rgba(91, 124, 250, 0.08);
 }
@@ -690,6 +667,11 @@
   gap: 6px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.stats-group {
+  display: flex;
+  gap: 6px;
 }
 
 .p-val-box {
@@ -899,6 +881,24 @@
   color: var(--p-muted);
   font-size: 0.85rem;
   line-height: 1.35;
+}
+
+.p-monthly-loser-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-top: 1px solid gray;
+  color: var(--p-muted);
+}
+
+.p-monthly-loser-section p {
+  color: var(--p-muted);
+}
+
+.p-monthly-loser-section span {
+  font-weight: 950;
 }
 
 /* -----------------------------

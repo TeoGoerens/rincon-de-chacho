@@ -9,7 +9,7 @@ const rankIcon = (idx) => {
   if (idx === 0) return "🥇";
   if (idx === 1) return "🥈";
   if (idx === 2) return "🥉";
-  return `${idx + 1}.`;
+  return "";
 };
 
 const ProdeRecords = () => {
@@ -83,27 +83,30 @@ const ProdeRecords = () => {
                   <tr>
                     <th>#</th>
                     <th>Jugador</th>
+                    <th>P1 (1)</th>
+                    <th>B</th>
+                    <th>P2 (2)</th>
                     <th>PJ</th>
                     <th>G</th>
                     <th>E</th>
                     <th>P</th>
-                    <th>P1 (1)</th>
-                    <th>B</th>
-                    <th>P2 (2)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {records?.historicalTable?.map((row, idx) => (
                     <tr key={row.id}>
-                      <td className="p-td-rank">{idx + 1}</td>
+                      <td className="p-td-rank">
+                        {idx + 1}
+                        <span>{rankIcon(idx)}</span>
+                      </td>
                       <td className="p-td-name">{row.name}</td>
+                      <td>{row.totalBasePoints ?? row.basePoints ?? 0}</td>
+                      <td>{row.totalBonusPoints ?? row.bonusPoints ?? 0}</td>
+                      <td className="p-td-total">{row.totalPoints}</td>
                       <td>{row.pj}</td>
                       <td>{row.pg}</td>
                       <td>{row.pe}</td>
                       <td>{row.pp}</td>
-                      <td>{row.totalBasePoints ?? row.basePoints ?? 0}</td>
-                      <td>{row.totalBonusPoints ?? row.bonusPoints ?? 0}</td>
-                      <td className="p-td-total">{row.totalPoints}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -117,14 +120,18 @@ const ProdeRecords = () => {
 
           {/* TOP 3 DESAFIOS */}
           <h2 className="p-card-title" style={{ marginTop: "1rem" }}>
-            ⭐ Top 3 por Desafío
+            ⭐ Top por Desafío
           </h2>
           <div className="p-challenges-stats-grid">
             {["GDT", "ARG", "MISC"].map((type) => (
-              <section key={type} className="p-card p-stat-card">
+              <section
+                key={type}
+                className="p-card p-stat-card p-scroll-area "
+                style={{ maxHeight: "250px" }}
+              >
                 <h3 className="p-card-title">{type}</h3>
                 <div className="p-stat-list-container">
-                  {records?.experts?.[type]?.slice(0, 3).map((item, i) => (
+                  {records?.experts?.[type]?.map((item, i) => (
                     <div key={i} className="p-stat-player-row">
                       <div className="p-player-info">
                         <span className="p-stat-name-medal">{rankIcon(i)}</span>
@@ -133,12 +140,18 @@ const ProdeRecords = () => {
                           {item.ratio}% efectividad
                         </div>
                       </div>
-                      <span
-                        className="p-val-box win"
-                        style={{ fontSize: "1rem" }}
-                      >
-                        {item.count}
-                      </span>
+
+                      <div className="stats-group">
+                        <div className="p-val-box win">
+                          <span>PG</span>
+                          {item.count}
+                        </div>
+
+                        <div className="p-val-box draw">
+                          <span>PTS</span>
+                          {Number(item.score || 0).toLocaleString("es-AR")}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -149,12 +162,27 @@ const ProdeRecords = () => {
           {/* GANADORES MENSUALES */}
           <section className="p-card" style={{ marginTop: "1rem" }}>
             <h2 className="p-card-title">🗓️ Comidas Mensuales</h2>
-            <div className="p-scroll-area" style={{ maxHeight: "300px" }}>
+            <div className="p-scroll-area" style={{ maxHeight: "150px" }}>
               <div className="p-monthly-grid">
                 {records?.topMonthlyWinners?.map((item, i) => (
                   <div key={i} className="record-stat-player-row">
                     <span className="p-stat-name-small">{`${i + 1}º ${item.name}`}</span>
                     <span className="p-val-box win">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* PERDEDORES MENSUALES */}
+          <section className="p-card" style={{ marginTop: "1rem" }}>
+            <h2 className="p-card-title">☠️ Organizadores de Comidas</h2>
+            <div className="p-scroll-area" style={{ maxHeight: "150px" }}>
+              <div className="p-monthly-grid">
+                {records?.topMonthlyLosers?.map((item, i) => (
+                  <div key={i} className="record-stat-player-row">
+                    <span className="p-stat-name-small">{`${i + 1}º ${item.name}`}</span>
+                    <span className="p-val-box loss">{item.count}</span>
                   </div>
                 ))}
               </div>
@@ -226,7 +254,10 @@ const ProdeRecords = () => {
           </section>
 
           {/* BONUS */}
-          <section className="p-card p-side-card">
+          <section
+            className="p-card p-side-card p-scroll-area"
+            style={{ maxHeight: "250px" }}
+          >
             <h3 className="p-side-title">⭐ Coleccionista de Bonus</h3>
             <div className="p-scroll-area">
               {records?.bonusRank?.map((item, i) => (
