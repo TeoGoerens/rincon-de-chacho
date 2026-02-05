@@ -116,6 +116,7 @@ export default class ProdeController {
         { path: "champion", model: "ProdePlayer" },
         { path: "lastPlace", model: "ProdePlayer" },
         { path: "monthlyWinners.winnerPlayerIds", model: "ProdePlayer" },
+        { path: "monthlyWinners.monthlyLoser", model: "ProdePlayer" },
       ]);
 
       if (!item)
@@ -147,6 +148,7 @@ export default class ProdeController {
         { path: "champion", model: "ProdePlayer" },
         { path: "lastPlace", model: "ProdePlayer" },
         { path: "monthlyWinners.winnerPlayerIds", model: "ProdePlayer" },
+        { path: "monthlyWinners.monthlyLoser", model: "ProdePlayer" },
       ]);
 
       if (!tournament) {
@@ -239,6 +241,7 @@ export default class ProdeController {
         { path: "champion", model: "ProdePlayer" },
         { path: "lastPlace", model: "ProdePlayer" },
         { path: "monthlyWinners.winnerPlayerIds", model: "ProdePlayer" },
+        { path: "monthlyWinners.monthlyLoser", model: "ProdePlayer" },
       ]);
 
       if (!updated)
@@ -264,7 +267,7 @@ export default class ProdeController {
   /* ---------- MONTHLY WINNERS ---------- */
   upsertMonthlyWinners = async (req, res, next) => {
     try {
-      const { month, winnerPlayerIds, note } = req.body;
+      const { month, winnerPlayerIds, note, monthlyLoser } = req.body;
 
       if (!MONTHS.includes(month)) {
         return res.status(400).json({ message: "Invalid month" });
@@ -301,8 +304,15 @@ export default class ProdeController {
         tournament.monthlyWinners[idx].winnerPlayerIds = winnerPlayerIds;
         tournament.monthlyWinners[idx].note =
           note ?? tournament.monthlyWinners[idx].note;
+        tournament.monthlyWinners[idx].monthlyLoser =
+          monthlyLoser ?? tournament.monthlyWinners[idx].monthlyLoser;
       } else {
-        tournament.monthlyWinners.push({ month, winnerPlayerIds, note });
+        tournament.monthlyWinners.push({
+          month,
+          winnerPlayerIds,
+          note,
+          monthlyLoser,
+        });
       }
 
       await tournament.save();

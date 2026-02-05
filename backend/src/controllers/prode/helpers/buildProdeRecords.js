@@ -10,6 +10,10 @@ export const buildProdeRecords = async (tournamentId = null) => {
     .populate({
       path: "monthlyWinners.winnerPlayerIds",
       model: "ProdePlayer",
+    })
+    .populate({
+      path: "monthlyWinners.monthlyLoser",
+      model: "ProdePlayer",
     });
 
   const tIds = tournaments.map((t) => t._id);
@@ -34,22 +38,33 @@ export const buildProdeRecords = async (tournamentId = null) => {
     gdtWins: 0,
     gdtDraws: 0,
     gdtPj: 0,
+    gdtScore: 0,
     argWins: 0,
     argDraws: 0,
     argPj: 0,
+    argScore: 0,
     miscWins: 0,
     miscDraws: 0,
     miscPj: 0,
+    miscScore: 0,
   });
 
   // --- GANADORES MENSUALES ---
   const monthlyWinnersCount = {};
+  const monthlyLosersCount = {};
+
   tournaments.forEach((t) => {
     t.monthlyWinners?.forEach((mw) => {
       mw.winnerPlayerIds?.forEach((p) => {
         const name = p?.name || "Desconocido";
         monthlyWinnersCount[name] = (monthlyWinnersCount[name] || 0) + 1;
       });
+
+      if (mw.monthlyLoser) {
+        const loserName = mw.monthlyLoser.name || "Desconocido";
+        monthlyLosersCount[loserName] =
+          (monthlyLosersCount[loserName] || 0) + 1;
+      }
     });
   });
 
@@ -80,8 +95,19 @@ export const buildProdeRecords = async (tournamentId = null) => {
         else s.pp += 1;
 
         d.challenges?.forEach((ch) => {
-          const typeKey = ch.type.toLowerCase();
+          const typeKey = ch.type.toLowerCase(); // gdt, arg o misc
+
+          // 1. Sumamos 1 partido jugado a la categoría
           s[`${typeKey}Pj`] += 1;
+
+          // --- NUEVA LÓGICA DE SUMA DE PUNTOS ---
+          // side.key es "A" o "B". Construimos "scoreA" o "scoreB"
+          // y lo sumamos a la propiedad (ej: gdtScore) del jugador.
+          const pointsAnotados = Number(ch[`score${side.key}`] || 0);
+          s[`${typeKey}Score`] += pointsAnotados;
+          // --------------------------------------
+
+          // 2. Lógica de victoria/empate que ya tenías
           if (ch.result === side.key) s[`${typeKey}Wins`] += 1;
           else if (ch.result === "draw") s[`${typeKey}Draws`] += 1;
         });
@@ -136,6 +162,10 @@ export const buildProdeRecords = async (tournamentId = null) => {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count),
 
+    topMonthlyLosers: Object.entries(monthlyLosersCount)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count),
+
     efficiency: [...formattedStats].sort(
       (a, b) => b.ratio - a.ratio || b.pg - a.pg,
     ),
@@ -155,28 +185,31 @@ export const buildProdeRecords = async (tournamentId = null) => {
         .map((s) => ({
           name: s.name,
           count: s.gdtWins,
+          draws: s.gdtDraws,
+          score: s.gdtScore,
           ratio: calcEfficiency(s.gdtWins, s.gdtDraws, s.gdtPj),
         }))
-        .sort((a, b) => b.ratio - a.ratio || b.count - a.count)
-        .slice(0, 5),
+        .sort((a, b) => b.count - a.count || b.draws - a.draws),
       ARG: allStats
         .filter((s) => s.argPj > 0)
         .map((s) => ({
           name: s.name,
           count: s.argWins,
+          draws: s.argDraws,
+          score: s.argScore,
           ratio: calcEfficiency(s.argWins, s.argDraws, s.argPj),
         }))
-        .sort((a, b) => b.ratio - a.ratio || b.count - a.count)
-        .slice(0, 5),
+        .sort((a, b) => b.count - a.count || b.draws - a.draws),
       MISC: allStats
         .filter((s) => s.miscPj > 0)
         .map((s) => ({
           name: s.name,
           count: s.miscWins,
+          draws: s.miscDraws,
+          score: s.miscScore,
           ratio: calcEfficiency(s.miscWins, s.miscDraws, s.miscPj),
         }))
-        .sort((a, b) => b.ratio - a.ratio || b.count - a.count)
-        .slice(0, 5),
+        .sort((a, b) => b.count - a.count || b.draws - a.draws),
     },
   };
 };

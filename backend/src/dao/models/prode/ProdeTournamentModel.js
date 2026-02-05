@@ -36,6 +36,13 @@ const monthlyWinnerSchema = new mongoose.Schema(
         message: "winnerPlayerIds must have exactly 4 players",
       },
     },
+
+    monthlyLoser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProdePlayer",
+      default: null, // Puede no haber perdedor cargado aún
+    },
+
     note: {
       type: String,
       default: "",
