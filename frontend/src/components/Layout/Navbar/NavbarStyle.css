@@ -19,12 +19,18 @@ nav {
 }
 
 .menu-btn {
-  font-size: 2rem;
-  border: 1px solid;
-  background-color: white;
-  color: var(--primary-color);
-  border-radius: 4px;
+  font-size: 1.5rem;
+  border: none;
+  background: transparent;
+  color: #7a8a98;
+  border-radius: 8px;
+  padding: 4px;
   cursor: pointer;
+  transition: color 0.3s ease, background 0.3s ease;
+}
+.menu-btn:hover {
+  color: #c0cdd8;
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .logo-img {

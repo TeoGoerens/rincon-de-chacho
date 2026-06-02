@@ -1,120 +1,83 @@
-//Import React & Hooks
-
-import { Link } from "react-router-dom";
-
-//Import components
-import SoonTag from "../SoonTag/SoonTag";
-
-//Import CSS & styles
+import { Link, useLocation } from "react-router-dom";
 import "./SidebarStyle.css";
-
-//Import Redux
 import { useSelector } from "react-redux";
+import { IconUsers, IconLayers, IconBars, IconOpenBook } from "../Icons/SectionIcons";
 
-//----------------------------------------
-//COMPONENT
-//----------------------------------------
+const LINKS = [
+  { to: "/home",          SvgIcon: null,         matIcon: "home",         label: "Home",     color: "var(--color-home)"     },
+  { to: "/photo-gallery", SvgIcon: null,         matIcon: "photo_camera", label: "Galería",  color: "var(--color-galeria)"  },
+  { to: "/chachos",       SvgIcon: IconUsers,    matIcon: null,           label: "Chachos",  color: "var(--color-chachos)"  },
+  { to: "/podrida",       SvgIcon: IconLayers,   matIcon: null,           label: "Podrida",  color: "var(--color-podrida)"  },
+  { to: "/prode",         SvgIcon: IconBars,     matIcon: null,           label: "Prode",    color: "var(--color-prode)"    },
+  { to: "/cronicas",      SvgIcon: IconOpenBook, matIcon: null,           label: "Crónicas", color: "var(--color-cronicas)" },
+];
 
 function Sidebar({ sidebarOpen, handleToggleSidebar }) {
-  //Select state from tournament rounds store
-  const storeData = useSelector((store) => store.users);
-  const { isAdmin } = storeData;
+  const { isAdmin } = useSelector((store) => store.users);
+  const { pathname } = useLocation();
+
+  const isActive = (to) =>
+    to === "/home"
+      ? pathname === "/home"
+      : pathname === to || pathname.startsWith(to + "/");
 
   return (
-    <aside className={`sidebar ${sidebarOpen ? "sidebar-active" : ""}`}>
-      <div className="sidebar-title">
-        <p className="sidebar-logo-text">
-          El rincon de <span>Chacho</span>
-        </p>
-        <span
-          className="material-symbols-outlined sidebar-close-btn"
-          onClick={handleToggleSidebar}
-        >
-          close
-        </span>
-      </div>
-      <div className="sidebar-links">
-        <ul>
-          <li>
-            <Link
-              to="/home"
-              className="aside-link"
-              onClick={handleToggleSidebar}
-            >
-              <span className="material-symbols-outlined">home</span>
-              <p>Home</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/photo-gallery"
-              className="aside-link"
-              onClick={handleToggleSidebar}
-            >
-              <span className="material-symbols-outlined">photo_camera</span>
-              <p>Galería</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/podrida"
-              className="aside-link"
-              onClick={handleToggleSidebar}
-            >
-              <span className="material-symbols-outlined">playing_cards</span>
-              <p>Podrida</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/prode"
-              className="aside-link"
-              onClick={handleToggleSidebar}
-            >
-              <span className="material-symbols-outlined">
-                stadia_controller
-              </span>
-              <p>Prode</p>
-              <SoonTag />
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/cronicas"
-              className="aside-link"
-              onClick={handleToggleSidebar}
-            >
-              <span className="material-symbols-outlined">edit_note</span>
-              <p>Crónicas</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/chachos"
-              className="aside-link"
-              onClick={handleToggleSidebar}
-            >
-              <span className="material-symbols-outlined">sports_soccer</span>
-              <p>Chachos</p>
-            </Link>
-          </li>
-          {isAdmin ? (
-            <li>
-              <Link
-                to="/admin/users"
-                className="aside-link"
-                onClick={handleToggleSidebar}
-              >
-                <span className="material-symbols-outlined">
-                  admin_panel_settings
-                </span>
-                <p>Admin</p>
-              </Link>
-            </li>
-          ) : null}
-        </ul>
-      </div>
-    </aside>
+    <>
+      <div
+        className={`sidebar-overlay${sidebarOpen ? " sidebar-overlay-active" : ""}`}
+        onClick={handleToggleSidebar}
+      />
+      <aside className={`sidebar${sidebarOpen ? " sidebar-active" : ""}`}>
+
+        <div className="sidebar-header">
+          <p className="sidebar-brand">
+            El Rincón de <span>Chacho</span>
+          </p>
+          <span
+            className="material-symbols-outlined sidebar-close-btn"
+            onClick={handleToggleSidebar}
+          >
+            close
+          </span>
+        </div>
+        <div className="sidebar-divider" />
+
+        <nav className="sidebar-nav">
+          <ul>
+            {LINKS.map(({ to, SvgIcon, matIcon, label, color }) => (
+              <li key={to}>
+                <Link
+                  to={to}
+                  className={`aside-link${isActive(to) ? " aside-link--active" : ""}`}
+                  onClick={handleToggleSidebar}
+                >
+                  {SvgIcon
+                    ? <div className="aside-link-icon aside-link-icon--svg"><SvgIcon color={color} /></div>
+                    : <div className="material-symbols-outlined aside-link-icon" style={{ color }}>{matIcon}</div>
+                  }
+                  <div className="aside-link-label">{label}</div>
+                  {isActive(to) && <div className="aside-link-dot" style={{ background: color }} />}
+                </Link>
+              </li>
+            ))}
+            {isAdmin && (
+              <li>
+                <Link
+                  to="/admin/users"
+                  className={`aside-link${pathname.startsWith("/admin") ? " aside-link--active" : ""}`}
+                  onClick={handleToggleSidebar}
+                >
+                  <div className="material-symbols-outlined aside-link-icon" style={{ color: "var(--color-admin)" }}>admin_panel_settings</div>
+                  <div className="aside-link-label">Admin</div>
+                  {pathname.startsWith("/admin") && <div className="aside-link-dot" style={{ background: "var(--color-admin)" }} />}
+                </Link>
+              </li>
+            )}
+          </ul>
+        </nav>
+
+      </aside>
+    </>
   );
 }
 
