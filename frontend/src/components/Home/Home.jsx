@@ -217,8 +217,8 @@ const Home = () => {
                 className={`hw-card hw-card--${s.mod}`}
                 onClick={() => navigate(s.to)}
               >
-                <div className="hw-card-top">
-                  <span className="hw-card-num">{s.label}</span>
+                <span className="hw-card-watermark" aria-hidden="true">{s.label}</span>
+                <div className="hw-card-ico-wrap">
                   <span className="hw-card-ico">{s.icon}</span>
                 </div>
                 <h3 className="hw-card-title">{s.title}</h3>
