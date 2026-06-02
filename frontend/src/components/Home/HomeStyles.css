@@ -521,6 +521,13 @@
    RESPONSIVE
    ════════════════════════════════════════════════════════════ */
 
+/* Desktop: stats más grandes */
+@media (min-width: 1101px) {
+  .hw-stat-card-num {
+    font-size: clamp(3.5rem, min(6vw, 8.5vh), 6.5rem);
+  }
+}
+
 /* Tablet ancho: 2 columnas */
 /* Tablet: 2 columnas + sin snap (el 2x2 no entra en un viewport) */
 @media (max-width: 1100px) {
