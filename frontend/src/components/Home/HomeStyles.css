@@ -27,6 +27,10 @@
   display: flex;
   flex-direction: column;
   background: #0a0a0a;
+  height: calc(100vh - 80px);
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -35,7 +39,9 @@
 
 .hw-hero {
   position: relative;
-  min-height: calc(100vh - 80px);
+  height: calc(100vh - 80px);
+  flex-shrink: 0;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   background: #0a0a0a;
@@ -134,18 +140,18 @@
   display: block;
 }
 .hw-title-line--1 {
-  font-size: clamp(3.8rem, 8.5vw, 7.5rem);
+  font-size: clamp(2.8rem, min(8.5vw, 9vh), 7.5rem);
   color: #f2f2f2;
   animation: hw-fade-up 0.7s ease 0.35s both;
 }
 .hw-title-line--2 {
-  font-size: clamp(2.5rem, 5.5vw, 5rem);
+  font-size: clamp(1.8rem, min(5.5vw, 6vh), 5rem);
   color: rgba(242, 242, 242, 0.28);
   margin-left: 0.15em;
   animation: hw-fade-up 0.7s ease 0.48s both;
 }
 .hw-title-line--3 {
-  font-size: clamp(4.5rem, 10vw, 9rem);
+  font-size: clamp(3.2rem, min(10vw, 11vh), 9rem);
   background: linear-gradient(135deg, #a8dadc 0%, #6eb5c0 55%, #457b9d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -275,7 +281,7 @@
 
 .hw-stat-card-num {
   font-family: "Urbanist", var(--secondary-font);
-  font-size: clamp(3rem, 5.5vw, 5rem);
+  font-size: clamp(2.2rem, min(5.5vw, 6vh), 5rem);
   font-weight: 900;
   letter-spacing: -0.05em;
   line-height: 1;
@@ -331,21 +337,23 @@
 .hw-sections {
   background: #0f0f0f;
   border-top: 1px solid rgba(255,255,255,0.05);
-  min-height: calc(100vh - 80px);
+  height: calc(100vh - 80px);
+  flex-shrink: 0;
+  scroll-snap-align: start;
   display: flex;
-  align-items: center;
-  padding: 5rem 0;
+  align-items: flex-start;
+  padding: clamp(3rem, 6vh, 6rem) 0 clamp(2rem, 4vh, 4rem);
+  overflow: hidden;
 }
 
 .hw-sections-inner {
   width: 88%;
   max-width: 1200px;
   margin: 0 auto;
-  width: 88%;
 }
 
 .hw-sections-head {
-  margin-bottom: 3.5rem;
+  margin-bottom: clamp(1.5rem, 3vh, 3.5rem);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -363,7 +371,7 @@
 
 .hw-sections-title {
   font-family: "Urbanist", var(--secondary-font);
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(1.5rem, min(4vw, 4.5vh), 3.2rem);
   font-weight: 800;
   color: #e8e8e8;
   background: transparent;
@@ -390,7 +398,7 @@
   background: #111111;
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 16px;
-  padding: 2rem 1.75rem 1.75rem;
+  padding: 1.75rem 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -514,21 +522,60 @@
    ════════════════════════════════════════════════════════════ */
 
 /* Tablet ancho: 2 columnas */
+/* Tablet: 2 columnas + sin snap (el 2x2 no entra en un viewport) */
 @media (max-width: 1100px) {
   .hw-grid { grid-template-columns: repeat(2, 1fr); gap: 0.875rem; }
+
+  .hw {
+    scroll-snap-type: none;
+    height: auto;
+    overflow-y: visible;
+  }
+  .hw-hero {
+    height: auto;
+    min-height: calc(100vh - 80px);
+    scroll-snap-align: none;
+    overflow: visible;
+  }
+  .hw-sections {
+    height: auto;
+    min-height: auto;
+    scroll-snap-align: none;
+    overflow: visible;
+    padding: 5rem 0;
+  }
 }
 
 /* Tablet: hero apilado */
 @media (max-width: 900px) {
+  /* Desactivar scroll snap en mobile — flujo natural */
+  .hw {
+    height: auto;
+    overflow-y: visible;
+    scroll-snap-type: none;
+  }
+  .hw-hero {
+    height: auto;
+    min-height: auto;
+    scroll-snap-align: none;
+    overflow: visible;
+  }
+  .hw-sections {
+    height: auto;
+    min-height: auto;
+    scroll-snap-align: none;
+    overflow: visible;
+    padding: 5rem 0;
+  }
   .hw-hero-inner {
     flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-start;
     padding: 3.5rem 6% 2.5rem;
     gap: 3rem;
   }
   .hw-hero-content { max-width: 100%; }
   .hw-hero-right   { width: 100%; max-width: 560px; }
-  .hw-sections     { min-height: auto; padding: 5rem 0; }
 }
 
 /* Mobile: columna única, cards horizontales */
