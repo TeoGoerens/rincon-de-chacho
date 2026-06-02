@@ -1,125 +1,393 @@
-.register-page-container {
-  min-height: calc(100vh - 80px);
-  width: 80%;
+/* ══════════════════════════════════════════
+   REGISTER — El Rincón de Chacho
+   ══════════════════════════════════════════ */
+
+@keyframes rp-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes rp-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes rp-glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* ── Contenedor principal ── */
+.rp {
+  height: calc(100vh - 80px);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 5rem;
-  overflow-x: hidden;
-  padding-inline: 5%;
-  background-color: transparent;
-}
-
-.message-error {
-  font-size: 0.85rem;
-  color: var(--fourth-color);
-}
-
-/* --------------- REGISTER IMAGE --------------- */
-
-.register-image-container {
-  width: 400px;
-  height: 450px;
+  align-items: stretch;
+  background: #0a0a0a;
+  position: relative;
   overflow: hidden;
-  background-color: inherit;
+  padding-bottom: 52px;
 }
 
-.register-image {
-  width: 100%;
+/* ── Decoraciones de fondo ── */
+.rp-bg-glow {
+  position: absolute;
+  top: -10%;
+  left: -5%;
+  width: 55%;
+  height: 120%;
+  background: radial-gradient(
+    ellipse at 20% 50%,
+    rgba(168, 218, 220, 0.055) 0%,
+    rgba(69, 123, 157, 0.025) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.rp-vline {
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 0;
+  width: 1px;
   height: 100%;
-  object-fit: contain;
-  background-color: inherit;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 20%,
+    rgba(255, 255, 255, 0.04) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* --------------- REGISTER TEXT --------------- */
+/* ── Barra inferior ── */
+.rp-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 6%;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.rp-bottom-bar-text {
+  font-family: var(--secondary-font);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #2e3e4e;
+  background: transparent;
+}
+.rp-bottom-bar-year {
+  font-family: var(--secondary-font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2e3e4e;
+  background: transparent;
+  letter-spacing: 0.1em;
+}
 
-.register-text {
-  width: 45%;
+/* ══════════════════════════════════════════
+   PANEL IZQUIERDO — Marca
+   ══════════════════════════════════════════ */
+
+.rp-brand {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  padding: 2rem 6% 2rem calc(6% + 2rem);
+  position: relative;
+  z-index: 1;
 }
 
-.register-text h1 {
-  font-size: 2.5rem;
-  width: 100%;
-  text-align: center;
+.rp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--secondary-font);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #a8dadc;
+  background: transparent;
+  animation: rp-fade-up 0.6s ease 0.1s both;
 }
-
-.register-text-brand {
-  font-family: var(--accent-font);
-}
-
-.register-text-brand span {
-  font-family: var(--accent-font);
-  color: var(--third-color);
-}
-
-.register-text h2 {
-  width: 100%;
-  text-align: center;
-  font-size: 1.5rem;
-  margin-top: 1rem;
-}
-
-.register-text form {
-  margin-top: 3rem;
-  font-size: 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.register-text form label {
+.rp-eyebrow-dot {
   display: inline-block;
-  width: 100px;
-  font-weight: 700;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #a8dadc;
+  flex-shrink: 0;
+  animation: rp-glow-pulse 2.5s ease infinite 1s;
 }
 
-.register-text form input {
+.rp-title {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.75rem;
+  background: transparent;
+}
+.rp-title-line {
+  font-family: var(--accent-font);
+  line-height: 0.92;
+  background: transparent;
+  display: block;
+}
+.rp-title-line--1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  color: rgba(242, 242, 242, 0.5);
+  animation: rp-fade-up 0.6s ease 0.2s both;
+}
+.rp-title-line--2 {
+  font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+  color: #f2f2f2;
+  animation: rp-fade-up 0.6s ease 0.32s both;
+}
+.rp-title-line--3 {
+  font-size: clamp(3rem, 6.5vw, 5.5rem);
+  background: linear-gradient(135deg, #a8dadc 0%, #6eb5c0 55%, #457b9d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rp-fade-up 0.6s ease 0.44s both;
+}
+
+.rp-tagline {
+  font-family: var(--secondary-font);
   font-size: 0.85rem;
-  border: 1px solid;
-  border-color: var(--third-color);
-  background-color: var(--third-color);
+  font-weight: 400;
+  color: #5a6a78;
+  line-height: 1.6;
+  margin-top: 1rem;
+  max-width: 320px;
+  background: transparent;
+  animation: rp-fade-up 0.6s ease 0.56s both;
+}
+
+/* Perks */
+.rp-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+  animation: rp-fade-up 0.6s ease 0.68s both;
+}
+.rp-perk {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: transparent;
+}
+.rp-perk-icon {
+  font-size: 1rem;
+  color: #a8dadc;
+  background: transparent;
+  flex-shrink: 0;
+}
+.rp-perk-text {
+  font-family: var(--secondary-font);
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #4a5a68;
+  background: transparent;
+}
+
+/* ══════════════════════════════════════════
+   PANEL DERECHO — Formulario
+   ══════════════════════════════════════════ */
+
+.rp-form-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 6%;
+  position: relative;
+  z-index: 1;
+}
+
+.rp-card {
   width: 100%;
-  border-radius: 10px;
-  padding: 0.5rem;
+  max-width: 440px;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 1.75rem 1.75rem;
+  animation: rp-fade-in 0.7s ease 0.3s both;
+}
+
+.rp-card-header {
+  margin-bottom: 1.25rem;
+  background: transparent;
+}
+.rp-card-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 1.4rem;
   font-weight: 700;
+  color: #e8e8e8;
+  background: transparent;
+  letter-spacing: -0.02em;
+}
+.rp-card-subtitle {
+  font-family: var(--secondary-font);
+  font-size: 0.82rem;
+  color: #4a5a68;
+  margin-top: 0.35rem;
+  background: transparent;
 }
 
-.register-text form button {
-  margin-top: 0.5rem;
-  width: 100px;
-  text-align: center;
-  padding: 0.5rem;
-  background-color: var(--primary-color);
-  color: white;
+/* Formulario */
+.rp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: transparent;
+}
+
+/* Fila nombre + apellido */
+.rp-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  background: transparent;
+}
+
+.rp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: transparent;
+}
+.rp-label {
+  font-family: var(--secondary-font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6a7a88;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: transparent;
+}
+
+.rp-input {
+  width: 100%;
+  background: #0d0d0d;
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 10px;
-  transition: all ease 0.3s;
+  padding: 0.62rem 1rem;
+  font-family: var(--secondary-font);
+  font-size: 0.88rem;
+  color: #d0d8e0;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.rp-input::placeholder { color: #3a4a58; }
+.rp-input:focus {
+  border-color: rgba(168, 218, 220, 0.45);
+  box-shadow: 0 0 0 3px rgba(168, 218, 220, 0.08);
+}
+.rp-input--error { border-color: rgba(230, 57, 70, 0.5); }
+.rp-input--error:focus {
+  border-color: rgba(230, 57, 70, 0.7);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.08);
 }
 
-.register-text form button:hover {
-  scale: 1.05;
+.rp-field-error {
+  font-family: var(--secondary-font);
+  font-size: 0.75rem;
+  color: #e63946;
+  background: transparent;
 }
 
-.register-text form .message-error {
-  color: var(--fourth-color);
+.rp-server-error {
+  font-family: var(--secondary-font);
+  font-size: 0.82rem;
+  color: #e63946;
+  background: rgba(230, 57, 70, 0.07);
+  border: 1px solid rgba(230, 57, 70, 0.2);
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+}
+
+.rp-submit {
+  width: 100%;
+  padding: 0.85rem;
+  background: #a8dadc;
+  color: #0a0a0a;
+  font-family: var(--secondary-font);
+  font-weight: 700;
   font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.rp-submit:hover {
+  background: #c8eced;
+  box-shadow: 0 8px 24px rgba(168, 218, 220, 0.18);
 }
 
-/* --------------- MEDIA QUERIES --------------- */
+.rp-login-link {
+  font-family: var(--secondary-font);
+  font-size: 0.8rem;
+  color: #3a4a58;
+  text-align: center;
+  background: transparent;
+}
+.rp-login-link a {
+  color: #a8dadc;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+.rp-login-link a:hover { color: #c8eced; }
 
-@media only screen and (max-width: 769px) {
-  .register-page-container {
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .rp {
     height: auto;
-    margin-top: 2rem;
-    width: 100%;
+    min-height: calc(100vh - 80px);
+    flex-direction: column;
+    align-items: stretch;
   }
+  .rp-vline { display: none; }
 
-  .register-text {
-    width: 100%;
+  .rp-brand {
+    flex: 0 0 auto;
+    padding: 3rem 6% 2rem;
+    justify-content: flex-start;
   }
+  .rp-title-line--1 { font-size: clamp(2rem, 7vw, 3rem); }
+  .rp-title-line--2 { font-size: clamp(2.2rem, 8vw, 3.4rem); }
+  .rp-title-line--3 { font-size: clamp(2.8rem, 11vw, 4.5rem); }
+  .rp-tagline       { display: none; }
+  .rp-perks         { display: none; }
 
-  .register-image-container {
-    display: none;
+  .rp-form-wrap {
+    flex: 0 0 auto;
+    padding: 1.5rem 6% 2.5rem;
+    justify-content: flex-start;
+    align-items: stretch;
   }
+  .rp-card { max-width: 100%; padding: 2rem 1.75rem; }
+
+  .rp-bottom-bar-text { letter-spacing: 0.12em; font-size: 0.58rem; }
+}
+
+@media (max-width: 480px) {
+  .rp-brand     { padding: 2.5rem 5% 1.75rem; }
+  .rp-form-wrap { padding: 1.25rem 5% 2rem; }
+  .rp-card      { padding: 1.75rem 1.25rem; border-radius: 12px; }
+  .rp-field-row { grid-template-columns: 1fr; }
 }
