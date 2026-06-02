@@ -1,149 +1,227 @@
-.user-menu {
-  height: 450px;
-  width: 280px;
-  background-color: white;
-  z-index: 850;
+/* ══════════════════════════════════════════
+   USER MENU — El Rincón de Chacho
+   ══════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.um-overlay {
   position: fixed;
-  top: 0;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 849;
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+.um-overlay.um-overlay-active {
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: all;
+}
+
+/* ── Panel ── */
+.um {
+  position: fixed;
+  top: 80px;
   right: 0;
-  padding: 1rem;
-  transform: translateY(80px);
-  transition: transform 0.3s ease;
-  border-bottom-left-radius: 20px;
-  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
+  width: 280px;
+  background: #0d0d0d;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom-left-radius: 16px;
+  z-index: 850;
+  transform: translateY(-16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+}
+.um.um-open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
 }
 
-.user-menu-active {
-  transform: translateY(-450px);
+/* ── Header ── */
+.um-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem 1.1rem;
+  background: transparent;
 }
 
-/* --------------- USER MENU TITLE --------------- */
-
-.user-menu-title {
-  background-color: transparent;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid;
-  border-color: var(--third-color);
+/* Avatar */
+.um-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0a0a0a;
+  flex-shrink: 0;
 }
 
-.user-menu-close-btn {
-  cursor: pointer;
-  background-color: var(--fourth-color);
-  color: white;
-  border-radius: 20%;
-  position: absolute;
-  top: 1.2rem;
-  left: 1.5rem;
-}
-
-.user-menu-title p {
-  background-color: transparent;
-  text-align: end;
-}
-
-.user-menu-title p:first-child {
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.user-menu-title p:last-child {
-  font-weight: 300;
-  font-size: 0.75rem;
-}
-
-/* --------------- USER MENU OPTIONS --------------- */
-
-.user-menu-options {
-  margin-top: 1rem;
-  padding-bottom: 1rem;
-  background-color: transparent;
+/* Nombre + email */
+.um-identity {
   display: flex;
   flex-direction: column;
-  border-bottom: 2px solid;
-  border-color: var(--third-color);
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+}
+.um-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #d0d8e0;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.um-email {
+  font-family: var(--secondary-font);
+  font-size: 0.72rem;
+  color: #3a4a58;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.user-menu-options a {
+/* Botón cerrar — mismo estilo que sidebar */
+.um-close {
+  cursor: pointer;
   display: flex;
-  gap: 1rem;
-  padding: 0.5rem;
   align-items: center;
-  background-color: transparent;
-  text-decoration: none;
-}
-
-.user-menu-options a span {
-  background-color: transparent;
-}
-.user-menu-options a p {
-  background-color: transparent;
-  font-size: 0.9rem;
-}
-
-.user-menu-options a:hover {
-  background-color: var(--third-color);
-  border-radius: 10px;
-}
-
-/* --------------- USER MENU SOCIALS --------------- */
-
-.user-menu-social {
-  background-color: transparent;
-  margin-top: 1rem;
-}
-
-.user-menu-social p {
-  background-color: transparent;
-  font-size: 0.9rem;
-}
-
-.user-menu-social-icons {
-  background-color: transparent;
-  display: flex;
   justify-content: center;
-  gap: 3rem;
-  padding-top: 0.8rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  color: #566878;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  user-select: none;
+  transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+.um-close:hover {
+  color: #a8dadc;
+  background: rgba(168, 218, 220, 0.08);
+  border-color: rgba(168, 218, 220, 0.2);
+}
+.um-close .material-symbols-outlined {
+  font-size: 1rem;
+  background: transparent;
+  color: inherit;
 }
 
-.user-menu-social-icons a {
-  background-color: transparent;
+/* ── Divisor ── */
+.um-divider {
+  height: 1px;
+  margin: 0 1rem;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(168, 218, 220, 0.2) 25%,
+    rgba(168, 218, 220, 0.2) 75%,
+    transparent
+  );
 }
 
-.user-menu-social-icons a i {
-  background-color: transparent;
-  font-size: 1.3rem;
-}
-
-/* --------------- USER MENU LOGOUT --------------- */
-
-.logout-container button {
+/* ── Acciones ── */
+.um-actions {
+  padding: 0.5rem 0 0.75rem;
+  background: transparent;
   display: flex;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
+  flex-direction: column;
+}
+
+.um-action-link {
+  display: flex;
   align-items: center;
-  position: absolute;
-  bottom: 0;
-  width: calc(280px - 2rem);
-  border-radius: 10px;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+.um-action-link:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.logout-container button span,
-.logout-container button p {
-  color: var(--fourth-color);
-  background-color: transparent;
+/* Ícono de acción */
+.um-action-ico {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+.um-action-ico .material-symbols-outlined {
+  font-size: 1.05rem;
+  color: #5a6a78;
+  background: transparent;
+  transition: color 0.3s ease;
+}
+.um-action-link:hover .um-action-ico {
+  background: rgba(168, 218, 220, 0.08);
+}
+.um-action-link:hover .um-action-ico .material-symbols-outlined {
+  color: #a8dadc;
 }
 
-.logout-container button p {
-  font-size: 0.9rem;
+/* Ícono rojo para logout */
+.um-action-ico--red .material-symbols-outlined { color: #5a6a78; }
+.um-action-link:hover .um-action-ico--red {
+  background: rgba(230, 57, 70, 0.08);
+}
+.um-action-link:hover .um-action-ico--red .material-symbols-outlined {
+  color: #e63946;
 }
 
-.logout-container button p {
-  padding-left: 1rem;
+/* Label */
+.um-action-label {
+  font-family: var(--secondary-font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #5a6a78;
+  flex: 1;
+  text-align: left;
+  background: transparent;
+  transition: color 0.3s ease;
+}
+.um-action-link:hover .um-action-label {
+  color: #c0cdd8;
 }
 
-.logout-container button:hover,
-.logout-container button:hover span,
-.logout-container button:hover p {
-  background-color: var(--fourth-color);
-  color: white;
+/* Flecha derecha (solo en cambiar contraseña) */
+.um-action-arrow {
+  font-size: 1rem;
+  color: #2a3a48;
+  background: transparent;
+  transition: color 0.3s ease;
+}
+.um-action-link:hover .um-action-arrow {
+  color: #5a6a78;
+}
+
+/* Logout: sin border, texto rojo en hover */
+.um-logout {
+  margin-top: 2px;
+}
+.um-action-link.um-logout:hover .um-action-label {
+  color: #e63946;
 }

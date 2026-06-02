@@ -1,120 +1,72 @@
-//Import React & Hooks
 import { Link, useNavigate } from "react-router-dom";
-
-//Import components
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUserAction } from "../../../redux/slices/users/usersSlices";
-import SoonTag from "../SoonTag/SoonTag";
-
-//Import CSS & styles
 import "./UserMenuStyle.css";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-
-//----------------------------------------
-//COMPONENT
-//----------------------------------------
-
 function UserMenu({ userMenuOpen, handleToggleUserMenu }) {
-  //Dispatch const creation
   const dispatch = useDispatch();
-
-  //Navigate const creation
   const navigate = useNavigate();
+  const { userAuth } = useSelector((store) => store.users);
 
-  //Select state from tournament rounds store
-  const storeData = useSelector((store) => store.users);
-  const { userAuth } = storeData;
+  const firstName = userAuth?.userToDisplay?.first_name ?? userAuth?.first_name ?? "";
+  const lastName  = userAuth?.userToDisplay?.last_name  ?? userAuth?.last_name  ?? "";
+  const email     = userAuth?.userToDisplay?.email      ?? userAuth?.email      ?? "";
+  const initial   = firstName.charAt(0).toUpperCase();
 
-  //Define handleLogout function
   const handleLogout = () => {
     dispatch(logoutUserAction());
-  };
-
-  //Define handleLogoutFunctions
-  const handleLogoutFunctions = () => {
-    handleLogout();
     handleToggleUserMenu();
     navigate("/");
   };
 
   return (
-    <section className={`user-menu ${!userMenuOpen ? "user-menu-active" : ""}`}>
-      <div className="user-menu-title">
-        <span
-          className="material-symbols-outlined user-menu-close-btn"
-          onClick={handleToggleUserMenu}
-        >
-          close
-        </span>
-        <p>
-          {userAuth?.userToDisplay === undefined
-            ? `${userAuth?.first_name} ${userAuth?.last_name}`
-            : `${userAuth?.userToDisplay?.first_name} ${userAuth?.userToDisplay?.last_name}`}
-        </p>
-        <p>
-          {userAuth?.userToDisplay === undefined
-            ? `${userAuth?.email}`
-            : `${userAuth?.userToDisplay?.email}`}
-        </p>
-      </div>
+    <>
+      {/* Overlay — click fuera cierra el menú */}
+      <div
+        className={`um-overlay${userMenuOpen ? " um-overlay-active" : ""}`}
+        onClick={handleToggleUserMenu}
+      />
 
-      <div className="user-menu-options">
-        <Link to="/" onClick={handleToggleUserMenu}>
-          <span className="material-symbols-outlined">account_circle</span>
-          <p>Mi perfil</p>
-          <SoonTag />
-        </Link>
-        <Link to="/" onClick={handleToggleUserMenu}>
-          <span className="material-symbols-outlined">lock</span>
-          <p>Cambiar contraseña</p>
-        </Link>
-        <Link to="/" onClick={handleToggleUserMenu}>
-          <span className="material-symbols-outlined">favorite</span>
-          <p>Mis favoritos</p>
-          <SoonTag />
-        </Link>
-        <Link to="/" onClick={handleToggleUserMenu}>
-          <span className="material-symbols-outlined">star</span>
-          <p>Destacados</p>
-          <SoonTag />
-        </Link>
-      </div>
+      {/* Panel */}
+      <div className={`um${userMenuOpen ? " um-open" : ""}`}>
 
-      <div className="user-menu-social">
-        <p>Seguime en redes</p>
-        <div className="user-menu-social-icons">
-          <Link
-            to="https://www.instagram.com/rafael_chacho/"
-            target="_blank"
-            onClick={handleToggleUserMenu}
-          >
-            <i className="fa-brands fa-instagram"></i>
-          </Link>
-          <Link
-            to="https://www.linkedin.com/in/rafael-giaccio-647599117/?originalSubdomain=ar"
-            target="_blank"
-            onClick={handleToggleUserMenu}
-          >
-            <i className="fa-brands fa-linkedin-in"></i>
-          </Link>
-          <Link
-            to="https://twitter.com/rafael_chacho"
-            target="_blank"
-            onClick={handleToggleUserMenu}
-          >
-            <i className="fa-brands fa-x-twitter"></i>
-          </Link>
+        {/* ── Header: avatar + nombre + email + cerrar ── */}
+        <div className="um-header">
+          <div className="um-avatar">{initial}</div>
+          <div className="um-identity">
+            <span className="um-name">{firstName} {lastName}</span>
+            <span className="um-email">{email}</span>
+          </div>
+          <div className="um-close" onClick={handleToggleUserMenu}>
+            <span className="material-symbols-outlined">close</span>
+          </div>
         </div>
-      </div>
 
-      <div className="logout-container">
-        <button className="logout-btn" onClick={handleLogoutFunctions}>
-          <span className="material-symbols-outlined">logout</span>
-          <p>Logout</p>
-        </button>
+        <div className="um-divider" />
+
+        {/* ── Acciones ── */}
+        <nav className="um-actions">
+          <Link
+            to="/forgot-password"
+            className="um-action-link"
+            onClick={handleToggleUserMenu}
+          >
+            <div className="um-action-ico">
+              <div className="material-symbols-outlined">lock_reset</div>
+            </div>
+            <div className="um-action-label">Cambiar contraseña</div>
+          </Link>
+
+          <button className="um-action-link um-logout" onClick={handleLogout}>
+            <div className="um-action-ico um-action-ico--red">
+              <div className="material-symbols-outlined">logout</div>
+            </div>
+            <div className="um-action-label">Cerrar sesión</div>
+          </button>
+        </nav>
+
       </div>
-    </section>
+    </>
   );
 }
 
