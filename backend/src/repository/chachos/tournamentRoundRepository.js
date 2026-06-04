@@ -52,7 +52,7 @@ export default class TournamentRoundRepository extends baseRepository {
           assists:      1,
           yellow_cards: 1,
           red_cards:    1,
-          avg_points:          { $round: ["$avg_points", 1] },
+          avg_points:          { $round: ["$avg_points", 2] },
           white_pearl_count:   1,
           vanilla_pearl_count: 1,
           ocher_pearl_count:   1,

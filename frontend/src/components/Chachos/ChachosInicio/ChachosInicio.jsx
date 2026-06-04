@@ -23,7 +23,7 @@ const RANKING_COLS = [
   { key: "assists",      label: "Asistencias", short: "A",   decimals: 0 },
   { key: "yellow_cards", label: "Amarillas",   short: "Am",  decimals: 0 },
   { key: "red_cards",    label: "Rojas",       short: "R",   decimals: 0 },
-  { key: "avg_points",   label: "Puntaje",     short: "Pts", decimals: 1 },
+  { key: "avg_points",   label: "Puntaje",     short: "Pts", decimals: 2 },
 ];
 
 /* ─── Helpers ─── */
@@ -401,7 +401,7 @@ const ChachosInicio = () => {
                               </div>
                             )}
                             <span className="ci-score-name">{p.first_name} {p.last_name}</span>
-                            <span className="ci-score-val">{p.points.toFixed(1)}</span>
+                            <span className="ci-score-val">{p.points.toFixed(2)}</span>
                           </div>
                         );
                       })
