@@ -1,0 +1,1360 @@
+/* ═══════════════════════════════════════════════════════════
+   CHACHOS INICIO  —  El Rincón de Chacho
+   Prefijo: ci-
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Contenedor ── */
+.ci {
+  min-height: calc(100vh - 80px - 42px);
+  background: var(--bg-deep);
+  padding: var(--space-xl) 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ── Header ── */
+.ci-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: var(--space-sm);
+}
+
+.ci-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--color-chachos);
+}
+
+.ci-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-chachos);
+  flex-shrink: 0;
+}
+
+.ci-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+}
+
+/* ── Títulos de sección ── */
+.ci-section-heading {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.ci-section-heading-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* ── Card base ── */
+.ci-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ci-card-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+/* ── Hero del partido ── */
+.ci-hero {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  padding: 2rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ci-hero::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+}
+
+.ci-hero--win::before    { background: var(--status-green); }
+.ci-hero--draw::before   { background: var(--status-yellow); }
+.ci-hero--defeat::before { background: var(--status-red); }
+.ci-hero--neutral::before { background: rgba(255,255,255,0.08); }
+
+.ci-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+
+.ci-hero-tournament {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.ci-hero-rival {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 2rem;
+  font-weight: var(--fw-black);
+  color: var(--text-bright);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ci-hero-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-subtle-dark);
+  margin-top: 0.1rem;
+}
+
+.ci-hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.ci-hero-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 3.5rem;
+  font-weight: var(--fw-black);
+  color: var(--text-bright);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+/* ── Badge resultado ── */
+.ci-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.ci-badge--win     { background: rgba(34,197,94,0.12);  color: var(--status-green);  }
+.ci-badge--draw    { background: rgba(245,158,11,0.12); color: var(--status-yellow); }
+.ci-badge--defeat  { background: rgba(230,57,70,0.12);  color: var(--status-red);    }
+
+/* ── Banner votación abierta ── */
+.ci-vote-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  background: rgba(168, 218, 220, 0.06);
+  border: 1px solid rgba(168, 218, 220, 0.2);
+  border-radius: var(--radius-xl);
+  padding: 1.1rem 1.5rem;
+}
+
+.ci-vote-banner--voted {
+  background: rgba(34, 197, 94, 0.05);
+  border-color: rgba(34, 197, 94, 0.18);
+}
+
+.ci-vote-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.ci-vote-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--third-color);
+  flex-shrink: 0;
+  animation: ci-pulse 2s ease infinite;
+}
+
+.ci-vote-pulse--green { background: var(--status-green); }
+
+@keyframes ci-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(168,218,220,0.4); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 6px rgba(168,218,220,0); }
+}
+
+.ci-vote-banner-tag {
+  display: block;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--third-color);
+  margin-bottom: 0.2rem;
+}
+
+.ci-vote-banner-tag--green { color: var(--status-green); }
+
+.ci-vote-banner-msg {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+.ci-vote-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--third-color);
+  color: var(--bg-deep);
+  font-family: var(--secondary-font);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-sm);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: background var(--transition-base), box-shadow var(--transition-base);
+}
+
+.ci-vote-btn:hover {
+  background: #c8eced;
+  box-shadow: 0 6px 20px rgba(168,218,220,0.2);
+}
+
+.ci-voted-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--status-green);
+}
+
+.ci-voted-check .material-symbols-outlined {
+  font-size: 1.1rem;
+  color: var(--status-green);
+}
+
+.ci-season-pct {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--status-green);
+}
+
+/* Forma reciente */
+.ci-forma-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ci-forma-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  flex-shrink: 0;
+}
+
+.ci-forma-pills {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.ci-forma-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+}
+
+.ci-forma-pill--win    { background: rgba(34,197,94,0.15);  color: var(--status-green);  }
+.ci-forma-pill--draw   { background: rgba(245,158,11,0.15); color: var(--status-yellow); }
+.ci-forma-pill--defeat { background: rgba(230,57,70,0.15);  color: var(--status-red);    }
+
+.ci-forma-pill--latest {
+  position: relative;
+}
+.ci-forma-pill--latest::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+}
+.ci-forma-pill--latest.ci-forma-pill--win::after    { background: var(--status-green);  box-shadow: 0 0 5px var(--status-green);  }
+.ci-forma-pill--latest.ci-forma-pill--draw::after   { background: var(--status-yellow); box-shadow: 0 0 5px var(--status-yellow); }
+.ci-forma-pill--latest.ci-forma-pill--defeat::after { background: var(--status-red);    box-shadow: 0 0 5px var(--status-red);    }
+
+/* ── Barra tripartita V/E/D ── */
+.ci-tribar-wrapper {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.ci-tribar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.ci-tribar-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.ci-tribar-count {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 1.6rem;
+  font-weight: var(--fw-black);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.ci-tribar-abbr {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.ci-tribar-seg {
+  height: 7px;
+  border-radius: var(--radius-full);
+  width: 100%;
+}
+
+.ci-tribar-col--win    .ci-tribar-count,
+.ci-tribar-col--win    .ci-tribar-abbr  { color: var(--status-green); }
+.ci-tribar-col--draw   .ci-tribar-count,
+.ci-tribar-col--draw   .ci-tribar-abbr  { color: var(--status-yellow); }
+.ci-tribar-col--defeat .ci-tribar-count,
+.ci-tribar-col--defeat .ci-tribar-abbr  { color: var(--status-red); }
+
+.ci-tribar-col--win    .ci-tribar-seg { background: rgba(34,197,94,0.45); }
+.ci-tribar-col--draw   .ci-tribar-seg { background: rgba(245,158,11,0.45); }
+.ci-tribar-col--defeat .ci-tribar-seg { background: rgba(230,57,70,0.45); }
+
+/* ── Stats secundarios PJ/GF/GC/DG ── */
+.ci-secondary-stats {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.ci-secondary-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.55rem 0.25rem;
+}
+
+.ci-secondary-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.ci-secondary-num {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  line-height: 1;
+}
+
+.ci-secondary-num--pos { color: var(--status-green); }
+.ci-secondary-num--neg { color: var(--status-red); }
+
+.ci-secondary-lbl {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+/* ── Card de resultados del partido ── */
+.ci-results-card {
+  gap: 1.25rem;
+}
+
+.ci-results-body {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.ci-results-scores {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.ci-results-pearls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 240px;
+  flex-shrink: 0;
+}
+
+.ci-pearl-result {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  transition: background var(--transition-base);
+}
+
+.ci-pearl-result:hover { background: rgba(255,255,255,0.05); }
+
+.ci-pearl-result-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ci-pearl-result-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.1);
+  display: block;
+}
+
+.ci-pearl-result-initial {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--avatar-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--bg-deep);
+}
+
+.ci-pearl-result-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 0.9rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+.ci-pearl-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.ci-pearl-result-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.ci-pearl-result-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.ci-score-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.875rem;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.02);
+  border-left: 2px solid transparent;
+  transition: background var(--transition-base);
+}
+
+.ci-score-row:hover { background: rgba(255,255,255,0.05); }
+
+/* Top 3 — gradiente lateral decreciente */
+.ci-score-row--1 {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(168,218,220,0.13) 0%, rgba(168,218,220,0.03) 55%, transparent 100%);
+  border-left-color: var(--color-chachos);
+  box-shadow:
+    0 0 24px rgba(168,218,220,0.07),
+    inset 0 1px 0 rgba(168,218,220,0.12);
+}
+
+.ci-score-row--1::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168,218,220,0.18) 50%,
+    transparent 100%
+  );
+  animation: ci-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ci-sweep {
+  0%        { left: -60%;  opacity: 0; }
+  10%       { opacity: 1; }
+  60%, 100% { left: 130%;  opacity: 0; }
+}
+
+
+.ci-score-pos {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-subtle-dark);
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.ci-score-row--1 .ci-score-pos {
+  font-size: var(--text-base);
+  font-weight: var(--fw-black);
+  color: var(--text-bright);
+}
+
+.ci-score-row--1 .ci-score-name { font-weight: var(--fw-bold); }
+
+.ci-score-row--1 .ci-score-val {
+  font-weight: var(--fw-black);
+  color: var(--color-chachos);
+}
+
+.ci-score-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.ci-score-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ci-score-avatar-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--avatar-gradient);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--bg-deep);
+}
+
+.ci-score-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  flex: 1;
+}
+
+.ci-score-val {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--color-chachos);
+}
+
+/* ── MVP row (dentro del card de performance) ── */
+.ci-mvp-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.ci-mvp-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg);
+  padding: 0.875rem 1rem;
+}
+
+.ci-mvp-item--pearl {
+  background: rgba(168,218,220,0.05);
+  border-color: rgba(168,218,220,0.14);
+}
+
+.ci-mvp-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.ci-mvp-label {
+  display: block;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  margin-bottom: 0.2rem;
+}
+
+.ci-mvp-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.ci-mvp-score {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-chachos);
+  background: rgba(168,218,220,0.1);
+  border-radius: var(--radius-full);
+  padding: 0.1rem 0.5rem;
+}
+
+/* ── Card estado de votación ── */
+.ci-vote-status-card {
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.ci-vote-status-msg {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+  line-height: 1.5;
+}
+
+/* ── Highlights del partido (dentro del hero) ── */
+.ci-hero-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 0.5rem;
+}
+
+.ci-hl-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.ci-hl-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  flex-shrink: 0;
+  min-width: 8.5rem;
+}
+
+.ci-hl-names {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+/* ── Formulario de voto ── */
+.ci-vote-form {
+  gap: 1.25rem;
+}
+
+.ci-vote-hint {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+/* Tabla de voto simplificada */
+.ci-vote-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ci-vote-table-head,
+.ci-vote-table-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 72px repeat(4, 36px);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ci-vote-table-head {
+  padding: 0 0.5rem 0.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.ci-vote-table-row {
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: background var(--transition-base);
+}
+
+.ci-vote-table-row:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.ci-vt-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ci-player-shirt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: rgba(168,218,220,0.1);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--third-color);
+  flex-shrink: 0;
+}
+
+.ci-player-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ci-score-input {
+  width: 64px;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: var(--radius-sm);
+  color: var(--input-text-dark);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  padding: 0.3rem 0.4rem;
+  text-align: center;
+  outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.ci-score-input:focus {
+  border-color: rgba(168,218,220,0.45);
+  box-shadow: 0 0 0 3px rgba(168,218,220,0.08);
+}
+
+/* Pearl toggle buttons */
+.ci-pearl-toggle {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0.35;
+  transition: opacity var(--transition-base), background var(--transition-base), border-color var(--transition-base);
+}
+
+.ci-pearl-toggle:hover {
+  opacity: 0.75;
+  background: rgba(255,255,255,0.06);
+}
+
+.ci-pearl-toggle--active {
+  opacity: 1;
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.ci-pearl-toggle--blocked {
+  opacity: 0.12;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ci-vote-submit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ci-vote-warning {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-muted-dark);
+}
+
+.ci-vote-submit {
+  align-self: flex-start;
+  background: var(--third-color);
+  color: var(--bg-deep);
+  font-family: var(--secondary-font);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-sm);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 2rem;
+  cursor: pointer;
+  transition: background var(--transition-base), box-shadow var(--transition-base);
+}
+
+.ci-vote-submit:hover:not(:disabled) {
+  background: #c8eced;
+  box-shadow: 0 8px 24px rgba(168,218,220,0.2);
+}
+
+.ci-vote-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Perlas del torneo ── */
+.ci-pearl-leaders {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+}
+
+.ci-pearl-leader-chip {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top-width: 2px;
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Header: emoji + label */
+.ci-plc-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ci-plc-emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ci-plc-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+/* Líder destacado */
+.ci-plc-top {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  justify-content: space-between;
+}
+
+.ci-plc-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.ci-plc-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ci-plc-avatar-initial {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--avatar-gradient);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-black);
+  color: var(--bg-deep);
+}
+
+.ci-plc-top-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.ci-plc-top-count {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  min-width: 24px;
+  text-align: center;
+}
+
+.ci-plc-rest-count {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-bold);
+  color: var(--text-subtle-dark);
+  flex-shrink: 0;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Resto de ganadores */
+.ci-plc-rest {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* avatar (36px) + gap (0.65rem) = offset para alinear con el nombre del líder */
+.ci-plc-rest-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-left: calc(36px + 0.65rem);
+}
+
+.ci-plc-rest-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ── Rankings con tabs ── */
+.ci-rankings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ci-stats-table-hint {
+  text-align: right;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+  letter-spacing: var(--ls-normal);
+  margin-bottom: 0.4rem;
+}
+
+.ci-stats-table-card { padding: 0; overflow: hidden; }
+
+.ci-stats-table-wrapper {
+  overflow-x: auto;
+  position: relative;
+}
+
+.ci-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Urbanist", var(--secondary-font);
+}
+
+.ci-st-col--name { width: 32%; }
+.ci-st-col--stat { width: 72px; }
+
+/* Header */
+.ci-st-th {
+  padding: 0.6rem 0.75rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-body-dark);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+  user-select: none;
+  overflow: hidden;
+}
+
+.ci-stats-table .ci-st-th--stat {
+  text-align: center;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.ci-stats-table .ci-st-th--stat span {
+  color: var(--text-bright);
+}
+
+.ci-stats-table .ci-st-th--stat:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.ci-stats-table .ci-st-th--active {
+  background: rgba(168,218,220,0.1);
+  font-weight: var(--fw-bold);
+}
+
+.ci-stats-table .ci-st-th--active span {
+  color: var(--third-color);
+}
+
+.ci-st-sort-icon {
+  display: inline-block;
+  margin-left: 0.2rem;
+  font-size: 0.6rem;
+  opacity: 0.4;
+  vertical-align: middle;
+}
+
+.ci-st-th--active .ci-st-sort-icon { opacity: 1; }
+
+/* Label full/short (responsive) */
+.ci-st-label-short { display: none; }
+
+/* Rows — zebra */
+.ci-st-row {
+  transition: background var(--transition-base);
+}
+.ci-st-row:nth-child(even) { background: rgba(255,255,255,0.025); }
+.ci-st-row:hover           { background: rgba(255,255,255,0.055); }
+
+.ci-st-row--first { background: rgba(168,218,220,0.06); }
+.ci-st-row--first:hover { background: rgba(168,218,220,0.09); }
+
+/* Colores semánticos — especificidad 0-2-0 para ganar a .ci-st-td--stat */
+.ci-st-td--stat.ci-st-val--goals        { color: var(--status-green);  }
+.ci-st-td--stat.ci-st-val--assists      { color: var(--color-chachos); }
+.ci-st-td--stat.ci-st-val--yellow_cards { color: var(--status-yellow); }
+.ci-st-td--stat.ci-st-val--red_cards    { color: var(--status-red);    }
+.ci-st-td--stat.ci-st-val--matches      { color: var(--text-bright);   }
+.ci-st-td--stat.ci-st-val--avg_points   { color: var(--text-bright); font-weight: var(--fw-bold); }
+.ci-st-td--stat.ci-st-val--zero         { color: rgba(255,255,255,0.12); }
+
+/* Cells */
+.ci-st-td {
+  padding: 0.65rem 0.75rem;
+  font-size: var(--text-sm);
+  overflow: hidden;
+}
+
+.ci-st-td--name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ci-st-td--stat {
+  text-align: center;
+  font-weight: var(--fw-regular);
+  color: var(--text-body-dark);
+}
+
+.ci-st-td--active {
+  background: rgba(168,218,220,0.06);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.ci-st-pos {
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--text-subtle-dark);
+  width: 14px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.ci-st-row--first .ci-st-pos { color: var(--text-subtle-dark); }
+
+.ci-st-name {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-regular);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Últimas fechas ── */
+.ci-recents-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ci-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+}
+
+.ci-recent-pill {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-decoration: none;
+  transition: background var(--transition-base), border-color var(--transition-base);
+}
+
+.ci-recent-pill:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.ci-recent-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ci-recent-rival {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ci-recent-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 1.5rem;
+  font-weight: var(--fw-black);
+  color: var(--text-bright);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.ci-recent-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+}
+
+.ci-recent-cta {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--third-color);
+  margin-top: 0.25rem;
+}
+
+/* ── Empty / loading ── */
+.ci-empty {
+  padding: 2rem;
+  text-align: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1100px) {
+  .ci { padding: var(--space-xl) var(--space-lg); }
+}
+
+@media (max-width: 900px) {
+  .ci-info-row       { grid-template-columns: 1fr; }
+  .ci-recent-grid    { grid-template-columns: repeat(2, 1fr); }
+  .ci-pearl-leaders  { grid-template-columns: repeat(2, 1fr); }
+  /* Tabla compacta en mobile — sin scroll */
+  .ci-stats-table-wrapper { overflow: visible; }
+
+  .ci-stats-table { table-layout: fixed; width: 100%; }
+
+  .ci-st-col--name { width: auto; }
+  .ci-st-col--stat { width: 35px; }
+
+  .ci-st-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ci-st-label-full  { display: none; }
+  .ci-st-label-short { display: inline; }
+  .ci-st-td, .ci-st-th { padding: 0.6rem 0.3rem; }
+  .ci-st-td--name, .ci-st-th--name { padding: 0.6rem 0.75rem; }
+}
+
+@media (max-width: 700px) {
+  .ci-results-body   { flex-direction: column; }
+  .ci-results-scores { width: 100%; }
+  .ci-results-pearls { width: 100%; order: -1; }
+}
+
+@media (max-width: 500px) {
+  .ci-pearl-leaders { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .ci { padding: var(--space-lg) var(--space-md); }
+  .ci-hero                { flex-direction: column; align-items: flex-start; gap: 1.25rem; padding: 1.5rem; }
+  .ci-hero-right          { align-items: flex-start; }
+  .ci-hero-score          { font-size: 2.75rem; }
+  .ci-vote-banner         { flex-direction: column; align-items: flex-start; }
+  .ci-vote-btn            { width: 100%; justify-content: center; text-align: center; }
+  .ci-ranking-tabs        { flex-wrap: wrap; }
+  .ci-vote-submit         { width: 100%; justify-content: center; text-align: center; }
+  .ci-recent-grid         { grid-template-columns: 1fr 1fr; }
+  .ci-vote-table-head,
+  .ci-vote-table-row      { grid-template-columns: 28px 1fr 60px repeat(4, 30px); gap: 0.35rem; }
+  .ci-mvp-row             { flex-direction: column; }
+  .ci-mvp-item            { width: 100%; }
+}
+

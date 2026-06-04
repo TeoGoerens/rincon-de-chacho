@@ -7,6 +7,19 @@ export default class MatchStatRepository extends baseRepository {
     super(MatchStat);
   }
 
+  // ---------- GET MATCH STATS BY ROUND ----------
+  getMatchStatByRound = async (roundId) => {
+    try {
+      const matchStats = await this.model.find({ round: roundId }).populate({
+        path: "player",
+        select: { first_name: 1, last_name: 1, shirt: 1, field_position: 1, _id: 1 },
+      });
+      return matchStats;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // ---------- GET MATCH STAT BY FILTER ----------
   getMatchStatFiltered = async (filter) => {
     try {

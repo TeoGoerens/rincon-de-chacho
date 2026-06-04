@@ -9,6 +9,86 @@ export default class TournamentRoundRepository extends baseRepository {
     super(TournamentRound);
   }
 
+  // ---------- GET CURRENT CONTEXT (last round + season rounds + last round stats) ----------
+  getCurrentContext = async () => {
+    try {
+      const lastRound = await this.model
+        .findOne()
+        .sort({ match_date: -1 })
+        .populate(["tournament", "rival", "players", "white_pearl", "vanilla_pearl", "ocher_pearl", "black_pearl"]);
+
+      if (!lastRound) return { lastRound: null, seasonRounds: [], lastRoundStats: [] };
+
+      const allPlayerIds = (lastRound.players ?? []).map((p) => p._id).filter(Boolean);
+
+      const rankingsPipeline = [
+        { $match: { tournament: lastRound.tournament._id } },
+        { $group: {
+          _id:                 "$player",
+          matches:             { $sum: 1 },
+          goals:               { $sum: "$goals" },
+          assists:             { $sum: "$assists" },
+          yellow_cards:        { $sum: "$yellow_cards" },
+          red_cards:           { $sum: "$red_cards" },
+          avg_points:          { $avg: "$points" },
+          white_pearl_count:   { $sum: { $cond: ["$white_pearl",   1, 0] } },
+          vanilla_pearl_count: { $sum: { $cond: ["$vanilla_pearl", 1, 0] } },
+          ocher_pearl_count:   { $sum: { $cond: ["$ocher_pearl",   1, 0] } },
+          black_pearl_count:   { $sum: { $cond: ["$black_pearl",   1, 0] } },
+        }},
+        { $match: { $or: [
+          { goals:        { $gt: 0 } },
+          { assists:      { $gt: 0 } },
+          { yellow_cards: { $gt: 0 } },
+          { red_cards:    { $gt: 0 } },
+          { avg_points:   { $ne: null } },
+        ]}},
+        { $lookup: { from: "players", localField: "_id", foreignField: "_id", as: "player" } },
+        { $unwind: "$player" },
+        { $project: {
+          _id:          0,
+          matches:      1,
+          goals:        1,
+          assists:      1,
+          yellow_cards: 1,
+          red_cards:    1,
+          avg_points:          { $round: ["$avg_points", 1] },
+          white_pearl_count:   1,
+          vanilla_pearl_count: 1,
+          ocher_pearl_count:   1,
+          black_pearl_count:   1,
+          "player._id":        1,
+          "player.first_name": 1,
+          "player.last_name":  1,
+        }},
+      ];
+
+      const [seasonRounds, lastRoundStats, playerUsers, rankings] = await Promise.all([
+        this.model
+          .find({ tournament: lastRound.tournament._id })
+          .sort({ match_date: -1 })
+          .select("_id win draw defeat score_chachos score_rival match_date complete_stats")
+          .populate({ path: "rival", select: "name" }),
+        MatchStat.find({ round: lastRound._id }).populate({
+          path: "player",
+          select: { first_name: 1, last_name: 1, shirt: 1, field_position: 1, _id: 1 },
+        }),
+        allPlayerIds.length > 0
+          ? User.find({ chacho_player: { $in: allPlayerIds } }, { chacho_player: 1, profile_picture: 1 })
+          : Promise.resolve([]),
+        MatchStat.aggregate(rankingsPipeline),
+      ]);
+
+      const playerPictures = Object.fromEntries(
+        playerUsers.map((u) => [u.chacho_player.toString(), u.profile_picture])
+      );
+
+      return { lastRound, seasonRounds, lastRoundStats, playerPictures, rankings };
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // ---------- GET ROUNDS BY TOURNAMENT ----------
   getTournamentRoundsByTournament = async (tournamentRoundId) => {
     try {

@@ -7,10 +7,11 @@ const router = Router();
 const controller = new TournamentRoundController();
 
 // ---------- GET ROUTES ----------
-router.get("/tournament/:pid", controller.getRoundsByTournament);
-router.get("/:pid", controller.getTournamentRoundById);
-router.get("/:pid/players", controller.getPlayersTournamentRoundById);
-router.get("/", controller.getAllTournamentRounds);
+router.get("/current-context", authMiddleware, controller.getCurrentContext);
+router.get("/tournament/:pid", authMiddleware, controller.getRoundsByTournament);
+router.get("/:pid", authMiddleware, controller.getTournamentRoundById);
+router.get("/:pid/players", authMiddleware, controller.getPlayersTournamentRoundById);
+router.get("/", authMiddleware, controller.getAllTournamentRounds);
 
 // ---------- POST ROUTES ----------
 router.post(
@@ -33,7 +34,7 @@ router.put(
   adminAuthMiddleware,
   controller.consolidatePearls
 );
-router.put("/:pid", controller.updateTournamentRoundById);
+router.put("/:pid", authMiddleware, adminAuthMiddleware, controller.updateTournamentRoundById);
 
 // ---------- DELETE ROUTES ----------
 router.delete(

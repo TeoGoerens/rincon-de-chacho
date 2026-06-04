@@ -142,7 +142,7 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--third-color) 0%, var(--secondary-color) 100%);
+  background: var(--avatar-gradient);
   display: flex;
   align-items: center;
   justify-content: center;

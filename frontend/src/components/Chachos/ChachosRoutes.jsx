@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 
+import ChachosInicio from "./ChachosInicio/ChachosInicio";
 import ChachosHomePanel from "./ChachosHome/ChachosHomePanel";
 import ChachosTournamentRounds from "./ChachosTournamentRounds/ChachosTournamentRounds";
 import PlayersVotes from "./ChachosTournamentRounds/Votes/PlayersVotes";
@@ -13,6 +14,7 @@ const ChachosRoutes = () => {
     <>
       <Routes>
         <Route>
+          <Route path="/inicio" Component={ChachosInicio} />
           <Route path="/" Component={ChachosHomePanel} />
 
           <Route path="/tournament-rounds/*">

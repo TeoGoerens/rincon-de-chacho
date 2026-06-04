@@ -126,7 +126,7 @@ nav.navbar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--third-color) 0%, var(--secondary-color) 100%);
+  background: var(--avatar-gradient);
   display: flex;
   align-items: center;
   justify-content: center;

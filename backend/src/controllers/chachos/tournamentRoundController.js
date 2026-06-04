@@ -5,6 +5,19 @@ import consolidatePearls from "../../helpers/consolidatePearls.js";
 const repository = new TournamentRoundRepository();
 
 export default class TournamentRoundController {
+  // ---------- GET CURRENT CONTEXT ----------
+  getCurrentContext = async (req, res, next) => {
+    try {
+      const context = await repository.getCurrentContext();
+      res.status(200).json({
+        message: "Current context has been properly retrieved",
+        ...context,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- GET ROUNDS BY TOURNAMENT ----------
   getRoundsByTournament = async (req, res, next) => {
     try {
