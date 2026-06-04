@@ -1124,7 +1124,7 @@
   overflow: hidden;
   position: sticky;
   top: 0;
-  background: var(--bg-card-dark);
+  background: #111111;
   z-index: 1;
 }
 
@@ -1180,7 +1180,8 @@
 .ci-st-td--stat.ci-st-val--yellow_cards { color: var(--status-yellow); }
 .ci-st-td--stat.ci-st-val--red_cards    { color: var(--status-red);    }
 .ci-st-td--stat.ci-st-val--matches      { color: var(--text-bright);   }
-.ci-st-td--stat.ci-st-val--avg_points   { color: var(--text-bright); font-weight: var(--fw-bold); }
+.ci-st-td--stat.ci-st-val--avg_points,
+.ci-st-td--stat.ci-st-val--avg_points.ci-st-td--active { color: var(--text-bright); font-weight: var(--fw-regular); }
 .ci-st-td--stat.ci-st-val--zero         { color: rgba(255,255,255,0.12); }
 
 /* Cells */
@@ -1324,7 +1325,7 @@
   .ci-stats-table { table-layout: fixed; width: 100%; }
 
   .ci-st-col--name { width: auto; }
-  .ci-st-col--stat { width: 35px; }
+  .ci-st-col--stat { width: 37px; }
 
   .ci-st-name {
     white-space: nowrap;
@@ -1335,7 +1336,7 @@
   .ci-st-label-full  { display: none; }
   .ci-st-label-short { display: inline; }
   .ci-st-td, .ci-st-th { padding: 0.6rem 0.3rem; }
-  .ci-st-td--name, .ci-st-th--name { padding: 0.6rem 0.75rem; }
+  .ci-st-td--name, .ci-st-th--name { padding: 0.6rem 0.2rem; }
 }
 
 @media (max-width: 700px) {
