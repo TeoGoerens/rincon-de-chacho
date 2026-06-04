@@ -14,6 +14,7 @@ import {
 const resetLoginAction = createAction("users/login-reset");
 const resetLogoutAction = createAction("users/logout-reset");
 export const resetAllUsersErrorsAction = createAction("users/errors-reset");
+export const updateLocalProfilePictureAction = createAction("users/update-profile-picture");
 
 // --------------------
 // ACTIONS
@@ -158,6 +159,26 @@ const userSlices = createSlice({
       state.serverError = undefined;
       state.resetTokenCreated = undefined;
       state.passwordReset = undefined;
+    });
+
+    // ---------- UPDATE PROFILE PICTURE LOCAL ----------
+    builder.addCase(updateLocalProfilePictureAction, (state, action) => {
+      if (state.userAuth?.userToDisplay) {
+        state.userAuth.userToDisplay.profile_picture = action.payload;
+      }
+      if (state.userAuth?.profile_picture !== undefined) {
+        state.userAuth.profile_picture = action.payload;
+      }
+      // Sincronizar localStorage
+      const stored = localStorage.getItem("userInfo");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed?.userToDisplay) parsed.userToDisplay.profile_picture = action.payload;
+          if (parsed?.profile_picture !== undefined) parsed.profile_picture = action.payload;
+          localStorage.setItem("userInfo", JSON.stringify(parsed));
+        } catch (_) {}
+      }
     });
 
     // ---------- USER REGISTER ----------

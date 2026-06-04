@@ -64,6 +64,15 @@
   flex-shrink: 0;
 }
 
+/* Foto de perfil dentro del avatar */
+.um-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-full);
+  display: block;
+}
+
 /* Nombre + email */
 .um-identity {
   display: flex;

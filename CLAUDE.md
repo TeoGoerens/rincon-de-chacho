@@ -25,6 +25,8 @@ El sitio está **en producción** en `https://elrincondechacho.com`. Fue constru
 
 > ⚠️ El proyecto mezcla Redux y React Query sin un criterio unificado. No cambiar esta arquitectura sin conversarlo primero.
 
+> 🎯 **Deuda técnica prioritaria — migración a React Query:** A largo plazo, todo el estado del servidor debe vivir en React Query y Redux debe eliminarse. El síntoma del problema es tener que sincronizar manualmente ambos sistemas (ej: despachar una acción Redux después de una mutación de React Query). La migración se hace sección por sección, en el mismo orden que el rediseño. El estado de auth (usuario logueado, JWT) es el último en migrar. **Recordar este objetivo en cada sesión** y priorizar React Query para cualquier feature nueva.
+
 ### Backend
 - **Node.js + Express** (`npm run dev` para desarrollo)
 - **MongoDB** con Mongoose (IDs son ObjectIDs, NO numéricos)

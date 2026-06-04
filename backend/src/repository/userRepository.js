@@ -1,6 +1,9 @@
 import User from "../dao/models/userModel.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import sharp from "sharp";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import s3Client from "../config/s3/s3Client.js";
 import baseRepository from "./baseRepository.js";
 import transport from "../config/email/nodemailer.js";
 
@@ -113,6 +116,54 @@ export default class UserRepository extends baseRepository {
     let mailSent = await transport.sendMail(mailOptions);
 
     return mailSent;
+  };
+
+  // ---------- UPDATE PROFILE PICTURE ----------
+  updateProfilePicture = async (userId, fileBuffer, mimetype) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error("Usuario no encontrado");
+
+    // Eliminar foto anterior de S3 si existe
+    if (user.profile_picture_key) {
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: user.profile_picture_key,
+        })
+      );
+    }
+
+    // Procesar imagen con Sharp: recortar a 400x400 y convertir a WebP
+    const processedBuffer = await sharp(fileBuffer)
+      .resize(512, 512, { fit: "cover", position: "center" })
+      .webp({ quality: 85 })
+      .toBuffer();
+
+    // Construir key con carpeta según entorno
+    const env = process.env.NODE_ENV === "production" ? "production" : "development";
+    const key = `users/${env}/${userId}_${Date.now()}.webp`;
+
+    // Subir a S3
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: key,
+        Body: processedBuffer,
+        ContentType: "image/webp",
+      })
+    );
+
+    // Construir URL pública
+    const url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+    // Actualizar usuario
+    user.profile_picture = url;
+    user.profile_picture_key = key;
+    await user.save();
+
+    return await User.findById(userId).select(
+      "-password -password_reset_token -password_reset_expires -password_changed_at"
+    );
   };
 
   // ---------- GET ALL USERS (ADMIN) ----------

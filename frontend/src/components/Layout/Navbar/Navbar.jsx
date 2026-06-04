@@ -66,8 +66,10 @@ const Navbar = () => {
   const handleToggleUserMenu = () => setUserMenuOpen(o => !o);
 
   const sectionName = useActiveSectionName();
-  const firstName = userAuth?.userToDisplay?.first_name ?? userAuth?.first_name ?? "";
-  const initial   = firstName.charAt(0).toUpperCase();
+  const firstName      = userAuth?.userToDisplay?.first_name      ?? userAuth?.first_name      ?? "";
+  const profilePicture = userAuth?.userToDisplay?.profile_picture ?? userAuth?.profile_picture ?? "";
+  const initial        = firstName.charAt(0).toUpperCase();
+  const hasPhoto       = profilePicture && !profilePicture.includes("pixabay.com");
 
   return (
     <>
@@ -97,7 +99,12 @@ const Navbar = () => {
         <div className="menu-container">
           {userAuth ? (
             <div className="user-credentials-container" onClick={handleToggleUserMenu}>
-              <div className="nav-user-avatar">{initial}</div>
+              <div className="nav-user-avatar">
+                {hasPhoto
+                  ? <img className="nav-user-avatar-img" src={profilePicture} alt={firstName} />
+                  : initial
+                }
+              </div>
               <span className="nav-user-name">{firstName}</span>
               <div className="nav-user-chevron"><IconChevron /></div>
             </div>

@@ -1,13 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { updateLocalProfilePictureAction } from "../../../redux/slices/users/usersSlices";
 import AdminMenu from "../AdminMenu";
 import fetchAllUsers from "../../../reactquery/admin/fetchAllUsers";
 import updateUser from "../../../reactquery/admin/updateUser";
 import fetchAllChachosPlayers from "../../../reactquery/chachos/fetchAllChachosPlayers";
 import fetchAllPodridaPlayers from "../../../reactquery/podrida/fetchAllPodridaPlayers";
 import fetchAllProdePlayers from "../../../reactquery/prode/fetchAllProdePlayers";
+import uploadProfilePicture from "../../../reactquery/users/uploadProfilePicture";
 import "./AdminUsersPanelStyles.css";
+
+const CameraIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+    <circle cx="12" cy="13" r="4"/>
+  </svg>
+);
+
+const hasCustomPhoto = (pic) => pic && !pic.includes("pixabay.com");
 
 const getLoginStatus = (lastLogin) => {
   if (!lastLogin) return { label: "Sin conexión", colorClass: "neutral" };
@@ -20,7 +32,41 @@ const getLoginStatus = (lastLogin) => {
 
 const AdminUsersPanel = () => {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { userAuth } = useSelector((store) => store.users);
+  const loggedInId = userAuth?.userToDisplay?._id ?? userAuth?._id ?? "";
   const [saving, setSaving] = useState({});
+  const fileInputRef = useRef(null);
+  const [uploadingFor, setUploadingFor] = useState(null);
+
+  const photoMutation = useMutation({
+    mutationFn: ({ id, file }) => uploadProfilePicture({ id, file }),
+    onSuccess: (data, variables) => {
+      setUploadingFor(null);
+      queryClient.invalidateQueries(["admin-users"]);
+      // Si el usuario actualizado es el mismo que está logueado, actualizar el store
+      if (variables.id === loggedInId) {
+        dispatch(updateLocalProfilePictureAction(data.updatedUser.profile_picture));
+      }
+      toast.success("Foto de perfil actualizada correctamente.");
+    },
+    onError: (err) => {
+      setUploadingFor(null);
+      toast.error(`Error al subir la foto: ${err.message}`);
+    },
+  });
+
+  const handleAvatarClick = (userId) => {
+    setUploadingFor(userId);
+    fileInputRef.current.value = "";
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file || !uploadingFor) return;
+    photoMutation.mutate({ id: uploadingFor, file });
+  };
 
   const { data: users, isLoading, isError } = useQuery({
     queryKey: ["admin-users"],
@@ -106,9 +152,23 @@ const AdminUsersPanel = () => {
                   const initial = user.first_name?.[0]?.toUpperCase() ?? "?";
                   return (
                     <tr key={user._id}>
-                      {/* Avatar */}
+                      {/* Avatar — desktop */}
                       <td>
-                        <div className="aup-avatar">{initial}</div>
+                        <div
+                          className={`aup-avatar-wrap${uploadingFor === user._id ? " aup-avatar-wrap--uploading" : ""}`}
+                          onClick={() => uploadingFor !== user._id && handleAvatarClick(user._id)}
+                        >
+                          {hasCustomPhoto(user.profile_picture)
+                            ? <img className="aup-avatar-img" src={user.profile_picture} alt={user.first_name} />
+                            : <div className="aup-avatar">{initial}</div>
+                          }
+                          <div className="aup-avatar-overlay">
+                            {uploadingFor === user._id
+                              ? <span className="aup-avatar-spinner" />
+                              : <CameraIcon />
+                            }
+                          </div>
+                        </div>
                       </td>
 
                       {/* Nombre — desktop muestra solo el nombre, mobile muestra card con avatar+email */}
@@ -117,7 +177,21 @@ const AdminUsersPanel = () => {
                           {user.first_name} {user.last_name}
                         </span>
                         <div className="aup-card-top">
-                          <div className="aup-avatar">{initial}</div>
+                          <div
+                            className={`aup-avatar-wrap${uploadingFor === user._id ? " aup-avatar-wrap--uploading" : ""}`}
+                            onClick={() => uploadingFor !== user._id && handleAvatarClick(user._id)}
+                          >
+                            {hasCustomPhoto(user.profile_picture)
+                              ? <img className="aup-avatar-img" src={user.profile_picture} alt={user.first_name} />
+                              : <div className="aup-avatar">{initial}</div>
+                            }
+                            <div className="aup-avatar-overlay">
+                              {uploadingFor === user._id
+                                ? <span className="aup-avatar-spinner" />
+                                : <CameraIcon />
+                              }
+                            </div>
+                          </div>
                           <div>
                             <div className="aup-cell-name">
                               {user.first_name} {user.last_name}
@@ -201,6 +275,13 @@ const AdminUsersPanel = () => {
           </div>
         )}
       </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
     </>
   );
 };

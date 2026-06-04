@@ -62,6 +62,25 @@
   max-height: calc(100vh - 280px);
   overflow-y: auto;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.aup-table-wrap::-webkit-scrollbar {
+  width: 4px;
+}
+
+.aup-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.aup-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+}
+
+.aup-table-wrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .aup-table {
@@ -109,6 +128,16 @@
 }
 
 /* ── Avatar ── */
+.aup-avatar-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
 .aup-avatar {
   width: 36px;
   height: 36px;
@@ -122,6 +151,61 @@
   font-weight: var(--fw-extrabold);
   color: var(--bg-deep);
   flex-shrink: 0;
+}
+
+.aup-avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  display: block;
+}
+
+/* Overlay con ícono de cámara */
+.aup-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+/* Desktop: mostrar en hover */
+.aup-avatar-wrap:hover .aup-avatar-overlay {
+  opacity: 1;
+}
+
+/* Touch devices: siempre visible */
+@media (hover: none) {
+  .aup-avatar-overlay {
+    opacity: 1;
+  }
+}
+
+/* Estado subiendo: overlay siempre visible */
+.aup-avatar-wrap--uploading {
+  cursor: default;
+}
+.aup-avatar-wrap--uploading .aup-avatar-overlay {
+  opacity: 1;
+}
+
+/* Spinner */
+@keyframes aup-spin {
+  to { transform: rotate(360deg); }
+}
+.aup-avatar-spinner {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: var(--radius-full);
+  animation: aup-spin 0.7s linear infinite;
 }
 
 /* En desktop: card-top oculto, mobile-label oculto, desktop-only visible */

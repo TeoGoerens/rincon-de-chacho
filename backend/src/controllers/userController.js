@@ -60,6 +60,31 @@ export default class UserController {
     }
   };
 
+  // ---------- UPDATE PROFILE PICTURE ----------
+  updateProfilePicture = async (req, res, next) => {
+    try {
+      if (!req.file) {
+        const error = new Error("No se recibió ninguna imagen");
+        error.status = 400;
+        return next(error);
+      }
+
+      const userId = req.params.id;
+      const updatedUser = await repository.updateProfilePicture(
+        userId,
+        req.file.buffer,
+        req.file.mimetype
+      );
+
+      res.status(200).json({
+        message: "Foto de perfil actualizada correctamente",
+        updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- GET ALL USERS (ADMIN) ----------
   getAllUsers = async (req, res, next) => {
     try {
