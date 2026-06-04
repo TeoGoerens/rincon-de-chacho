@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════════════════
+   SECTION NAV  —  El Rincón de Chacho
+   Barra de sub-navegación reutilizable entre secciones
+   Prefijo: snav
+   ═══════════════════════════════════════════════════════════ */
+
+/* Wrapper sticky — contiene el nav y el gradiente de fade */
+.snav-outer {
+  position: sticky;
+  top: 80px;
+  z-index: 800;
+  flex-shrink: 0;
+}
+
+/* Gradiente de fade derecho — solo en mobile */
+@media (max-width: 768px) {
+  .snav-outer::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 1px;
+    width: 48px;
+    background: linear-gradient(to right, transparent, var(--bg-panel));
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.snav {
+  background: var(--bg-panel);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.snav::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Tab ── */
+.snav-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 1.25rem;
+  height: 42px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+  transition: color var(--transition-base);
+  border-bottom: 2px solid transparent;
+}
+
+.snav-tab:hover {
+  color: var(--text-body-dark);
+}
+
+/* Tab activa */
+.snav-tab--active {
+  color: var(--text-bright);
+  font-weight: var(--fw-semibold);
+  border-bottom-color: var(--snav-accent, var(--third-color));
+}

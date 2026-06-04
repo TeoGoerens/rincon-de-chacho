@@ -59,6 +59,9 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-xl);
   overflow: hidden;
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
 .aup-table {
@@ -69,6 +72,9 @@
 .aup-table thead tr {
   background: var(--bg-panel);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .aup-table th {
@@ -78,9 +84,10 @@
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--text-subtle-dark);
-  padding: var(--space-sm) 1rem;
-  text-align: left;
+  padding: 0.65rem 0.75rem;
+  text-align: center;
   white-space: nowrap;
+  background: var(--bg-panel);
 }
 
 .aup-table tbody tr {
@@ -97,7 +104,7 @@
 }
 
 .aup-table td {
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 0.75rem;
   vertical-align: middle;
 }
 
@@ -174,10 +181,10 @@
   color: var(--text-body-dark);
   font-family: var(--secondary-font);
   font-size: var(--text-xs);
-  padding: 0.4rem 2rem 0.4rem 0.65rem;
+  padding: 0.35rem 1.75rem 0.35rem 0.55rem;
   width: 100%;
-  min-width: 155px;
-  max-width: 200px;
+  min-width: 130px;
+  max-width: 170px;
   cursor: pointer;
   outline: none;
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
@@ -188,9 +195,22 @@
   background-position: right 0.65rem center;
 }
 
+.aup-select option {
+  background: var(--bg-panel);
+  color: var(--text-body-dark);
+  font-weight: var(--fw-regular);
+}
+
 .aup-select:focus {
   border-color: rgba(168, 218, 220, 0.45);
   box-shadow: 0 0 0 3px rgba(168, 218, 220, 0.08);
+}
+
+.aup-select--assigned {
+  border-color: var(--status-green);
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--status-green);
+  font-weight: var(--fw-semibold);
 }
 
 .aup-select:disabled {
@@ -236,6 +256,9 @@
     border: none;
     border-radius: 0;
     overflow: visible;
+    max-height: none;
+    overflow-y: visible;
+    overflow-x: visible;
   }
 
   .aup-table thead {

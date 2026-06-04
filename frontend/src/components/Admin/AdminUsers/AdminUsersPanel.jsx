@@ -91,13 +91,13 @@ const AdminUsersPanel = () => {
             <table className="aup-table">
               <thead>
                 <tr>
-                  <th>Foto</th>
-                  <th>Nombre y Apellido</th>
+                  <th></th>
+                  <th>Nombre</th>
                   <th>Mail</th>
-                  <th>Último acceso</th>
-                  <th>Jugador Chachos</th>
-                  <th>Jugador Podrida</th>
-                  <th>Jugador Prode</th>
+                  <th>Acceso</th>
+                  <th>Chachos</th>
+                  <th>Podrida</th>
+                  <th>Prode</th>
                 </tr>
               </thead>
               <tbody>
@@ -145,7 +145,7 @@ const AdminUsersPanel = () => {
                         <div className="aup-mobile-field">
                           <span className="aup-mobile-label">Chachos</span>
                           <select
-                            className={`aup-select${saving[`${user._id}-chacho_player`] ? " aup-select--saving" : ""}`}
+                            className={`aup-select${saving[`${user._id}-chacho_player`] ? " aup-select--saving" : ""}${user.chacho_player?._id ? " aup-select--assigned" : ""}`}
                             disabled={!!saving[`${user._id}-chacho_player`]}
                             value={user.chacho_player?._id ?? ""}
                             onChange={(e) => handleAssign(user._id, "chacho_player", e.target.value)}
@@ -164,7 +164,7 @@ const AdminUsersPanel = () => {
                         <div className="aup-mobile-field">
                           <span className="aup-mobile-label">Podrida</span>
                           <select
-                            className={`aup-select${saving[`${user._id}-podrida_player`] ? " aup-select--saving" : ""}`}
+                            className={`aup-select${saving[`${user._id}-podrida_player`] ? " aup-select--saving" : ""}${user.podrida_player?._id ? " aup-select--assigned" : ""}`}
                             disabled={!!saving[`${user._id}-podrida_player`]}
                             value={user.podrida_player?._id ?? ""}
                             onChange={(e) => handleAssign(user._id, "podrida_player", e.target.value)}
@@ -181,7 +181,7 @@ const AdminUsersPanel = () => {
                         <div className="aup-mobile-field">
                           <span className="aup-mobile-label">Prode</span>
                           <select
-                            className={`aup-select${saving[`${user._id}-prode_player`] ? " aup-select--saving" : ""}`}
+                            className={`aup-select${saving[`${user._id}-prode_player`] ? " aup-select--saving" : ""}${user.prode_player?._id ? " aup-select--assigned" : ""}`}
                             disabled={!!saving[`${user._id}-prode_player`]}
                             value={user.prode_player?._id ?? ""}
                             onChange={(e) => handleAssign(user._id, "prode_player", e.target.value)}
