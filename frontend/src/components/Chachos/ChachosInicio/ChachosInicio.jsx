@@ -308,7 +308,6 @@ const ChachosInicio = () => {
 
                 <div className="ci-vote-table">
                   <div className="ci-vote-table-head">
-                    <span></span>
                     <span>Jugador</span>
                     <span className="ci-vt-center">Puntaje</span>
                     {PEARL_OPTIONS.map((p) => (
@@ -318,19 +317,20 @@ const ChachosInicio = () => {
 
                   {players.map((player) => (
                     <div key={player._id} className="ci-vote-table-row">
-                      <span className="ci-player-shirt">{player.shirt}</span>
                       <span className="ci-player-name">{player.first_name} {player.last_name}</span>
                       <div className="ci-vt-center">
-                        <input
-                          type="number"
+                        <select
                           className="ci-score-input"
-                          min="1" max="10" step="0.5"
-                          placeholder="–"
                           value={scores[player._id] ?? ""}
                           onChange={(e) =>
                             setScores((prev) => ({ ...prev, [player._id]: e.target.value }))
                           }
-                        />
+                        >
+                          <option value="" disabled>–</option>
+                          {[1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10].map((v) => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
                       </div>
                       {PEARL_OPTIONS.map((pearl) => {
                         const selected = pearls[pearl.key] === player._id;
@@ -538,9 +538,11 @@ const ChachosInicio = () => {
                         </div>
                         <div className="ci-recent-score">{round.score_chachos} - {round.score_rival}</div>
                         <div className="ci-recent-date">{fmtDateShort(round.match_date)}</div>
-                        <div className="ci-recent-cta">
-                          {round.complete_stats ? "Ver detalle →" : "Ver fechas →"}
-                        </div>
+                        {!round.open_for_vote && (
+                          <div className="ci-recent-cta">
+                            {round.complete_stats ? "Ver detalle →" : "Ver fechas →"}
+                          </div>
+                        )}
                       </Link>
                     );
                   })}

@@ -67,7 +67,7 @@ export default class TournamentRoundRepository extends baseRepository {
         this.model
           .find({ tournament: lastRound.tournament._id })
           .sort({ match_date: -1 })
-          .select("_id win draw defeat score_chachos score_rival match_date complete_stats")
+          .select("_id win draw defeat score_chachos score_rival match_date complete_stats open_for_vote")
           .populate({ path: "rival", select: "name" }),
         MatchStat.find({ round: lastRound._id }).populate({
           path: "player",
