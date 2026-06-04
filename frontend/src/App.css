@@ -77,6 +77,12 @@
   --transition-slow:   0.45s ease;
   --transition-panel:  0.38s cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* ── Colores de estado (semáforo) ── */
+  --status-green:   #22c55e;
+  --status-yellow:  #f59e0b;
+  --status-red:     var(--fourth-color);
+  --status-neutral: #566878;
+
   /* ── Espaciado base ── */
   --space-xs:   0.5rem;
   --space-sm:   0.875rem;

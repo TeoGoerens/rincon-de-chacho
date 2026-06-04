@@ -115,6 +115,34 @@ export default class UserRepository extends baseRepository {
     return mailSent;
   };
 
+  // ---------- GET ALL USERS (ADMIN) ----------
+  getAllUsers = async () => {
+    return await User.find()
+      .select("-password -password_reset_token -password_reset_expires -password_changed_at")
+      .populate("chacho_player", "first_name last_name shirt")
+      .populate("podrida_player", "name")
+      .populate("prode_player", "name")
+      .sort({ last_name: 1 });
+  };
+
+  // ---------- UPDATE USER (ADMIN) ----------
+  updateUser = async (userId, data) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error("Usuario no encontrado");
+
+    const allowed = ["first_name", "last_name", "role", "is_admin", "chacho_player", "podrida_player", "prode_player"];
+    allowed.forEach((field) => {
+      if (data[field] !== undefined) user[field] = data[field];
+    });
+
+    await user.save();
+    return await User.findById(userId)
+      .select("-password -password_reset_token -password_reset_expires -password_changed_at")
+      .populate("chacho_player", "first_name last_name shirt")
+      .populate("podrida_player", "name")
+      .populate("prode_player", "name");
+  };
+
   // ---------- VALIDATE TOKEN RECEIVED AND RESET PASSWORD ----------
   passwordReset = async (token, password) => {
     //Hash token and password provided

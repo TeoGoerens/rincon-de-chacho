@@ -40,6 +40,21 @@ const userSchema = new mongoose.Schema(
     password_reset_expires: { type: Date, default: null },
     password_changed_at: { type: Date, default: null },
     last_login: { type: Date, default: null },
+    chacho_player: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Player",
+      default: null,
+    },
+    podrida_player: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PodridaPlayer",
+      default: null,
+    },
+    prode_player: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProdePlayer",
+      default: null,
+    },
   },
   {
     toJSON: {
