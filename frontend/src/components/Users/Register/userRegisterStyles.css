@@ -78,14 +78,14 @@
   font-weight: 400;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: #2e3e4e;
+  color: var(--text-subtle-dark);
   background: transparent;
 }
 .rp-bottom-bar-year {
   font-family: var(--secondary-font);
   font-size: 0.78rem;
   font-weight: 600;
-  color: #2e3e4e;
+  color: var(--text-subtle-dark);
   background: transparent;
   letter-spacing: 0.1em;
 }
@@ -113,7 +113,7 @@
   font-weight: 600;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #a8dadc;
+  color: var(--third-color);
   background: transparent;
   animation: rp-fade-up 0.6s ease 0.1s both;
 }
@@ -122,7 +122,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #a8dadc;
+  background: var(--third-color);
   flex-shrink: 0;
   animation: rp-glow-pulse 2.5s ease infinite 1s;
 }
@@ -162,7 +162,7 @@
   font-family: var(--secondary-font);
   font-size: 0.85rem;
   font-weight: 400;
-  color: #5a6a78;
+  color: var(--text-muted-dark);
   line-height: 1.6;
   margin-top: 1rem;
   max-width: 320px;
@@ -186,7 +186,7 @@
 }
 .rp-perk-icon {
   font-size: 1rem;
-  color: #a8dadc;
+  color: var(--third-color);
   background: transparent;
   flex-shrink: 0;
 }
@@ -194,7 +194,7 @@
   font-family: var(--secondary-font);
   font-size: 0.82rem;
   font-weight: 400;
-  color: #4a5a68;
+  color: var(--text-subtle-dark);
   background: transparent;
 }
 
@@ -230,14 +230,14 @@
   font-family: "Urbanist", var(--secondary-font);
   font-size: 1.4rem;
   font-weight: 700;
-  color: #e8e8e8;
+  color: var(--text-bright);
   background: transparent;
   letter-spacing: -0.02em;
 }
 .rp-card-subtitle {
   font-family: var(--secondary-font);
   font-size: 0.82rem;
-  color: #4a5a68;
+  color: var(--text-subtle-dark);
   margin-top: 0.35rem;
   background: transparent;
 }
@@ -268,7 +268,7 @@
   font-family: var(--secondary-font);
   font-size: 0.78rem;
   font-weight: 600;
-  color: #6a7a88;
+  color: var(--text-label-dark);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   background: transparent;
@@ -276,17 +276,17 @@
 
 .rp-input {
   width: 100%;
-  background: #0d0d0d;
+  background: var(--bg-panel);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 10px;
   padding: 0.62rem 1rem;
   font-family: var(--secondary-font);
   font-size: 0.88rem;
-  color: #d0d8e0;
+  color: var(--input-text-dark);
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.rp-input::placeholder { color: #3a4a58; }
+.rp-input::placeholder { color: var(--input-placeholder); }
 .rp-input:focus {
   border-color: rgba(168, 218, 220, 0.45);
   box-shadow: 0 0 0 3px rgba(168, 218, 220, 0.08);
@@ -317,8 +317,8 @@
 .rp-submit {
   width: 100%;
   padding: 0.85rem;
-  background: #a8dadc;
-  color: #0a0a0a;
+  background: var(--third-color);
+  color: var(--bg-deep);
   font-family: var(--secondary-font);
   font-weight: 700;
   font-size: 0.85rem;
@@ -338,12 +338,12 @@
 .rp-login-link {
   font-family: var(--secondary-font);
   font-size: 0.8rem;
-  color: #3a4a58;
+  color: var(--text-subtle-dark);
   text-align: center;
   background: transparent;
 }
 .rp-login-link a {
-  color: #a8dadc;
+  color: var(--third-color);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;

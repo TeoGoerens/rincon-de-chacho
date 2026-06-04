@@ -18,7 +18,7 @@ nav.navbar {
   font-size: 1.5rem;
   border: none;
   background: transparent;
-  color: #7a8a98;
+  color: var(--text-muted-dark);
   border-radius: 8px;
   padding: 4px;
   cursor: pointer;
@@ -68,7 +68,7 @@ nav.navbar {
 .logo-text {
   font-size: 1.3rem;
   font-family: var(--accent-font);
-  color: #d0d8e0;
+  color: var(--text-body-dark);
   background-color: transparent;
 }
 .logo-text span {
@@ -90,7 +90,7 @@ nav.navbar {
   font-family: var(--secondary-font);
   font-size: 0.8rem;
   font-weight: 500;
-  color: #4a5a68;
+  color: var(--text-subtle-dark);
   background: transparent;
   white-space: nowrap;
   letter-spacing: 0.02em;
@@ -126,14 +126,14 @@ nav.navbar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
+  background: linear-gradient(135deg, var(--third-color) 0%, var(--secondary-color) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: "Urbanist", var(--secondary-font);
   font-size: 0.78rem;
   font-weight: 800;
-  color: #0a0a0a;
+  color: var(--bg-deep);
   flex-shrink: 0;
 }
 
@@ -141,14 +141,14 @@ nav.navbar {
   font-family: var(--secondary-font);
   font-size: 0.82rem;
   font-weight: 500;
-  color: #8a9aaa;
+  color: var(--text-label-dark);
   background: transparent;
 }
 
 .nav-user-chevron {
   display: flex;
   align-items: center;
-  color: #8a9aaa;
+  color: var(--text-label-dark);
   background: transparent;
 }
 .nav-user-chevron svg {
@@ -188,8 +188,8 @@ nav.navbar {
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  color: #0a0a0a;
-  background: #a8dadc;
+  color: var(--bg-deep);
+  background: var(--third-color);
   border: 1px solid transparent;
   font-family: var(--secondary-font);
   font-size: 0.82rem;

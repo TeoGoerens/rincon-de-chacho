@@ -23,6 +23,67 @@
   --color-prode:    #f97316;
   --color-cronicas: #e63946;
   --color-admin:    #6b8a9a;
+
+  /* ── Fondos oscuros ── */
+  --bg-deep:        #0a0a0a;
+  --bg-panel:       #0d0d0d;
+  --bg-card-dark:   #111111;
+
+  /* ── Tipografía sobre fondos oscuros ── */
+  --text-bright:       #e8e8e8;
+  --text-body-dark:    #c0cdd8;
+  --text-label-dark:   #98a8b8;  /* ratio 8.13:1 vs --bg-deep */
+  --text-muted-dark:   #94a4b4;  /* ratio 7.75:1 vs --bg-deep */
+  --text-subtle-dark:  #909fb0;  /* ratio 7.32:1 vs --bg-deep */
+  --input-text-dark:   #d0d8e0;
+  --input-placeholder: #4a5a6a;
+
+  /* ── Font weights ── */
+  --fw-regular:    400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+  --fw-extrabold:  800;
+  --fw-black:      900;
+
+  /* ── Font sizes (escala UI) ── */
+  --text-2xs:  0.65rem;   /* meta, bar text, stat labels */
+  --text-xs:   0.75rem;   /* errores de campo, links secundarios */
+  --text-sm:   0.82rem;   /* body small, subtítulos de card */
+  --text-base: 0.88rem;   /* body estándar, inputs */
+  --text-md:   1rem;      /* base */
+  --text-lg:   1.4rem;    /* títulos de card, títulos de form */
+  --text-xl:   1.75rem;   /* títulos de sección medianos */
+
+  /* ── Letter spacing ── */
+  --ls-tight:    0.02em;  /* títulos, nombres */
+  --ls-normal:   0.04em;  /* labels de formulario */
+  --ls-wide:     0.14em;  /* stat labels uppercase */
+  --ls-wider:    0.25em;  /* bar text, bottom bar */
+  --ls-widest:   0.3em;   /* eyebrows, sección tags */
+
+  /* ── Border radius ── */
+  --radius-xs:   6px;     /* chips pequeños */
+  --radius-sm:   8px;     /* botones, badges, iconos de acción */
+  --radius-md:   10px;    /* inputs */
+  --radius-lg:   12px;    /* cards mobile */
+  --radius-xl:   16px;    /* cards desktop, panels */
+  --radius-2xl:  20px;    /* elementos grandes */
+  --radius-full: 9999px;  /* pills, avatares */
+
+  /* ── Transiciones ── */
+  --transition-fast:   0.2s ease;
+  --transition-base:   0.3s ease;
+  --transition-slow:   0.45s ease;
+  --transition-panel:  0.38s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Espaciado base ── */
+  --space-xs:   0.5rem;
+  --space-sm:   0.875rem;
+  --space-md:   1.25rem;
+  --space-lg:   2rem;
+  --space-xl:   3rem;
+  --space-2xl:  5rem;
 }
 
 * {
