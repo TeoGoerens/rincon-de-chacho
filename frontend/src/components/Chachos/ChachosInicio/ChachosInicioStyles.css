@@ -1093,7 +1093,10 @@
 
 .ci-stats-table-wrapper {
   overflow-x: auto;
+  overflow-y: auto;
   position: relative;
+  /* header ~2.3rem + 10 filas × 2.35rem cada una */
+  max-height: calc(2.3rem + 10 * 2.35rem);
 }
 
 .ci-stats-table {
@@ -1119,6 +1122,10 @@
   white-space: nowrap;
   user-select: none;
   overflow: hidden;
+  position: sticky;
+  top: 0;
+  background: var(--bg-card-dark);
+  z-index: 1;
 }
 
 .ci-stats-table .ci-st-th--stat {
@@ -1312,8 +1319,7 @@
   .ci-info-row       { grid-template-columns: 1fr; }
   .ci-recent-grid    { grid-template-columns: repeat(2, 1fr); }
   .ci-pearl-leaders  { grid-template-columns: repeat(2, 1fr); }
-  /* Tabla compacta en mobile — sin scroll */
-  .ci-stats-table-wrapper { overflow: visible; }
+  .ci-stats-table-wrapper { overflow-x: auto; overflow-y: auto; }
 
   .ci-stats-table { table-layout: fixed; width: 100%; }
 
