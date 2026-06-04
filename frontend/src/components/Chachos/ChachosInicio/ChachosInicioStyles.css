@@ -1143,7 +1143,7 @@
 }
 
 .ci-stats-table .ci-st-th--active {
-  background: rgba(168,218,220,0.1);
+  background: #1a2a2b;
   font-weight: var(--fw-bold);
 }
 
