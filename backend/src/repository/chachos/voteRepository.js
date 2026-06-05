@@ -350,7 +350,7 @@ export default class VoteRepository extends baseRepository {
       { $unwind: "$evaluation" },
       { $match: { $expr: { $ne: ["$evaluation.player", "$voterUser.chacho_player"] } } },
       { $group: { _id: "$voterUser.chacho_player", avg: { $avg: "$evaluation.points" }, count: { $sum: 1 } } },
-      { $match: { count: { $gte: 3 } } },
+      { $match: { count: { $gte: 5 } } },
       playerLookup("_id"),
       { $unwind: "$player" },
       { $project: { avg: 1, "player.first_name": 1, "player.last_name": 1 } },
@@ -425,7 +425,7 @@ export default class VoteRepository extends baseRepository {
         pct: matchMap[v._id.toString()] > 0 ? Math.round((v.voteCount / matchMap[v._id.toString()]) * 100) : 0,
       }))
       .filter((r) => r.matchCount >= 1);
-    activityRows.sort((a, b) => b.pct - a.pct);
+    activityRows.sort((a, b) => b.voteCount - a.voteCount);
 
     const top3ActiveIds      = activityRows.slice(0, 3).map((r) => r.playerId);
     const top3LeastActiveIds = activityRows.slice(-3).reverse().map((r) => r.playerId);
@@ -434,7 +434,7 @@ export default class VoteRepository extends baseRepository {
     const activityPlayerMap = Object.fromEntries(activityPlayers.map((p) => [p._id.toString(), p]));
 
     const buildActivityList = (rows) => rows
-      .map((r) => ({ player: activityPlayerMap[r.playerId.toString()], pct: r.pct }))
+      .map((r) => ({ player: activityPlayerMap[r.playerId.toString()], pct: r.pct, voteCount: r.voteCount }))
       .filter((r) => r.player);
 
     const mostActiveListRaw  = buildActivityList(activityRows.slice(0, 3));

@@ -749,6 +749,8 @@
   flex-direction: column;
   padding: 1.1rem 1.25rem 1.1rem;
   position: relative;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .ce-alter-side--pos { background: rgba(168,218,220,0.03); }
