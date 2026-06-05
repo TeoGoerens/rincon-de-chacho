@@ -953,18 +953,18 @@
   padding: 1rem 1.1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
-/* Header: emoji + label */
+/* Header: label + emoji inline */
 .ci-plc-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .ci-plc-emoji {
-  font-size: 1.1rem;
+  font-size: 0.85rem;
   line-height: 1;
   flex-shrink: 0;
 }
@@ -978,7 +978,7 @@
   color: var(--text-subtle-dark);
 }
 
-/* Líder destacado */
+/* Líder */
 .ci-plc-top {
   display: flex;
   align-items: center;
@@ -1026,35 +1026,22 @@
 
 .ci-plc-top-count {
   font-family: "Urbanist", var(--secondary-font);
-  font-size: var(--text-2xs);
+  font-size: var(--text-lg);
   font-weight: var(--fw-black);
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-full);
   flex-shrink: 0;
-  min-width: 24px;
-  text-align: center;
-}
-
-.ci-plc-rest-count {
-  font-family: "Urbanist", var(--secondary-font);
-  font-size: var(--text-2xs);
-  font-weight: var(--fw-bold);
-  color: var(--text-subtle-dark);
-  flex-shrink: 0;
-  min-width: 24px;
-  text-align: center;
+  line-height: 1;
 }
 
 /* Resto de ganadores */
 .ci-plc-rest {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.25rem;
   padding-top: 0.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* avatar (36px) + gap (0.65rem) = offset para alinear con el nombre del líder */
+/* avatar (36px) + gap (0.65rem) = offset para alinear con nombre del líder */
 .ci-plc-rest-row {
   display: flex;
   align-items: center;
@@ -1065,7 +1052,7 @@
 
 .ci-plc-rest-name {
   font-family: "Urbanist", var(--secondary-font);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: var(--fw-medium);
   color: var(--text-muted-dark);
   white-space: nowrap;
@@ -1073,12 +1060,87 @@
   text-overflow: ellipsis;
 }
 
+.ci-plc-rest-count {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-subtle-dark);
+  flex-shrink: 0;
+  min-width: 16px;
+  text-align: right;
+}
+
+.ci-plc-rest .ci-plc-expand-btn {
+  background: none;
+  border: none;
+  padding: 0.15rem 0;
+  margin-top: 0.875rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  color: var(--text-subtle-dark);
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  transition: color var(--transition-base);
+}
+
+.ci-plc-rest .ci-plc-expand-btn:hover { color: var(--text-body-dark); }
+
+
+/* ── Tabla mobile stats ── */
+.ci-mobile-stats {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ci-mstat-pills {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.ci-mstat-pill {
+  font-family: var(--secondary-font);
+  font-size: 0.6rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-muted-dark);
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base);
+}
+
+.ci-mstat-pill:hover {
+  color: var(--text-bright);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.ci-mstat-pills .ci-mstat-pill--active {
+  color: var(--bg-deep);
+  border-color: var(--third-color);
+  background: var(--third-color);
+}
+
+.ci-st-td--mstat-avg {
+  color: var(--text-subtle-dark);
+}
 
 /* ── Rankings con tabs ── */
 .ci-rankings-section {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-top: var(--space-sm);
 }
 
 .ci-stats-table-hint {
@@ -1322,6 +1384,12 @@
   .ci-info-row       { grid-template-columns: 1fr; }
   .ci-recent-grid    { grid-template-columns: repeat(2, 1fr); }
   .ci-pearl-leaders  { grid-template-columns: repeat(2, 1fr); }
+
+  /* Tabla mobile visible / desktop oculta */
+  .ci-mobile-stats { display: flex; }
+  .ci-stats-table-hint,
+  .ci-rankings-section > .ci-card { display: none; }
+
   .ci-stats-table-wrapper { overflow-x: auto; overflow-y: auto; }
 
   .ci-stats-table { table-layout: fixed; width: 100%; }
@@ -1337,8 +1405,18 @@
 
   .ci-st-label-full  { display: none; }
   .ci-st-label-short { display: inline; }
-  .ci-st-td, .ci-st-th { padding: 0.5rem 0.3rem; font-size: var(--text-xs); }
-  .ci-st-td--name, .ci-st-th--name { padding: 0.5rem 0.2rem; }
+  /* Tabla desktop — oculta en mobile, sus estilos no aplican aquí */
+  .ci-rankings-section > .ci-stats-table-hint { display: none; }
+
+  /* Mobile table — tipografía coherente con sección de resultados */
+  .ci-mobile-stats .ci-st-th { font-size: var(--text-2xs); background: #111111; pointer-events: none; }
+  .ci-mobile-stats .ci-st-th:hover { background: #111111; }
+  .ci-mobile-stats .ci-st-th--active,
+  .ci-mobile-stats .ci-st-th--active:hover { background: #1a2a2b; }
+  .ci-mobile-stats .ci-st-td { font-size: var(--text-xs); padding: 0.5rem 0.3rem; }
+  .ci-mobile-stats .ci-st-td--name { padding: 0.5rem 0.2rem; }
+  .ci-mobile-stats .ci-st-th { padding: 0.5rem 0.3rem; }
+  .ci-mobile-stats .ci-st-th--name { padding: 0.5rem 0.2rem; }
 }
 
 @media (max-width: 700px) {

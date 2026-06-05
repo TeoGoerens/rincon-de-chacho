@@ -10,6 +10,14 @@ import { getUserId }            from "../../../reactquery/getUserInformation";
 import "./ChachosInicioStyles.css";
 
 /* ─── Constantes ─── */
+const MOBILE_STAT_OPTIONS = [
+  { key: "goals",        label: "Goles",       short: "GOL" },
+  { key: "assists",      label: "Asistencias", short: "AST" },
+  { key: "yellow_cards", label: "Amarillas",   short: "AM"  },
+  { key: "red_cards",    label: "Rojas",       short: "ROJ" },
+  { key: "avg_points",   label: "Puntaje",     short: "PTS" },
+];
+
 const PEARL_OPTIONS = [
   { key: "white_pearl",   emoji: "⚪", label: "Perla Blanca"  },
   { key: "vanilla_pearl", emoji: "🟡", label: "Perla Vainilla" },
@@ -53,6 +61,9 @@ const scrollToVote = () => {
    ═══════════════════════════════════════════════════════════ */
 const ChachosInicio = () => {
   const [sortKey, setSortKey] = useState("avg_points");
+  const [mobileStat, setMobileStat] = useState("goals");
+  const [expandedPearls, setExpandedPearls] = useState({});
+  const togglePearlExpand = (k) => setExpandedPearls((prev) => ({ ...prev, [k]: !prev[k] }));
   const queryClient = useQueryClient();
   const userId = getUserId();
 
@@ -592,11 +603,13 @@ const ChachosInicio = () => {
                       background: `linear-gradient(160deg, color-mix(in srgb, ${color} 6%, var(--bg-card-dark)) 0%, var(--bg-card-dark) 60%)`,
                     }}
                   >
+                    {/* Header: label + emoji inline */}
                     <div className="ci-plc-header">
-                      <span className="ci-plc-emoji">{emoji}</span>
                       <span className="ci-plc-label">{label}</span>
+                      <span className="ci-plc-emoji">{emoji}</span>
                     </div>
 
+                    {/* Líder */}
                     <div className="ci-plc-top">
                       <div className="ci-plc-avatar">
                         {topHasPhoto
@@ -605,25 +618,119 @@ const ChachosInicio = () => {
                         }
                       </div>
                       <span className="ci-plc-top-name">{top.player?.first_name} {top.player?.last_name}</span>
-                      <span className="ci-plc-top-count" style={{ color, background: `${color}18` }}>{top[key]}</span>
+                      <span className="ci-plc-top-count" style={{ color }}>{top[key]}</span>
                     </div>
 
-                    {rest.length > 0 && (
-                      <div className="ci-plc-rest">
-                        {rest.map((r) => (
-                          <div key={r.player?._id} className="ci-plc-rest-row">
-                            <span className="ci-plc-rest-name">{r.player?.first_name} {r.player?.last_name}</span>
-                            <span className="ci-plc-rest-count">{r[key]}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    {/* Resto */}
+                    {rest.length > 0 && (() => {
+                      const MAX_VISIBLE = 4;
+                      const isExpanded = !!expandedPearls[key];
+                      const visible = isExpanded ? rest : rest.slice(0, MAX_VISIBLE);
+                      const hasMore = rest.length > MAX_VISIBLE;
+                      return (
+                        <div className="ci-plc-rest">
+                          {visible.map((r) => (
+                            <div key={r.player?._id} className="ci-plc-rest-row">
+                              <span className="ci-plc-rest-name">{r.player?.first_name} {r.player?.last_name}</span>
+                              <span className="ci-plc-rest-count">{r[key]}</span>
+                            </div>
+                          ))}
+                          {hasMore && (
+                            <button
+                              type="button"
+                              className="ci-plc-expand-btn"
+                              onClick={() => togglePearlExpand(key)}
+                            >
+                              {isExpanded
+                                ? "Ver menos ↑"
+                                : `Ver ${rest.length - MAX_VISIBLE} más ↓`}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })}
             </div>
           )}
 
+          {/* Pills + tabla mobile */}
+          {rankingsByCategory.length > 0 && (
+            <div className="ci-mobile-stats">
+              <div className="ci-mstat-pills">
+                {MOBILE_STAT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    className={`ci-mstat-pill${mobileStat === opt.key ? " ci-mstat-pill--active" : ""}`}
+                    onClick={() => setMobileStat(opt.key)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <div className="ci-card ci-stats-table-card">
+                <div className="ci-stats-table-wrapper">
+                  <table className="ci-stats-table">
+                    <colgroup>
+                      <col style={{ width: "auto" }} />
+                      <col style={{ width: "44px" }} />
+                      <col style={{ width: "44px" }} />
+                      {mobileStat !== "avg_points" && <col style={{ width: "44px" }} />}
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th className="ci-st-th ci-st-th--name">Jugador</th>
+                        <th className="ci-st-th ci-st-th--stat">PJ</th>
+                        <th className="ci-st-th ci-st-th--stat ci-st-th--active">
+                          {MOBILE_STAT_OPTIONS.find((o) => o.key === mobileStat)?.short}
+                        </th>
+                        {mobileStat !== "avg_points" && (
+                          <th className="ci-st-th ci-st-th--stat">AVG</th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...rankingsByCategory]
+                        .sort((a, b) => {
+                          const diff = (b[mobileStat] ?? 0) - (a[mobileStat] ?? 0);
+                          if (diff !== 0) return diff;
+                          const nameA = `${a.player?.last_name} ${a.player?.first_name}`;
+                          const nameB = `${b.player?.last_name} ${b.player?.first_name}`;
+                          return nameA.localeCompare(nameB, "es");
+                        })
+                        .map((item, i) => {
+                          const val = item[mobileStat];
+                          const avg = mobileStat !== "avg_points" && item.matches > 0
+                            ? (val / item.matches).toFixed(2)
+                            : null;
+                          return (
+                            <tr key={item.player?._id ?? i} className={`ci-st-row${i === 0 ? " ci-st-row--first" : ""}`}>
+                              <td className="ci-st-td ci-st-td--name">
+                                <span className="ci-st-pos">{i + 1}</span>
+                                <span className="ci-st-name">{item.player?.first_name} {item.player?.last_name}</span>
+                              </td>
+                              <td className="ci-st-td ci-st-td--stat">{item.matches}</td>
+                              <td className={`ci-st-td ci-st-td--stat ci-st-td--active${val === 0 ? " ci-st-val--zero" : ` ci-st-val--${mobileStat}`}`}>
+                                {val != null ? (mobileStat === "avg_points" ? val.toFixed(2) : val) : "—"}
+                              </td>
+                              {mobileStat !== "avg_points" && (
+                                <td className="ci-st-td ci-st-td--stat ci-st-td--mstat-avg">
+                                  {avg ?? "—"}
+                                </td>
+                              )}
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tabla desktop */}
           <p className="ci-stats-table-hint">↕ Tocá un encabezado para ordenar</p>
           <div className="ci-card ci-stats-table-card">
             {(rankingsByCategory ?? []).length > 0 ? (() => {
