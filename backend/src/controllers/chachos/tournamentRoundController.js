@@ -18,13 +18,23 @@ export default class TournamentRoundController {
     }
   };
 
+  // ---------- GET STATS SUMMARY ----------
+  getStatsSummary = async (req, res, next) => {
+    try {
+      const tournamentId = req.query.tournament || null;
+      const summary = await repository.getStatsSummary(tournamentId);
+      res.status(200).json({ message: "Stats summary retrieved", ...summary });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- GET ROUNDS BY TOURNAMENT ----------
   getRoundsByTournament = async (req, res, next) => {
     try {
       const tournamentId = req.params.pid;
-      const tournamentRounds = await repository.getTournamentRoundsByTournament(
-        tournamentRoundId
-      );
+      const tournamentRounds =
+        await repository.getTournamentRoundsByTournament(tournamentRoundId);
       res.status(200).json({
         message: `Todas las fechas correspondientes al torneo de id ${tournamentId} han sido correctamente recuperadas de la base de datos`,
         tournamentRounds,
@@ -115,7 +125,7 @@ export default class TournamentRoundController {
 
       const { win, draw, defeat } = await defineMatchOutcome(
         tournamentRound.score_chachos,
-        tournamentRound.score_rival
+        tournamentRound.score_rival,
       );
 
       tournamentRound.win = win;
@@ -124,7 +134,7 @@ export default class TournamentRoundController {
 
       const tournamentRoundLoaded = await repository.baseCreate(
         tournamentRound,
-        "match_date"
+        "match_date",
       );
 
       res.status(200).json({
@@ -187,14 +197,14 @@ export default class TournamentRoundController {
           whitePearl,
           vanillaPearl,
           ocherPearl,
-          blackPearl
+          blackPearl,
         );
 
       //Update points information on match stats collection
       const updatedMatchStatsFromPoints =
         await repository.updateMatchStatsFromPoints(
           tournamentRoundId,
-          pointsArray
+          pointsArray,
         );
 
       //Update tournament round information in database
@@ -234,7 +244,7 @@ export default class TournamentRoundController {
 
       const { win, draw, defeat } = await defineMatchOutcome(
         newTournamentRoundInfo.score_chachos,
-        newTournamentRoundInfo.score_rival
+        newTournamentRoundInfo.score_rival,
       );
 
       newTournamentRoundInfo.win = win;
@@ -243,7 +253,7 @@ export default class TournamentRoundController {
 
       const tournamentRoundUpdated = await repository.baseUpdateById(
         tournamentRoundId,
-        newTournamentRoundInfo
+        newTournamentRoundInfo,
       );
       res.status(200).json({
         message: `Tournament round with id ${tournamentRoundId} has been properly updated`,
@@ -258,9 +268,8 @@ export default class TournamentRoundController {
   deleteTournamentRoundById = async (req, res, next) => {
     try {
       const tournamentRoundId = req.params.pid;
-      const tournamentRoundDeleted = await repository.baseDeleteById(
-        tournamentRoundId
-      );
+      const tournamentRoundDeleted =
+        await repository.baseDeleteById(tournamentRoundId);
       res.status(200).json({
         message: `Tournament round with id ${tournamentRoundId} has been properly deleted`,
         tournamentRoundDeleted,

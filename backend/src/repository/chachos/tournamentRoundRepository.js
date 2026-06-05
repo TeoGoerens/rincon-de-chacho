@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import TournamentRound from "../../dao/models/chachos/tournamentRoundModel.js";
 import User from "../../dao/models/userModel.js";
 import MatchStat from "../../dao/models/chachos/matchStatModel.js";
@@ -84,6 +85,106 @@ export default class TournamentRoundRepository extends baseRepository {
       );
 
       return { lastRound, seasonRounds, lastRoundStats, playerPictures, rankings };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // ---------- GET STATS SUMMARY (team + individual + H2H) ----------
+  getStatsSummary = async (tournamentId) => {
+    try {
+      const roundMatch = tournamentId
+        ? { tournament: new mongoose.Types.ObjectId(tournamentId) }
+        : {};
+      const statMatch = tournamentId
+        ? { tournament: new mongoose.Types.ObjectId(tournamentId) }
+        : {};
+
+      const [teamArr, individualRankings, h2h] = await Promise.all([
+        TournamentRound.aggregate([
+          { $match: roundMatch },
+          { $group: {
+            _id:            null,
+            matches:        { $sum: 1 },
+            wins:           { $sum: { $cond: ["$win",    1, 0] } },
+            draws:          { $sum: { $cond: ["$draw",   1, 0] } },
+            defeats:        { $sum: { $cond: ["$defeat", 1, 0] } },
+            goals_for:      { $sum: "$score_chachos" },
+            goals_against:  { $sum: "$score_rival" },
+          }},
+          { $project: { _id: 0, matches: 1, wins: 1, draws: 1, defeats: 1, goals_for: 1, goals_against: 1 } },
+        ]),
+
+        MatchStat.aggregate([
+          { $match: statMatch },
+          { $group: {
+            _id:            "$player",
+            matches:        { $sum: 1 },
+            goals:          { $sum: "$goals" },
+            assists:        { $sum: "$assists" },
+            yellow_cards:   { $sum: "$yellow_cards" },
+            red_cards:      { $sum: "$red_cards" },
+            avg_points:     { $avg: "$points" },
+            white_pearl:    { $sum: { $cond: ["$white_pearl",   1, 0] } },
+            vanilla_pearl:  { $sum: { $cond: ["$vanilla_pearl", 1, 0] } },
+            ocher_pearl:    { $sum: { $cond: ["$ocher_pearl",   1, 0] } },
+            black_pearl:    { $sum: { $cond: ["$black_pearl",   1, 0] } },
+          }},
+          { $lookup: { from: "players", localField: "_id", foreignField: "_id", as: "player" } },
+          { $unwind: "$player" },
+          { $project: {
+            _id:            0,
+            matches:        1,
+            goals:          1,
+            assists:        1,
+            yellow_cards:   1,
+            red_cards:      1,
+            avg_points:     { $round: ["$avg_points", 2] },
+            white_pearl:    1,
+            vanilla_pearl:  1,
+            ocher_pearl:    1,
+            black_pearl:    1,
+            "player._id":        1,
+            "player.first_name": 1,
+            "player.last_name":  1,
+          }},
+          { $sort: { avg_points: -1 } },
+        ]),
+
+        TournamentRound.aggregate([
+          { $match: roundMatch },
+          { $group: {
+            _id:            "$rival",
+            matches:        { $sum: 1 },
+            wins:           { $sum: { $cond: ["$win",    1, 0] } },
+            draws:          { $sum: { $cond: ["$draw",   1, 0] } },
+            defeats:        { $sum: { $cond: ["$defeat", 1, 0] } },
+            goals_for:      { $sum: "$score_chachos" },
+            goals_against:  { $sum: "$score_rival" },
+          }},
+          { $lookup: { from: "rival teams", localField: "_id", foreignField: "_id", as: "rival" } },
+          { $unwind: "$rival" },
+          { $addFields: { _pts: { $add: [{ $multiply: ["$wins", 3] }, "$draws"] } } },
+          { $sort: { _pts: -1 } },
+          { $project: {
+            _id:            0,
+            matches:        1,
+            wins:           1,
+            draws:          1,
+            defeats:        1,
+            goals_for:      1,
+            goals_against:  1,
+            "rival._id":    1,
+            "rival.name":   1,
+          }},
+        ]),
+      ]);
+
+      return {
+        teamSummary: teamArr[0] ?? { matches: 0, wins: 0, draws: 0, defeats: 0, goals_for: 0, goals_against: 0 },
+        individualRankings,
+        h2h,
+      };
     } catch (error) {
       throw error;
     }

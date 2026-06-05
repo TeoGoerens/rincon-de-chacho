@@ -8,6 +8,7 @@ const controller = new TournamentRoundController();
 
 // ---------- GET ROUTES ----------
 router.get("/current-context", authMiddleware, controller.getCurrentContext);
+router.get("/stats-summary",   authMiddleware, controller.getStatsSummary);
 router.get("/tournament/:pid", authMiddleware, controller.getRoundsByTournament);
 router.get("/:pid", authMiddleware, controller.getTournamentRoundById);
 router.get("/:pid/players", authMiddleware, controller.getPlayersTournamentRoundById);

@@ -7,7 +7,7 @@
 .ci {
   min-height: calc(100vh - 80px - 42px);
   background: var(--bg-deep);
-  padding: var(--space-xl) 3rem;
+  padding: var(--space-xl) var(--space-xl);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
@@ -56,7 +56,10 @@
   font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
-  color: var(--text-subtle-dark);
+  color: var(--text-label-dark);
+  margin-top: var(--space-xl);
+  border-left: 2px solid rgba(168, 218, 220, 0.45);
+  padding-left: var(--space-xs);
 }
 
 .ci-section-heading-row {
@@ -64,6 +67,11 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
+  margin-top: var(--space-xl);
+}
+
+.ci-section-heading-row .ci-section-heading {
+  margin-top: 0;
 }
 
 /* ── Card base ── */
@@ -1241,7 +1249,7 @@
 }
 
 .ci-stats-table .ci-st-th--stat:hover {
-  background: rgba(255,255,255,0.05);
+  background: #171717;
 }
 
 .ci-stats-table .ci-st-th--active {
@@ -1419,6 +1427,9 @@
 }
 
 @media (max-width: 900px) {
+  .ci-section-heading,
+  .ci-section-heading-row { margin-top: var(--space-md); }
+
   .ci-info-row       { grid-template-columns: 1fr; }
   .ci-recent-grid    { grid-template-columns: repeat(2, 1fr); }
   .ci-pearl-leaders  { grid-template-columns: repeat(2, 1fr); }

@@ -51,8 +51,9 @@ El sitio está **en producción** en `https://elrincondechacho.com`. Fue constru
 | `/prode` | Sección Prode | Auth requerida |
 | `/cronicas` | Listado de crónicas | Auth requerida |
 | `/cronicas/:id` | Detalle de crónica | IDs son ObjectIDs de Mongo |
-| `/chachos` | Home Chachos (tab: Estadísticas) | Auth requerida |
-| `/chachos/tournament-rounds` | Historial de fechas | Auth requerida |
+| `/chachos` | Chachos — tab Inicio | Auth requerida |
+| `/chachos/historical-stats` | Chachos — tab Estadísticas | Auth requerida |
+| `/chachos/tournament-rounds` | Chachos — tab Fechas | Auth requerida |
 | `/chachos/squad` | Plantel | Auth requerida |
 | `/admin/users` | Panel admin — usuarios | Admin requerido |
 | `/admin/chachos` | Panel admin — Chachos | Admin requerido |
