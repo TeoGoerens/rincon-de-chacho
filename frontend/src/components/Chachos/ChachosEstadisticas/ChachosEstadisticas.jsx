@@ -558,8 +558,8 @@ const ChachosEstadisticas = () => {
                   {[
                     {
                       num: "01", title: "Rendimiento extremo", showCtx: true,
-                      left:  { label: "Fecha perfecta",    items: voteRecords.maxScores    ?? [], getValue: (r) => Number(r.avg).toFixed(2),                                                                                   getName: (r) => `${r.player.first_name} ${r.player.last_name}`, getCtx: (r) => `vs ${r.rival.name} · ${new Date(r.round.match_date).toLocaleDateString("es-AR",{month:"short",year:"numeric"})}`, getPic: (r) => r.profile_picture },
-                      right: { label: "Fecha negra",       items: voteRecords.minScores    ?? [], getValue: (r) => Number(r.avg).toFixed(2),                                                                                   getName: (r) => `${r.player.first_name} ${r.player.last_name}`, getCtx: (r) => `vs ${r.rival.name} · ${new Date(r.round.match_date).toLocaleDateString("es-AR",{month:"short",year:"numeric"})}`, getPic: (r) => r.profile_picture },
+                      left:  { label: "Fecha perfecta",    items: voteRecords.maxScores    ?? [], getValue: (r) => Number(r.avg).toFixed(2),                                                                                   getName: (r) => `${r.player.first_name} ${r.player.last_name}`, getCtx: (r) => { const d = new Date(r.round.match_date); const mon = d.toLocaleDateString("es-AR",{month:"short"}).replace(".",""); const yr = String(d.getFullYear()).slice(-2); return `vs ${r.rival.name} · ${mon} ${yr}`; }, getPic: (r) => r.profile_picture },
+                      right: { label: "Fecha negra",       items: voteRecords.minScores    ?? [], getValue: (r) => Number(r.avg).toFixed(2),                                                                                   getName: (r) => `${r.player.first_name} ${r.player.last_name}`, getCtx: (r) => { const d = new Date(r.round.match_date); const mon = d.toLocaleDateString("es-AR",{month:"short"}).replace(".",""); const yr = String(d.getFullYear()).slice(-2); return `vs ${r.rival.name} · ${mon} ${yr}`; }, getPic: (r) => r.profile_picture },
                     },
                     {
                       num: "02", title: "Evaluando a sus compañeros",
@@ -609,7 +609,7 @@ const ChachosEstadisticas = () => {
                       </div>
                     );
                     return (
-                      <div key={idx} className="ce-alter-card">
+                      <div key={idx} className={`ce-alter-card${pair.showCtx ? " ce-alter-card--has-ctx" : ""}`}>
                         <div className="ce-alter-card-title">
                           <span className="ce-alter-title-text">{pair.title}</span>
                           <span className="ce-alter-watermark">{pair.num}</span>

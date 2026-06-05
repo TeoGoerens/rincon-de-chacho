@@ -843,10 +843,17 @@
   font-size: 0.86rem;
   font-weight: var(--fw-bold);
   color: var(--text-bright);
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+/* Solo en la card con contexto (Rendimiento extremo) forzamos ellipsis */
+.ce-alter-card--has-ctx .ce-alter-side-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  word-break: normal;
 }
 
 .ce-alter-side-ctx {
