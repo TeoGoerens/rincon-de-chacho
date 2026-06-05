@@ -174,6 +174,16 @@ export default class VoteController {
     }
   };
 
+  // ---------- VOTE RECORDS ----------
+  getVoteRecords = async (req, res, next) => {
+    try {
+      const records = await repository.getVoteRecords();
+      res.status(200).json(records);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- DELETE VOTE ----------
   deleteVoteById = async (req, res, next) => {
     try {

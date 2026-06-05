@@ -7,6 +7,7 @@ const router = Router();
 const controller = new VoteController();
 
 // ---------- GET ROUTES ----------
+router.get("/records", authMiddleware, controller.getVoteRecords);
 router.get(
   "/:pid/voter/:vid",
   authMiddleware,

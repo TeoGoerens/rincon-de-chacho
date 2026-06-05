@@ -719,8 +719,10 @@ const ChachosInicio = () => {
                           return (
                             <tr key={item.player?._id ?? i} className={`ci-st-row${i === 0 ? " ci-st-row--first" : ""}`}>
                               <td className="ci-st-td ci-st-td--name">
-                                <span className="ci-st-pos">{i + 1}</span>
-                                <span className="ci-st-name">{item.player?.first_name} {item.player?.last_name}</span>
+                                <div className="ci-td-name-inner">
+                                  <span className="ci-st-pos">{i + 1}</span>
+                                  <span className="ci-st-name">{item.player?.first_name} {item.player?.last_name}</span>
+                                </div>
                               </td>
                               <td className="ci-st-td ci-st-td--stat">{item.matches}</td>
                               <td className={`ci-st-td ci-st-td--stat ci-st-td--active${val === 0 ? " ci-st-val--zero" : ` ci-st-val--${mobileStat}`}`}>
@@ -781,8 +783,10 @@ const ChachosInicio = () => {
                       {sorted.map((item, i) => (
                         <tr key={item.player?._id ?? i} className={`ci-st-row${i === 0 ? " ci-st-row--first" : ""}`}>
                           <td className="ci-st-td ci-st-td--name">
-                            <span className="ci-st-pos">{i + 1}</span>
-                            <span className="ci-st-name">{item.player?.first_name} {item.player?.last_name}</span>
+                            <div className="ci-td-name-inner">
+                              <span className="ci-st-pos">{i + 1}</span>
+                              <span className="ci-st-name">{item.player?.first_name} {item.player?.last_name}</span>
+                            </div>
                           </td>
                           {RANKING_COLS.map((col) => {
                             const val = item[col.key];

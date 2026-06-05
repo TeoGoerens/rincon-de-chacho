@@ -1238,6 +1238,8 @@
   z-index: 1;
 }
 
+.ci-stats-table .ci-st-th--name  { text-align: center; }
+
 .ci-stats-table .ci-st-th--stat {
   text-align: center;
   cursor: pointer;
@@ -1302,9 +1304,18 @@
 }
 
 .ci-st-td--name {
+  text-align: left;
+  overflow: hidden;
+  max-width: 0;
+}
+
+.ci-td-name-inner {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
 }
 
 .ci-st-td--stat {
