@@ -11,11 +11,11 @@ import "./ChachosInicioStyles.css";
 
 /* ─── Constantes ─── */
 const MOBILE_STAT_OPTIONS = [
-  { key: "goals",        label: "Goles",       short: "GOL" },
-  { key: "assists",      label: "Asistencias", short: "AST" },
-  { key: "yellow_cards", label: "Amarillas",   short: "AM"  },
-  { key: "red_cards",    label: "Rojas",       short: "ROJ" },
-  { key: "avg_points",   label: "Puntaje",     short: "PTS" },
+  { key: "goals",        label: "GOL", short: "GOL" },
+  { key: "assists",      label: "AST", short: "AST" },
+  { key: "yellow_cards", label: "AMA", short: "AMA" },
+  { key: "red_cards",    label: "ROJ", short: "ROJ" },
+  { key: "avg_points",   label: "PTS", short: "PTS" },
 ];
 
 const PEARL_OPTIONS = [
@@ -330,18 +330,29 @@ const ChachosInicio = () => {
                     <div key={player._id} className="ci-vote-table-row">
                       <span className="ci-player-name">{player.first_name} {player.last_name}</span>
                       <div className="ci-vt-center">
-                        <select
-                          className="ci-score-input"
-                          value={scores[player._id] ?? ""}
-                          onChange={(e) =>
-                            setScores((prev) => ({ ...prev, [player._id]: e.target.value }))
-                          }
-                        >
-                          <option value="" disabled>–</option>
-                          {[1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10].map((v) => (
-                            <option key={v} value={v}>{v}</option>
-                          ))}
-                        </select>
+                        <div className="ci-score-stepper">
+                          <button
+                            type="button"
+                            className="ci-stepper-btn"
+                            onClick={() => setScores((prev) => {
+                              const cur = parseFloat(prev[player._id]) || 0;
+                              const next = cur <= 1 ? 1 : Math.round((cur - 0.5) * 10) / 10;
+                              return { ...prev, [player._id]: next };
+                            })}
+                          >−</button>
+                          <span className="ci-stepper-value">
+                            {scores[player._id] != null && scores[player._id] !== "" ? scores[player._id] : "–"}
+                          </span>
+                          <button
+                            type="button"
+                            className="ci-stepper-btn"
+                            onClick={() => setScores((prev) => {
+                              const cur = parseFloat(prev[player._id]) || 0;
+                              const next = cur >= 10 ? 10 : Math.round((cur + 0.5) * 10) / 10;
+                              return { ...prev, [player._id]: next };
+                            })}
+                          >+</button>
+                        </div>
                       </div>
                       {PEARL_OPTIONS.map((pearl) => {
                         const selected = pearls[pearl.key] === player._id;

@@ -141,6 +141,9 @@ El sitio está **en producción** en `https://elrincondechacho.com`. Fue constru
 
 #### Variables definidas en App.css (referencia completa)
 ```css
+/* Avatar inicial — usar SIEMPRE esta variable, nunca hardcodear el gradiente */
+--avatar-gradient: linear-gradient(135deg, var(--secondary-color), var(--third-color));
+
 /* Font weights */
 --fw-regular: 400 | --fw-medium: 500 | --fw-semibold: 600
 --fw-bold: 700 | --fw-extrabold: 800 | --fw-black: 900
@@ -324,9 +327,34 @@ Se descartaron: Mi perfil, Mis favoritos, Destacados, redes sociales del creador
 
 ---
 
+## Sección Chachos — estado del rediseño
+
+### Tab Inicio ✅ CERRADO (junio 2026)
+Archivos: `frontend/src/components/Chachos/ChachosInicio/ChachosInicio.jsx` + `ChachosInicioStyles.css`
+
+Secciones implementadas (en orden):
+1. Hero del último partido (resultado, rival, highlights)
+2. Banner de votación (teal=abierta, verde=ya votó)
+3. Formulario de voto — `<select>` desplegable (1–10 en 0.5), sin número de camiseta, perlas con toggle. CTA de pills de últimas fechas oculto si `open_for_vote=true`
+4. Resultados de votación — ranking con sweep animado en #1, perlas con avatar
+5. Rendimiento del equipo — barra tripartita + forma reciente 5 pills
+6. Últimas 5 fechas — grilla pills con CTA condicional
+7. Chips de perlas del torneo — 4 chips temáticos, líder con avatar, resto colapsado a 4 visibles con "Ver N más"
+8. Estadísticas individuales — desktop: tabla 7 cols sorteable con scroll; mobile: pills selector (GOL/AST/AM/ROJ/PTS) + tabla 4 cols (Jugador/PJ/stat/AVG)
+
+Backend modificado: `tournamentRoundRepository.js` — rankings pipeline agrega `*_pearl_count` y `avg_points` a 2 decimales; `seasonRounds` select incluye `open_for_vote`.
+
+### Tabs pendientes
+- **Estadísticas** — Rankings por torneo, perlas acumuladas, head-to-head vs rivales
+- **Fechas** — Lista de fechas con detalle por partido
+- **Jugadores** (reemplaza Nosotros) — Grid de cards con ficha completa
+
+---
+
 ## Lo que queda pendiente (próximas sesiones)
 
-- Rediseño estético de las secciones internas (Podrida, Prode, Crónicas, Chachos, Galería)
+- Tabs Estadísticas / Fechas / Jugadores de la sección Chachos
+- Rediseño estético de las secciones internas (Podrida, Prode, Crónicas, Galería)
 - Sistema de diseño global coherente entre secciones internas
 - Página 404 con diseño real
 
