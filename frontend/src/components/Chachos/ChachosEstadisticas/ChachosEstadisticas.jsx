@@ -51,7 +51,7 @@ const AlterAvatar = ({ name, picture }) => {
 };
 
 const ChachosEstadisticas = () => {
-  const [selectedTournament, setSelectedTournament] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [mobileStat, setMobileStat] = useState("goals");
@@ -74,8 +74,8 @@ const ChachosEstadisticas = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["stats-summary", selectedTournament || null],
-    queryFn:  () => fetchStatsSummary({ tournament: selectedTournament || null }),
+    queryKey: ["stats-summary", selectedYear || null],
+    queryFn:  () => fetchStatsSummary({ year: selectedYear || null }),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -89,10 +89,10 @@ const ChachosEstadisticas = () => {
   const individualRaw = data?.individualRankings ?? [];
   const h2h           = data?.h2h               ?? [];
 
-  const tournamentsSorted = useMemo(
-    () => [...tournaments].sort((a, b) => b.year - a.year),
-    [tournaments]
-  );
+  const years = useMemo(() => {
+    const unique = [...new Set(tournaments.map((t) => t.year))];
+    return unique.sort((a, b) => b - a);
+  }, [tournaments]);
 
   const efectividad = teamSummary && teamSummary.matches > 0
     ? ((teamSummary.wins * 3 + teamSummary.draws) / (teamSummary.matches * 3) * 100).toFixed(1)
@@ -149,7 +149,7 @@ const ChachosEstadisticas = () => {
           <h1 className="ce-title">Estadísticas</h1>
         </div>
 
-        {/* ── Selector de torneo ── */}
+        {/* ── Selector de año ── */}
         <div className="ce-dd" ref={dropdownRef}>
           <button
             type="button"
@@ -157,11 +157,9 @@ const ChachosEstadisticas = () => {
             onClick={() => setDropdownOpen((o) => !o)}
           >
             <div className="ce-dd-trigger-inner">
-              <div className="ce-dd-label">Torneo</div>
+              <div className="ce-dd-label">Año</div>
               <div className="ce-dd-value">
-                {selectedTournament
-                  ? (() => { const t = tournamentsSorted.find((t) => t._id === selectedTournament); return t ? t.name : "Todos los torneos"; })()
-                  : "Todos los torneos"}
+                {selectedYear ? selectedYear : "Todos los años"}
               </div>
             </div>
             <svg className={`ce-dd-chevron${dropdownOpen ? " ce-dd-chevron--open" : ""}`} viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -170,15 +168,15 @@ const ChachosEstadisticas = () => {
           </button>
           {dropdownOpen && (
             <ul className="ce-dd-list" role="listbox">
-              {[{ _id: "", name: "Todos los torneos", year: "" }, ...tournamentsSorted].map((t) => (
+              {["", ...years].map((y) => (
                 <li
-                  key={t._id}
+                  key={y}
                   role="option"
-                  aria-selected={selectedTournament === t._id}
-                  className={`ce-dd-item${selectedTournament === t._id ? " ce-dd-item--active" : ""}`}
-                  onClick={() => { setSelectedTournament(t._id); setDropdownOpen(false); }}
+                  aria-selected={selectedYear === y}
+                  className={`ce-dd-item${selectedYear === y ? " ce-dd-item--active" : ""}`}
+                  onClick={() => { setSelectedYear(y); setDropdownOpen(false); }}
                 >
-                  {t.name}
+                  {y === "" ? "Todos los años" : y}
                 </li>
               ))}
             </ul>
@@ -425,7 +423,7 @@ const ChachosEstadisticas = () => {
             <p className="ce-table-hint">↕ Tocá un encabezado para ordenar</p>
             <div className="ce-card ce-table-card ce-ranking-desktop">
               {sortedRankings.length === 0 ? (
-                <p className="ce-empty" style={{ padding: "1rem 1.5rem" }}>Sin datos para este torneo.</p>
+                <p className="ce-empty" style={{ padding: "1rem 1.5rem" }}>Sin datos para este año.</p>
               ) : (
                 <div className="ce-table-wrapper">
                   <table className="ce-table">
@@ -505,7 +503,7 @@ const ChachosEstadisticas = () => {
             <p className="ce-table-hint ce-table-hint--pearls">↕ Tocá un encabezado para ordenar</p>
             <div className="ce-card ce-table-card">
               {pearlRows.length === 0 ? (
-                <p className="ce-empty" style={{ padding: "1rem 1.5rem" }}>Sin perlas registradas para este torneo.</p>
+                <p className="ce-empty" style={{ padding: "1rem 1.5rem" }}>Sin perlas registradas para este año.</p>
               ) : (
                 <div className="ce-table-wrapper">
                   <table className="ce-table">

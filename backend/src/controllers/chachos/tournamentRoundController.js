@@ -21,8 +21,8 @@ export default class TournamentRoundController {
   // ---------- GET STATS SUMMARY ----------
   getStatsSummary = async (req, res, next) => {
     try {
-      const tournamentId = req.query.tournament || null;
-      const summary = await repository.getStatsSummary(tournamentId);
+      const year = req.query.year || null;
+      const summary = await repository.getStatsSummary(year);
       res.status(200).json({ message: "Stats summary retrieved", ...summary });
     } catch (error) {
       next(error);

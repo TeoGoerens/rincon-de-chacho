@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import TournamentRound from "../../dao/models/chachos/tournamentRoundModel.js";
+import Tournament from "../../dao/models/chachos/tournamentModel.js";
 import User from "../../dao/models/userModel.js";
 import MatchStat from "../../dao/models/chachos/matchStatModel.js";
 import baseRepository from "../baseRepository.js";
@@ -91,14 +92,17 @@ export default class TournamentRoundRepository extends baseRepository {
   };
 
   // ---------- GET STATS SUMMARY (team + individual + H2H) ----------
-  getStatsSummary = async (tournamentId) => {
+  getStatsSummary = async (year) => {
     try {
-      const roundMatch = tournamentId
-        ? { tournament: new mongoose.Types.ObjectId(tournamentId) }
-        : {};
-      const statMatch = tournamentId
-        ? { tournament: new mongoose.Types.ObjectId(tournamentId) }
-        : {};
+      let roundMatch = {};
+      let statMatch  = {};
+
+      if (year) {
+        const tournaments = await Tournament.find({ year: Number(year) }, { _id: 1 });
+        const ids = tournaments.map((t) => t._id);
+        roundMatch = { tournament: { $in: ids } };
+        statMatch  = { tournament: { $in: ids } };
+      }
 
       const [teamArr, individualRankings, h2h] = await Promise.all([
         TournamentRound.aggregate([
