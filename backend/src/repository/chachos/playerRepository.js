@@ -14,78 +14,33 @@ export default class PlayerRepository extends baseRepository {
   // ---------- GET SQUAD (grid view) ----------
   getSquad = async () => {
     try {
-      const stats = await MatchStat.aggregate([
-        { $group: {
-          _id:           "$player",
-          matches:       { $sum: 1 },
-          goals:         { $sum: "$goals" },
-          assists:       { $sum: "$assists" },
-          yellow_cards:  { $sum: "$yellow_cards" },
-          red_cards:     { $sum: "$red_cards" },
-          avg_points:    { $avg: "$points" },
-          white_pearl:   { $sum: { $cond: ["$white_pearl",   1, 0] } },
-          vanilla_pearl: { $sum: { $cond: ["$vanilla_pearl", 1, 0] } },
-          ocher_pearl:   { $sum: { $cond: ["$ocher_pearl",   1, 0] } },
-          black_pearl:   { $sum: { $cond: ["$black_pearl",   1, 0] } },
-        }},
+      const players = await MatchStat.aggregate([
+        { $group: { _id: "$player" } },
         { $lookup: { from: "players", localField: "_id", foreignField: "_id", as: "player" } },
         { $unwind: "$player" },
         { $sort: { "player.last_name": 1, "player.first_name": 1 } },
         { $project: {
-          matches:       1,
-          goals:         1,
-          assists:       1,
-          yellow_cards:  1,
-          red_cards:     1,
-          avg_points:    { $round: ["$avg_points", 2] },
-          white_pearl:   1,
-          vanilla_pearl: 1,
-          ocher_pearl:   1,
-          black_pearl:   1,
-          "player._id":          1,
-          "player.first_name":   1,
-          "player.last_name":    1,
-          "player.shirt":        1,
-          "player.field_position": 1,
+          "player._id":        1,
+          "player.first_name": 1,
+          "player.last_name":  1,
         }},
       ]);
 
-      // Batch lookup de profile_picture y nombre real desde users
-      const playerIds = stats.map((s) => s._id);
+      const playerIds = players.map((p) => p._id);
       const users = await User.find(
         { chacho_player: { $in: playerIds } },
-        { chacho_player: 1, profile_picture: 1, first_name: 1, last_name: 1 }
+        { chacho_player: 1, profile_picture: 1 }
       ).lean();
       const userMap = Object.fromEntries(
-        users.map((u) => [u.chacho_player.toString(), {
-          profile_picture: u.profile_picture ?? null,
-          real_first_name: u.first_name,
-          real_last_name:  u.last_name,
-        }])
+        users.map((u) => [u.chacho_player.toString(), u.profile_picture ?? null])
       );
 
-      return stats.map((s) => ({
+      return players.map((p) => ({
         player: {
-          _id:            s.player._id,
-          first_name:     s.player.first_name,
-          last_name:      s.player.last_name,
-          shirt:          s.player.shirt,
-          field_position: s.player.field_position,
-          profile_picture:  userMap[s._id.toString()]?.profile_picture  ?? null,
-          real_first_name:  userMap[s._id.toString()]?.real_first_name  ?? null,
-          real_last_name:   userMap[s._id.toString()]?.real_last_name   ?? null,
-        },
-        career: {
-          matches:       s.matches,
-          goals:         s.goals,
-          assists:       s.assists,
-          yellow_cards:  s.yellow_cards,
-          red_cards:     s.red_cards,
-          avg_points:    s.avg_points,
-          white_pearl:   s.white_pearl,
-          vanilla_pearl: s.vanilla_pearl,
-          ocher_pearl:   s.ocher_pearl,
-          black_pearl:   s.black_pearl,
+          _id:             p.player._id,
+          first_name:      p.player.first_name,
+          last_name:       p.player.last_name,
+          profile_picture: userMap[p._id.toString()] ?? null,
         },
       }));
     } catch (error) {

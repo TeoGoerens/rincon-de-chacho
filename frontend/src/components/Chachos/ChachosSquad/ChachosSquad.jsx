@@ -310,7 +310,7 @@ const ChachosSquad = () => {
                           <div className="csq-avg-track">
                             <div className="csq-avg-fill" style={{ width: `${pct}%` }} />
                           </div>
-                          <span className="csq-chart-val">{y.avg_points != null ? y.avg_points.toFixed(1) : "—"}</span>
+                          <span className="csq-chart-val">{y.avg_points != null ? y.avg_points.toFixed(2) : "—"}</span>
                         </div>
                       );
                     })}
