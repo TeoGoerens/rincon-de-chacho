@@ -194,6 +194,70 @@ export default class TournamentRoundRepository extends baseRepository {
     }
   };
 
+  // ---------- GET PLAYER PICTURES BY ROUND ----------
+  getPlayerPicturesByRound = async (roundId) => {
+    try {
+      const stats = await MatchStat.find({ round: roundId }, { player: 1 });
+      const playerIds = stats.map((s) => s.player).filter(Boolean);
+      if (!playerIds.length) return {};
+
+      const users = await User.find(
+        { chacho_player: { $in: playerIds } },
+        { chacho_player: 1, profile_picture: 1 }
+      );
+
+      return Object.fromEntries(
+        users.map((u) => [u.chacho_player.toString(), u.profile_picture ?? null])
+      );
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // ---------- GET ALL ROUNDS FOR LIST VIEW (optimizado para tab Fechas) ----------
+  getAllRoundsForList = async () => {
+    try {
+      const rounds = await this.model
+        .find()
+        .sort({ match_date: -1 })
+        .select("_id match_date win draw defeat score_chachos score_rival open_for_vote players tournament rival white_pearl vanilla_pearl ocher_pearl black_pearl")
+        .populate({ path: "rival",         select: "name" })
+        .populate({ path: "tournament",    select: "year" })
+        .populate({ path: "white_pearl",   select: "first_name last_name" })
+        .populate({ path: "vanilla_pearl", select: "first_name" })
+        .populate({ path: "ocher_pearl",   select: "first_name" })
+        .populate({ path: "black_pearl",   select: "first_name last_name" })
+        .lean();
+
+      // Batch lookup de fotos para los ganadores de perla blanca
+      const wpIds = [...new Set(
+        rounds.flatMap((r) => (r.white_pearl ?? []).map((p) => p._id?.toString()).filter(Boolean))
+      )];
+
+      if (wpIds.length) {
+        const users = await User.find(
+          { chacho_player: { $in: wpIds } },
+          { chacho_player: 1, profile_picture: 1 }
+        ).lean();
+        const picMap = Object.fromEntries(
+          users.map((u) => [u.chacho_player.toString(), u.profile_picture ?? null])
+        );
+        rounds.forEach((r) => {
+          if (r.white_pearl?.length) {
+            r.white_pearl = r.white_pearl.map((p) => ({
+              ...p,
+              profile_picture: picMap[p._id?.toString()] ?? null,
+            }));
+          }
+        });
+      }
+
+      return rounds;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // ---------- GET ROUNDS BY TOURNAMENT ----------
   getTournamentRoundsByTournament = async (tournamentRoundId) => {
     try {

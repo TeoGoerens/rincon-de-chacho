@@ -1,193 +1,516 @@
-/* ---------- Votes results container ---------- */
-.votes-results-container {
-  margin-bottom: 3rem;
+/* ════════════════════════════════════════════
+   VotesResults
+   Prefijo: vr-
+   ════════════════════════════════════════════ */
+
+/* ── Contenedor raíz ── */
+.vr {
+  min-height: calc(100vh - 80px - 42px);
+  background: var(--bg-deep);
+  padding: var(--space-xl) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
-/* ---------- Votes results title ---------- */
-.votes-results-title {
+/* ── Header ── */
+.vr-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: var(--space-sm);
+}
+
+.vr-header-top {
   display: flex;
   align-items: center;
-  margin: 1rem 0 2rem;
+  justify-content: space-between;
 }
 
-.votes-results-title h2 {
+.vr-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: var(--secondary-font);
-  font-size: 1.2rem;
-  font-weight: 900;
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
   text-transform: uppercase;
+  color: var(--color-chachos);
 }
 
-.votes-results-title .return-link {
-  text-decoration: none;
-  margin-left: 3rem;
-  font-size: 0.8rem;
-  background-color: var(--fourth-color);
-  color: white;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  transition: all ease 0.3s;
+.vr-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-chachos);
+  flex-shrink: 0;
 }
 
-/* ---------- Votes results content ---------- */
-.votes-results-content {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto;
-  grid-template-areas:
-    "match-details evaluation"
-    "pearls evaluation";
-
-  background-color: white;
-  padding: 1rem;
-  border-radius: 20px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+.vr-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
 }
 
-.votes-results-content h4 {
-  margin-bottom: 1rem;
-}
-
-.votes-results-content h4 span {
-  color: var(--fourth-color);
-  font-weight: 900;
-}
-
-.votes-results-content p {
-  font-size: 0.9rem;
-}
-
-.votes-results-content:hover {
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
-}
-
-/* ---------- Votes results match details ---------- */
-.votes-results-content .votes-results-match-details {
-  grid-area: match-details;
-}
-
-.votes-results-content .votes-results-match-details span {
-  font-weight: 900;
-}
-
-/* ---------- Votes results pearls details ---------- */
-.votes-results-content .votes-results-pearls-details {
-  grid-area: pearls;
-  display: flex;
-  flex-direction: column;
-}
-
-.pearl-container {
-  display: flex;
-  flex-direction: column;
+/* ── Botón volver ── */
+.vr-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.85rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-body-dark);
   cursor: pointer;
-  border: 1px solid;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+.vr-back svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.vr-back:hover {
   border-color: var(--third-color);
-  border-radius: 10px;
+  color: var(--third-color);
 }
 
-.pearl-container:not(:first-child):not(:nth-child(2)) {
-  margin-top: 0.8rem;
+/* ── Section heading ── */
+.vr-section-heading {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  margin-top: var(--space-sm);
+  border-left: 2px solid rgba(168, 218, 220, 0.45);
+  padding-left: var(--space-xs);
 }
 
-.pearl-container img {
-  height: 70px;
+/* ── Loading / empty ── */
+.vr-loading,
+.vr-empty {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+  padding: var(--space-xs) 0;
+  margin: 0;
 }
 
-.pearl-container .pearl-winners {
-  flex-grow: 1;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.pearl-container .pearl-winners .pearl-winners-names {
-  font-weight: 900;
-}
-
-.pearl-container .pearl-list-detail {
-  display: flex;
-  flex-direction: column;
-  padding: 0 0.5rem 0.5rem 0.5rem;
-}
-
-.pearl-container .pearl-list-detail .player-detail {
-  display: flex;
-  align-items: center;
-  height: 20px;
-}
-
-.pearl-container .pearl-list-detail p {
-  color: var(--secondary-color);
-  font-size: 0.85rem;
-  width: 200px;
-}
-
-.pearl-container .pearl-list-detail .player-detail span {
-  font-size: 0.85rem;
-  font-weight: 900;
-}
-
-.pearl-container .pearl-list-detail .player-detail .player-votes {
-  background-color: var(--third-color);
-  width: 20px;
-  border-radius: 50%;
-  text-align: center;
-  margin-right: 1rem;
-}
-
-/* ---------- Votes results evaluation details ---------- */
-.votes-results-content .votes-results-evaluation-container {
-  grid-area: evaluation;
+/* ── Match card ── */
+.vr-match-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-xl);
+  padding: var(--space-md) var(--space-lg);
   display: flex;
   flex-direction: column;
+  gap: 0;
 }
 
-.votes-results-evaluation-table {
-  background-color: white;
-  font-size: 0.85rem;
-  width: 100%;
-  height: 100%;
-  border-radius: 20px;
+.vr-match-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.vr-match-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.vr-match-rival {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+}
+
+.vr-match-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted-dark);
+}
+
+.vr-match-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.vr-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-black);
+  letter-spacing: 0.04em;
+}
+
+.vr-score--win     { color: var(--status-green); }
+.vr-score--draw    { color: var(--status-yellow); }
+.vr-score--loss    { color: var(--status-red); }
+.vr-score--neutral { color: var(--text-muted-dark); }
+
+.vr-result-badge {
+  font-family: var(--secondary-font);
+  font-size: 0.6rem;
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-xs);
+  padding: 0.18rem 0.5rem;
+}
+
+.vr-result-badge--win  { background: rgba(34,197,94,0.12);  color: var(--status-green);  border: 1px solid rgba(34,197,94,0.25); }
+.vr-result-badge--draw { background: rgba(245,158,11,0.12); color: var(--status-yellow); border: 1px solid rgba(245,158,11,0.25); }
+.vr-result-badge--loss { background: rgba(230,57,70,0.12);  color: var(--status-red);    border: 1px solid rgba(230,57,70,0.25); }
+.vr-result-badge--neutral { background: rgba(255,255,255,0.05); color: var(--text-subtle-dark); border: 1px solid rgba(255,255,255,0.1); }
+
+/* ── Chip de votos ── */
+.vr-votes-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(168,218,220,0.07);
+  border: 1px solid rgba(168,218,220,0.2);
+  border-radius: var(--radius-md);
+}
+
+.vr-votes-chip-count {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-black);
+  color: var(--third-color);
+  line-height: 1;
+}
+
+.vr-votes-chip-label {
+  font-family: var(--secondary-font);
+  font-size: 0.6rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+/* ── Grid de perlas ── */
+.vr-pearls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+/* ── Pearl card ── */
+.vr-pearl-card {
+  background: var(--bg-card-dark);
+  border: 1px solid var(--pearl-border, rgba(255,255,255,0.06));
+  border-radius: var(--radius-xl);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: border-color var(--transition-slow), box-shadow var(--transition-slow);
+}
+
+.vr-pearl-card:hover {
+  border-color: var(--pearl-color);
+  box-shadow: 0 6px 28px rgba(0,0,0,0.3);
+}
+
+.vr-pearl-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vr-pearl-emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.vr-pearl-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--pearl-color, var(--text-label-dark));
+}
+
+/* ── Ganador(es) ── */
+.vr-pearl-winners {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.vr-pearl-winner-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vr-pearl-winner-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.vr-pearl-winner-avatar--initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--avatar-gradient);
+  font-family: var(--secondary-font);
+  font-size: 0.6rem;
+  font-weight: var(--fw-bold);
+  color: var(--bg-deep);
+}
+
+.vr-pearl-winner-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  line-height: 1.2;
+}
+
+.vr-pearl-no-winner {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Breakdown de votos ── */
+.vr-pearl-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: var(--space-sm);
+  margin-top: auto;
+}
+
+.vr-pearl-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vr-pearl-row-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-body-dark);
+  white-space: nowrap;
   overflow: hidden;
-  transition: all ease 0.3s;
+  text-overflow: ellipsis;
 }
 
-.votes-results-evaluation-table table {
+.vr-pearl-bar-wrap {
+  width: 60px;
+  height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.vr-pearl-bar {
+  height: 100%;
+  background: var(--pearl-color, var(--third-color));
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+}
+
+.vr-pearl-row-votes {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  color: var(--pearl-color, var(--text-bright));
+  min-width: 16px;
+  text-align: right;
+}
+
+.vr-pearl-row-pct {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-subtle-dark);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ── Tabla de puntajes ── */
+.vr-scores-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.vr-scores-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(2.3rem + 15 * 2.35rem);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.vr-scores-wrapper::-webkit-scrollbar { width: 4px; height: 4px; }
+.vr-scores-wrapper::-webkit-scrollbar-track { background: transparent; }
+.vr-scores-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-full);
+}
+
+.vr-scores-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Urbanist", var(--secondary-font);
+}
+
+.vr-col--name { width: auto; }
+.vr-col--pts  { width: 100px; }
+
+.vr-th {
+  padding: 0.6rem 0.75rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-body-dark);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: #111111;
+  z-index: 1;
+}
+
+.vr-th--left   { text-align: left; }
+.vr-th--center { text-align: center; }
+
+.vr-tr { transition: background var(--transition-base); }
+.vr-tr:nth-child(even) { background: rgba(255,255,255,0.025); }
+.vr-tr:hover           { background: rgba(255,255,255,0.055); }
+
+.vr-tr--top            { background: rgba(168,218,220,0.06); }
+.vr-tr--top:hover      { background: rgba(168,218,220,0.09); }
+
+.vr-td {
+  padding: 0.65rem 0.75rem;
+  font-size: var(--text-sm);
+  overflow: hidden;
+}
+
+.vr-td--center { text-align: center; }
+
+.vr-td--name {
+  text-align: left;
+  overflow: hidden;
+  max-width: 0;
+}
+
+.vr-td-name-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  min-width: 0;
   width: 100%;
 }
 
-.votes-results-evaluation-table thead {
-  background-color: var(--primary-color);
+.vr-st-pos {
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--text-subtle-dark);
+  width: 14px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
-.votes-results-evaluation-table thead tr th {
-  color: white;
+.vr-st-name {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-regular);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.votes-results-evaluation-table tbody tr:nth-child(even) {
-  background-color: color-mix(in srgb, var(--third-color), transparent 75%);
-}
-
-.votes-results-evaluation-table tbody tr:hover {
-  background-color: var(--third-color);
-  font-weight: 800;
-}
-
-.votes-results-evaluation-table tbody tr td {
+.vr-td--pts {
   text-align: center;
+  font-weight: var(--fw-regular);
+  color: var(--text-body-dark);
 }
 
-/* ---------- Media queries ---------- */
-@media only screen and (max-width: 600px) {
-  .votes-results-content {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "match-details"
-      "pearls"
-      "evaluation";
+/* ── Highlights del partido ── */
+.vr-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  padding-top: 0.875rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 0.875rem;
+}
 
-    padding: 1rem;
-  }
+.vr-hl-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.vr-hl-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--secondary-font);
+  font-size: 0.6rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  flex-shrink: 0;
+  min-width: 7.5rem;
+}
+
+.vr-hl-names {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted-dark);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .vr { padding: var(--space-xl) var(--space-lg); }
+}
+
+@media (max-width: 750px) {
+  .vr-pearls-grid  { grid-template-columns: 1fr; }
+  .vr-match-top    { flex-wrap: wrap; gap: var(--space-sm); }
+}
+
+@media (max-width: 600px) {
+  .vr { padding: var(--space-lg) var(--space-md); }
+  .vr-pearl-bar-wrap { width: 40px; }
 }

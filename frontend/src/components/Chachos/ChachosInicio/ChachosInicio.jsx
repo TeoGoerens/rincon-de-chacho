@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import ChachosMenu              from "../ChachosMenu";
@@ -52,7 +52,7 @@ const fmtDateShort = (d) =>
 const scrollToVote = () => {
   const el = document.getElementById("ci-vote-form");
   if (!el) return;
-  const top = el.getBoundingClientRect().top + window.scrollY - 96;
+  const top = el.getBoundingClientRect().top + window.scrollY - 122;
   window.scrollTo({ top, behavior: "smooth" });
 };
 
@@ -60,6 +60,7 @@ const scrollToVote = () => {
    COMPONENTE PRINCIPAL
    ═══════════════════════════════════════════════════════════ */
 const ChachosInicio = () => {
+  const location = useLocation();
   const [sortKey, setSortKey] = useState("avg_points");
   const [mobileStat, setMobileStat] = useState("goals");
   const [expandedPearls, setExpandedPearls] = useState({});
@@ -148,6 +149,18 @@ const ChachosInicio = () => {
     if (players.length > 0)
       setScores(Object.fromEntries(players.map((p) => [p._id, ""])));
   }, [lastRound?._id]);
+
+  // Scroll al form de votación si viene con hash #vote
+  useEffect(() => {
+    if (location.hash !== "#vote") return;
+    const timeout = setTimeout(() => {
+      const el = document.getElementById("ci-vote-form");
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 122;
+      window.scrollTo({ top, behavior: "smooth" });
+    }, 150);
+    return () => clearTimeout(timeout);
+  }, [location.hash]);
 
   const togglePearl = (pearlKey, playerId) => {
     setPearls((prev) => ({
@@ -330,29 +343,19 @@ const ChachosInicio = () => {
                     <div key={player._id} className="ci-vote-table-row">
                       <span className="ci-player-name">{player.first_name} {player.last_name}</span>
                       <div className="ci-vt-center">
-                        <div className="ci-score-stepper">
-                          <button
-                            type="button"
-                            className="ci-stepper-btn"
-                            onClick={() => setScores((prev) => {
-                              const cur = parseFloat(prev[player._id]) || 0;
-                              const next = cur <= 1 ? 1 : Math.round((cur - 0.5) * 10) / 10;
-                              return { ...prev, [player._id]: next };
-                            })}
-                          >−</button>
-                          <span className="ci-stepper-value">
-                            {scores[player._id] != null && scores[player._id] !== "" ? scores[player._id] : "–"}
-                          </span>
-                          <button
-                            type="button"
-                            className="ci-stepper-btn"
-                            onClick={() => setScores((prev) => {
-                              const cur = parseFloat(prev[player._id]) || 0;
-                              const next = cur >= 10 ? 10 : Math.round((cur + 0.5) * 10) / 10;
-                              return { ...prev, [player._id]: next };
-                            })}
-                          >+</button>
-                        </div>
+                        <select
+                          className="ci-score-select"
+                          value={scores[player._id] ?? ""}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? "" : parseFloat(e.target.value);
+                            setScores((prev) => ({ ...prev, [player._id]: val }));
+                          }}
+                        >
+                          <option value="">–</option>
+                          {Array.from({ length: 19 }, (_, i) => (i + 2) * 0.5).map((v) => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
                       </div>
                       {PEARL_OPTIONS.map((pearl) => {
                         const selected = pearls[pearl.key] === player._id;

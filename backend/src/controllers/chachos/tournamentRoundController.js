@@ -29,6 +29,30 @@ export default class TournamentRoundController {
     }
   };
 
+  // ---------- GET PLAYER PICTURES BY ROUND ----------
+  getPlayerPicturesByRound = async (req, res, next) => {
+    try {
+      const roundId = req.params.pid;
+      const pictures = await repository.getPlayerPicturesByRound(roundId);
+      res.status(200).json({ pictures });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ---------- GET ALL ROUNDS FOR LIST VIEW ----------
+  getAllRoundsForListView = async (req, res, next) => {
+    try {
+      const tournamentRounds = await repository.getAllRoundsForList();
+      res.status(200).json({
+        message: "Tournament rounds list retrieved",
+        tournamentRounds,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- GET ROUNDS BY TOURNAMENT ----------
   getRoundsByTournament = async (req, res, next) => {
     try {

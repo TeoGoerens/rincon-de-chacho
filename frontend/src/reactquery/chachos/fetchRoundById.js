@@ -2,15 +2,16 @@ import axios from "axios";
 import { baseURL } from "../../helpers/baseURL";
 import { getUserJWT } from "../getUserInformation";
 
-const fetchAllTournamentRounds = async () => {
+const fetchRoundById = async (roundId) => {
   const token = getUserJWT();
   if (!token) throw new Error("Token JWT inválido o expirado.");
 
-  const response = await axios.get(`${baseURL}/api/chachos/tournament-round/list`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.get(
+    `${baseURL}/api/chachos/tournament-round/${roundId}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 
   return response.data;
 };
 
-export default fetchAllTournamentRounds;
+export default fetchRoundById;

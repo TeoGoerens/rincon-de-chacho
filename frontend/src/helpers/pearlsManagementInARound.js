@@ -3,29 +3,22 @@ export const calculateTotalVotesByPearl = (votes, campo) => {
 
   votes?.forEach((vote) => {
     const person = vote[campo];
+    if (!person) return;
 
-    if (person) {
-      const { _id } = person;
-      const key = _id; // Utilizar _id como clave
-
-      if (personMap.has(key)) {
-        personMap.set(key, personMap.get(key) + 1);
-      } else {
-        personMap.set(key, 1);
-      }
+    const key = person._id;
+    if (personMap.has(key)) {
+      personMap.get(key).count += 1;
+    } else {
+      personMap.set(key, { player: person, count: 1 });
     }
   });
 
-  const personArray = Array.from(personMap.entries()).map(
-    ([key, total_votes]) => {
-      const person = votes.find((vote) => vote[campo]?._id === key);
-      const { _id, first_name, last_name } = person[campo];
-      return { _id, first_name, last_name, total_votes };
-    }
-  );
-
-  // Ordenar el array por total_votes en orden descendente
-  const sortedArray = personArray.sort((a, b) => b.total_votes - a.total_votes);
-
-  return sortedArray;
+  return Array.from(personMap.values())
+    .map(({ player, count }) => ({
+      _id:         player._id,
+      first_name:  player.first_name,
+      last_name:   player.last_name,
+      total_votes: count,
+    }))
+    .sort((a, b) => b.total_votes - a.total_votes);
 };
