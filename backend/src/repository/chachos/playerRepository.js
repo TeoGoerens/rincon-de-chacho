@@ -137,7 +137,7 @@ export default class PlayerRepository extends baseRepository {
         { $lookup: { from: "users",   localField: "_id",            foreignField: "_id",           as: "voter_user"   } },
         { $unwind: "$voter_user" },
         { $lookup: { from: "players", localField: "voter_user.chacho_player", foreignField: "_id", as: "voter_player" } },
-        { $unwind: { path: "$voter_player", preserveNullAndEmptyArrays: true } },
+        { $unwind: "$voter_player" },
         { $project: {
           count:                           1,
           avg:                             1,
@@ -159,29 +159,29 @@ export default class PlayerRepository extends baseRepository {
         Vote.aggregate([
           { $match: { white_pearl: pid } },
           { $group: { _id: "$voter", count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1, _id: 1 } },
           { $limit: 1 },
           ...voterToPlayerPipeline,
         ]),
 
-        // Mayor fan: quien mayor puntaje promedio te dio
+        // Mayor fan: quien mayor puntaje promedio te dio (mín. 3 votos)
         Vote.aggregate([
           { $unwind: "$evaluation" },
           { $match: { "evaluation.player": pid } },
           { $group: { _id: "$voter", avg: { $avg: "$evaluation.points" }, count: { $sum: 1 } } },
           { $match: { count: { $gte: 3 } } },
-          { $sort: { avg: -1 } },
+          { $sort: { avg: -1, count: -1, _id: 1 } },
           { $limit: 1 },
           ...voterToPlayerPipeline,
         ]),
 
-        // Mayor crítico: quien menor puntaje promedio te dio
+        // Mayor crítico: quien menor puntaje promedio te dio (mín. 3 votos)
         Vote.aggregate([
           { $unwind: "$evaluation" },
           { $match: { "evaluation.player": pid } },
           { $group: { _id: "$voter", avg: { $avg: "$evaluation.points" }, count: { $sum: 1 } } },
           { $match: { count: { $gte: 3 } } },
-          { $sort: { avg: 1 } },
+          { $sort: { avg: 1, count: -1, _id: 1 } },
           { $limit: 1 },
           ...voterToPlayerPipeline,
         ]),
@@ -190,7 +190,7 @@ export default class PlayerRepository extends baseRepository {
         Vote.aggregate([
           { $match: { black_pearl: pid } },
           { $group: { _id: "$voter", count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1, _id: 1 } },
           { $limit: 1 },
           ...voterToPlayerPipeline,
         ]),
@@ -199,7 +199,7 @@ export default class PlayerRepository extends baseRepository {
         ...(user ? [Vote.aggregate([
           { $match: { voter: user._id, white_pearl: { $ne: null } } },
           { $group: { _id: "$white_pearl", count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1, _id: 1 } },
           { $limit: 1 },
           { $lookup: { from: "players", localField: "_id", foreignField: "_id", as: "player" } },
           { $unwind: "$player" },
@@ -210,7 +210,7 @@ export default class PlayerRepository extends baseRepository {
         ...(user ? [Vote.aggregate([
           { $match: { voter: user._id, black_pearl: { $ne: null } } },
           { $group: { _id: "$black_pearl", count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1, _id: 1 } },
           { $limit: 1 },
           { $lookup: { from: "players", localField: "_id", foreignField: "_id", as: "player" } },
           { $unwind: "$player" },
