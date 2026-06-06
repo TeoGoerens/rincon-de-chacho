@@ -30,8 +30,7 @@ export default class PlayerRepository extends baseRepository {
         }},
         { $lookup: { from: "players", localField: "_id", foreignField: "_id", as: "player" } },
         { $unwind: "$player" },
-        { $match: { "player.role": "team" } },
-        { $sort: { "player.shirt": 1 } },
+        { $sort: { "player.last_name": 1, "player.first_name": 1 } },
         { $project: {
           matches:       1,
           goals:         1,

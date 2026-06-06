@@ -117,7 +117,11 @@ const ChachosSquad = () => {
                   className={`csq-dd-item${selectedId === player._id ? " csq-dd-item--active" : ""}`}
                   onClick={() => { setSelectedId(player._id); setDropdownOpen(false); }}
                 >
-                  <span className="csq-dd-item-name">{player.first_name} {player.last_name}</span>
+                  <span className="csq-dd-item-name">
+                    <span className="csq-dd-item-firstname">{player.first_name}</span>
+                    {" "}
+                    <span className="csq-dd-item-lastname">{player.last_name}</span>
+                  </span>
                 </li>
               ))}
             </ul>

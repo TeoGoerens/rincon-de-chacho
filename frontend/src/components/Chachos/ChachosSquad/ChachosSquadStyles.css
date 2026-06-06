@@ -61,7 +61,7 @@
   padding: 0.55rem 0.75rem 0.55rem 1rem;
   cursor: pointer;
   transition: border-color var(--transition-base);
-  min-width: 220px;
+  width: 290px;
 }
 
 .csq-dd-trigger:hover        { border-color: rgba(255,255,255,0.2); }
@@ -137,11 +137,18 @@
 .csq-dd-item--active    { background: rgba(168,218,220,0.06); }
 
 .csq-dd-item-name {
-  font-family: var(--secondary-font);
+  font-family: "Urbanist", var(--secondary-font);
   font-size: var(--text-sm);
-  font-weight: var(--fw-medium);
   color: var(--text-bright);
   white-space: nowrap;
+}
+.csq-dd-item-firstname {
+  font-weight: var(--fw-light, 300);
+  color: var(--text-bright);
+}
+.csq-dd-item-lastname {
+  font-weight: var(--fw-extrabold);
+  color: var(--text-bright);
 }
 .csq-dd-item-real {
   font-family: var(--secondary-font);
