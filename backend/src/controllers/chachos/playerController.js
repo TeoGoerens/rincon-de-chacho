@@ -17,17 +17,38 @@ export default class PlayerController {
       next(error);
     }
   };
+
   // ---------- GET ALL PLAYERS ----------
   getAllPlayers = async (req, res, next) => {
     try {
       const players = await repository.baseGetAll({ sortBy: "shirt" });
-      res
-        .status(200)
-        .json({ message: "All players have been properly retrieved", players });
+      res.status(200).json({ message: "All players have been properly retrieved", players });
     } catch (error) {
       next(error);
     }
   };
+
+  // ---------- GET SQUAD (con stats de carrera) ----------
+  getSquad = async (req, res, next) => {
+    try {
+      const squad = await repository.getSquad();
+      res.status(200).json({ message: "Squad retrieved", squad });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ---------- GET PLAYER PROFILE (detalle individual) ----------
+  getPlayerProfile = async (req, res, next) => {
+    try {
+      const playerId = req.params.pid;
+      const profile = await repository.getPlayerProfile(playerId);
+      res.status(200).json({ message: "Player profile retrieved", ...profile });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- CREATE PLAYER ----------
   createPlayer = async (req, res, next) => {
     try {
@@ -40,21 +61,17 @@ export default class PlayerController {
         interview: req.body.interview,
         role: req.body.role,
       };
-
       const playerLoaded = await repository.baseCreate(player, "shirt");
-
-      res
-        .status(200)
-        .json({ message: "Player has been properly created", playerLoaded });
+      res.status(200).json({ message: "Player has been properly created", playerLoaded });
     } catch (error) {
       next(error);
     }
   };
+
   // ---------- UPDATE PLAYER ----------
   updatePlayerById = async (req, res, next) => {
     try {
       const playerId = req.params.pid;
-
       const newPlayerInfo = {
         shirt: req.body.shirt,
         first_name: req.body.first_name,
@@ -64,28 +81,19 @@ export default class PlayerController {
         interview: req.body.interview,
         role: req.body.role,
       };
-
-      const playerUpdated = await repository.baseUpdateById(
-        playerId,
-        newPlayerInfo
-      );
-      res.status(200).json({
-        message: `Player with id ${playerId} has been properly updated`,
-        playerUpdated,
-      });
+      const playerUpdated = await repository.baseUpdateById(playerId, newPlayerInfo);
+      res.status(200).json({ message: `Player with id ${playerId} has been properly updated`, playerUpdated });
     } catch (error) {
       next(error);
     }
   };
+
   // ---------- DELETE PLAYER ----------
   deletePlayerById = async (req, res, next) => {
     try {
       const playerId = req.params.pid;
       const playerDeleted = await repository.baseDeleteById(playerId);
-      res.status(200).json({
-        message: `Player with id ${playerId} has been properly deleted`,
-        playerDeleted,
-      });
+      res.status(200).json({ message: `Player with id ${playerId} has been properly deleted`, playerDeleted });
     } catch (error) {
       next(error);
     }

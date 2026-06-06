@@ -229,14 +229,17 @@ export default class TournamentRoundRepository extends baseRepository {
         .populate({ path: "black_pearl",   select: "first_name last_name" })
         .lean();
 
-      // Batch lookup de fotos para los ganadores de perla blanca
-      const wpIds = [...new Set(
-        rounds.flatMap((r) => (r.white_pearl ?? []).map((p) => p._id?.toString()).filter(Boolean))
+      // Batch lookup de fotos para perla blanca y perla negra
+      const allPearlIds = [...new Set(
+        rounds.flatMap((r) => [
+          ...(r.white_pearl ?? []).map((p) => p._id?.toString()),
+          ...(r.black_pearl ?? []).map((p) => p._id?.toString()),
+        ].filter(Boolean))
       )];
 
-      if (wpIds.length) {
+      if (allPearlIds.length) {
         const users = await User.find(
-          { chacho_player: { $in: wpIds } },
+          { chacho_player: { $in: allPearlIds } },
           { chacho_player: 1, profile_picture: 1 }
         ).lean();
         const picMap = Object.fromEntries(
@@ -245,6 +248,12 @@ export default class TournamentRoundRepository extends baseRepository {
         rounds.forEach((r) => {
           if (r.white_pearl?.length) {
             r.white_pearl = r.white_pearl.map((p) => ({
+              ...p,
+              profile_picture: picMap[p._id?.toString()] ?? null,
+            }));
+          }
+          if (r.black_pearl?.length) {
+            r.black_pearl = r.black_pearl.map((p) => ({
               ...p,
               profile_picture: picMap[p._id?.toString()] ?? null,
             }));

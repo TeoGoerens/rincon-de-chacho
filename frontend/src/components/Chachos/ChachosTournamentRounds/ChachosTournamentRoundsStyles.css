@@ -305,11 +305,12 @@
 }
 
 .cf-rival-date {
-  display: inline;
+  display: block;
   font-family: var(--secondary-font);
   font-size: var(--text-2xs);
   font-weight: var(--fw-medium);
   color: var(--text-subtle-dark);
+  margin-top: 0.2rem;
   letter-spacing: var(--ls-normal);
 }
 
@@ -678,7 +679,15 @@
   }
 
   .cf-rival-name { font-size: 0.92rem; }
-  .cf-rival-date { font-size: 0.68rem; }
+
+  .cf-rival-date {
+    display: inline;
+    font-size: 0.68rem;
+    margin-top: 0;
+  }
+  .cf-rival-date::before {
+    content: " — ";
+  }
 
   /* Emojis para distinguir perlas */
   .cf-mvp-cell::before {

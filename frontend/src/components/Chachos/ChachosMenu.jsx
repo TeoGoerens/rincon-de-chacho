@@ -5,7 +5,7 @@ const CHACHOS_TABS = [
   { label: "Inicio",       to: "/chachos",                   exact: true  },
   { label: "Estadísticas", to: "/chachos/historical-stats"               },
   { label: "Fechas",       to: "/chachos/tournament-rounds"              },
-  { label: "Nosotros",     to: "/chachos/squad"                          },
+  { label: "Jugadores",    to: "/chachos/squad"                          },
 ];
 
 const ChachosMenu = () => (

@@ -7,26 +7,18 @@ const router = Router();
 const controller = new PlayerController();
 
 // ---------- GET ROUTES ----------
-router.get("/:pid", authMiddleware, controller.getPlayerById);
-router.get("/", authMiddleware, controller.getAllPlayers);
+router.get("/squad",        authMiddleware, controller.getSquad);
+router.get("/:pid/profile", authMiddleware, controller.getPlayerProfile);
+router.get("/:pid",         authMiddleware, controller.getPlayerById);
+router.get("/",             authMiddleware, controller.getAllPlayers);
 
 // ---------- POST ROUTES ----------
 router.post("/", authMiddleware, adminAuthMiddleware, controller.createPlayer);
 
 // ---------- PUT ROUTES ----------
-router.put(
-  "/:pid",
-  authMiddleware,
-  adminAuthMiddleware,
-  controller.updatePlayerById
-);
+router.put("/:pid", authMiddleware, adminAuthMiddleware, controller.updatePlayerById);
 
 // ---------- DELETE ROUTES ----------
-router.delete(
-  "/:pid",
-  authMiddleware,
-  adminAuthMiddleware,
-  controller.deletePlayerById
-);
+router.delete("/:pid", authMiddleware, adminAuthMiddleware, controller.deletePlayerById);
 
 export default router;

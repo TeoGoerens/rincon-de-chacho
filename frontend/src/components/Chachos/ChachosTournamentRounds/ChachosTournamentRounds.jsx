@@ -225,10 +225,8 @@ const ChachosTournamentRounds = () => {
                         </td>
 
                         <td className="cf-td cf-td--rival">
-                          <span className="cf-rival-name">
-                            {round.rival?.name}
-                            <span className="cf-rival-date"> — {formatDate(round.match_date)}</span>
-                          </span>
+                          <span className="cf-rival-name">{round.rival?.name}</span>
+                          <span className="cf-rival-date">{formatDate(round.match_date)}</span>
                         </td>
 
                         <td className={`cf-td cf-td--score cf-score--${cls}`}>
