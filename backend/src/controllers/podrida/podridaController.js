@@ -67,11 +67,12 @@ export default class PodridaController {
   /* --------------- GET LAST PODRIDA MATCH --------------- */
   getLastPodridaMatch = async (req, res, next) => {
     try {
-      const lastMatch = await repository.getLastPodridaMatch();
+      const { lastMatch, playerPictures } = await repository.getLastPodridaMatch();
 
       res.status(200).json({
         message: "Last Podrida match retrieved successfully",
         lastMatch,
+        playerPictures,
       });
     } catch (error) {
       next(error);
@@ -143,11 +144,14 @@ export default class PodridaController {
   getRanking = async (req, res, next) => {
     try {
       const year = req.query.year;
-      const ranking = await repository.getRanking(year);
+      const { ranking, totalMatches, filteredMatches, availableYears } = await repository.getRanking(year);
 
       res.status(200).json({
         message: "Ranking has been properly calculated",
         ranking,
+        totalMatches,
+        filteredMatches,
+        availableYears,
       });
     } catch (error) {
       console.error("Error in getRanking:", error);

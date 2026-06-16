@@ -1,279 +1,920 @@
-.podrida-container {
-  font-family: "Segoe UI", sans-serif;
-  color: #333;
-  max-width: 1200px;
-  margin: auto;
-}
+/* ═══════════════════════════════════════════════════════════
+   PODRIDA RESUMEN  —  El Rincón de Chacho
+   Prefijo: pr-
+   ═══════════════════════════════════════════════════════════ */
 
-/* Subtítulos de sección */
-.section-title {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 0.8rem;
-  margin-top: 2rem;
-}
-
-.section-title.blue {
-  color: #007acc;
-}
-
-.section-title.yellow {
-  color: #b8860b;
-}
-
-.section-title.gray {
-  color: #444;
-}
-
-.filtro-container {
-  margin-block: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.filtro-container select {
-  padding: 0.4rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-/* RECORDS */
-.records-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-  background-color: #ffffff;
-  padding: 1rem;
-  border-radius: 10px;
-  border-left: 6px solid #2196f3; /* Azul */
-}
-
-.record-card {
-  padding: 0.8rem;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease,
-    background-color 0.2s ease, color 0.2s ease;
-  cursor: pointer;
-  color: #000;
+/* ── Contenedor raíz ── */
+.pr {
+  min-height: calc(100vh - 80px - 42px);
+  background: var(--bg-deep);
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: var(--space-md);
 }
 
-.record-card.positivo {
-  background: #e0f7e9;
+/* ── Header ── */
+.pr-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: var(--space-sm);
 }
 
-.record-card.negativo {
-  background: #fdecea;
+.pr-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--color-podrida);
 }
 
-.record-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+.pr-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-podrida);
+  flex-shrink: 0;
 }
 
-.record-card h4 {
-  margin-bottom: 0.8rem;
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: inherit;
-  text-align: center;
+.pr-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
 }
 
-.record-card ul {
-  padding: 0;
+/* ── Títulos de sección ── */
+.pr-section-heading {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  margin-top: var(--space-xl);
+  border-left: 2px solid rgba(246, 201, 14, 0.4);
+  padding-left: var(--space-xs);
 }
 
-/* Estilos para el top 3 dentro de cada tarjeta */
-.record-position {
-  font-size: 0.9rem;
+/* ── Mini stats strip ── */
+.pr-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+}
+
+.pr-stat-chip {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cuerpo principal del chip */
+.pr-stat-body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+}
+
+/* Eyebrow — label pequeño con punto de color */
+.pr-stat-eyebrow {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
 }
 
-/* 🥇 Primer lugar: más grande, más llamativo */
-.record-1 {
-  font-weight: 700;
-  color: var(--text-color); /* azul oscuro */
-  padding-block: 0.5rem;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid gray;
+.pr-stat-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-podrida);
+  opacity: 0.55;
+  flex-shrink: 0;
 }
 
-/* 🥈 Segundo lugar */
-.record-2 {
-  color: rgb(150, 150, 150);
-  font-weight: 500;
-  margin-bottom: 0.3rem;
+/* Número / valor principal — dominante */
+.pr-stat-num {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 2.2rem;
+  font-weight: var(--fw-black);
+  color: var(--color-podrida);
+  line-height: 1;
+  letter-spacing: -0.03em;
 }
 
-/* 🥉 Tercer lugar */
-.record-3 {
-  color: rgb(150, 150, 150);
-  font-weight: 400;
+.pr-stat-num--name {
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Íconos (opcional, si querés más visual) */
-.record-1::before {
-  content: "🥇";
-}
-.record-2::before {
-  content: "🥈";
-}
-.record-3::before {
-  content: "🥉";
-}
-
-/* ULTIMA PARTIDA */
-.ultima-partida-container {
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-  border-left: 6px solid #fbc02d; /* Dorado */
-}
-
-.ultima-partida-container ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.ultima-partida-container li {
-  margin: 0.5rem 0;
-}
-
-/* RANKING */
-.ranking-container {
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 10px;
-  margin-bottom: 2rem;
-  border-left: 6px solid #616161; /* Gris oscuro */
-}
-
-/* Leyenda de emojis */
-.emoji-legenda {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+/* Footer del chip — sección física separada */
+.pr-stat-foot {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  background-color: #ffffff;
-  border-radius: 6px;
-  color: #333;
+  padding: 0.55rem var(--space-md);
+  background: rgba(255, 255, 255, 0.025);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.emoji-legenda .emoji {
-  font-size: 1.2rem;
-  margin-right: 0.4rem;
+/* Badge del año */
+.pr-stat-year-tag {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
+  color: var(--color-podrida);
+  background: rgba(246, 201, 14, 0.08);
+  border: 1px solid rgba(246, 201, 14, 0.2);
+  border-radius: var(--radius-xs);
+  padding: 0.1rem 0.4rem;
+  flex-shrink: 0;
+  line-height: 1.4;
 }
 
-/* Tabla con scroll horizontal */
-.ranking-table-wrapper {
-  overflow-x: auto;
+/* Valor del año */
+.pr-stat-year-val {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.ranking-table-wrapper table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: separate; /* ⬅️ CAMBIO CLAVE */
-  border-spacing: 0;
-  padding: 0;
+/* Sin datos en el año actual */
+.pr-stat-year-val--empty {
+  color: rgba(255, 255, 255, 0.2);
+  font-style: italic;
 }
 
-.ranking-table-wrapper th,
-.ranking-table-wrapper td {
-  padding: 0.5rem;
+/* ── Card base ── */
+.pr-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Última partida ── */
+.pr-lm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pr-lm-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-body-dark);
+  letter-spacing: var(--ls-normal);
+}
+
+.pr-lm-count {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-muted-dark);
+  letter-spacing: var(--ls-normal);
+}
+
+/* ── Podio ── */
+.pr-podium {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: stretch;
+}
+
+.pr-podium-slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--space-sm) var(--space-xs);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   text-align: center;
-  border: 1px solid #ccc;
 }
 
-.ranking-table-wrapper th {
-  background-color: #f0f0f0;
+.pr-podium-slot--1 {
+  border-color: rgba(246, 201, 14, 0.25);
+  background: rgba(246, 201, 14, 0.04);
 }
 
-.ranking-table-wrapper tbody tr:nth-child(odd) {
-  background-color: #fdfdfd;
+.pr-podium-pos {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-subtle-dark);
+  text-transform: uppercase;
 }
 
-.ranking-table-wrapper tbody tr:hover {
-  background-color: #e6f7ff;
+.pr-podium-slot--1 .pr-podium-pos {
+  color: var(--color-podrida);
 }
 
-/* Sticky columnas: Rank, Jugador, Pts */
-.ranking-table-wrapper th.sticky-col,
-.ranking-table-wrapper td.sticky-col {
+.pr-podium-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--avatar-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.pr-podium-slot--1 .pr-podium-avatar {
+  width: 52px;
+  height: 52px;
+  font-size: var(--text-lg);
+  box-shadow: 0 0 18px rgba(246, 201, 14, 0.18);
+}
+
+.pr-podium-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-full);
+}
+
+.pr-podium-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-body-dark);
+}
+
+.pr-podium-slot--1 .pr-podium-name {
+  color: var(--text-bright);
+  font-weight: var(--fw-bold);
+}
+
+.pr-podium-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-label-dark);
+}
+
+.pr-podium-slot--1 .pr-podium-score {
+  color: var(--color-podrida);
+}
+
+/* ── Resto de jugadores ── */
+.pr-lm-rest {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: var(--space-xs);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pr-lm-rest-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.3rem var(--space-xs);
+  border-radius: var(--radius-sm);
+}
+
+.pr-lm-rest-row--last {
+  background: rgba(230, 57, 70, 0.05);
+  border: 1px solid rgba(230, 57, 70, 0.1);
+}
+
+.pr-lm-rest-pos {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-subtle-dark);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.pr-lm-rest-row--last .pr-lm-rest-pos {
+  color: var(--fourth-color);
+}
+
+.pr-lm-rest-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+  flex: 1;
+}
+
+.pr-lm-rest-row--last .pr-lm-rest-name {
+  color: rgba(230, 57, 70, 0.85);
+}
+
+.pr-lm-rest-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Tiles: Highlight + Rachas — compactos ── */
+.pr-lm-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pr-lm-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.5rem var(--space-xs);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  text-align: center;
+}
+
+.pr-lm-tile-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.pr-lm-tile-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-tight);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  margin-top: 0.1rem;
+}
+
+.pr-lm-tile-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-body-dark);
+}
+
+.pr-lm-tile-val {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Ranking header ── */
+.pr-ranking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-xl);
+}
+
+.pr-ranking-header .pr-section-heading {
+  margin-top: 0;
+}
+
+/* ── Selector de año ── */
+.pr-year-select {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-body-dark);
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.pr-year-select option {
+  background: var(--bg-panel);
+  color: var(--text-body-dark);
+}
+
+.pr-year-select:focus {
+  border-color: rgba(246, 201, 14, 0.45);
+}
+
+/* ── Leyenda de puntos ── */
+.pr-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.pr-legend-title {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-right: var(--space-sm);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pr-legend-items {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.pr-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 0.85rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.pr-legend-item:first-child {
+  padding-left: 0;
+}
+
+.pr-legend-item:last-child {
+  border-right: none;
+}
+
+.pr-legend-item-label {
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+  letter-spacing: var(--ls-tight);
+}
+
+.pr-legend-item-pts {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  color: var(--color-podrida);
+  letter-spacing: 0;
+}
+
+.pr-legend-item-pts--neg {
+  color: rgba(230, 57, 70, 0.8);
+}
+
+/* ── Tabla ── */
+
+/* La card del ranking no tiene padding propio — la tabla llega al borde */
+.pr-ranking-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* La leyenda va dentro de la card con su propio padding */
+.pr-legend {
+  padding: 1rem 1.5rem 0;
+}
+
+/* En mobile la leyenda desktop se oculta */
+@media (max-width: 600px) {
+  .pr-legend--desktop { display: none; }
+}
+
+/* Desktop table: visible en desktop, oculta en mobile */
+.pr-table--desktop {
+  display: block;
+}
+
+/* Mobile stats: oculta en desktop */
+.pr-mobile-stats {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .pr-table--desktop { display: none; }
+  .pr-mobile-stats   { display: block; }
+}
+
+.pr-table-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.pr-table-wrapper::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.pr-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pr-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+/* Columnas */
+.pr-col--rank { width: 40px; }
+.pr-col--name { width: 32%; }
+.pr-col--stat { width: 72px; }
+
+.pr-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Urbanist", var(--secondary-font);
+}
+
+/* ── Headers desktop ── */
+.pr-th {
   position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.6rem 0.75rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  background: #111111;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  white-space: nowrap;
 }
 
-.ranking-table-wrapper td.sticky-col {
-  background-color: white;
+.pr-th--stat {
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-base);
 }
 
-.ranking-table-wrapper th.sticky-rank,
-.ranking-table-wrapper td.sticky-rank {
-  left: 0px;
-  z-index: 3; /* superior para la primera columna */
-  width: 60px;
+.pr-th--stat:hover { background: #171717; }
+
+.pr-th--active {
+  background: rgba(246, 201, 14, 0.06);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
 }
 
-.ranking-table-wrapper th.sticky-player,
-.ranking-table-wrapper td.sticky-player {
-  left: 60px;
-  width: 150px;
+.pr-th--name { text-align: center; }
+
+.pr-sort-icon {
+  display: inline-block;
+  margin-left: 0.2rem;
+  font-size: 0.6rem;
+  opacity: 0.3;
+  vertical-align: middle;
 }
 
-.ranking-table-wrapper th.sticky-pts,
-.ranking-table-wrapper td.sticky-pts {
-  left: 210px;
-  width: 60px;
-  z-index: 2;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+.pr-sort-icon--active { opacity: 1; }
+
+/* ── Rows ── */
+.pr-tr { transition: background var(--transition-base); }
+
+.pr-tr:nth-child(even) .pr-td {
+  background: rgba(255, 255, 255, 0.025);
 }
 
-.ranking-table-wrapper td.sticky-pts {
-  background-color: #d7f0ff; /* celeste claro */
-  font-weight: bold;
-  color: #0a2d4a;
+.pr-tr:hover .pr-td {
+  background: rgba(255, 255, 255, 0.055) !important;
 }
 
-.ranking-table-wrapper th:nth-child(n + 4),
-.ranking-table-wrapper td:nth-child(n + 4) {
-  width: 60px;
+.pr-tr--first .pr-td {
+  background: rgba(246, 201, 14, 0.05);
 }
 
-/* Responsividad */
-@media (max-width: 768px) {
-  .ranking-table-wrapper table {
-    font-size: 0.9rem;
+.pr-tr--first:hover .pr-td {
+  background: rgba(246, 201, 14, 0.08) !important;
+}
+
+/* ── Cells ── */
+.pr-td {
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.pr-td--active-col {
+  background: rgba(246, 201, 14, 0.04);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.pr-td--rank {
+  color: var(--text-subtle-dark);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+}
+
+.pr-td--name {
+  text-align: left;
+  font-weight: var(--fw-medium);
+  color: var(--text-bright);
+  max-width: 0;
+}
+
+.pr-tr--first .pr-td--name { color: var(--color-podrida); }
+
+/* PTS siempre en amarillo */
+.pr-td--pts {
+  font-weight: var(--fw-bold);
+  color: var(--color-podrida);
+}
+
+.pr-td--last { color: rgba(230, 57, 70, 0.75); }
+
+/* Zero: disimulado — especificidad 0-2-0 */
+.pr-tr .pr-td--zero { color: rgba(255, 255, 255, 0.12); }
+
+/* ── Pills selector mobile ── */
+.pr-mstat-pills {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem 0;
+}
+
+.pr-mstat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.pr-mstat-pill:hover {
+  border-color: rgba(246, 201, 14, 0.3);
+  color: var(--text-body-dark);
+}
+
+.pr-mstat-pill--active {
+  background: rgba(246, 201, 14, 0.08);
+  border-color: rgba(246, 201, 14, 0.4);
+  color: var(--text-bright);
+}
+
+.pr-mstat-pill--neg.pr-mstat-pill--active {
+  background: rgba(230, 57, 70, 0.08);
+  border-color: rgba(230, 57, 70, 0.4);
+}
+
+.pr-mstat-pill-pts {
+  font-family: "Urbanist", var(--secondary-font);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-2xs);
+  color: var(--color-podrida);
+  opacity: 0.7;
+}
+
+.pr-mstat-pill--active .pr-mstat-pill-pts {
+  opacity: 1;
+}
+
+.pr-mstat-pill--neg .pr-mstat-pill-pts {
+  color: rgba(230, 57, 70, 0.8);
+}
+
+/* ── Tabla mobile compacta ── */
+.pr-mobile-table-wrapper {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.pr-mobile-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: var(--secondary-font);
+}
+
+.pr-mt-th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  background: #111111;
+  padding: 0.5rem 0.6rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pr-mt-th:hover {
+  background: #171717;
+}
+
+.pr-mt-th--name {
+  text-align: left;
+}
+
+.pr-mt-th--pts {
+  color: var(--color-podrida);
+}
+
+.pr-mt-th--active {
+  color: var(--color-podrida);
+  background: rgba(246, 201, 14, 0.04);
+}
+
+.pr-mt-th--active-neg {
+  color: rgba(230, 57, 70, 0.9);
+  background: rgba(230, 57, 70, 0.04);
+}
+
+.pr-mt-th--sorted {
+  color: var(--text-bright);
+}
+
+.pr-mt-th--active.pr-mt-th--sorted {
+  color: var(--color-podrida);
+}
+
+.pr-mt-th--active-neg.pr-mt-th--sorted {
+  color: rgba(230, 57, 70, 0.9);
+}
+
+.pr-mt-tr {
+  transition: background var(--transition-base);
+}
+
+.pr-mt-tr:nth-child(even) .pr-mt-td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.pr-mt-tr:hover .pr-mt-td {
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.pr-mt-tr--first .pr-mt-td {
+  background: rgba(246, 201, 14, 0.05);
+}
+
+.pr-mt-tr--first:hover .pr-mt-td {
+  background: rgba(246, 201, 14, 0.08) !important;
+}
+
+.pr-mt-td {
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  padding: 0.6rem 0.6rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.pr-mt-td--name {
+  text-align: left;
+  font-weight: var(--fw-medium);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
+}
+
+.pr-mt-tr--first .pr-mt-td--name {
+  color: var(--color-podrida);
+}
+
+.pr-mt-td--pts {
+  font-family: "Urbanist", var(--secondary-font);
+  font-weight: var(--fw-bold);
+  color: var(--color-podrida);
+}
+
+.pr-mt-td--active {
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.pr-mt-td--last {
+  color: rgba(230, 57, 70, 0.8);
+}
+
+.pr-mt-tr .pr-mt-td--zero {
+  color: rgba(255, 255, 255, 0.12);
+  font-weight: var(--fw-regular);
+}
+
+/* ── Vacío / cargando ── */
+.pr-empty {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+  padding: var(--space-sm) 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1100px) {
+  .pr {
+    padding: var(--space-lg);
   }
 }
 
-@media (max-width: 480px) {
-  .ranking-table-wrapper table {
-    font-size: 0.85rem;
+@media (max-width: 900px) {
+  .pr-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .pr {
+    padding: var(--space-md);
   }
 
-  .ranking-table-wrapper th,
-  .ranking-table-wrapper td {
-    padding: 0.5rem;
+  .pr-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .ranking-table-wrapper th:nth-child(n + 4),
-  .ranking-table-wrapper td:nth-child(n + 4) {
-    display: none;
+  .pr-podium {
+    flex-wrap: wrap;
   }
 
-  .ranking-table-wrapper th.sticky-pts,
-  .ranking-table-wrapper td.sticky-pts {
-    box-shadow: none;
+  .pr-podium-slot--1 {
+    width: 100%;
+    flex-basis: 100%;
   }
+
+  .pr-podium-slot--2,
+  .pr-podium-slot--3 {
+    flex: 1;
+  }
+
+  /* Tiles en mobile: horizontal */
+  .pr-lm-tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .pr-lm-tile {
+    flex-direction: row;
+    text-align: left;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .pr-lm-tile-label,
+  .pr-lm-tile-name,
+  .pr-lm-tile-val {
+    display: inline;
+  }
+
+  .pr-lm-tile-name::before { content: " "; }
+  .pr-lm-tile-val::before  { content: " · "; color: var(--text-subtle-dark); }
+
 }

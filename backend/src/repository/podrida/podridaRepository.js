@@ -89,7 +89,7 @@ export default class PodridaRepository extends baseRepository {
   /* --------------- GET LAST PODRIDA MATCH --------------- */
   getLastPodridaMatch = async () => {
     const lastMatch = await PodridaMatch.findOne({})
-      .sort({ date: -1 }) // ordenar por fecha descendente
+      .sort({ date: -1 })
       .populate("players.player")
       .populate("highlight.player")
       .populate("longestStreakOnTime.player")
@@ -99,7 +99,16 @@ export default class PodridaRepository extends baseRepository {
       throw new Error("No matches found in the database");
     }
 
-    return lastMatch;
+    const playerIds = lastMatch.players.map((p) => p.player._id);
+    const users = await User.find(
+      { podrida_player: { $in: playerIds } },
+      { podrida_player: 1, profile_picture: 1 }
+    );
+    const playerPictures = Object.fromEntries(
+      users.map((u) => [u.podrida_player.toString(), u.profile_picture])
+    );
+
+    return { lastMatch, playerPictures };
   };
 
   /* --------------- GET PODRIDA MATCH BY YEAR --------------- */
@@ -234,7 +243,18 @@ export default class PodridaRepository extends baseRepository {
         .populate("highlight.player");
     }
 
-    return calculateRanking(matches);
+    const allMatchesMeta = await PodridaMatch.find({}, { date: 1 }).lean();
+    const totalMatches = allMatchesMeta.length;
+    const availableYears = [
+      ...new Set(allMatchesMeta.map((m) => new Date(m.date).getFullYear())),
+    ].sort((a, b) => b - a);
+
+    return {
+      ranking: calculateRanking(matches),
+      totalMatches,
+      filteredMatches: matches.length,
+      availableYears,
+    };
   };
 
   /* --------------- DELETE PODRIDA MATCH --------------- */

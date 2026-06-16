@@ -1,24 +1,37 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 
-import PodridaHomePanel from "../Podrida/PodridaHome/PodridaHomePanel";
-/* import PodridaGames from "./PodridaGames/PodridaGames"; */
+import PodridaHomePanel from "./PodridaHome/PodridaHomePanel";
+import PodridaMenu from "./PodridaMenu";
 
-const PodridaRoutes = () => {
-  return (
-    <>
-      <Routes>
-        <Route>
-          <Route path="/" Component={PodridaHomePanel} />
+const PodridaPlaceholder = ({ title }) => (
+  <>
+    <PodridaMenu />
+    <div style={{
+      minHeight: "calc(100vh - 80px - 42px)",
+      background: "var(--bg-deep)",
+      padding: "var(--space-xl)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}>
+      <p style={{
+        fontFamily: "var(--secondary-font)",
+        fontSize: "var(--text-sm)",
+        color: "var(--text-muted-dark)",
+      }}>
+        {title} — próximamente
+      </p>
+    </div>
+  </>
+);
 
-          {/*       <Route path="/games/*">
-            <Route index Component={PodridaGames} />
-            <Route path=":id/details" Component={PodridaGames} />
-          </Route> */}
-        </Route>
-      </Routes>
-    </>
-  );
-};
+const PodridaRoutes = () => (
+  <Routes>
+    <Route path="/" element={<PodridaHomePanel />} />
+    <Route path="/historial" element={<PodridaPlaceholder title="Historial" />} />
+    <Route path="/estadisticas" element={<PodridaPlaceholder title="Estadísticas" />} />
+  </Routes>
+);
 
 export default PodridaRoutes;
