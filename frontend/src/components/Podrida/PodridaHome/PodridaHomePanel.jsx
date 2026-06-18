@@ -28,6 +28,11 @@ const getInitial = (name) => name?.[0]?.toUpperCase() ?? "?";
 const hasValidPhoto = (url) =>
   !!url && !url.includes("pixabay") && !url.includes("avatar-1577909");
 
+const topChamp  = (ranking) =>
+  ranking.length === 0
+    ? null
+    : [...ranking].sort((a, b) => b.firsts - a.firsts)[0];
+
 const topChumbo = (ranking) =>
   ranking.length === 0
     ? null
@@ -89,8 +94,8 @@ const PodridaHomePanel = () => {
   }, [ranking, sortKey, sortDir]);
   const availableYears     = allTimeData?.availableYears ?? [];
 
-  const allTimeLeader  = allTimeRanking[0] ?? null;
-  const yearLeader     = currentYearRanking[0] ?? null;
+  const allTimeChamp   = useMemo(() => topChamp(allTimeRanking),  [allTimeRanking]);
+  const yearChamp      = useMemo(() => topChamp(currentYearRanking), [currentYearRanking]);
   const allTimeChumbo  = useMemo(() => topChumbo(allTimeRanking), [allTimeRanking]);
   const yearChumbo     = useMemo(() => topChumbo(currentYearRanking), [currentYearRanking]);
 
@@ -155,17 +160,17 @@ const PodridaHomePanel = () => {
               <div className="pr-stat-body">
                 <span className="pr-stat-eyebrow">
                   <span className="pr-stat-dot" />
-                  Líder histórico
+                  Más victorias
                 </span>
                 <span className="pr-stat-num pr-stat-num--name">
-                  {allTimeLeader?.name ?? "—"}
+                  {allTimeChamp?.name ?? "—"}
                 </span>
               </div>
               {hasCurrentYearData && (
                 <div className="pr-stat-foot">
                   <span className="pr-stat-year-tag">{CURRENT_YEAR}</span>
-                  <span className={`pr-stat-year-val${!yearLeader ? " pr-stat-year-val--empty" : ""}`}>
-                    {yearLeader ? yearLeader.name : "Sin partidas aún"}
+                  <span className={`pr-stat-year-val${!yearChamp ? " pr-stat-year-val--empty" : ""}`}>
+                    {yearChamp ? yearChamp.name : "Sin partidas aún"}
                   </span>
                 </div>
               )}
@@ -175,7 +180,7 @@ const PodridaHomePanel = () => {
               <div className="pr-stat-body">
                 <span className="pr-stat-eyebrow">
                   <span className="pr-stat-dot" />
-                  Más últimos histórico
+                  Más últimos puestos
                 </span>
                 <span className="pr-stat-num pr-stat-num--name">
                   {allTimeChumbo?.name ?? "—"}
@@ -358,7 +363,6 @@ const PodridaHomePanel = () => {
                   <div className="pr-table-wrapper pr-table--desktop">
                     <table className="pr-table">
                       <colgroup>
-                        <col className="pr-col--rank" />
                         <col className="pr-col--name" />
                         <col className="pr-col--stat" />
                         <col className="pr-col--stat" />
@@ -371,7 +375,6 @@ const PodridaHomePanel = () => {
                       </colgroup>
                       <thead>
                         <tr>
-                          <th className="pr-th pr-th--rank">#</th>
                           <th className="pr-th pr-th--name">Jugador</th>
                           <SortTh col="played">PJ</SortTh>
                           <SortTh col="points" className="pr-th--pts">PTS</SortTh>
@@ -388,8 +391,12 @@ const PodridaHomePanel = () => {
                           const ac = (col) => sortKey === col ? " pr-td--active-col" : "";
                           return (
                             <tr key={j.name} className={`pr-tr${idx === 0 ? " pr-tr--first" : ""}`}>
-                              <td className="pr-td pr-td--rank">{idx + 1}</td>
-                              <td className="pr-td pr-td--name">{j.name}</td>
+                              <td className="pr-td pr-td--name">
+                                <div className="pr-td-name-inner">
+                                  <span className="pr-td-pos">{idx + 1}</span>
+                                  {j.name}
+                                </div>
+                              </td>
                               <td className={`pr-td${ac("played")}${j.played === 0 ? " pr-td--zero" : ""}`}>{j.played}</td>
                               <td className={`pr-td pr-td--pts${ac("points")}`}>{j.points}</td>
                               <td className={`pr-td${ac("average")}${j.average === 0 ? " pr-td--zero" : ""}`}>{j.average?.toFixed(1)}</td>
@@ -461,7 +468,12 @@ const PodridaHomePanel = () => {
                             const isLast = mobileStat === "lasts";
                             return (
                               <tr key={j.name} className={`pr-mt-tr${idx === 0 ? " pr-mt-tr--first" : ""}`}>
-                                <td className="pr-mt-td pr-mt-td--name">{j.name}</td>
+                                <td className="pr-mt-td pr-mt-td--name">
+                                  <div className="pr-td-name-inner">
+                                    <span className="pr-td-pos">{idx + 1}</span>
+                                    {j.name}
+                                  </div>
+                                </td>
                                 <td className={`pr-mt-td${j.played === 0 ? " pr-mt-td--zero" : ""}`}>{j.played}</td>
                                 <td className="pr-mt-td pr-mt-td--pts">{j.points}</td>
                                 <td className={`pr-mt-td${j.average === 0 ? " pr-mt-td--zero" : ""}`}>{j.average?.toFixed(1)}</td>

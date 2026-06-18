@@ -3,107 +3,55 @@ export const calculateMostWins = (matches) => {
 
   matches.forEach((match) => {
     const winner = match.players.find((p) => p.position === 1);
-    if (winner && winner.player && winner.player.name) {
+    if (winner?.player?.name) {
       const name = winner.player.name;
       winCounts[name] = (winCounts[name] || 0) + 1;
     }
   });
 
-  const sorted = Object.entries(winCounts)
+  return Object.entries(winCounts)
     .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value);
-
-  return sorted.slice(0, 3);
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 };
 
 export const calculateMostLastPlaces = (matches) => {
   const lastPlaceCounts = {};
 
   matches.forEach((match) => {
-    // Obtener la posición más baja en esa partida
     const maxPosition = Math.max(...match.players.map((p) => p.position));
-
     const lastPlayer = match.players.find((p) => p.position === maxPosition);
 
-    if (lastPlayer && lastPlayer.player && lastPlayer.player.name) {
+    if (lastPlayer?.player?.name) {
       const name = lastPlayer.player.name;
       lastPlaceCounts[name] = (lastPlaceCounts[name] || 0) + 1;
     }
   });
 
-  const topThree = Object.entries(lastPlaceCounts)
+  return Object.entries(lastPlaceCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(([name, value]) => ({ name, value }));
-
-  return topThree;
 };
 
-export const calculateBestWinRatio = (matches) => {
-  const stats = {};
-
-  matches.forEach((match) => {
-    match.players.forEach(({ player, position }) => {
-      if (!player || !player.name) return;
-
-      const name = player.name;
-
-      if (!stats[name]) {
-        stats[name] = { wins: 0, total: 0 };
-      }
-
-      stats[name].total += 1;
-
-      if (position === 1) {
-        stats[name].wins += 1;
-      }
-    });
-  });
-
-  const ratios = Object.entries(stats)
-    .filter(([_, { total }]) => total > 0)
-    .map(([name, { wins, total }]) => ({
-      name,
-      value: `${Math.round((wins / total) * 100)}%`,
-    }));
-
-  const topThree = ratios
-    .sort((a, b) => {
-      const aVal = parseInt(a.value);
-      const bVal = parseInt(b.value);
-      return bVal - aVal;
-    })
-    .slice(0, 3);
-
-  return topThree;
-};
 
 export const calculateLongestStreakOnTime = (matches) => {
   const streakMap = {};
 
   matches.forEach((match) => {
     const streak = match.longestStreakOnTime;
-
-    if (
-      streak &&
-      streak.player &&
-      streak.player.name &&
-      typeof streak.count === "number"
-    ) {
+    if (streak?.player?.name && typeof streak.count === "number") {
       const name = streak.player.name;
-
       if (!streakMap[name] || streak.count > streakMap[name]) {
         streakMap[name] = streak.count;
       }
     }
   });
 
-  const topThree = Object.entries(streakMap)
-    .map(([name, count]) => ({ name, value: count }))
+  return Object.entries(streakMap)
+    .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 3);
-
-  return topThree;
+    .slice(0, 5);
 };
 
 export const calculateLongestStreakFailing = (matches) => {
@@ -111,233 +59,228 @@ export const calculateLongestStreakFailing = (matches) => {
 
   matches.forEach((match) => {
     const streak = match.longestStreakFailing;
-
-    if (
-      streak &&
-      streak.player &&
-      streak.player.name &&
-      typeof streak.count === "number"
-    ) {
+    if (streak?.player?.name && typeof streak.count === "number") {
       const name = streak.player.name;
-
       if (!streakMap[name] || streak.count > streakMap[name]) {
         streakMap[name] = streak.count;
       }
     }
   });
 
-  const topThree = Object.entries(streakMap)
+  return Object.entries(streakMap)
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 3);
+    .slice(0, 5);
+};
 
-  return topThree;
+export const calculateMostHighlights = (matches) => {
+  const counts = {};
+
+  matches.forEach((match) => {
+    if (match.highlight?.player?.name) {
+      const name = match.highlight.player.name;
+      counts[name] = (counts[name] || 0) + 1;
+    }
+  });
+
+  return Object.entries(counts)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 };
 
 export const calculateHighestHighlight = (matches) => {
-  const highlights = [];
-
-  matches.forEach((match) => {
-    const highlight = match.highlight;
-
-    if (
-      highlight &&
-      highlight.player &&
-      highlight.player.name &&
-      typeof highlight.score === "number"
-    ) {
-      highlights.push({
-        name: highlight.player.name,
-        value: highlight.score,
-      });
-    }
-  });
-
-  // Ordenamos por puntaje descendente y tomamos el top 3
-  return highlights.sort((a, b) => b.value - a.value).slice(0, 3);
+  return matches
+    .filter((m) => m.highlight?.player?.name && typeof m.highlight.score === "number")
+    .map((m) => ({ name: m.highlight.player.name, value: m.highlight.score }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 };
 
-export const calculateLongestTimeSinceFirstPlace = (matches, allPlayers) => {
-  const lastWinDate = {};
+// Mejor tramo histórico de partidas consecutivas sin ganar (negativo)
+// "Active" = ese mejor tramo es el que está vigente hoy
+export const calculateDroughtSinceFirstPlace = (matches) => {
+  const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Inicializamos todos los jugadores como "Nunca"
-  allPlayers.forEach((player) => {
-    lastWinDate[player.name] = null;
+  const playerData = {};
+
+  sortedMatches.forEach((match, idx) => {
+    match.players.forEach(({ player, position }) => {
+      if (!player?.name) return;
+      const name = player.name;
+      if (!playerData[name]) playerData[name] = { name, matchIndices: [], winIndices: [] };
+      playerData[name].matchIndices.push(idx);
+      if (position === 1) playerData[name].winIndices.push(idx);
+    });
   });
-
-  // Ordenamos partidas de más reciente a más antigua
-  const sortedMatches = [...matches].sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  );
-
-  // Recorremos para registrar la fecha más reciente en que ganaron
-  for (const match of sortedMatches) {
-    const winner = match.players.find((p) => p.position === 1);
-    if (winner && winner.player && winner.player.name) {
-      const name = winner.player.name;
-      if (!lastWinDate[name]) {
-        lastWinDate[name] = new Date(match.date);
-      }
-    }
-  }
 
   const now = new Date();
 
-  // Convertimos en array con cálculo de días o "Nunca"
-  const result = Object.entries(lastWinDate).map(([name, date]) => ({
-    name,
-    value: date ? Math.floor((now - date) / (1000 * 60 * 60 * 24)) : "Nunca",
-  }));
+  return Object.values(playerData)
+    .map((p) => {
+      const checkpoints = [-1, ...p.winIndices];
+      let bestGap = 0;
+      let bestActive = false;
+      let bestStartDate = null;
+      let bestEndDate = null;
 
-  // Separar quienes nunca ganaron
-  const neverWon = result.filter((r) => r.value === "Nunca");
-  const others = result
-    .filter((r) => r.value !== "Nunca")
-    .sort((a, b) => b.value - a.value); // Ordenamos por días
+      for (let i = 0; i < checkpoints.length; i++) {
+        const from = checkpoints[i];
+        const to = checkpoints[i + 1] ?? Infinity;
+        const gapIndices = p.matchIndices.filter((mi) => mi > from && mi < to);
+        const gap = gapIndices.length;
+        const isActive = to === Infinity;
 
-  // Armamos el top 3
-  const top3 = [...neverWon.slice(0, 3)];
+        if (gap > bestGap || (gap === bestGap && isActive)) {
+          bestGap = gap;
+          bestActive = isActive;
+          // inicio del tramo: match que abrió la sequía, o primer match del jugador si nunca ganó
+          const startIdx = from >= 0 ? from : (gapIndices[0] ?? null);
+          bestStartDate = startIdx !== null ? new Date(sortedMatches[startIdx].date) : null;
+          bestEndDate = isActive ? now : (to < Infinity ? new Date(sortedMatches[to].date) : null);
+        }
+      }
 
-  if (top3.length < 3) {
-    top3.push(...others.slice(0, 3 - top3.length));
-  }
+      const days = (bestStartDate && bestEndDate)
+        ? Math.floor((bestEndDate - bestStartDate) / (1000 * 60 * 60 * 24))
+        : null;
 
-  return top3;
+      return { name: p.name, value: bestGap, days, active: bestActive };
+    })
+    .filter((p) => p.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 };
 
-export const calculateLongestTimeSinceLastPlace = (matches, allPlayers) => {
-  const lastLastPlaceDate = {};
+// Mejor tramo histórico de partidas consecutivas sin salir último (positivo)
+// "Active" = ese mejor tramo es el que está vigente hoy
+export const calculateDroughtSinceLastPlace = (matches) => {
+  const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Inicializamos todos los jugadores como "Nunca"
-  allPlayers.forEach((player) => {
-    lastLastPlaceDate[player.name] = null;
-  });
+  const playerData = {};
 
-  // Ordenamos las partidas de más reciente a más antigua
-  const sortedMatches = [...matches].sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  );
-
-  for (const match of sortedMatches) {
+  sortedMatches.forEach((match, idx) => {
     const maxPosition = Math.max(...match.players.map((p) => p.position));
-    const lastPlayer = match.players.find((p) => p.position === maxPosition);
 
-    if (lastPlayer && lastPlayer.player && lastPlayer.player.name) {
-      const name = lastPlayer.player.name;
-      if (!lastLastPlaceDate[name]) {
-        lastLastPlaceDate[name] = new Date(match.date);
-      }
-    }
-  }
+    match.players.forEach(({ player, position }) => {
+      if (!player?.name) return;
+      const name = player.name;
+      if (!playerData[name]) playerData[name] = { name, matchIndices: [], lastIndices: [] };
+      playerData[name].matchIndices.push(idx);
+      if (position === maxPosition) playerData[name].lastIndices.push(idx);
+    });
+  });
 
   const now = new Date();
 
-  const result = Object.entries(lastLastPlaceDate).map(([name, date]) => ({
-    name,
-    value: date ? Math.floor((now - date) / (1000 * 60 * 60 * 24)) : "Nunca",
-  }));
+  return Object.values(playerData)
+    .map((p) => {
+      const checkpoints = [-1, ...p.lastIndices];
+      let bestGap = 0;
+      let bestActive = false;
+      let bestStartDate = null;
+      let bestEndDate = null;
 
-  // Separar quienes nunca salieron últimos
-  const never = result.filter((r) => r.value === "Nunca");
-  const others = result
-    .filter((r) => r.value !== "Nunca")
-    .sort((a, b) => b.value - a.value); // más días sin salir últimos
+      for (let i = 0; i < checkpoints.length; i++) {
+        const from = checkpoints[i];
+        const to = checkpoints[i + 1] ?? Infinity;
+        const gapIndices = p.matchIndices.filter((mi) => mi > from && mi < to);
+        const gap = gapIndices.length;
+        const isActive = to === Infinity;
 
-  // Armamos el top 3
-  const top3 = [...never.slice(0, 3)];
+        if (gap > bestGap || (gap === bestGap && isActive)) {
+          bestGap = gap;
+          bestActive = isActive;
+          const startIdx = from >= 0 ? from : (gapIndices[0] ?? null);
+          bestStartDate = startIdx !== null ? new Date(sortedMatches[startIdx].date) : null;
+          bestEndDate = isActive ? now : (to < Infinity ? new Date(sortedMatches[to].date) : null);
+        }
+      }
 
-  if (top3.length < 3) {
-    top3.push(...others.slice(0, 3 - top3.length));
-  }
+      const days = (bestStartDate && bestEndDate)
+        ? Math.floor((bestEndDate - bestStartDate) / (1000 * 60 * 60 * 24))
+        : null;
 
-  return top3;
+      return { name: p.name, value: bestGap, days, active: bestActive };
+    })
+    .filter((p) => p.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 };
 
 export const calculateHighestSingleScore = (matches) => {
-  const scores = [];
-
-  matches.forEach((match) => {
-    match.players.forEach(({ player, score }) => {
-      if (!player || !player.name || typeof score !== "number") return;
-
-      scores.push({
-        name: player.name,
-        value: score,
-      });
-    });
-  });
-
-  if (!scores.length) return [];
-
-  scores.sort((a, b) => b.value - a.value);
-
-  // Tomamos los primeros 3
-  return scores.slice(0, 3);
+  return matches
+    .flatMap((m) =>
+      m.players
+        .filter((p) => p.player?.name && typeof p.score === "number")
+        .map((p) => ({ name: p.player.name, value: p.score }))
+    )
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 };
 
 export const calculateLowestSingleScore = (matches) => {
-  const scores = [];
-
-  matches.forEach((match) => {
-    match.players.forEach(({ player, score }) => {
-      if (!player || !player.name || typeof score !== "number") return;
-
-      scores.push({
-        name: player.name,
-        value: score,
-      });
-    });
-  });
-
-  if (!scores.length) return [];
-
-  scores.sort((a, b) => a.value - b.value); // Orden ascendente
-
-  // Tomamos los primeros 3
-  return scores.slice(0, 3);
+  return matches
+    .flatMap((m) =>
+      m.players
+        .filter((p) => p.player?.name && typeof p.score === "number")
+        .map((p) => ({ name: p.player.name, value: p.score }))
+    )
+    .sort((a, b) => a.value - b.value)
+    .slice(0, 5);
 };
 
 export const calculateRanking = (matches) => {
   const playerStats = {};
 
   matches.forEach((match) => {
-    // Determinar la peor posición (último puesto)
     const worstPosition = Math.max(...match.players.map((p) => p.position));
 
-    // Contabilizar a cada jugador en la partida
     match.players.forEach(({ player, position }) => {
       const name = player.name;
-
       if (!playerStats[name]) {
-        playerStats[name] = {
-          name,
-          played: 0,
-          firsts: 0,
-          seconds: 0,
-          thirds: 0,
-          lasts: 0,
-          highlights: 0,
-        };
+        playerStats[name] = { name, played: 0, firsts: 0, seconds: 0, thirds: 0, lasts: 0, highlights: 0 };
       }
 
       const stats = playerStats[name];
       stats.played += 1;
-
       if (position === 1) stats.firsts += 1;
       else if (position === 2) stats.seconds += 1;
       else if (position === 3) stats.thirds += 1;
       if (position === worstPosition) stats.lasts += 1;
     });
 
-    // Agregar punto por highlight
-    if (
-      match.highlight &&
-      match.highlight.player &&
-      match.highlight.player.name
-    ) {
+    if (match.highlight?.player?.name) {
       const name = match.highlight.player.name;
       if (!playerStats[name]) {
-        playerStats[name] = {
+        playerStats[name] = { name, played: 0, firsts: 0, seconds: 0, thirds: 0, lasts: 0, highlights: 0 };
+      }
+      playerStats[name].highlights += 1;
+    }
+  });
+
+  return Object.values(playerStats)
+    .map((stats) => {
+      const points = stats.firsts * 3 + stats.seconds * 2 + stats.thirds + stats.highlights - stats.lasts;
+      return { ...stats, points, average: stats.played ? parseFloat((points / stats.played).toFixed(2)) : 0 };
+    })
+    .sort((a, b) => b.points - a.points);
+};
+
+export const calculatePlayerProfiles = (matches) => {
+  const playerStats = {};
+
+  matches.forEach((match) => {
+    const worstPosition = Math.max(...match.players.map((p) => p.position));
+    const matchDate = new Date(match.date);
+
+    match.players.forEach(({ player, position, score }) => {
+      const id = player._id.toString();
+      const name = player.name;
+
+      if (!playerStats[id]) {
+        playerStats[id] = {
+          id,
           name,
           played: 0,
           firsts: 0,
@@ -345,32 +288,48 @@ export const calculateRanking = (matches) => {
           thirds: 0,
           lasts: 0,
           highlights: 0,
+          totalScore: 0,
+          firstMatch: matchDate,
+          lastMatch: matchDate,
         };
       }
-      playerStats[name].highlights += 1;
+
+      const s = playerStats[id];
+      s.played += 1;
+      s.totalScore += score;
+      if (position === 1) s.firsts += 1;
+      else if (position === 2) s.seconds += 1;
+      else if (position === 3) s.thirds += 1;
+      if (position === worstPosition) s.lasts += 1;
+      if (matchDate < s.firstMatch) s.firstMatch = matchDate;
+      if (matchDate > s.lastMatch) s.lastMatch = matchDate;
+    });
+
+    if (match.highlight?.player?._id) {
+      const id = match.highlight.player._id.toString();
+      if (playerStats[id]) playerStats[id].highlights += 1;
     }
   });
 
-  // Calcular puntos y promedio
-  const rankingArray = Object.values(playerStats).map((stats) => {
-    const points =
-      stats.firsts * 3 +
-      stats.seconds * 2 +
-      stats.thirds +
-      stats.highlights -
-      stats.lasts;
-
+  return Object.values(playerStats).map((s) => {
+    const points = s.firsts * 3 + s.seconds * 2 + s.thirds + s.highlights - s.lasts;
     return {
-      ...stats,
+      id: s.id,
+      name: s.name,
+      played: s.played,
+      firsts: s.firsts,
+      seconds: s.seconds,
+      thirds: s.thirds,
+      lasts: s.lasts,
+      highlights: s.highlights,
+      totalScore: s.totalScore,
       points,
-      average: stats.played
-        ? parseFloat((points / stats.played).toFixed(2))
-        : 0,
+      average: s.played ? parseFloat((points / s.played).toFixed(2)) : 0,
+      winRatio: s.played ? Math.round((s.firsts / s.played) * 100) : 0,
+      lastRatio: s.played ? Math.round((s.lasts / s.played) * 100) : 0,
+      highlightRatio: s.played ? Math.round((s.highlights / s.played) * 100) : 0,
+      firstMatch: s.firstMatch,
+      lastMatch: s.lastMatch,
     };
   });
-
-  // Ordenar por puntos descendente
-  rankingArray.sort((a, b) => b.points - a.points);
-
-  return rankingArray;
 };

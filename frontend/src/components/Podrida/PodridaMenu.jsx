@@ -2,9 +2,9 @@ import React from "react";
 import SectionNav from "../Layout/SectionNav/SectionNav";
 
 const PODRIDA_TABS = [
-  { label: "Inicio",       to: "/podrida",                exact: true },
-  { label: "Historial",    to: "/podrida/historial"                   },
-  { label: "Estadísticas", to: "/podrida/estadisticas"                },
+  { label: "Inicio",        to: "/podrida",                 exact: true },
+  { label: "Estadísticas",  to: "/podrida/estadisticas"                 },
+  { label: "Jugadores",     to: "/podrida/jugadores"                    },
 ];
 
 const PodridaMenu = () => (

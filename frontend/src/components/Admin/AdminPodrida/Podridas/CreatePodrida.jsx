@@ -49,7 +49,7 @@ const CreatePodrida = () => {
     mutationFn: createPodridaMatch,
     onSuccess: (data) => {
       toast.success("Partida creada con éxito");
-      queryClient.invalidateQueries(["fetchPodridaRecords"]);
+      queryClient.invalidateQueries(["fetchPodridaStats"]);
       navigate("/admin/podrida");
     },
     onError: (error) => {

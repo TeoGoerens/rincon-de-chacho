@@ -4,20 +4,20 @@ import PodridaPlayer from "../../dao/models/podrida/podridaPlayerModel.js";
 import PodridaMatch from "../../dao/models/podrida/podridaMatchModel.js";
 import baseRepository from "../baseRepository.js";
 
-// Helper para enviar correos
 import { sendBulkEmail } from "../../helpers/sendBulkEmail.js";
 import {
   calculateMostWins,
   calculateMostLastPlaces,
-  calculateBestWinRatio,
+  calculateMostHighlights,
+  calculateHighestHighlight,
   calculateLongestStreakOnTime,
   calculateLongestStreakFailing,
-  calculateHighestHighlight,
-  calculateLongestTimeSinceFirstPlace,
-  calculateLongestTimeSinceLastPlace,
   calculateHighestSingleScore,
   calculateLowestSingleScore,
+  calculateDroughtSinceFirstPlace,
+  calculateDroughtSinceLastPlace,
   calculateRanking,
+  calculatePlayerProfiles,
 } from "../../helpers/podrida/recordCalculators.js";
 
 export default class PodridaRepository extends baseRepository {
@@ -34,27 +34,18 @@ export default class PodridaRepository extends baseRepository {
       throw new Error("A player with this name already exists");
     }
 
-    const newPlayer = await PodridaPlayer.create({ name, email });
-    return newPlayer;
+    return await PodridaPlayer.create({ name, email });
   };
 
   /* --------------- GET ALL PODRIDA PLAYERS --------------- */
   getAllPodridaPlayers = async () => {
-    const players = await PodridaPlayer.find().sort({ name: 1 });
-    return players;
+    return await PodridaPlayer.find().sort({ name: 1 });
   };
 
   /* --------------- CREATE PODRIDA MATCH --------------- */
   createPodridaMatch = async (matchData) => {
-    const {
-      date,
-      players,
-      highlight,
-      longestStreakOnTime,
-      longestStreakFailing,
-    } = matchData;
+    const { date, players, highlight, longestStreakOnTime, longestStreakFailing } = matchData;
 
-    // Validar que todos los IDs de jugadores existan
     const allPlayerIds = [
       ...players.map((p) => p.player),
       highlight.player,
@@ -62,28 +53,14 @@ export default class PodridaRepository extends baseRepository {
       longestStreakFailing.player,
     ];
 
-    const uniquePlayerIds = [
-      ...new Set(allPlayerIds.map((id) => id.toString())),
-    ];
-
-    const existingPlayers = await PodridaPlayer.find({
-      _id: { $in: uniquePlayerIds },
-    });
+    const uniquePlayerIds = [...new Set(allPlayerIds.map((id) => id.toString()))];
+    const existingPlayers = await PodridaPlayer.find({ _id: { $in: uniquePlayerIds } });
 
     if (existingPlayers.length !== uniquePlayerIds.length) {
       throw new Error("One or more player IDs are invalid");
     }
 
-    // Crear y guardar el match
-    const newMatch = await PodridaMatch.create({
-      date,
-      players,
-      highlight,
-      longestStreakOnTime,
-      longestStreakFailing,
-    });
-
-    return newMatch;
+    return await PodridaMatch.create({ date, players, highlight, longestStreakOnTime, longestStreakFailing });
   };
 
   /* --------------- GET LAST PODRIDA MATCH --------------- */
@@ -95,9 +72,7 @@ export default class PodridaRepository extends baseRepository {
       .populate("longestStreakOnTime.player")
       .populate("longestStreakFailing.player");
 
-    if (!lastMatch) {
-      throw new Error("No matches found in the database");
-    }
+    if (!lastMatch) throw new Error("No matches found in the database");
 
     const playerIds = lastMatch.players.map((p) => p.player._id);
     const users = await User.find(
@@ -111,118 +86,57 @@ export default class PodridaRepository extends baseRepository {
     return { lastMatch, playerPictures };
   };
 
-  /* --------------- GET PODRIDA MATCH BY YEAR --------------- */
-  getMatchesByYear = async (year) => {
-    // Rango de fechas del año completo
-    const startDate = new Date(`${year}-01-01`);
-    const endDate = new Date(`${year}-12-31T23:59:59.999Z`);
-
-    const matches = await PodridaMatch.find({
-      date: { $gte: startDate, $lte: endDate },
-    })
-      .sort({ date: -1 })
-      .populate("players.player")
-      .populate("highlight.player")
-      .populate("longestStreakOnTime.player")
-      .populate("longestStreakFailing.player");
-
-    return matches;
-  };
-
   /* --------------- GET ALL PODRIDA MATCHES --------------- */
   getAllPodridaMatches = async () => {
-    const matches = await PodridaMatch.find({})
+    return await PodridaMatch.find({})
       .sort({ date: -1 })
       .populate("players.player")
       .populate("highlight.player")
       .populate("longestStreakOnTime.player")
       .populate("longestStreakFailing.player");
-
-    return matches;
   };
 
-  /* --------------- GET PODRIDA RECORDS --------------- */
-  getPodridaRecords = async (year) => {
-    let matchFilter = {};
-
-    if (year) {
-      const yearNum = parseInt(year, 10);
-      if (isNaN(yearNum) || yearNum < 1900 || yearNum > 3000) {
-        throw new Error("Invalid year provided");
-      }
-
-      matchFilter.date = {
-        $gte: new Date(`${year}-01-01`),
-        $lte: new Date(`${year}-12-31T23:59:59.999Z`),
-      };
-    }
-
-    const matches = await PodridaMatch.find(matchFilter)
+  /* --------------- GET PODRIDA STATS --------------- */
+  getPodridaStats = async () => {
+    const matches = await PodridaMatch.find({})
+      .sort({ date: 1 })
       .populate("players.player")
       .populate("highlight.player")
       .populate("longestStreakOnTime.player")
       .populate("longestStreakFailing.player");
 
-    if (!matches.length) {
-      throw new Error("No matches found for the given filter");
-    }
+    if (!matches.length) throw new Error("No matches found in the database");
 
-    // Buscamos todos los jugadores registrados para evaluar las rachas mas largas sin salir primero y ultimo
-    const players = await PodridaPlayer.find();
-
-    // Acá más adelante vamos a calcular todos los records
-    return [
-      {
-        title: "🎯 Más partidas ganadas",
-        type: "positivo",
-        top: calculateMostWins(matches),
-      },
-      {
-        title: "💀 Más últimos puestos",
-        type: "negativo",
-        top: calculateMostLastPlaces(matches),
-      },
-      {
-        title: "🏆 Mejor ratio de victorias",
-        type: "positivo",
-        top: calculateBestWinRatio(matches),
-      },
-      {
-        title: "🔥 Racha más larga cumpliendo",
-        type: "positivo",
-        top: calculateLongestStreakOnTime(matches),
-      },
-      {
-        title: "🧊 Racha más larga sin cumplir",
-        type: "negativo",
-        top: calculateLongestStreakFailing(matches),
-      },
-      {
-        title: "🌟 Mayor highlight",
-        type: "positivo",
-        top: calculateHighestHighlight(matches),
-      },
-      {
-        title: "⌛ Días sin ganar",
-        type: "negativo",
-        top: calculateLongestTimeSinceFirstPlace(matches, players),
-      },
-      {
-        title: "💪 Días sin salir último",
-        type: "positivo",
-        top: calculateLongestTimeSinceLastPlace(matches, players),
-      },
-      {
-        title: "🚀 Máximo puntaje en una partida",
-        type: "positivo",
-        top: calculateHighestSingleScore(matches),
-      },
-      {
-        title: "🐢 Mínimo puntaje en una partida",
-        type: "negativo",
-        top: calculateLowestSingleScore(matches),
-      },
+    // --- Dominio histórico ---
+    // --- Noches épicas ---
+    // --- Sequías ---
+    const records = [
+      { group: "dominio",  title: "Más partidas ganadas",              type: "positivo", top: calculateMostWins(matches) },
+      { group: "dominio",  title: "Más últimos puestos",               type: "negativo", top: calculateMostLastPlaces(matches) },
+      { group: "dominio",  title: "Más highlights acumulados",         type: "positivo", top: calculateMostHighlights(matches) },
+      { group: "epicas",   title: "Mayor highlight en una partida",    type: "positivo", top: calculateHighestHighlight(matches) },
+      { group: "epicas",   title: "Racha más larga cumpliendo",        type: "positivo", top: calculateLongestStreakOnTime(matches) },
+      { group: "epicas",   title: "Racha más larga sin cumplir",       type: "negativo", top: calculateLongestStreakFailing(matches) },
+      { group: "epicas",   title: "Máximo puntaje en una partida",     type: "positivo", top: calculateHighestSingleScore(matches) },
+      { group: "epicas",   title: "Mínimo puntaje en una partida",     type: "negativo", top: calculateLowestSingleScore(matches) },
+      { group: "sequias",  title: "Más partidas sin salir último",     type: "positivo", top: calculateDroughtSinceLastPlace(matches) },
+      { group: "sequias",  title: "Más partidas sin ganar",            type: "negativo", top: calculateDroughtSinceFirstPlace(matches) },
     ];
+
+    const playerProfiles = calculatePlayerProfiles(matches);
+
+    // Partidas por año para gráfico de actividad
+    const yearlyActivity = Object.entries(
+      matches.reduce((acc, m) => {
+        const year = new Date(m.date).getFullYear();
+        acc[year] = (acc[year] || 0) + 1;
+        return acc;
+      }, {})
+    )
+      .map(([year, count]) => ({ year: parseInt(year), count }))
+      .sort((a, b) => a.year - b.year);
+
+    return { records, players: playerProfiles, yearlyActivity };
   };
 
   /* --------------- GET PODRIDA RANKING --------------- */
@@ -232,9 +146,7 @@ export default class PodridaRepository extends baseRepository {
     if (year && year !== "all") {
       const start = new Date(`${year}-01-01`);
       const end = new Date(`${parseInt(year) + 1}-01-01`);
-      matches = await PodridaMatch.find({
-        date: { $gte: start, $lt: end },
-      })
+      matches = await PodridaMatch.find({ date: { $gte: start, $lt: end } })
         .populate("players.player")
         .populate("highlight.player");
     } else {
@@ -260,11 +172,7 @@ export default class PodridaRepository extends baseRepository {
   /* --------------- DELETE PODRIDA MATCH --------------- */
   deletePodridaMatch = async (id) => {
     const match = await PodridaMatch.findById(id);
-
-    if (!match) {
-      return null;
-    }
-
+    if (!match) return null;
     await match.deleteOne();
     return match;
   };
@@ -272,11 +180,8 @@ export default class PodridaRepository extends baseRepository {
   /* --------------- UPDATE PODRIDA MATCH --------------- */
   updatePodridaMatch = async (matchId, matchData) => {
     const match = await PodridaMatch.findById(matchId);
-    if (!match) {
-      throw new Error("La partida no existe");
-    }
+    if (!match) throw new Error("La partida no existe");
 
-    // Actualizamos los campos principales
     match.date = matchData.date;
     match.players = matchData.players;
     match.highlight = matchData.highlight;
@@ -304,9 +209,7 @@ export default class PodridaRepository extends baseRepository {
   /* --------------- UPDATE PLAYER --------------- */
   updatePodridaPlayer = async (id, data) => {
     const player = await PodridaPlayer.findById(id);
-    if (!player) {
-      throw new Error("Jugador no encontrado");
-    }
+    if (!player) throw new Error("Jugador no encontrado");
 
     player.name = data.name;
     player.email = data.email;
@@ -319,7 +222,6 @@ export default class PodridaRepository extends baseRepository {
   deletePodridaPlayer = async (id) => {
     const player = await PodridaPlayer.findById(id);
     if (!player) return null;
-
     await player.deleteOne();
     return player;
   };

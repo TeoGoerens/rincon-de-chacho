@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 import PodridaHomePanel from "./PodridaHome/PodridaHomePanel";
+import PodridaEstadisticas from "./PodridaEstadisticas/PodridaEstadisticas";
 import PodridaMenu from "./PodridaMenu";
 
 const PodridaPlaceholder = ({ title }) => (
@@ -28,9 +29,9 @@ const PodridaPlaceholder = ({ title }) => (
 
 const PodridaRoutes = () => (
   <Routes>
-    <Route path="/" element={<PodridaHomePanel />} />
-    <Route path="/historial" element={<PodridaPlaceholder title="Historial" />} />
-    <Route path="/estadisticas" element={<PodridaPlaceholder title="Estadísticas" />} />
+    <Route path="/"              element={<PodridaHomePanel />} />
+    <Route path="/estadisticas"  element={<PodridaEstadisticas />} />
+    <Route path="/jugadores"     element={<PodridaPlaceholder title="Jugadores" />} />
   </Routes>
 );
 
