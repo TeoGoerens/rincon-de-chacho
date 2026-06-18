@@ -107,6 +107,28 @@ export default class PodridaRepository extends baseRepository {
 
     if (!matches.length) throw new Error("No matches found in the database");
 
+    // Build name → playerId map from populated matches
+    const nameToPlayerId = {};
+    matches.forEach((match) => {
+      match.players.forEach(({ player }) => {
+        if (player?.name && player?._id) nameToPlayerId[player.name] = player._id.toString();
+      });
+      if (match.highlight?.player?._id) nameToPlayerId[match.highlight.player.name] = match.highlight.player._id.toString();
+      if (match.longestStreakOnTime?.player?._id) nameToPlayerId[match.longestStreakOnTime.player.name] = match.longestStreakOnTime.player._id.toString();
+      if (match.longestStreakFailing?.player?._id) nameToPlayerId[match.longestStreakFailing.player.name] = match.longestStreakFailing.player._id.toString();
+    });
+
+    const playerObjectIds = Object.values(nameToPlayerId).map((id) => new mongoose.Types.ObjectId(id));
+    const usersWithPhotos = await User.find({ podrida_player: { $in: playerObjectIds } }, { podrida_player: 1, profile_picture: 1 });
+    const photoByPlayerId = Object.fromEntries(usersWithPhotos.map((u) => [u.podrida_player.toString(), u.profile_picture]));
+
+    const hasValidPhoto = (url) => !!url && !url.includes("pixabay") && !url.includes("avatar-1577909");
+    const getPhoto = (name) => {
+      const pid = nameToPlayerId[name];
+      const url = pid ? photoByPlayerId[pid] : null;
+      return hasValidPhoto(url) ? url : null;
+    };
+
     // --- Dominio histórico ---
     // --- Noches épicas ---
     // --- Sequías ---
@@ -136,7 +158,12 @@ export default class PodridaRepository extends baseRepository {
       .map(([year, count]) => ({ year: parseInt(year), count }))
       .sort((a, b) => a.year - b.year);
 
-    return { records, players: playerProfiles, yearlyActivity };
+    const enrichedRecords = records.map((r) => ({
+      ...r,
+      top: r.top.map((item) => ({ ...item, photo: getPhoto(item.name) })),
+    }));
+
+    return { records: enrichedRecords, players: playerProfiles, yearlyActivity };
   };
 
   /* --------------- GET PODRIDA RANKING --------------- */

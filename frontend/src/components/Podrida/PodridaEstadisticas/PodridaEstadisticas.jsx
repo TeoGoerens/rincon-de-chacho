@@ -33,8 +33,11 @@ const RecordCard = ({ record }) => {
       {first && (
         <>
           <div className="pe-card__first">
-            <div className="pe-card__avatar pe-card__avatar--lg">
-              {getInitial(first.name)}
+            <div className={`pe-card__avatar pe-card__avatar--lg${first.photo ? " pe-card__avatar--photo" : ""}`}>
+              {first.photo
+                ? <img src={first.photo} alt={first.name} className="pe-card__avatar-img" />
+                : getInitial(first.name)
+              }
             </div>
             <div className="pe-card__first-info">
               <div className="pe-card__first-top">
