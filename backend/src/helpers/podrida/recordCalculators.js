@@ -97,8 +97,9 @@ export const calculateHighestHighlight = (matches) => {
     .slice(0, 5);
 };
 
-// Mejor tramo histórico de partidas consecutivas sin ganar (negativo)
-// "Active" = ese mejor tramo es el que está vigente hoy
+// Todos los tramos históricos de partidas consecutivas sin ganar (negativo)
+// "Active" = ese tramo es el que está vigente hoy. Un mismo jugador puede
+// aportar varios tramos al top si más de una de sus sequías lo amerita.
 export const calculateDroughtSinceFirstPlace = (matches) => {
   const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -115,45 +116,39 @@ export const calculateDroughtSinceFirstPlace = (matches) => {
   });
 
   const now = new Date();
+  const streaks = [];
 
-  return Object.values(playerData)
-    .map((p) => {
-      const checkpoints = [-1, ...p.winIndices];
-      let bestGap = 0;
-      let bestActive = false;
-      let bestStartDate = null;
-      let bestEndDate = null;
+  Object.values(playerData).forEach((p) => {
+    const checkpoints = [-1, ...p.winIndices];
 
-      for (let i = 0; i < checkpoints.length; i++) {
-        const from = checkpoints[i];
-        const to = checkpoints[i + 1] ?? Infinity;
-        const gapIndices = p.matchIndices.filter((mi) => mi > from && mi < to);
-        const gap = gapIndices.length;
-        const isActive = to === Infinity;
+    for (let i = 0; i < checkpoints.length; i++) {
+      const from = checkpoints[i];
+      const to = checkpoints[i + 1] ?? Infinity;
+      const gapIndices = p.matchIndices.filter((mi) => mi > from && mi < to);
+      const gap = gapIndices.length;
+      if (gap === 0) continue;
+      const isActive = to === Infinity;
 
-        if (gap > bestGap || (gap === bestGap && isActive)) {
-          bestGap = gap;
-          bestActive = isActive;
-          // inicio del tramo: match que abrió la sequía, o primer match del jugador si nunca ganó
-          const startIdx = from >= 0 ? from : (gapIndices[0] ?? null);
-          bestStartDate = startIdx !== null ? new Date(sortedMatches[startIdx].date) : null;
-          bestEndDate = isActive ? now : (to < Infinity ? new Date(sortedMatches[to].date) : null);
-        }
-      }
-
-      const days = (bestStartDate && bestEndDate)
-        ? Math.floor((bestEndDate - bestStartDate) / (1000 * 60 * 60 * 24))
+      // inicio del tramo: match que abrió la sequía, o primer match del jugador si nunca ganó
+      const startIdx = from >= 0 ? from : (gapIndices[0] ?? null);
+      const startDate = startIdx !== null ? new Date(sortedMatches[startIdx].date) : null;
+      const endDate = isActive ? now : (to < Infinity ? new Date(sortedMatches[to].date) : null);
+      const days = (startDate && endDate)
+        ? Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
         : null;
 
-      return { name: p.name, value: bestGap, days, active: bestActive };
-    })
-    .filter((p) => p.value > 0)
+      streaks.push({ name: p.name, value: gap, days, active: isActive });
+    }
+  });
+
+  return streaks
     .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
+    .slice(0, 10);
 };
 
-// Mejor tramo histórico de partidas consecutivas sin salir último (positivo)
-// "Active" = ese mejor tramo es el que está vigente hoy
+// Todos los tramos históricos de partidas consecutivas sin salir último (positivo)
+// "Active" = ese tramo es el que está vigente hoy. Un mismo jugador puede
+// aportar varios tramos al top si más de una de sus rachas lo amerita.
 export const calculateDroughtSinceLastPlace = (matches) => {
   const sortedMatches = [...matches].sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -172,40 +167,33 @@ export const calculateDroughtSinceLastPlace = (matches) => {
   });
 
   const now = new Date();
+  const streaks = [];
 
-  return Object.values(playerData)
-    .map((p) => {
-      const checkpoints = [-1, ...p.lastIndices];
-      let bestGap = 0;
-      let bestActive = false;
-      let bestStartDate = null;
-      let bestEndDate = null;
+  Object.values(playerData).forEach((p) => {
+    const checkpoints = [-1, ...p.lastIndices];
 
-      for (let i = 0; i < checkpoints.length; i++) {
-        const from = checkpoints[i];
-        const to = checkpoints[i + 1] ?? Infinity;
-        const gapIndices = p.matchIndices.filter((mi) => mi > from && mi < to);
-        const gap = gapIndices.length;
-        const isActive = to === Infinity;
+    for (let i = 0; i < checkpoints.length; i++) {
+      const from = checkpoints[i];
+      const to = checkpoints[i + 1] ?? Infinity;
+      const gapIndices = p.matchIndices.filter((mi) => mi > from && mi < to);
+      const gap = gapIndices.length;
+      if (gap === 0) continue;
+      const isActive = to === Infinity;
 
-        if (gap > bestGap || (gap === bestGap && isActive)) {
-          bestGap = gap;
-          bestActive = isActive;
-          const startIdx = from >= 0 ? from : (gapIndices[0] ?? null);
-          bestStartDate = startIdx !== null ? new Date(sortedMatches[startIdx].date) : null;
-          bestEndDate = isActive ? now : (to < Infinity ? new Date(sortedMatches[to].date) : null);
-        }
-      }
-
-      const days = (bestStartDate && bestEndDate)
-        ? Math.floor((bestEndDate - bestStartDate) / (1000 * 60 * 60 * 24))
+      const startIdx = from >= 0 ? from : (gapIndices[0] ?? null);
+      const startDate = startIdx !== null ? new Date(sortedMatches[startIdx].date) : null;
+      const endDate = isActive ? now : (to < Infinity ? new Date(sortedMatches[to].date) : null);
+      const days = (startDate && endDate)
+        ? Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24))
         : null;
 
-      return { name: p.name, value: bestGap, days, active: bestActive };
-    })
-    .filter((p) => p.value > 0)
+      streaks.push({ name: p.name, value: gap, days, active: isActive });
+    }
+  });
+
+  return streaks
     .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
+    .slice(0, 10);
 };
 
 export const calculateHighestSingleScore = (matches) => {

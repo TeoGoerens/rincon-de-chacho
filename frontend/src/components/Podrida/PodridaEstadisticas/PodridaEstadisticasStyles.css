@@ -328,17 +328,38 @@
   flex-shrink: 0;
 }
 
+.pe-card__runner-name-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+}
+
 .pe-card__runner-name {
   font-family: var(--secondary-font);
   font-size: var(--text-sm);
   color: var(--text-body-dark);
-  flex: 1;
+  flex-shrink: 1;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.pe-card__runner-days {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--text-subtle-dark);
+  opacity: 0.85;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.pe-card__runner-days::before {
+  content: "· ";
+}
 
 .pe-card__runner-value {
   font-family: "Urbanist", var(--secondary-font);

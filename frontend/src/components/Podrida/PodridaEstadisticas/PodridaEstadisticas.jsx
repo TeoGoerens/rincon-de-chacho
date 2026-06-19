@@ -58,13 +58,18 @@ const RecordCard = ({ record }) => {
       )}
 
       <div className="pe-card__runners">
-        {(record.top ?? []).slice(1, 5).filter(Boolean).map((item, idx) => (
+        {(record.top ?? []).slice(1, isSequia ? 10 : 5).filter(Boolean).map((item, idx) => (
           <div
             key={idx}
             className={`pe-card__runner${isSequia && item.active ? " pe-card__runner--active" : ""}`}
           >
             <span className="pe-card__runner-pos">{idx + 2}°</span>
-            <span className="pe-card__runner-name">{item.name}</span>
+            <span className="pe-card__runner-name-group">
+              <span className="pe-card__runner-name">{item.name}</span>
+              {isSequia && item.days !== null && item.days !== undefined && (
+                <span className="pe-card__runner-days">{fmtDays(item.days)}</span>
+              )}
+            </span>
             {isSequia && item.active && <span className="pe-card__fire" title="Racha vigente">🔥</span>}
             <span className={`pe-card__runner-value ${isNeg ? "pe-card__runner-value--neg" : ""}`}>
               {item.value}
