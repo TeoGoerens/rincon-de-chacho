@@ -67,7 +67,7 @@ export default class PlayerRepository extends baseRepository {
       const totalRounds = await TournamentRound.countDocuments();
 
       // Career totals + by-year (match_stats.year exists directly)
-      const [careerArr, byYear] = await Promise.all([
+      const [careerArr, byYear, vsRivals] = await Promise.all([
         MatchStat.aggregate([
           { $match: { player: pid } },
           { $group: {
@@ -109,6 +109,31 @@ export default class PlayerRepository extends baseRepository {
             yellow_cards: 1, red_cards: 1,
             avg_points:  { $round: ["$avg_points", 2] },
             white_pearl: 1, black_pearl: 1,
+          }},
+        ]),
+
+        // Performance vs rivales
+        MatchStat.aggregate([
+          { $match: { player: pid } },
+          { $lookup: { from: "tournament rounds", localField: "round", foreignField: "_id", as: "round" } },
+          { $unwind: "$round" },
+          { $group: {
+            _id:     "$round.rival",
+            matches: { $sum: 1 },
+            goals:   { $sum: "$goals" },
+            assists: { $sum: "$assists" },
+            wins:    { $sum: { $cond: ["$round.win",    1, 0] } },
+            draws:   { $sum: { $cond: ["$round.draw",   1, 0] } },
+            losses:  { $sum: { $cond: ["$round.defeat", 1, 0] } },
+          }},
+          { $lookup: { from: "rival teams", localField: "_id", foreignField: "_id", as: "rival" } },
+          { $unwind: "$rival" },
+          { $addFields: { hypo_points: { $add: [{ $multiply: ["$wins", 3] }, "$draws"] } } },
+          { $sort: { hypo_points: -1, "rival.name": 1 } },
+          { $project: {
+            _id: 0,
+            rival: { _id: "$rival._id", name: "$rival.name", avatar: "$rival.avatar" },
+            matches: 1, goals: 1, assists: 1, wins: 1, draws: 1, losses: 1,
           }},
         ]),
       ]);
@@ -249,6 +274,7 @@ export default class PlayerRepository extends baseRepository {
         },
         career:      careerArr[0] ?? null,
         byYear,
+        vsRivals,
         social,
         totalRounds,
       };

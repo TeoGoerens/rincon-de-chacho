@@ -61,11 +61,26 @@ const ChachosSquad = () => {
   const profile     = profileData?.player     ?? null;
   const career      = profileData?.career     ?? null;
   const byYear      = profileData?.byYear     ?? [];
+  const vsRivals    = profileData?.vsRivals   ?? [];
   const social      = profileData?.social     ?? {};
   const totalRounds = profileData?.totalRounds ?? 0;
 
   const maxGA  = byYear.length ? Math.max(...byYear.flatMap((y) => [y.goals, y.assists]), 1) : 1;
   const maxAvg = 10;
+
+  let bestRivalId = null, worstRivalId = null;
+  if (vsRivals.length > 1) {
+    let bestDiff = -Infinity, worstDiff = Infinity;
+    vsRivals.forEach((r) => {
+      const diff = r.wins - r.losses;
+      if (diff > bestDiff)  { bestDiff  = diff; bestRivalId  = r.rival._id; }
+      if (diff < worstDiff) { worstDiff = diff; worstRivalId = r.rival._id; }
+    });
+    if (bestDiff <= 0)  bestRivalId  = null;
+    if (worstDiff >= 0) worstRivalId = null;
+  }
+  const rivRowMod = (id) => id === bestRivalId ? "csq-rrt-row--best" : id === worstRivalId ? "csq-rrt-row--worst" : "";
+  const rivZ = (v) => `csq-rrt-num${v === 0 ? " csq-rrt-num--zero" : ""}`;
 
   const initials = profile
     ? (profile.first_name?.[0] ?? "").toUpperCase()
@@ -267,8 +282,25 @@ const ChachosSquad = () => {
               <>
                 <h3 className="csq-section-heading">Progresión por año</h3>
                 <div className="csq-chart-card">
+                  {/* Línea de promedio de puntos */}
+                  <p className="csq-chart-subtitle">Promedio de puntos</p>
+                  <div className="csq-avg-bars">
+                    {byYear.map((y) => {
+                      const pct = y.avg_points != null ? Math.round((y.avg_points / maxAvg) * 100) : 0;
+                      return (
+                        <div key={y.year} className="csq-chart-row">
+                          <span className="csq-chart-left csq-chart-left--year">{y.year}</span>
+                          <div className="csq-avg-track">
+                            <div className="csq-avg-fill" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="csq-chart-val">{y.avg_points != null ? y.avg_points.toFixed(2) : "—"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
                   {/* Barras horizontales agrupadas por año */}
-                  <p className="csq-chart-subtitle">Goles y asistencias</p>
+                  <p className="csq-chart-subtitle" style={{ marginTop: "1.5rem" }}>Goles y asistencias</p>
                   <div className="csq-ga-groups">
                     {byYear.map((y) => (
                       <div key={y.year} className="csq-ga-group">
@@ -298,22 +330,68 @@ const ChachosSquad = () => {
                     <span className="csq-ga-legend-item csq-ga-legend-item--goal">Goles</span>
                     <span className="csq-ga-legend-item csq-ga-legend-item--assist">Asistencias</span>
                   </div>
+                </div>
+              </>
+            )}
 
-                  {/* Línea de promedio de puntos */}
-                  <p className="csq-chart-subtitle" style={{ marginTop: "1.5rem" }}>Promedio de puntos</p>
-                  <div className="csq-avg-bars">
-                    {byYear.map((y) => {
-                      const pct = y.avg_points != null ? Math.round((y.avg_points / maxAvg) * 100) : 0;
-                      return (
-                        <div key={y.year} className="csq-chart-row">
-                          <span className="csq-chart-left csq-chart-left--year">{y.year}</span>
-                          <div className="csq-avg-track">
-                            <div className="csq-avg-fill" style={{ width: `${pct}%` }} />
-                          </div>
-                          <span className="csq-chart-val">{y.avg_points != null ? y.avg_points.toFixed(2) : "—"}</span>
+            {/* ── Performance vs rivales ── */}
+            {vsRivals.length > 0 && (
+              <>
+                <h3 className="csq-section-heading">Performance vs rivales</h3>
+                <p className="csq-riv-caption">G y A son los goles y asistencias del jugador frente a cada rival, no del equipo.</p>
+
+                <div className="csq-riv-record-card">
+                  {/* Desktop — tabla */}
+                  <div className="csq-riv-record-table-wrapper csq-riv-desktop-only">
+                    <table className="csq-riv-record-table">
+                      <thead>
+                        <tr>
+                          <th className="csq-rrt-name">Rival</th>
+                          <th title="Partidos jugados">PJ</th>
+                          <th className="csq-rrt-th--win"  title="Partidos ganados">PG</th>
+                          <th title="Partidos empatados">PE</th>
+                          <th className="csq-rrt-th--loss" title="Partidos perdidos">PP</th>
+                          <th className="csq-rrt-th--goal"   title="Goles marcados">G</th>
+                          <th className="csq-rrt-th--assist" title="Asistencias">A</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {vsRivals.map((r) => (
+                          <tr key={r.rival._id} className={rivRowMod(r.rival._id)}>
+                            <td className="csq-rrt-name" title={r.rival.name}>{r.rival.name}</td>
+                            <td className={rivZ(r.matches)}>{r.matches}</td>
+                            <td className={`${rivZ(r.wins)} csq-rrt-num--win`}>{r.wins}</td>
+                            <td className={rivZ(r.draws)}>{r.draws}</td>
+                            <td className={`${rivZ(r.losses)} csq-rrt-num--loss`}>{r.losses}</td>
+                            <td className={`${rivZ(r.goals)} csq-rrt-num--goal`}><span className="csq-rrt-chip">{r.goals}</span></td>
+                            <td className={`${rivZ(r.assists)} csq-rrt-num--assist`}><span className="csq-rrt-chip">{r.assists}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile — cards compactas de 2 líneas */}
+                  <div className="csq-riv-mobile-only">
+                    {vsRivals.map((r) => (
+                      <div key={r.rival._id} className={`csq-riv-mcard ${rivRowMod(r.rival._id)}`}>
+                        <div className="csq-riv-mcard-row1">
+                          <span className="csq-riv-mcard-name" title={r.rival.name}>{r.rival.name}</span>
+                          <span className="csq-riv-mcard-pj">{r.matches} PJ</span>
                         </div>
-                      );
-                    })}
+                        <div className="csq-riv-mcard-row2">
+                          <span className="csq-riv-mcard-record">
+                            <span className={`csq-riv-mcard-rec--win${r.wins === 0 ? " csq-riv-mcard-rec--zero" : ""}`}>{r.wins} PG</span>
+                            <span className={`csq-riv-mcard-rec--draw${r.draws === 0 ? " csq-riv-mcard-rec--zero" : ""}`}>{r.draws} PE</span>
+                            <span className={`csq-riv-mcard-rec--loss${r.losses === 0 ? " csq-riv-mcard-rec--zero" : ""}`}>{r.losses} PP</span>
+                          </span>
+                          <span className="csq-riv-mcard-ga">
+                            <span className={`csq-rrt-chip csq-rrt-chip--goal${r.goals === 0 ? " csq-rrt-chip--zero" : ""}`}>{r.goals} G</span>
+                            <span className={`csq-rrt-chip csq-rrt-chip--assist${r.assists === 0 ? " csq-rrt-chip--zero" : ""}`}>{r.assists} A</span>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </>

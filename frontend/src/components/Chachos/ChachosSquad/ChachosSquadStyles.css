@@ -598,6 +598,162 @@
 }
 
 
+/* ── Performance vs rivales ── */
+.csq-riv-caption {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-muted-dark);
+  margin: -0.25rem 0 0;
+}
+
+.csq-riv-record-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.csq-riv-record-table-wrapper {
+  overflow-x: auto;
+}
+
+.csq-riv-record-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Urbanist", var(--secondary-font);
+}
+
+.csq-riv-record-table th,
+.csq-riv-record-table td {
+  padding: 0.65rem 0.5rem;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-body-dark);
+  width: 10%;
+}
+
+.csq-riv-record-table th {
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.csq-rrt-name {
+  width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.csq-riv-record-table td.csq-rrt-name {
+  text-align: left;
+}
+
+.csq-riv-record-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.csq-riv-record-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.csq-rrt-row--best {
+  background: rgba(168,218,220,0.07);
+}
+.csq-rrt-row--best .csq-rrt-name {
+  color: var(--third-color);
+  font-weight: var(--fw-bold);
+}
+
+.csq-rrt-row--worst {
+  background: rgba(230,57,70,0.06);
+}
+.csq-rrt-row--worst .csq-rrt-name {
+  color: var(--fourth-color);
+  font-weight: var(--fw-bold);
+}
+
+/* Headers — anticipan el color semántico de su columna */
+.csq-rrt-th--win    { color: var(--status-green); }
+.csq-rrt-th--loss   { color: var(--status-red); }
+.csq-rrt-th--goal   { color: #c084fc; }
+.csq-rrt-th--assist { color: #38bdf8; }
+
+/* Valores — PG en verde, PP en rojo (mismo patrón que ChachosTournamentRounds) */
+/* Calificados con .csq-riv-record-table td para ganarle a la especificidad de la regla base td */
+.csq-riv-record-table td.csq-rrt-num--win  { color: var(--status-green); font-weight: var(--fw-semibold); }
+.csq-riv-record-table td.csq-rrt-num--loss { color: var(--status-red);   font-weight: var(--fw-semibold); }
+
+/* Goles y asistencias del jugador — chip con fondo, para que no se confundan con el resultado del equipo */
+.csq-riv-record-table td.csq-rrt-num--goal,
+.csq-riv-record-table td.csq-rrt-num--assist {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.csq-rrt-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-weight: var(--fw-bold);
+}
+
+.csq-riv-record-table td.csq-rrt-num--goal .csq-rrt-chip {
+  background: rgba(192,132,252,0.14);
+  border: 1px solid rgba(192,132,252,0.35);
+  color: #c084fc;
+}
+.csq-riv-record-table td.csq-rrt-num--assist .csq-rrt-chip {
+  background: rgba(56,189,248,0.14);
+  border: 1px solid rgba(56,189,248,0.35);
+  color: #38bdf8;
+}
+
+/* Cero — el chip se atenúa pero mantiene su forma para no romper el ritmo visual de la columna */
+.csq-riv-record-table td.csq-rrt-num--zero .csq-rrt-chip {
+  background: transparent;
+  border-color: rgba(255,255,255,0.08);
+  color: var(--text-subtle-dark);
+  font-weight: var(--fw-regular);
+}
+
+/* Ceros — se camuflan con el fondo, sin competir por atención. Va al final para ganarle a los colores semánticos */
+.csq-riv-record-table td.csq-rrt-num--zero {
+  color: var(--text-subtle-dark);
+  font-weight: var(--fw-regular);
+  opacity: 0.45;
+}
+
+/* Chips reutilizables fuera de la tabla — usados también en las mobile cards */
+.csq-rrt-chip--goal {
+  background: rgba(192,132,252,0.14);
+  border: 1px solid rgba(192,132,252,0.35);
+  color: #c084fc;
+}
+.csq-rrt-chip--assist {
+  background: rgba(56,189,248,0.14);
+  border: 1px solid rgba(56,189,248,0.35);
+  color: #38bdf8;
+}
+.csq-rrt-chip--zero {
+  background: transparent;
+  border-color: rgba(255,255,255,0.08);
+  color: var(--text-subtle-dark);
+  font-weight: var(--fw-regular);
+}
+
+/* ── Mobile cards — toggle ── */
+.csq-riv-mobile-only { display: none; }
+
 /* ── Social insights ── */
 .csq-social-grid {
   display: grid;
@@ -772,4 +928,84 @@
   .csq-bars          { height: 90px; }
   .csq-bar-stack     { height: 70px; }
   .csq-social-grid   { grid-template-columns: 1fr; }
+  .csq-riv-record-card { padding: 0.85rem; }
+
+  .csq-riv-desktop-only { display: none; }
+  .csq-riv-mobile-only  { display: flex; flex-direction: column; gap: 0.55rem; }
+
+  /* Card compacta — 2 líneas, acento de color vibrante a la izquierda */
+  .csq-riv-mcard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.7rem 0.85rem 0.7rem 1rem;
+    background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.008));
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius-md);
+    box-shadow: inset 3px 0 0 rgba(255,255,255,0.14);
+  }
+  .csq-riv-mcard.csq-rrt-row--best {
+    background: linear-gradient(135deg, rgba(168,218,220,0.1), rgba(168,218,220,0.015));
+    border-color: rgba(168,218,220,0.22);
+    box-shadow: inset 3px 0 0 var(--third-color);
+  }
+  .csq-riv-mcard.csq-rrt-row--worst {
+    background: linear-gradient(135deg, rgba(230,57,70,0.09), rgba(230,57,70,0.012));
+    border-color: rgba(230,57,70,0.18);
+    box-shadow: inset 3px 0 0 var(--fourth-color);
+  }
+
+  .csq-riv-mcard-row1,
+  .csq-riv-mcard-row2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .csq-riv-mcard-name {
+    font-family: "Urbanist", var(--secondary-font);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-bright);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .csq-rrt-row--best  .csq-riv-mcard-name { color: var(--third-color); }
+  .csq-rrt-row--worst .csq-riv-mcard-name { color: var(--fourth-color); }
+
+  .csq-riv-mcard-pj {
+    flex-shrink: 0;
+    font-family: var(--secondary-font);
+    font-size: 0.62rem;
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--text-subtle-dark);
+  }
+
+  .csq-riv-mcard-record,
+  .csq-riv-mcard-ga {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .csq-riv-mcard-record > span {
+    font-family: "Urbanist", var(--secondary-font);
+    font-size: var(--text-xs);
+    font-weight: var(--fw-bold);
+  }
+  .csq-riv-mcard-rec--win  { color: var(--status-green); }
+  .csq-riv-mcard-rec--draw { color: var(--text-body-dark); }
+  .csq-riv-mcard-rec--loss { color: var(--status-red); }
+  .csq-riv-mcard-rec--zero { color: var(--text-subtle-dark); font-weight: var(--fw-regular); opacity: 0.45; }
+
+  .csq-riv-mcard-ga .csq-rrt-chip {
+    font-family: "Urbanist", var(--secondary-font);
+    font-size: 0.68rem;
+    padding: 0.18rem 0.5rem;
+  }
 }
