@@ -11,7 +11,6 @@ import "./UpdatePodridaStyles.css";
 import fetchAllPodridaPlayers from "../../../../reactquery/podrida/fetchAllPodridaPlayers";
 import fetchPodridaMatchById from "../../../../reactquery/podrida/fetchPodridaMatchById";
 import updatePodridaMatch from "../../../../reactquery/podrida/updatePodridaMatch";
-import createPodridaMatch from "../../../../reactquery/podrida/createPodridaMatch";
 
 const UpdatePodrida = () => {
   const navigate = useNavigate();
@@ -129,9 +128,15 @@ const UpdatePodrida = () => {
     if (
       !date ||
       players.length < 5 ||
-      players.some((p) => !p.player || !p.score)
+      players.some((p) => !p.player || !p.score || Number(p.score) < 0)
     ) {
-      toast.error("Por favor completá todos los campos obligatorios");
+      toast.error("Por favor completá todos los campos obligatorios con valores válidos");
+      return;
+    }
+
+    const selectedPlayerIds = players.map((p) => p.player);
+    if (new Set(selectedPlayerIds).size !== selectedPlayerIds.length) {
+      toast.error("Un mismo jugador no puede estar repetido en la partida");
       return;
     }
 
@@ -167,6 +172,38 @@ const UpdatePodrida = () => {
     // Envío
     mutation.mutate({ matchId: id, matchData });
   };
+
+  if (isLoadingPlayers) {
+    return (
+      <div className="container">
+        <p>Cargando jugadores...</p>
+      </div>
+    );
+  }
+
+  if (isErrorPlayers) {
+    return (
+      <div className="container">
+        <p>Ocurrió un error al cargar los jugadores.</p>
+      </div>
+    );
+  }
+
+  if (isLoadingMatch) {
+    return (
+      <div className="container">
+        <p>Cargando partida...</p>
+      </div>
+    );
+  }
+
+  if (isErrorMatch) {
+    return (
+      <div className="container">
+        <p>Ocurrió un error al cargar la partida.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -213,6 +250,7 @@ const UpdatePodrida = () => {
               </select>
               <input
                 type="number"
+                min="0"
                 placeholder="Puntaje"
                 value={playerData.score}
                 onChange={(e) =>
@@ -259,6 +297,7 @@ const UpdatePodrida = () => {
             </select>
             <input
               type="number"
+                min="0"
               placeholder="Puntaje"
               value={highlight.score}
               onChange={(e) =>
@@ -289,6 +328,7 @@ const UpdatePodrida = () => {
             </select>
             <input
               type="number"
+                min="0"
               placeholder="Cantidad"
               value={longestStreakOnTime.count}
               onChange={(e) =>
@@ -322,6 +362,7 @@ const UpdatePodrida = () => {
             </select>
             <input
               type="number"
+                min="0"
               placeholder="Cantidad"
               value={longestStreakFailing.count}
               onChange={(e) =>

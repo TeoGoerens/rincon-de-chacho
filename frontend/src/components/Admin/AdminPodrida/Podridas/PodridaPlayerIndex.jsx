@@ -52,6 +52,13 @@ const PodridaPlayerIndex = () => {
         </Link>
       </div>
       <div className="podrida-index-content">
+        {isErrorPlayers ? (
+          <p>
+            {errorPlayers?.message || "Ocurrió un error al cargar los jugadores."}
+          </p>
+        ) : isLoadingPlayers ? (
+          <p>Cargando jugadores...</p>
+        ) : (
         <table>
           <thead>
             <tr>
@@ -80,6 +87,7 @@ const PodridaPlayerIndex = () => {
             ))}
           </tbody>
         </table>
+        )}
       </div>
     </div>
   );

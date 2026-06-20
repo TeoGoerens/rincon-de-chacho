@@ -282,4 +282,22 @@ export default class PlayerRepository extends baseRepository {
       throw error;
     }
   };
+
+  // ---------- DELETE PLAYER (bloqueado si tiene partidos jugados) ----------
+  deletePlayerById = async (playerId) => {
+    const playerExists = await this.model.findById(playerId);
+    if (!playerExists) {
+      throw new Error("Player was not found in the database");
+    }
+
+    const hasMatchStats = await MatchStat.exists({ player: playerId });
+    if (hasMatchStats) {
+      throw new Error(
+        "No se puede eliminar este jugador porque tiene partidos jugados registrados"
+      );
+    }
+
+    const playerDeleted = await this.model.findOneAndDelete({ _id: playerId });
+    return playerDeleted;
+  };
 }

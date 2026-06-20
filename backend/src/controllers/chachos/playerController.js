@@ -92,7 +92,7 @@ export default class PlayerController {
   deletePlayerById = async (req, res, next) => {
     try {
       const playerId = req.params.pid;
-      const playerDeleted = await repository.baseDeleteById(playerId);
+      const playerDeleted = await repository.deletePlayerById(playerId);
       res.status(200).json({ message: `Player with id ${playerId} has been properly deleted`, playerDeleted });
     } catch (error) {
       next(error);

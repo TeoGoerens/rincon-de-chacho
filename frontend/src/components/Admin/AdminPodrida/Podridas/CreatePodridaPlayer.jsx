@@ -1,15 +1,13 @@
 // Import React dependencies
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 // Imports CSS & helpers
 import "./CreatePodridaPlayerStyles.css";
 
 //Import React Query functions
-import fetchAllPodridaPlayers from "../../../../reactquery/podrida/fetchAllPodridaPlayers";
-import createPodridaMatch from "../../../../reactquery/podrida/createPodridaMatch";
 import createPodridaPlayer from "../../../../reactquery/podrida/createPodridaPlayer";
 
 const CreatePodridaPlayer = () => {

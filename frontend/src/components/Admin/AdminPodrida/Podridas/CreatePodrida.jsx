@@ -49,7 +49,7 @@ const CreatePodrida = () => {
     mutationFn: createPodridaMatch,
     onSuccess: (data) => {
       toast.success("Partida creada con éxito");
-      queryClient.invalidateQueries(["fetchPodridaStats"]);
+      queryClient.invalidateQueries(["fetchAllPodridaMatches"]);
       navigate("/admin/podrida");
     },
     onError: (error) => {
@@ -94,9 +94,15 @@ const CreatePodrida = () => {
     if (
       !date ||
       players.length < 5 ||
-      players.some((p) => !p.player || !p.score)
+      players.some((p) => !p.player || !p.score || Number(p.score) < 0)
     ) {
-      toast.error("Por favor completá todos los campos obligatorios");
+      toast.error("Por favor completá todos los campos obligatorios con valores válidos");
+      return;
+    }
+
+    const selectedPlayerIds = players.map((p) => p.player);
+    if (new Set(selectedPlayerIds).size !== selectedPlayerIds.length) {
+      toast.error("Un mismo jugador no puede estar repetido en la partida");
       return;
     }
 
@@ -132,6 +138,22 @@ const CreatePodrida = () => {
     // Envío
     mutation.mutate(matchData);
   };
+
+  if (isLoadingPlayers) {
+    return (
+      <div className="container">
+        <p>Cargando jugadores...</p>
+      </div>
+    );
+  }
+
+  if (isErrorPlayers) {
+    return (
+      <div className="container">
+        <p>Ocurrió un error al cargar los jugadores.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -177,6 +199,7 @@ const CreatePodrida = () => {
               </select>
               <input
                 type="number"
+                min="0"
                 placeholder="Puntaje"
                 value={playerData.score}
                 onChange={(e) =>
@@ -223,6 +246,7 @@ const CreatePodrida = () => {
             </select>
             <input
               type="number"
+                min="0"
               placeholder="Puntaje"
               value={highlight.score}
               onChange={(e) =>
@@ -253,6 +277,7 @@ const CreatePodrida = () => {
             </select>
             <input
               type="number"
+                min="0"
               placeholder="Cantidad"
               value={longestStreakOnTime.count}
               onChange={(e) =>
@@ -286,6 +311,7 @@ const CreatePodrida = () => {
             </select>
             <input
               type="number"
+                min="0"
               placeholder="Cantidad"
               value={longestStreakFailing.count}
               onChange={(e) =>

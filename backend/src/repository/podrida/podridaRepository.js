@@ -35,6 +35,11 @@ export default class PodridaRepository extends baseRepository {
       throw new Error("A player with this name already exists");
     }
 
+    const existingEmail = await PodridaPlayer.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      throw new Error("A player with this email already exists");
+    }
+
     return await PodridaPlayer.create({ name, email });
   };
 
@@ -267,6 +272,19 @@ export default class PodridaRepository extends baseRepository {
     const player = await PodridaPlayer.findById(id);
     if (!player) throw new Error("Jugador no encontrado");
 
+    const existingName = await PodridaPlayer.findOne({ name: data.name, _id: { $ne: id } });
+    if (existingName) {
+      throw new Error("A player with this name already exists");
+    }
+
+    const existingEmail = await PodridaPlayer.findOne({
+      email: data.email.toLowerCase(),
+      _id: { $ne: id },
+    });
+    if (existingEmail) {
+      throw new Error("A player with this email already exists");
+    }
+
     player.name = data.name;
     player.email = data.email;
 
@@ -278,6 +296,14 @@ export default class PodridaRepository extends baseRepository {
   deletePodridaPlayer = async (id) => {
     const player = await PodridaPlayer.findById(id);
     if (!player) return null;
+
+    const hasMatches = await PodridaMatch.exists({ "players.player": id });
+    if (hasMatches) {
+      throw new Error(
+        "No se puede eliminar este jugador porque tiene partidas jugadas registradas"
+      );
+    }
+
     await player.deleteOne();
     return player;
   };

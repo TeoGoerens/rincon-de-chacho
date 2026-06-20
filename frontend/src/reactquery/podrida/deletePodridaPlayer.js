@@ -22,7 +22,7 @@ const deletePodridaPlayer = async ({ playerId }) => {
     return response.data.message;
   } catch (error) {
     console.error("❌ Error al eliminar jugador:", error);
-    throw error?.response?.data?.message || error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al eliminar el jugador");
   }
 };
 

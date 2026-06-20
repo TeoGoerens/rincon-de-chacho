@@ -24,7 +24,7 @@ const deletePodridaMatch = async ({ matchId }) => {
     return response.data;
   } catch (error) {
     console.error("❌ Error al eliminar la partida:", error);
-    throw error?.response?.data?.message || error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al eliminar la partida");
   }
 };
 

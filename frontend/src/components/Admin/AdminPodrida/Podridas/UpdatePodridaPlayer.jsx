@@ -110,7 +110,7 @@ const UpdatePodridaPlayer = () => {
             className="submit-btn"
             disabled={mutation.isPending}
           >
-            {mutation.isPending ? "Cargando..." : "Actualizar partida"}
+            {mutation.isPending ? "Cargando..." : "Actualizar jugador"}
           </button>
         </form>
       </div>
