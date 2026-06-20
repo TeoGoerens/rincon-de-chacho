@@ -68,18 +68,12 @@ const ChachosSquad = () => {
   const maxGA  = byYear.length ? Math.max(...byYear.flatMap((y) => [y.goals, y.assists]), 1) : 1;
   const maxAvg = 10;
 
-  let bestRivalId = null, worstRivalId = null;
-  if (vsRivals.length > 1) {
-    let bestDiff = -Infinity, worstDiff = Infinity;
-    vsRivals.forEach((r) => {
-      const diff = r.wins - r.losses;
-      if (diff > bestDiff)  { bestDiff  = diff; bestRivalId  = r.rival._id; }
-      if (diff < worstDiff) { worstDiff = diff; worstRivalId = r.rival._id; }
-    });
-    if (bestDiff <= 0)  bestRivalId  = null;
-    if (worstDiff >= 0) worstRivalId = null;
-  }
-  const rivRowMod = (id) => id === bestRivalId ? "csq-rrt-row--best" : id === worstRivalId ? "csq-rrt-row--worst" : "";
+  // La tabla ya viene ordenada por récord (mejor a peor) — primera fila = mejor, última = peor
+  const rivRowMod = (i) => i === 0 && vsRivals.length > 1
+    ? "csq-rrt-row--best"
+    : i === vsRivals.length - 1 && vsRivals.length > 1
+      ? "csq-rrt-row--worst"
+      : "";
   const rivZ = (v) => `csq-rrt-num${v === 0 ? " csq-rrt-num--zero" : ""}`;
 
   const initials = profile
@@ -344,6 +338,10 @@ const ChachosSquad = () => {
                   {/* Desktop — tabla */}
                   <div className="csq-riv-record-table-wrapper csq-riv-desktop-only">
                     <table className="csq-riv-record-table">
+                      <colgroup>
+                        <col className="csq-rrt-col--name" />
+                        {["pj","pg","pe","pp","g","a"].map((c) => <col key={c} className="csq-rrt-col--stat" />)}
+                      </colgroup>
                       <thead>
                         <tr>
                           <th className="csq-rrt-name">Rival</th>
@@ -356,8 +354,8 @@ const ChachosSquad = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {vsRivals.map((r) => (
-                          <tr key={r.rival._id} className={rivRowMod(r.rival._id)}>
+                        {vsRivals.map((r, i) => (
+                          <tr key={r.rival._id} className={rivRowMod(i)}>
                             <td className="csq-rrt-name" title={r.rival.name}>{r.rival.name}</td>
                             <td className={rivZ(r.matches)}>{r.matches}</td>
                             <td className={`${rivZ(r.wins)} csq-rrt-num--win`}>{r.wins}</td>
@@ -373,8 +371,8 @@ const ChachosSquad = () => {
 
                   {/* Mobile — cards compactas de 2 líneas */}
                   <div className="csq-riv-mobile-only">
-                    {vsRivals.map((r) => (
-                      <div key={r.rival._id} className={`csq-riv-mcard ${rivRowMod(r.rival._id)}`}>
+                    {vsRivals.map((r, i) => (
+                      <div key={r.rival._id} className={`csq-riv-mcard ${rivRowMod(i)}`}>
                         <div className="csq-riv-mcard-row1">
                           <span className="csq-riv-mcard-name" title={r.rival.name}>{r.rival.name}</span>
                           <span className="csq-riv-mcard-pj">{r.matches} PJ</span>

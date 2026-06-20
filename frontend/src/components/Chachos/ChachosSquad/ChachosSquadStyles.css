@@ -610,43 +610,90 @@
   background: var(--bg-card-dark);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: var(--radius-xl);
-  padding: 1.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  padding: 0;
+  overflow: hidden;
 }
 
+/* ── Tabla — mismo patrón canónico que ce-table (ChachosEstadisticas H2H) ── */
 .csq-riv-record-table-wrapper {
   overflow-x: auto;
+  overflow-y: auto;
+  /* header ~2.3rem + 10 filas × 2.35rem cada una — idéntico a ce-table-wrapper */
+  max-height: calc(2.3rem + 10 * 2.35rem);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.csq-riv-record-table-wrapper::-webkit-scrollbar { width: 4px; height: 4px; }
+.csq-riv-record-table-wrapper::-webkit-scrollbar-track { background: transparent; }
+.csq-riv-record-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-full);
 }
 
 .csq-riv-record-table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-family: "Urbanist", var(--secondary-font);
 }
 
-.csq-riv-record-table th,
-.csq-riv-record-table td {
-  padding: 0.65rem 0.5rem;
-  text-align: center;
-  font-size: var(--text-xs);
-  color: var(--text-body-dark);
-  width: 10%;
-}
+.csq-rrt-col--name { width: 32%; }
+.csq-rrt-col--stat { width: 72px; }
 
+/* Header — sticky, idéntico a .ce-th */
 .csq-riv-record-table th {
+  padding: 0.6rem 0.75rem;
+  font-family: var(--secondary-font);
   font-size: var(--text-2xs);
   font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
-  color: var(--text-label-dark);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-body-dark);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  background: #111111;
+  z-index: 1;
+}
+
+/* Rows — zebra idéntico a Inicio/Estadísticas */
+.csq-riv-record-table tbody tr { transition: background var(--transition-base); }
+.csq-riv-record-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.025); }
+.csq-riv-record-table tbody tr:hover            { background: rgba(255,255,255,0.055); }
+
+/* Destaque tile — siempre la primera fila (la tabla ya viene ordenada por mejor récord) */
+.csq-riv-record-table tbody tr.csq-rrt-row--best {
+  background: rgba(168,218,220,0.06);
+}
+.csq-riv-record-table tbody tr.csq-rrt-row--best:hover {
+  background: rgba(168,218,220,0.09);
+}
+.csq-rrt-row--best .csq-rrt-name {
+  color: var(--third-color);
+  font-weight: var(--fw-bold);
+}
+
+/* Destaque rojo — siempre la última fila */
+.csq-riv-record-table tbody tr.csq-rrt-row--worst {
+  background: rgba(230,57,70,0.05);
+}
+.csq-riv-record-table tbody tr.csq-rrt-row--worst:hover {
+  background: rgba(230,57,70,0.08);
+}
+.csq-rrt-row--worst .csq-rrt-name {
+  color: var(--fourth-color);
+  font-weight: var(--fw-bold);
+}
+
+/* Celdas — idénticas a .ce-td (sin Urbanist: ce-table hereda la fuente default del body) */
+.csq-riv-record-table td {
+  padding: 0.65rem 0.75rem;
+  font-size: var(--text-sm);
+  overflow: hidden;
 }
 
 .csq-rrt-name {
-  width: 40%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -654,29 +701,19 @@
 
 .csq-riv-record-table td.csq-rrt-name {
   text-align: left;
+  font-weight: var(--fw-regular);
+  color: var(--text-bright);
+  max-width: 0;
 }
 
-.csq-riv-record-table tbody tr {
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.csq-riv-record-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.csq-rrt-row--best {
-  background: rgba(168,218,220,0.07);
-}
-.csq-rrt-row--best .csq-rrt-name {
-  color: var(--third-color);
-  font-weight: var(--fw-bold);
-}
-
-.csq-rrt-row--worst {
-  background: rgba(230,57,70,0.06);
-}
-.csq-rrt-row--worst .csq-rrt-name {
-  color: var(--fourth-color);
-  font-weight: var(--fw-bold);
+.csq-riv-record-table td.csq-rrt-num,
+.csq-riv-record-table td.csq-rrt-num--win,
+.csq-riv-record-table td.csq-rrt-num--loss,
+.csq-riv-record-table td.csq-rrt-num--goal,
+.csq-riv-record-table td.csq-rrt-num--assist {
+  text-align: center;
+  font-weight: var(--fw-regular);
+  color: var(--text-body-dark);
 }
 
 /* Headers — anticipan el color semántico de su columna */
@@ -686,17 +723,10 @@
 .csq-rrt-th--assist { color: #38bdf8; }
 
 /* Valores — PG en verde, PP en rojo (mismo patrón que ChachosTournamentRounds) */
-/* Calificados con .csq-riv-record-table td para ganarle a la especificidad de la regla base td */
 .csq-riv-record-table td.csq-rrt-num--win  { color: var(--status-green); font-weight: var(--fw-semibold); }
 .csq-riv-record-table td.csq-rrt-num--loss { color: var(--status-red);   font-weight: var(--fw-semibold); }
 
 /* Goles y asistencias del jugador — chip con fondo, para que no se confundan con el resultado del equipo */
-.csq-riv-record-table td.csq-rrt-num--goal,
-.csq-riv-record-table td.csq-rrt-num--assist {
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-}
-
 .csq-rrt-chip {
   display: inline-flex;
   align-items: center;
@@ -722,15 +752,14 @@
 .csq-riv-record-table td.csq-rrt-num--zero .csq-rrt-chip {
   background: transparent;
   border-color: rgba(255,255,255,0.08);
-  color: var(--text-subtle-dark);
+  color: rgba(255,255,255,0.12);
   font-weight: var(--fw-regular);
 }
 
-/* Ceros — se camuflan con el fondo, sin competir por atención. Va al final para ganarle a los colores semánticos */
+/* Ceros — mismo camuflaje que .ce-val--zero (Estadísticas). Va al final para ganarle a los colores semánticos */
 .csq-riv-record-table td.csq-rrt-num--zero {
-  color: var(--text-subtle-dark);
+  color: rgba(255,255,255,0.12);
   font-weight: var(--fw-regular);
-  opacity: 0.45;
 }
 
 /* Chips reutilizables fuera de la tabla — usados también en las mobile cards */
