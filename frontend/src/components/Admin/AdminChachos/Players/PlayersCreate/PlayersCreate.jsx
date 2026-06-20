@@ -2,7 +2,9 @@
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Navigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -15,9 +17,8 @@ import { toolbarReactQuill } from "../../../../../helpers/reactQuillModules";
 import "../../TournamentRounds/TournamentRoundsFormStyle.css";
 import "../PlayersFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { createPlayerAction } from "../../../../../redux/slices/players/playersSlices";
+//Import React Query functions
+import createPlayer from "../../../../../reactquery/chachos/createPlayer";
 
 //Form schema
 const formSchema = Yup.object({
@@ -33,18 +34,8 @@ const formSchema = Yup.object({
 //----------------------------------------
 
 const PlayersCreate = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Formik configuration
-  const formik = useFormik({
-    initialValues: {},
-    onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(createPlayerAction({ ...values, interview }));
-    },
-    validationSchema: formSchema,
-  });
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   //Define the features of React Quill
   const [interview, setInterview] = useState("");
@@ -52,12 +43,25 @@ const PlayersCreate = () => {
     setInterview(value);
   };
 
-  //Select state from store
-  const storeData = useSelector((store) => store.players);
-  const { appError, serverError } = storeData;
+  const mutation = useMutation({
+    mutationFn: createPlayer,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["chachos-players"]);
+      navigate("/admin/chachos/players");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Error al crear el jugador");
+    },
+  });
 
-  //Navigate to index in case there is a created player
-  if (storeData?.isCreated) return <Navigate to="/admin/chachos/players" />;
+  //Formik configuration
+  const formik = useFormik({
+    initialValues: {},
+    onSubmit: (values) => {
+      mutation.mutate({ ...values, interview });
+    },
+    validationSchema: formSchema,
+  });
 
   return (
     <div className="ctr-form-page">
@@ -74,8 +78,10 @@ const PlayersCreate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

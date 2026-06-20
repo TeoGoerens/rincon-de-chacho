@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsStyle.css";
@@ -10,33 +12,34 @@ import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteTournamentAction,
-  getAllTournamentsAction,
-} from "../../../../redux/slices/tournaments/tournamentsSlices";
+//Import React Query functions
+import fetchAllTournaments from "../../../../reactquery/chachos/fetchAllTournaments";
+import deleteTournament from "../../../../reactquery/chachos/deleteTournament";
 
 //----------------------------------------
 //COMPONENT
 //----------------------------------------
 
 const TournamentsIndex = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournaments);
-  const tournaments = storeData.tournaments?.tournaments;
-  const { appError, serverError, isDeleted } = storeData;
+  const { data: tournaments, error } = useQuery({
+    queryKey: ["tournaments"],
+    queryFn: fetchAllTournaments,
+  });
 
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTournamentsAction());
-  }, [dispatch, isDeleted]);
+  const deleteMutation = useMutation({
+    mutationFn: deleteTournament,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tournaments"]);
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Error al eliminar el torneo");
+    },
+  });
 
   const handleDelete = (id) => {
-    dispatch(deleteTournamentAction(id));
+    deleteMutation.mutate(id);
   };
 
   return (
@@ -59,10 +62,8 @@ const TournamentsIndex = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-state">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-state">{error.message}</p>
       ) : tournaments?.length <= 0 ? (
         <p className="ctr-state">No se encontraron torneos en la base de datos</p>
       ) : (

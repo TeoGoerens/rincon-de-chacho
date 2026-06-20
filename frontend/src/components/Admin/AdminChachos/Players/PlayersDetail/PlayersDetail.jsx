@@ -1,14 +1,14 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "../../TournamentRounds/TournamentRoundsFormStyle.css";
 import "../PlayersFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { getPlayerAction } from "../../../../../redux/slices/players/playersSlices";
+//Import React Query functions
+import fetchPlayerById from "../../../../../reactquery/chachos/fetchPlayerById";
 
 //Etiquetas en español para posición y rol
 import { POSITION_LABEL, ROLE_LABEL } from "../../../../../helpers/playerLabels";
@@ -20,18 +20,10 @@ import { POSITION_LABEL, ROLE_LABEL } from "../../../../../helpers/playerLabels"
 const PlayersDetail = () => {
   const { id } = useParams();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Get player information from database every time the component renders
-  useEffect(() => {
-    dispatch(getPlayerAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.players);
-  const { appError, serverError } = storeData;
-  const player = storeData?.player?.player;
+  const { data: player, error } = useQuery({
+    queryKey: ["chachos-player", id],
+    queryFn: () => fetchPlayerById(id),
+  });
 
   return (
     <div className="ctr-form-page">
@@ -48,10 +40,8 @@ const PlayersDetail = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-form-error-banner">{error.message}</p>
       ) : (
         <div className="plfd-card">
           <div className="plfd-head">

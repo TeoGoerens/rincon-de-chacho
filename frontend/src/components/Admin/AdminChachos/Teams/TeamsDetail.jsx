@@ -1,14 +1,14 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 import "./TeamsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { getTeamAction } from "../../../../redux/slices/teams/teamsSlices";
+//Import React Query functions
+import fetchTeamById from "../../../../reactquery/chachos/fetchTeamById";
 
 //----------------------------------------
 //COMPONENT
@@ -17,18 +17,10 @@ import { getTeamAction } from "../../../../redux/slices/teams/teamsSlices";
 const TeamsDetail = () => {
   const { id } = useParams();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Get team information from database every time the component renders
-  useEffect(() => {
-    dispatch(getTeamAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.teams);
-  const { appError, serverError } = storeData;
-  const team = storeData?.team?.rivalTeam;
+  const { data: team, error } = useQuery({
+    queryKey: ["team", id],
+    queryFn: () => fetchTeamById(id),
+  });
 
   return (
     <div className="ctr-form-page">
@@ -45,10 +37,8 @@ const TeamsDetail = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-form-error-banner">{error.message}</p>
       ) : (
         <div className="tmfd-card">
           {team?.avatar ? (

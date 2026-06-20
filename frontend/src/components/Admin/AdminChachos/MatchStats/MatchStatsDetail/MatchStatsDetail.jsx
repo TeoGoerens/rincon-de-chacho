@@ -1,6 +1,7 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "../../TournamentRounds/TournamentRoundsFormStyle.css";
@@ -12,10 +13,9 @@ import { formatDate } from "../../../../../helpers/dateFormatter";
 //Import components
 import MatchStatsGrid from "../MatchStatsGrid";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { getTournamentRoundAction } from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
-import { getMatchStatsFilteredAction } from "../../../../../redux/slices/match-stats/matchStatsSlices";
+//Import React Query functions
+import fetchRoundById from "../../../../../reactquery/chachos/fetchRoundById";
+import fetchMatchStatsFiltered from "../../../../../reactquery/chachos/fetchMatchStatsFiltered";
 
 //----------------------------------------
 //COMPONENT
@@ -24,21 +24,16 @@ import { getMatchStatsFilteredAction } from "../../../../../redux/slices/match-s
 const MatchStatsDetail = () => {
   const { id } = useParams();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: roundData, error } = useQuery({
+    queryKey: ["tournament-round", id],
+    queryFn: () => fetchRoundById(id),
+  });
+  const tournamentRound = roundData?.tournamentRound;
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournamentRounds);
-  const { appError, serverError } = storeData;
-  const tournamentRound = storeData?.tournamentRound?.tournamentRound;
-  const storeDataStats = useSelector((store) => store.stats);
-  const filteredMatchStats = storeDataStats?.filteredMatchStats?.filteredMatchStats;
-
-  //Get tournament round + match stats every time the component renders
-  useEffect(() => {
-    dispatch(getTournamentRoundAction(id));
-    dispatch(getMatchStatsFilteredAction({ round: id }));
-  }, [dispatch, id]);
+  const { data: filteredMatchStats } = useQuery({
+    queryKey: ["match-stats-filtered", { round: id }],
+    queryFn: () => fetchMatchStatsFiltered({ round: id }),
+  });
 
   //Indexar las estadísticas guardadas por jugador para alimentar MatchStatsGrid
   const statsByPlayer = {};
@@ -61,8 +56,8 @@ const MatchStatsDetail = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {error ? (
+        <p className="ctr-form-error-banner">{error.message}</p>
       ) : null}
 
       <div className="msc-match-summary">

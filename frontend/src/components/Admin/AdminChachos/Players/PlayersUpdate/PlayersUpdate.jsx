@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Navigate, useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -15,12 +17,9 @@ import { toolbarReactQuill } from "../../../../../helpers/reactQuillModules";
 import "../../TournamentRounds/TournamentRoundsFormStyle.css";
 import "../PlayersFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getPlayerAction,
-  updatePlayerAction,
-} from "../../../../../redux/slices/players/playersSlices";
+//Import React Query functions
+import fetchPlayerById from "../../../../../reactquery/chachos/fetchPlayerById";
+import updatePlayer from "../../../../../reactquery/chachos/updatePlayer";
 
 //Form schema
 const formSchema = Yup.object({
@@ -37,67 +36,61 @@ const formSchema = Yup.object({
 
 const PlayersUpdate = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Get player information from database every time the component renders
-  useEffect(() => {
-    dispatch(getPlayerAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.players);
-  const { appError, serverError } = storeData;
-  const shirt = storeData?.player?.player?.shirt;
-  const first_name = storeData?.player?.player?.first_name;
-  const last_name = storeData?.player?.player?.last_name;
-  const field_position = storeData?.player?.player?.field_position;
-  const role = storeData?.player?.player?.role;
-  const bio = storeData?.player?.player?.bio;
-  const interviewFromDB = storeData?.player?.player?.interview;
+  const { data: player } = useQuery({
+    queryKey: ["chachos-player", id],
+    queryFn: () => fetchPlayerById(id),
+  });
 
   //Define the features of React Quill
   const [interview, setInterview] = useState("");
   useEffect(() => {
-    setInterview(interviewFromDB ?? "");
-  }, [interviewFromDB]);
+    setInterview(player?.interview ?? "");
+  }, [player?.interview]);
 
   const handleChangeInterview = (value) => {
     setInterview(value);
   };
 
+  const mutation = useMutation({
+    mutationFn: updatePlayer,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["chachos-players"]);
+      queryClient.invalidateQueries(["chachos-player", id]);
+      navigate("/admin/chachos/players");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Error al editar el jugador");
+    },
+  });
+
   //Formik configuration
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      shirt,
-      first_name,
-      last_name,
-      field_position,
-      role,
-      bio,
+      shirt: player?.shirt,
+      first_name: player?.first_name,
+      last_name: player?.last_name,
+      field_position: player?.field_position,
+      role: player?.role,
+      bio: player?.bio,
     },
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(
-        updatePlayerAction({
-          shirt: values.shirt,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          field_position: values.field_position,
-          role: values.role,
-          bio: values.bio,
-          interview,
-          id,
-        })
-      );
+      mutation.mutate({
+        id,
+        shirt: values.shirt,
+        first_name: values.first_name,
+        last_name: values.last_name,
+        field_position: values.field_position,
+        role: values.role,
+        bio: values.bio,
+        interview,
+      });
     },
     validationSchema: formSchema,
   });
-
-  //Navigate to index in case there is an updated player
-  if (storeData?.isEdited) return <Navigate to="/admin/chachos/players" />;
 
   return (
     <div className="ctr-form-page">
@@ -114,8 +107,10 @@ const PlayersUpdate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

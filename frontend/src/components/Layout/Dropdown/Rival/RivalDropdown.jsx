@@ -1,25 +1,19 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "./RivalDropdownStyle.css";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getAllTeamsAction } from "../../../../redux/slices/teams/teamsSlices";
+//Import React Query functions
+import fetchAllTeams from "../../../../reactquery/chachos/fetchAllTeams";
 
 const RivalDropdown = ({ field, form }) => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: teams } = useQuery({
+    queryKey: ["teams"],
+    queryFn: fetchAllTeams,
+  });
 
-  //Select state from store
-  const storeData = useSelector((store) => store.teams);
-  const teams = storeData.teams?.rivalTeams;
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTeamsAction());
-  }, [dispatch]);
   return (
     <>
       <label>Rival</label>

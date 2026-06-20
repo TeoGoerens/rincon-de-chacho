@@ -1,5 +1,7 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsStyle.css";
@@ -13,35 +15,37 @@ import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getAllTournamentRoundsAction } from "../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
-import { deleteMatchStatsForARoundAction } from "../../../../redux/slices/match-stats/matchStatsSlices";
+//Import React Query functions
+import fetchAllTournamentRoundsAdmin from "../../../../reactquery/chachos/fetchAllTournamentRoundsAdmin";
+import deleteMatchStatsForRound from "../../../../reactquery/chachos/deleteMatchStatsForRound";
 
 //----------------------------------------
 //COMPONENT
 //----------------------------------------
 
 const MatchStatsIndex = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournamentRounds);
-  const tournamentRounds = storeData.tournamentRounds?.tournamentRounds;
-  const { appError, serverError } = storeData;
+  const { data: tournamentRounds, error } = useQuery({
+    queryKey: ["admin-tournament-rounds"],
+    queryFn: fetchAllTournamentRoundsAdmin,
+  });
 
-  //Select stats state from store
-  const statsStoreData = useSelector((store) => store.stats);
-  const { isDeleted } = statsStoreData;
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTournamentRoundsAction());
-  }, [dispatch, isDeleted]);
+  const deleteMutation = useMutation({
+    mutationFn: deleteMatchStatsForRound,
+    onSuccess: () => {
+      //"complete_stats" vive en el tournament round, no en match-stats
+      queryClient.invalidateQueries(["admin-tournament-rounds"]);
+    },
+    onError: (error) => {
+      toast.error(
+        error?.response?.data?.message || "Error al eliminar las estadísticas"
+      );
+    },
+  });
 
   const handleDelete = (id) => {
-    dispatch(deleteMatchStatsForARoundAction(id));
+    deleteMutation.mutate(id);
   };
 
   return (
@@ -61,10 +65,8 @@ const MatchStatsIndex = () => {
         </div>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-state">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-state">{error.message}</p>
       ) : tournamentRounds?.length <= 0 ? (
         <p className="ctr-state">No se encontraron fechas en la base de datos</p>
       ) : (

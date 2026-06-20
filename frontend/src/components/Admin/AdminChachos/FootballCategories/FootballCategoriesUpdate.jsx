@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
-import { Navigate, useParams, Link } from "react-router-dom";
+import React from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -9,12 +11,9 @@ import * as Yup from "yup";
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getCategoryAction,
-  updateCategoryAction,
-} from "../../../../redux/slices/football-categories/footballCategoriesSlices";
+//Import React Query functions
+import fetchFootballCategoryById from "../../../../reactquery/chachos/fetchFootballCategoryById";
+import updateFootballCategory from "../../../../reactquery/chachos/updateFootballCategory";
 
 //Form schema
 const formSchema = Yup.object({
@@ -27,36 +26,39 @@ const formSchema = Yup.object({
 
 const FootballCategoriesUpdate = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: category } = useQuery({
+    queryKey: ["football-category", id],
+    queryFn: () => fetchFootballCategoryById(id),
+  });
 
-  //Get category information from database every time the component renders
-  useEffect(() => {
-    dispatch(getCategoryAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.categories);
-  const { appError, serverError } = storeData;
-  const categoryName = storeData.footballCategory?.footballCategory?.name;
+  const mutation = useMutation({
+    mutationFn: updateFootballCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["football-categories"]);
+      queryClient.invalidateQueries(["football-category", id]);
+      navigate("/admin/chachos/football-categories");
+    },
+    onError: (error) => {
+      toast.error(
+        error?.response?.data?.message || "Error al editar la categoría"
+      );
+    },
+  });
 
   //Formik configuration
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: categoryName,
+      name: category?.name,
     },
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(updateCategoryAction({ name: values.name, id }));
+      mutation.mutate({ id, name: values.name });
     },
     validationSchema: formSchema,
   });
-
-  //Navigate to index in case there is an updated category
-  if (storeData?.isEdited)
-    return <Navigate to="/admin/chachos/football-categories" />;
 
   return (
     <div className="ctr-form-page">
@@ -73,8 +75,10 @@ const FootballCategoriesUpdate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

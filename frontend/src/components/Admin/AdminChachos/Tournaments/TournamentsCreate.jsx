@@ -1,6 +1,8 @@
 //Import React & Hooks
 import React from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -9,9 +11,8 @@ import * as Yup from "yup";
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { createTournamentAction } from "../../../../redux/slices/tournaments/tournamentsSlices";
+//Import React Query functions
+import createTournament from "../../../../reactquery/chachos/createTournament";
 
 //Import components
 import CategoryDropdown from "../../../Layout/Dropdown/Category/CategoryDropdown";
@@ -28,25 +29,28 @@ const formSchema = Yup.object({
 //----------------------------------------
 
 const TournamentsCreate = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createTournament,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tournaments"]);
+      navigate("/admin/chachos/tournaments");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Error al crear el torneo");
+    },
+  });
 
   //Formik configuration
   const formik = useFormik({
     initialValues: {},
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(createTournamentAction(values));
+      mutation.mutate(values);
     },
     validationSchema: formSchema,
   });
-
-  //Select state from store
-  const storeData = useSelector((store) => store.tournaments);
-  const { appError, serverError } = storeData;
-
-  //Navigate to index in case there is a created tournament
-  if (storeData?.isCreated) return <Navigate to="/admin/chachos/tournaments" />;
 
   return (
     <div className="ctr-form-page">
@@ -63,8 +67,10 @@ const TournamentsCreate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

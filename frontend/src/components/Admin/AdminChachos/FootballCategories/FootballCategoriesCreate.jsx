@@ -1,6 +1,8 @@
 //Import React & Hooks
 import React from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -9,9 +11,8 @@ import * as Yup from "yup";
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { createCategoryAction } from "../../../../redux/slices/football-categories/footballCategoriesSlices";
+//Import React Query functions
+import createFootballCategory from "../../../../reactquery/chachos/createFootballCategory";
 
 //Form schema
 const formSchema = Yup.object({
@@ -23,8 +24,21 @@ const formSchema = Yup.object({
 //----------------------------------------
 
 const FootballCategoriesCreate = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createFootballCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["football-categories"]);
+      navigate("/admin/chachos/football-categories");
+    },
+    onError: (error) => {
+      toast.error(
+        error?.response?.data?.message || "Error al crear la categoría"
+      );
+    },
+  });
 
   //Formik configuration
   const formik = useFormik({
@@ -32,19 +46,10 @@ const FootballCategoriesCreate = () => {
       name: "",
     },
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(createCategoryAction(values));
+      mutation.mutate(values);
     },
     validationSchema: formSchema,
   });
-
-  //Select state from store
-  const storeData = useSelector((store) => store.categories);
-  const { appError, serverError } = storeData;
-
-  //Navigate to index in case there is a created category
-  if (storeData?.isCreated)
-    return <Navigate to="/admin/chachos/football-categories" />;
 
   return (
     <div className="ctr-form-page">
@@ -61,8 +66,10 @@ const FootballCategoriesCreate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

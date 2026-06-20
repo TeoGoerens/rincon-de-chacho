@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsStyle.css";
@@ -11,33 +13,34 @@ import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteTeamAction,
-  getAllTeamsAction,
-} from "../../../../redux/slices/teams/teamsSlices";
+//Import React Query functions
+import fetchAllTeams from "../../../../reactquery/chachos/fetchAllTeams";
+import deleteTeam from "../../../../reactquery/chachos/deleteTeam";
 
 //----------------------------------------
 //COMPONENT
 //----------------------------------------
 
 const TeamsIndex = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  //Select state from store
-  const storeData = useSelector((store) => store.teams);
-  const teams = storeData.teams?.rivalTeams;
-  const { appError, serverError, isDeleted } = storeData;
+  const { data: teams, error } = useQuery({
+    queryKey: ["teams"],
+    queryFn: fetchAllTeams,
+  });
 
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTeamsAction());
-  }, [dispatch, isDeleted]);
+  const deleteMutation = useMutation({
+    mutationFn: deleteTeam,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["teams"]);
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Error al eliminar el equipo");
+    },
+  });
 
   const handleDelete = (id) => {
-    dispatch(deleteTeamAction(id));
+    deleteMutation.mutate(id);
   };
 
   return (
@@ -58,10 +61,8 @@ const TeamsIndex = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-state">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-state">{error.message}</p>
       ) : teams?.length <= 0 ? (
         <p className="ctr-state">No se encontraron equipos en la base de datos</p>
       ) : (

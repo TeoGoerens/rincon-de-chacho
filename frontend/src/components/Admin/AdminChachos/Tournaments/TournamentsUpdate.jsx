@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
-import { Navigate, useParams, Link } from "react-router-dom";
+import React from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -12,12 +14,9 @@ import "../TournamentRounds/TournamentRoundsFormStyle.css";
 //Import components
 import CategoryDropdown from "../../../Layout/Dropdown/Category/CategoryDropdown";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getTournamentAction,
-  updateTournamentAction,
-} from "../../../../redux/slices/tournaments/tournamentsSlices";
+//Import React Query functions
+import fetchTournamentById from "../../../../reactquery/chachos/fetchTournamentById";
+import updateTournament from "../../../../reactquery/chachos/updateTournament";
 
 //Form schema
 const formSchema = Yup.object({
@@ -32,47 +31,46 @@ const formSchema = Yup.object({
 
 const TournamentsUpdate = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: tournament } = useQuery({
+    queryKey: ["tournament", id],
+    queryFn: () => fetchTournamentById(id),
+  });
 
-  //Get tournament information from database every time the component renders
-  useEffect(() => {
-    dispatch(getTournamentAction(id));
-  }, [dispatch, id]);
+  const categoryId = tournament?.category?._id ?? tournament?.category;
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournaments);
-  const { appError, serverError } = storeData;
-  const name = storeData?.tournament?.tournament?.name;
-  const year = storeData?.tournament?.tournament?.year;
-  const category = storeData?.tournament?.tournament?.category;
-  const categoryId = category?._id ?? category;
+  const mutation = useMutation({
+    mutationFn: updateTournament,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tournaments"]);
+      queryClient.invalidateQueries(["tournament", id]);
+      navigate("/admin/chachos/tournaments");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Error al editar el torneo");
+    },
+  });
 
   //Formik configuration
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name,
-      year,
+      name: tournament?.name,
+      year: tournament?.year,
       category: categoryId,
     },
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(
-        updateTournamentAction({
-          name: values.name,
-          year: values.year,
-          category: values.category,
-          id,
-        })
-      );
+      mutation.mutate({
+        id,
+        name: values.name,
+        year: values.year,
+        category: values.category,
+      });
     },
     validationSchema: formSchema,
   });
-
-  //Navigate to index in case there is an updated tournament
-  if (storeData?.isEdited) return <Navigate to="/admin/chachos/tournaments" />;
 
   return (
     <div className="ctr-form-page">
@@ -89,8 +87,10 @@ const TournamentsUpdate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import CSS & styles
 import "../TournamentRoundsFormStyle.css";
@@ -12,16 +14,11 @@ import { formatDate } from "../../../../../helpers/dateFormatter";
 //Import components
 import DeleteButton from "../../../../Layout/Buttons/DeleteButton";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getTournamentRoundAction,
-  consolidatePearlsAction,
-} from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
-import {
-  deleteVoteByIdAction,
-  getVotesFromTournamentRoundAction,
-} from "../../../../../redux/slices/votes/votesSlices";
+//Import React Query functions
+import fetchRoundById from "../../../../../reactquery/chachos/fetchRoundById";
+import fetchVotesByRound from "../../../../../reactquery/chachos/fetchVotesByRound";
+import deleteVote from "../../../../../reactquery/chachos/deleteVote";
+import consolidatePearls from "../../../../../reactquery/chachos/consolidatePearls";
 
 //Definición de perlas (mismo mapeo de colores que el sitio público)
 const PEARLS = [
@@ -37,49 +34,66 @@ const PEARLS = [
 
 const TournamentRoundsDetail = () => {
   const { id } = useParams();
+  const queryClient = useQueryClient();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: roundData, error } = useQuery({
+    queryKey: ["tournament-round", id],
+    queryFn: () => fetchRoundById(id),
+  });
+  const tournamentRound = roundData?.tournamentRound;
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournamentRounds);
-  const tournamentRound = storeData.tournamentRound?.tournamentRound;
-  const { appError, serverError, arePearlsConsolidated } = storeData;
+  const { data: votesData } = useQuery({
+    queryKey: ["votes-by-round", id],
+    queryFn: () => fetchVotesByRound(id),
+  });
+  const votesByRound = votesData?.allVotesForRound;
 
-  //Select vote state from store
-  const VotesStoreData = useSelector((store) => store.votes);
-  const votesByRound = VotesStoreData?.votesFromRound?.allVotesForRound;
-  const isVoteDeleted = VotesStoreData?.isDeleted;
+  const deleteVoteMutation = useMutation({
+    mutationFn: deleteVote,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["votes-by-round", id]);
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Error al eliminar el voto");
+    },
+  });
+
+  const consolidatePearlsMutation = useMutation({
+    mutationFn: consolidatePearls,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tournament-round", id]);
+      queryClient.invalidateQueries(["admin-tournament-rounds"]);
+      toast.success("Perlas consolidadas correctamente");
+    },
+    onError: (err) => {
+      toast.error(
+        err?.response?.data?.message || "Error al consolidar las perlas"
+      );
+    },
+  });
 
   //Functions assigned to buttons
-  const handleDelete = (id) => {
-    dispatch(deleteVoteByIdAction(id));
+  const handleDelete = (voteId) => {
+    deleteVoteMutation.mutate(voteId);
   };
 
   const handleConsolidatePearls = () => {
-    dispatch(consolidatePearlsAction(id));
+    consolidatePearlsMutation.mutate({
+      tournamentRoundId: id,
+      fullVotes: votesByRound,
+    });
   };
 
   //Constant definitions to place in view
-  const match_date = formatDate(
-    storeData?.tournamentRound?.tournamentRound?.match_date
-  );
-  const rival = storeData?.tournamentRound?.tournamentRound?.rival?.name;
-  const score_chachos =
-    storeData?.tournamentRound?.tournamentRound?.score_chachos;
-  const score_rival = storeData?.tournamentRound?.tournamentRound?.score_rival;
+  const match_date = formatDate(tournamentRound?.match_date);
+  const rival = tournamentRound?.rival?.name;
+  const score_chachos = tournamentRound?.score_chachos;
+  const score_rival = tournamentRound?.score_rival;
 
-  const white_pearl = storeData?.tournamentRound?.tournamentRound?.white_pearl;
-  const vanilla_pearl =
-    storeData?.tournamentRound?.tournamentRound?.vanilla_pearl;
-  const ocher_pearl = storeData?.tournamentRound?.tournamentRound?.ocher_pearl;
-  const black_pearl = storeData?.tournamentRound?.tournamentRound?.black_pearl;
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getTournamentRoundAction(id));
-    dispatch(getVotesFromTournamentRoundAction(id));
-  }, [dispatch, id, isVoteDeleted, arePearlsConsolidated]);
+  const white_pearl = tournamentRound?.white_pearl;
+  const vanilla_pearl = tournamentRound?.vanilla_pearl;
+  const ocher_pearl = tournamentRound?.ocher_pearl;
+  const black_pearl = tournamentRound?.black_pearl;
 
   //Mapa de ganadores consolidados por perla (round level)
   const roundPearlWinners = {
@@ -104,10 +118,8 @@ const TournamentRoundsDetail = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-form-error-banner">{error.message}</p>
       ) : tournamentRound?.length <= 0 ? (
         <p className="ctrd-state">No se encontraron fechas en la base de datos</p>
       ) : (

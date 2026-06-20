@@ -1,25 +1,19 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "./CategoryDropdownStyle.css";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getAllCategoriesAction } from "../../../../redux/slices/football-categories/footballCategoriesSlices";
+//Import React Query functions
+import fetchAllFootballCategories from "../../../../reactquery/chachos/fetchAllFootballCategories";
 
 const CategoryDropdown = ({ field, form }) => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: categories } = useQuery({
+    queryKey: ["football-categories"],
+    queryFn: fetchAllFootballCategories,
+  });
 
-  //Select state from store
-  const storeData = useSelector((store) => store.categories);
-  const categories = storeData.footballCategories?.footballCategories;
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllCategoriesAction());
-  }, [dispatch]);
   return (
     <>
       <label>Categoria</label>

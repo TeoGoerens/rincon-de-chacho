@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsStyle.css";
@@ -10,12 +12,9 @@ import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deletePlayerAction,
-  getAllPlayersAction,
-} from "../../../../redux/slices/players/playersSlices";
+//Import React Query functions
+import fetchAllChachosPlayers from "../../../../reactquery/chachos/fetchAllChachosPlayers";
+import deletePlayer from "../../../../reactquery/chachos/deletePlayer";
 
 //Etiquetas en español para posición y rol
 import { POSITION_LABEL, ROLE_LABEL } from "../../../../helpers/playerLabels";
@@ -25,21 +24,25 @@ import { POSITION_LABEL, ROLE_LABEL } from "../../../../helpers/playerLabels";
 //----------------------------------------
 
 const PlayersIndex = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  //Select state from store
-  const storeData = useSelector((store) => store.players);
-  const players = storeData.players?.players;
-  const { appError, serverError, isDeleted } = storeData;
+  const { data: players, error } = useQuery({
+    queryKey: ["chachos-players"],
+    queryFn: fetchAllChachosPlayers,
+  });
 
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllPlayersAction());
-  }, [dispatch, isDeleted]);
+  const deleteMutation = useMutation({
+    mutationFn: deletePlayer,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["chachos-players"]);
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Error al eliminar el jugador");
+    },
+  });
 
   const handleDelete = (id) => {
-    dispatch(deletePlayerAction(id));
+    deleteMutation.mutate(id);
   };
 
   return (
@@ -60,10 +63,8 @@ const PlayersIndex = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-state">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-state">{error.message}</p>
       ) : players?.length <= 0 ? (
         <p className="ctr-state">No se encontraron jugadores en la base de datos</p>
       ) : (

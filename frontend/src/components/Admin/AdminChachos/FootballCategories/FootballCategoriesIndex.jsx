@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsStyle.css";
@@ -10,33 +12,34 @@ import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteCategoryAction,
-  getAllCategoriesAction,
-} from "../../../../redux/slices/football-categories/footballCategoriesSlices";
+//Import React Query functions
+import fetchAllFootballCategories from "../../../../reactquery/chachos/fetchAllFootballCategories";
+import deleteFootballCategory from "../../../../reactquery/chachos/deleteFootballCategory";
 
 //----------------------------------------
 //COMPONENT
 //----------------------------------------
 
 const FootballCategoriesIndex = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  //Select state from store
-  const storeData = useSelector((store) => store.categories);
-  const footballCategories = storeData.footballCategories?.footballCategories;
-  const { appError, serverError, isDeleted } = storeData;
+  const { data: footballCategories, error } = useQuery({
+    queryKey: ["football-categories"],
+    queryFn: fetchAllFootballCategories,
+  });
 
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllCategoriesAction());
-  }, [dispatch, isDeleted]);
+  const deleteMutation = useMutation({
+    mutationFn: deleteFootballCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["football-categories"]);
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Error al eliminar la categoría");
+    },
+  });
 
   const handleDelete = (id) => {
-    dispatch(deleteCategoryAction(id));
+    deleteMutation.mutate(id);
   };
 
   return (
@@ -62,10 +65,8 @@ const FootballCategoriesIndex = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-state">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-state">{error.message}</p>
       ) : footballCategories?.length <= 0 ? (
         <p className="ctr-state">
           No se encontraron categorías en la base de datos

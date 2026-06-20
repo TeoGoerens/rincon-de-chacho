@@ -1,24 +1,19 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "./PlayersToggleListStyle.css";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getAllPlayersAction } from "../../../redux/slices/players/playersSlices";
-
 //Import React Query functions
+import fetchAllChachosPlayers from "../../../reactquery/chachos/fetchAllChachosPlayers";
 import fetchStatsSummary from "../../../reactquery/chachos/fetchStatsSummary";
 
 const PlayersToggleList = ({ selectedPlayers, setSelectedPlayers }) => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Select state from store
-  const storeData = useSelector((store) => store.players);
-  const players = storeData.players?.players;
+  const { data: players } = useQuery({
+    queryKey: ["chachos-players"],
+    queryFn: fetchAllChachosPlayers,
+  });
   const filteredPlayers = players?.filter(
     (player) => player.role !== "supporter"
   );
@@ -43,11 +38,6 @@ const PlayersToggleList = ({ selectedPlayers, setSelectedPlayers }) => {
       if (matchesDiff !== 0) return matchesDiff;
       return a.shirt - b.shirt;
     });
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllPlayersAction());
-  }, [dispatch]);
 
   const ToggleButton = ({ selected, onClick }) => {
     return (

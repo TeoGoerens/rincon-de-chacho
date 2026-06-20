@@ -1,6 +1,8 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
-import { Navigate, useParams, Link } from "react-router-dom";
+import React from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -10,12 +12,9 @@ import * as Yup from "yup";
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 import "./TeamsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getTeamAction,
-  updateTeamAction,
-} from "../../../../redux/slices/teams/teamsSlices";
+//Import React Query functions
+import fetchTeamById from "../../../../reactquery/chachos/fetchTeamById";
+import updateTeam from "../../../../reactquery/chachos/updateTeam";
 
 //Form schema
 const formSchema = Yup.object({
@@ -29,43 +28,38 @@ const formSchema = Yup.object({
 
 const TeamsUpdate = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: team } = useQuery({
+    queryKey: ["team", id],
+    queryFn: () => fetchTeamById(id),
+  });
 
-  //Get team information from database every time the component renders
-  useEffect(() => {
-    dispatch(getTeamAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.teams);
-  const { appError, serverError } = storeData;
-  const avatar = storeData?.team?.rivalTeam?.avatar;
-  const name = storeData?.team?.rivalTeam?.name;
+  const mutation = useMutation({
+    mutationFn: updateTeam,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["teams"]);
+      queryClient.invalidateQueries(["team", id]);
+      navigate("/admin/chachos/teams");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Error al editar el equipo");
+    },
+  });
 
   //Formik configuration
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      avatar,
-      name,
+      avatar: team?.avatar,
+      name: team?.name,
     },
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(
-        updateTeamAction({
-          avatar: values.avatar,
-          name: values.name,
-          id,
-        })
-      );
+      mutation.mutate({ id, avatar: values.avatar, name: values.name });
     },
     validationSchema: formSchema,
   });
-
-  //Navigate to index in case there is an updated team
-  if (storeData?.isEdited) return <Navigate to="/admin/chachos/teams" />;
 
   return (
     <div className="ctr-form-page">
@@ -82,8 +76,10 @@ const TeamsUpdate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

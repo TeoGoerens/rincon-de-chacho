@@ -1,13 +1,13 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { getCategoryAction } from "../../../../redux/slices/football-categories/footballCategoriesSlices";
+//Import React Query functions
+import fetchFootballCategoryById from "../../../../reactquery/chachos/fetchFootballCategoryById";
 
 //----------------------------------------
 //COMPONENT
@@ -16,18 +16,10 @@ import { getCategoryAction } from "../../../../redux/slices/football-categories/
 const FootballCategoriesDetail = () => {
   const { id } = useParams();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Get category information from database every time the component renders
-  useEffect(() => {
-    dispatch(getCategoryAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.categories);
-  const { appError, serverError } = storeData;
-  const category = storeData?.footballCategory?.footballCategory;
+  const { data: category, error } = useQuery({
+    queryKey: ["football-category", id],
+    queryFn: () => fetchFootballCategoryById(id),
+  });
 
   return (
     <div className="ctr-form-page">
@@ -44,10 +36,8 @@ const FootballCategoriesDetail = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-form-error-banner">{error.message}</p>
       ) : (
         <div className="ctr-form">
           <div className="ctr-field">

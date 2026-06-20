@@ -1,18 +1,16 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "./ChachosSquadPlayerDetailsStyles.css";
 
-//Import helpers
-
 //Import components
 import chachosSquadImages from "./ChachosSquadPlayerDetailsSupport";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getPlayerAction } from "../../../../redux/slices/players/playersSlices";
+//Import React Query functions
+import fetchPlayerById from "../../../../reactquery/chachos/fetchPlayerById";
 
 //----------------------------------------
 //COMPONENT
@@ -22,19 +20,10 @@ const ChachosSquadPlayerDetails = () => {
   //Get player id
   const { id } = useParams();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Select state from players store
-  const playerStoreData = useSelector((store) => store.players);
-
-  const { appError, serverError, player } = playerStoreData;
-  const selectedPlayer = player?.player;
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getPlayerAction(id));
-  }, [dispatch, id]);
+  const { data: selectedPlayer, error } = useQuery({
+    queryKey: ["chachos-player", id],
+    queryFn: () => fetchPlayerById(id),
+  });
 
   const playerInfo = chachosSquadImages.find(
     (jugador) => jugador.shirt === selectedPlayer?.shirt
@@ -44,11 +33,7 @@ const ChachosSquadPlayerDetails = () => {
   return (
     <>
       <div className="container chachos-player-details-container">
-        {appError || serverError ? (
-          <h5>
-            {appError} {serverError}
-          </h5>
-        ) : null}
+        {error ? <h5>{error.message}</h5> : null}
         <div className="chachos-player-details-link">
           <Link className="return-link" to="/chachos/squad">
             Volver

@@ -1,25 +1,19 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "./TournamentDropdownStyle.css";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getAllTournamentsAction } from "../../../../redux/slices/tournaments/tournamentsSlices";
+//Import React Query functions
+import fetchAllTournaments from "../../../../reactquery/chachos/fetchAllTournaments";
 
 const TournamentDropdown = ({ field, form }) => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: tournaments } = useQuery({
+    queryKey: ["tournaments"],
+    queryFn: fetchAllTournaments,
+  });
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournaments);
-  const tournaments = storeData.tournaments?.tournaments;
-
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTournamentsAction());
-  }, [dispatch]);
   return (
     <>
       <label>Torneo</label>

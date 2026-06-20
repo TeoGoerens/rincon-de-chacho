@@ -1,6 +1,8 @@
 //Import React & Hooks
 import React, { useState, useEffect } from "react";
-import { Navigate, Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import CSS & styles
 import "../../TournamentRounds/TournamentRoundsFormStyle.css";
@@ -13,13 +15,10 @@ import { emptyStats } from "../../../../../helpers/matchStatsFields";
 //Import components
 import MatchStatsGrid from "../MatchStatsGrid";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { getTournamentRoundAction } from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
-import {
-  getMatchStatsFilteredAction,
-  updateMatchStatAction,
-} from "../../../../../redux/slices/match-stats/matchStatsSlices";
+//Import React Query functions
+import fetchRoundById from "../../../../../reactquery/chachos/fetchRoundById";
+import fetchMatchStatsFiltered from "../../../../../reactquery/chachos/fetchMatchStatsFiltered";
+import updateMatchStats from "../../../../../reactquery/chachos/updateMatchStats";
 
 //----------------------------------------
 //COMPONENT
@@ -27,25 +26,22 @@ import {
 
 const MatchStatsUpdate = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: roundData, error } = useQuery({
+    queryKey: ["tournament-round", id],
+    queryFn: () => fetchRoundById(id),
+  });
+  const tournamentRound = roundData?.tournamentRound;
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournamentRounds);
-  const { appError, serverError } = storeData;
-  const tournamentRound = storeData?.tournamentRound?.tournamentRound;
-  const storeDataStats = useSelector((store) => store.stats);
-  const filteredMatchStats = storeDataStats?.filteredMatchStats?.filteredMatchStats;
+  const { data: filteredMatchStats } = useQuery({
+    queryKey: ["match-stats-filtered", { round: id }],
+    queryFn: () => fetchMatchStatsFiltered({ round: id }),
+  });
 
   //Estadísticas por jugador
   const [statsByPlayer, setStatsByPlayer] = useState({});
-
-  //Get tournament round + existing match stats every time the component renders
-  useEffect(() => {
-    dispatch(getTournamentRoundAction(id));
-    dispatch(getMatchStatsFilteredAction({ round: id }));
-  }, [dispatch, id]);
 
   //Inicializar el estado con las estadísticas ya guardadas para cada jugador convocado
   useEffect(() => {
@@ -76,18 +72,27 @@ const MatchStatsUpdate = () => {
     }));
   };
 
+  const mutation = useMutation({
+    mutationFn: updateMatchStats,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["match-stats-filtered", { round: id }]);
+      navigate("/admin/chachos/match-stats");
+    },
+    onError: (error) => {
+      toast.error(
+        error?.response?.data?.message || "Error al guardar los cambios"
+      );
+    },
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = Object.entries(statsByPlayer).map(([playerId, stats]) => ({
       playerId,
       ...stats,
     }));
-    dispatch(updateMatchStatAction(payload));
+    mutation.mutate({ tournamentRoundId: id, stats: payload });
   };
-
-  //Navigate to index once the stats have been updated
-  if (storeDataStats?.isUpdated)
-    return <Navigate to="/admin/chachos/match-stats" />;
 
   return (
     <div className="ctr-form-page">
@@ -104,8 +109,10 @@ const MatchStatsUpdate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {error || mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {error?.message ?? mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <div className="msc-match-summary">

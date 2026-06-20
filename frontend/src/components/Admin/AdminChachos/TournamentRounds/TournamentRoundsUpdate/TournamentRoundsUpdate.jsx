@@ -1,6 +1,7 @@
 //Import React & Hooks
 import React, { useState, useEffect } from "react";
-import { Navigate, useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -17,12 +18,9 @@ import PlayersToggleList from "../../../../Layout/ToggleList/PlayersToggleList";
 //Import CSS & styles
 import "../TournamentRoundsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getTournamentRoundAction,
-  updateTournamentRoundAction,
-} from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
+//Import React Query functions
+import fetchRoundById from "../../../../../reactquery/chachos/fetchRoundById";
+import updateTournamentRound from "../../../../../reactquery/chachos/updateTournamentRound";
 
 //Form schema
 const formSchema = Yup.object({
@@ -44,36 +42,38 @@ const formSchema = Yup.object({
 
 const TournamentRoundsUpdate = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const { data: roundData } = useQuery({
+    queryKey: ["tournament-round", id],
+    queryFn: () => fetchRoundById(id),
+  });
+  const tournamentRound = roundData?.tournamentRound;
 
-  //Get category information from database every time the component renders
-  useEffect(() => {
-    dispatch(getTournamentRoundAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.tournamentRounds);
-
-  const { appError, serverError, loading } = storeData;
-  const tournament =
-    storeData?.tournamentRound?.tournamentRound?.tournament?._id;
-  const rival = storeData?.tournamentRound?.tournamentRound?.rival?._id;
-  const match_date = storeData?.tournamentRound?.tournamentRound?.match_date;
-  const score_chachos =
-    storeData?.tournamentRound?.tournamentRound?.score_chachos;
-  const score_rival = storeData?.tournamentRound?.tournamentRound?.score_rival;
-  const players = storeData?.tournamentRound?.tournamentRound?.players;
+  const tournament = tournamentRound?.tournament?._id;
+  const rival = tournamentRound?.rival?._id;
+  const match_date = tournamentRound?.match_date;
+  const score_chachos = tournamentRound?.score_chachos;
+  const score_rival = tournamentRound?.score_rival;
+  const players = tournamentRound?.players;
   const initialSelectedPlayers = players?.map((player) => player._id) || [];
 
   //Define the array of selected players. No need to use Redux
-  const [selectedPlayers, setSelectedPlayers] = useState(
-    initialSelectedPlayers
-  );
+  const [selectedPlayers, setSelectedPlayers] = useState([]);
   useEffect(() => {
     setSelectedPlayers(initialSelectedPlayers);
-  }, [loading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tournamentRound?.players]);
+
+  const mutation = useMutation({
+    mutationFn: updateTournamentRound,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["admin-tournament-rounds"]);
+      queryClient.invalidateQueries(["tournament-round", id]);
+      navigate("/admin/chachos/tournament-rounds");
+    },
+  });
 
   //Formik configuration
   const formik = useFormik({
@@ -87,25 +87,18 @@ const TournamentRoundsUpdate = () => {
       players,
     },
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(
-        updateTournamentRoundAction({
-          tournament: values.tournament,
-          rival: values.rival,
-          match_date: values.match_date,
-          score_chachos: values.score_chachos,
-          score_rival: values.score_rival,
-          players: selectedPlayers,
-          id,
-        })
-      );
+      mutation.mutate({
+        id,
+        tournament: values.tournament,
+        rival: values.rival,
+        match_date: values.match_date,
+        score_chachos: values.score_chachos,
+        score_rival: values.score_rival,
+        players: selectedPlayers,
+      });
     },
     validationSchema: formSchema,
   });
-
-  //Navigate to index in case there is an updated category
-  if (storeData?.isEdited)
-    return <Navigate to="/admin/chachos/tournament-rounds" />;
 
   return (
     <div className="ctr-form-page">
@@ -122,9 +115,9 @@ const TournamentRoundsUpdate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
+      {mutation.isError ? (
         <p className="ctr-form-error-banner">
-          {appError} {serverError}
+          {mutation.error?.response?.data?.message}
         </p>
       ) : null}
 

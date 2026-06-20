@@ -1,13 +1,13 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 //Import CSS & styles
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { getTournamentAction } from "../../../../redux/slices/tournaments/tournamentsSlices";
+//Import React Query functions
+import fetchTournamentById from "../../../../reactquery/chachos/fetchTournamentById";
 
 //----------------------------------------
 //COMPONENT
@@ -16,18 +16,10 @@ import { getTournamentAction } from "../../../../redux/slices/tournaments/tourna
 const TournamentsDetail = () => {
   const { id } = useParams();
 
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
-  //Get tournament information from database every time the component renders
-  useEffect(() => {
-    dispatch(getTournamentAction(id));
-  }, [dispatch, id]);
-
-  //Select state from store
-  const storeData = useSelector((store) => store.tournaments);
-  const { appError, serverError } = storeData;
-  const tournament = storeData?.tournament?.tournament;
+  const { data: tournament, error } = useQuery({
+    queryKey: ["tournament", id],
+    queryFn: () => fetchTournamentById(id),
+  });
 
   return (
     <div className="ctr-form-page">
@@ -44,10 +36,8 @@ const TournamentsDetail = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-form-error-banner">{error.message}</p>
       ) : (
         <div className="ctr-form">
           <div className="ctr-form-row">

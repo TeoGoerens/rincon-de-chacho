@@ -1,5 +1,6 @@
 //Import React & Hooks
 import React, { useEffect, useState, useRef, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 //Import libraries
 import { SwiperContainer, SwiperSlide } from "swiper/element/bundle";
@@ -22,19 +23,15 @@ import secondPlaceSource from "../../../assets/images/second-place.png";
 import secondToLastPlaceSource from "../../../assets/images/clown.png";
 import lastPlaceSource from "../../../assets/images/black-star.png";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import { getMatchStatsFilteredAction } from "../../../redux/slices/match-stats/matchStatsSlices";
-import { getAllTournamentsAction } from "../../../redux/slices/tournaments/tournamentsSlices";
+//Import React Query functions
+import fetchAllTournaments from "../../../reactquery/chachos/fetchAllTournaments";
+import fetchMatchStatsFiltered from "../../../reactquery/chachos/fetchMatchStatsFiltered";
 
 //----------------------------------------
 //COMPONENT
 //----------------------------------------
 
 const ChachosHomePanel = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
-
   // --------------------
   // LOCAL STATES
   // --------------------
@@ -43,39 +40,24 @@ const ChachosHomePanel = () => {
   const [regroupedPlayersStats, setRegroupedPlayersStats] = useState([]);
 
   // --------------------
-  // REDUX SELECTORS
+  // TORNEOS (React Query)
   // --------------------
-  //Select tournament information from store
-  const tournamentStoreData = useSelector((store) => store.tournaments);
-  const allTournaments = tournamentStoreData?.tournaments?.tournaments;
-
-  //Select match stats information from store
-  const matchStatsStoreData = useSelector((store) => store.stats);
-  const allMatchStats =
-    matchStatsStoreData?.filteredMatchStats?.filteredMatchStats;
-  const { appError, serverError } = matchStatsStoreData;
+  const { data: allTournaments } = useQuery({
+    queryKey: ["tournaments"],
+    queryFn: fetchAllTournaments,
+  });
 
   // --------------------
-  // DATA FETCH
+  // MATCH STATS FILTRADAS (React Query)
   // --------------------
-  // 1) Al montar, obtenemos la lista de torneos para poder armar el filtro de años y torneos.
-  useEffect(() => {
-    dispatch(getAllTournamentsAction());
-  }, [dispatch]);
+  const filter = {};
+  if (yearFilter !== "all") filter.year = yearFilter;
+  if (tournamentFilter !== "all") filter.tournament = tournamentFilter;
 
-  // 2) Cada vez que cambien yearFilter o tournamentFilter, disparamos getMatchStatsFilteredAction
-  useEffect(() => {
-    // Armamos un objeto con los filtros (sin "all")
-    const filter = {};
-    if (yearFilter !== "all") {
-      filter.year = yearFilter;
-    }
-    if (tournamentFilter !== "all") {
-      filter.tournament = tournamentFilter;
-    }
-
-    dispatch(getMatchStatsFilteredAction(filter));
-  }, [yearFilter, tournamentFilter, dispatch]);
+  const { data: allMatchStats, error } = useQuery({
+    queryKey: ["match-stats-filtered", filter],
+    queryFn: () => fetchMatchStatsFiltered(filter),
+  });
 
   // --------------------
   // LISTA DE AÑOS Y TORNEOS FILTRADOS
@@ -259,11 +241,7 @@ const ChachosHomePanel = () => {
 
         {/*-------------------- TOP 10 de categorías --------------------*/}
         <h2>Top 10 por categoria</h2>
-        {appError || serverError ? (
-          <h5>
-            {appError} {serverError}
-          </h5>
-        ) : null}
+        {error ? <h5>{error.message}</h5> : null}
 
         {/*         Tablas de presencias, goleadores y asistencias */}
 

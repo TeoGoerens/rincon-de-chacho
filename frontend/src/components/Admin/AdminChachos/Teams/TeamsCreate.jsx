@@ -1,6 +1,8 @@
 //Import React & Hooks
 import React from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -10,9 +12,8 @@ import * as Yup from "yup";
 import "../TournamentRounds/TournamentRoundsFormStyle.css";
 import "./TeamsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { createTeamAction } from "../../../../redux/slices/teams/teamsSlices";
+//Import React Query functions
+import createTeam from "../../../../reactquery/chachos/createTeam";
 
 //Form schema
 const formSchema = Yup.object({
@@ -25,25 +26,28 @@ const formSchema = Yup.object({
 //----------------------------------------
 
 const TeamsCreate = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createTeam,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["teams"]);
+      navigate("/admin/chachos/teams");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Error al crear el equipo");
+    },
+  });
 
   //Formik configuration
   const formik = useFormik({
     initialValues: {},
     onSubmit: (values) => {
-      //Dispatch the action
-      dispatch(createTeamAction(values));
+      mutation.mutate(values);
     },
     validationSchema: formSchema,
   });
-
-  //Select state from store
-  const storeData = useSelector((store) => store.teams);
-  const { appError, serverError } = storeData;
-
-  //Navigate to index in case there is a created team
-  if (storeData?.isCreated) return <Navigate to="/admin/chachos/teams" />;
 
   return (
     <div className="ctr-form-page">
@@ -60,8 +64,10 @@ const TeamsCreate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>

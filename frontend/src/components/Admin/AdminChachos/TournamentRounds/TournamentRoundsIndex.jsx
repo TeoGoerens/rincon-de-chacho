@@ -1,7 +1,7 @@
 //Import React & Hooks
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 //Import CSS & styles
@@ -11,7 +11,11 @@ import "./TournamentRoundsStyle.css";
 import { formatDate } from "../../../../helpers/dateFormatter";
 
 //Import React Query functions
+import fetchAllTournamentRoundsAdmin from "../../../../reactquery/chachos/fetchAllTournamentRoundsAdmin";
+import deleteTournamentRound from "../../../../reactquery/chachos/deleteTournamentRound";
 import toggleOpenForVote from "../../../../reactquery/chachos/toggleOpenForVote";
+import fetchVotesByRound from "../../../../reactquery/chachos/fetchVotesByRound";
+import consolidatePearls from "../../../../reactquery/chachos/consolidatePearls";
 
 //Import components
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
@@ -19,42 +23,37 @@ import EditButton from "../../../Layout/Buttons/EditButton";
 import ViewButton from "../../../Layout/Buttons/ViewButton";
 import ToggleOpenForVote from "../../../Layout/Buttons/ToggleOpenForVote";
 
-//Import Redux
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteTournamentRoundAction,
-  getAllTournamentRoundsAction,
-  consolidatePearlsAction,
-} from "../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
-import { getVotesFromTournamentRoundAction } from "../../../../redux/slices/votes/votesSlices";
-
 //----------------------------------------
 //COMPONENT
 //----------------------------------------
 
 const TournamentRoundsIndex = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournamentRounds);
-  const tournamentRounds = storeData.tournamentRounds?.tournamentRounds;
-  const { appError, serverError, isDeleted, isEdited } = storeData;
+  const { data: tournamentRounds, error } = useQuery({
+    queryKey: ["admin-tournament-rounds"],
+    queryFn: fetchAllTournamentRoundsAdmin,
+  });
 
-  //Dispatch action from store with useEffect()
-  useEffect(() => {
-    dispatch(getAllTournamentRoundsAction());
-  }, [dispatch, isDeleted, isEdited]);
+  const deleteMutation = useMutation({
+    mutationFn: deleteTournamentRound,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["admin-tournament-rounds"]);
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Error al eliminar la fecha");
+    },
+  });
 
   const handleDelete = (id) => {
-    dispatch(deleteTournamentRoundAction(id));
+    deleteMutation.mutate(id);
   };
 
   const toggleOpenForVoteMutation = useMutation({
     mutationFn: (tournamentRoundId) =>
       toggleOpenForVote({ tournamentRoundId }),
     onSuccess: (data) => {
-      dispatch(getAllTournamentRoundsAction());
+      queryClient.invalidateQueries(["admin-tournament-rounds"]);
 
       if (data?.failedEmails?.length > 0) {
         toast.warning(
@@ -77,12 +76,16 @@ const TournamentRoundsIndex = () => {
     //avisarle a los usuarios que los resultados están disponibles
     if (isClosing) {
       try {
-        const votesPayload = await dispatch(
-          getVotesFromTournamentRoundAction(id)
-        ).unwrap();
+        const votesPayload = await queryClient.fetchQuery({
+          queryKey: ["votes-by-round", id],
+          queryFn: () => fetchVotesByRound(id),
+        });
 
         if (votesPayload?.allVotesForRound?.length > 0) {
-          await dispatch(consolidatePearlsAction(id)).unwrap();
+          await consolidatePearls({
+            tournamentRoundId: id,
+            fullVotes: votesPayload.allVotesForRound,
+          });
         }
       } catch (error) {
         toast.warning(
@@ -114,10 +117,8 @@ const TournamentRoundsIndex = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-state">
-          {appError} {serverError}
-        </p>
+      {error ? (
+        <p className="ctr-state">{error.message}</p>
       ) : tournamentRounds?.length <= 0 ? (
         <p className="ctr-state">No se encontraron fechas en la base de datos</p>
       ) : (

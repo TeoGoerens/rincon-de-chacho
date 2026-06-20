@@ -1,6 +1,7 @@
 //Import React & Hooks
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -14,9 +15,8 @@ import PlayersToggleList from "../../../../Layout/ToggleList/PlayersToggleList";
 //Import CSS & styles
 import "../TournamentRoundsFormStyle.css";
 
-//Import redux
-import { useDispatch, useSelector } from "react-redux";
-import { createTournamentRoundAction } from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
+//Import React Query functions
+import createTournamentRound from "../../../../../reactquery/chachos/createTournamentRound";
 
 //Form schema
 const formSchema = Yup.object({
@@ -37,33 +37,33 @@ const formSchema = Yup.object({
 //----------------------------------------
 
 const TournamentRoundsCreate = () => {
-  //Dispatch const creation
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   //Define the array of selected players. No need to use Redux
   const [selectedPlayers, setSelectedPlayers] = useState([]);
 
-  //Formik configuration
-  const formik = useFormik({
-    initialValues: {},
-    onSubmit: async (values) => {
-      //Dispatch the action
-      values.players = selectedPlayers;
-      const result = await dispatch(createTournamentRoundAction(values));
-      const newRoundId = result?.payload?.tournamentRoundLoaded?._id;
+  const mutation = useMutation({
+    mutationFn: createTournamentRound,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["admin-tournament-rounds"]);
+      const newRoundId = data?.tournamentRoundLoaded?._id;
 
       //Tras crear la fecha, ir directo a cargar las estadísticas de esa fecha
       if (newRoundId) {
         navigate(`/admin/chachos/match-stats/create/${newRoundId}`);
       }
     },
-    validationSchema: formSchema,
   });
 
-  //Select state from store
-  const storeData = useSelector((store) => store.tournamentRounds);
-  const { appError, serverError } = storeData;
+  //Formik configuration
+  const formik = useFormik({
+    initialValues: {},
+    onSubmit: (values) => {
+      mutation.mutate({ ...values, players: selectedPlayers });
+    },
+    validationSchema: formSchema,
+  });
 
   return (
     <div className="ctr-form-page">
@@ -80,8 +80,10 @@ const TournamentRoundsCreate = () => {
         </Link>
       </div>
 
-      {appError || serverError ? (
-        <p className="ctr-form-error-banner">{appError}</p>
+      {mutation.isError ? (
+        <p className="ctr-form-error-banner">
+          {mutation.error?.response?.data?.message}
+        </p>
       ) : null}
 
       <form className="ctr-form" onSubmit={formik.handleSubmit}>
