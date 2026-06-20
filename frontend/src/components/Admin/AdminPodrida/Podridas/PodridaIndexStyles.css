@@ -1,63 +1,255 @@
-.podrida-index-container {
+/* ═══════════════════════════════════════════════════════════
+   PODRIDA INDEX (Admin Podrida)  —  El Rincón de Chacho
+   Prefijo: pdi
+   Compartido entre PodridaIndex y PodridaPlayerIndex
+   ═══════════════════════════════════════════════════════════ */
+
+.pdi {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  gap: var(--space-lg);
 }
 
-.podrida-index-head {
-  width: 100%;
+/* ── Header ── */
+.pdi-header {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
+  gap: var(--space-md);
 }
 
-.podrida-index-head a {
+.pdi-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pdi-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--third-color);
+}
+
+.pdi-eyebrow-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--third-color);
+  flex-shrink: 0;
+}
+
+.pdi-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+}
+
+.pdi-subtitle {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+.pdi-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--bg-deep);
+  background: var(--third-color);
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--transition-base);
+}
+
+.pdi-create-btn:hover {
+  background: var(--secondary-color);
+  color: var(--text-bright);
+}
+
+/* ── Tabla ── */
+.pdi-table-wrap {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.pdi-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pdi-table thead tr {
+  background: var(--bg-panel);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.pdi-table th {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pdi-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background var(--transition-base);
+}
+
+.pdi-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.pdi-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.pdi-table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.pdi-cell-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  white-space: nowrap;
+}
+
+.pdi-cell-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.pdi-cell-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-body-dark);
+}
+
+.pdi-cell-email {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+/* ── Estados loading / error ── */
+.pdi-state {
+  padding: 4rem 2rem;
+  text-align: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Acciones ── */
+.pdi-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.8rem;
-  background-color: var(--primary-color);
-  padding-block: 0.3rem;
-  padding-inline: 0.5rem;
-  border-radius: 5px;
 }
 
-.podrida-index-head a i,
-.podrida-index-head a p {
-  color: white;
+.pdi-actions .view-button,
+.pdi-actions .edit-button,
+.pdi-actions .delete-button {
+  font-size: 0.95rem;
 }
 
-.podrida-index-content {
-  margin-top: 2.5rem;
+.pdi-actions .view-button { color: var(--third-color); }
+.pdi-actions .edit-button { color: var(--status-yellow); }
+.pdi-actions .delete-button { color: var(--status-red); }
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .pdi-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pdi-create-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-.podrida-index-content table {
-  background-color: white;
-  border-radius: 0px;
-  font-size: 0.8rem;
-  width: 100%;
+/* ── Toggle entre vista desktop (tabla) y mobile (cards) ── */
+.pdi-mobile-list {
+  display: none;
 }
 
-.podrida-index-content table thead {
-  border-bottom: 2px solid black;
-  background-color: rgb(240, 240, 240);
-}
+@media (max-width: 640px) {
+  .pdi-desktop-only {
+    display: none;
+  }
 
-.podrida-index-content table tbody tr:not(:last-child) {
-  border-bottom: 1px solid black;
-}
+  .pdi-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
 
-.podrida-index-content table .podrida-index-table-actions {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
+  .pdi-mobile-card {
+    background: var(--bg-card-dark);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-lg);
+    padding: 0.7rem var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
 
-.podrida-index-content table .podrida-index-table-actions a i {
-  font-size: 1rem;
-  color: orange;
-}
+  .pdi-mobile-row-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
 
-.podrida-index-content table .podrida-index-table-actions button i {
-  font-size: 1rem;
+  .pdi-mobile-row-top .pdi-cell-name {
+    font-size: var(--text-base);
+  }
+
+  .pdi-mobile-row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .pdi-mobile-row-bottom .pdi-cell-date,
+  .pdi-mobile-row-bottom .pdi-cell-email {
+    font-size: var(--text-xs);
+  }
+
+  .pdi-actions {
+    justify-content: flex-end;
+    gap: 0.2rem;
+  }
 }

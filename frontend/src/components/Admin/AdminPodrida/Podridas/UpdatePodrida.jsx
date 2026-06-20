@@ -5,7 +5,10 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 // Imports CSS & helpers
-import "./UpdatePodridaStyles.css";
+import "./PodridaDetailStyles.css";
+
+//Import components
+import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
 
 //Import React Query functions
 import fetchAllPodridaPlayers from "../../../../reactquery/podrida/fetchAllPodridaPlayers";
@@ -85,9 +88,7 @@ const UpdatePodrida = () => {
       navigate("/admin/podrida");
     },
     onError: (error) => {
-      toast.error(
-        `❌ Error al actualizar la partida: ${error.message || error}`
-      );
+      toast.error(error?.message || "Error al actualizar la partida");
     },
   });
 
@@ -175,32 +176,32 @@ const UpdatePodrida = () => {
 
   if (isLoadingPlayers) {
     return (
-      <div className="container">
-        <p>Cargando jugadores...</p>
+      <div className="pdf-page">
+        <p className="pdf-state">Cargando jugadores...</p>
       </div>
     );
   }
 
   if (isErrorPlayers) {
     return (
-      <div className="container">
-        <p>Ocurrió un error al cargar los jugadores.</p>
+      <div className="pdf-page">
+        <p className="pdf-error-banner">Ocurrió un error al cargar los jugadores.</p>
       </div>
     );
   }
 
   if (isLoadingMatch) {
     return (
-      <div className="container">
-        <p>Cargando partida...</p>
+      <div className="pdf-page">
+        <p className="pdf-state">Cargando partida...</p>
       </div>
     );
   }
 
   if (isErrorMatch) {
     return (
-      <div className="container">
-        <p>Ocurrió un error al cargar la partida.</p>
+      <div className="pdf-page">
+        <p className="pdf-error-banner">Ocurrió un error al cargar la partida.</p>
       </div>
     );
   }
@@ -208,176 +209,204 @@ const UpdatePodrida = () => {
   return (
     <>
       {/* Spinner Overlay */}
-      {mutation.isPending && (
-        <div className="spinner-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
+      {mutation.isPending && <SpinnerOverlay />}
 
-      <div className={`container ${mutation.isPending ? "blurred" : ""}`}>
-        <div className="create-podrida-head">
-          <h2>Actualizar partida</h2>
-          <Link className="back-btn" to="/admin/podrida">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+      <div className="pdf-page">
+        <div className="pdf-header">
+          <div className="pdf-header-text">
+            <div className="pdf-eyebrow">
+              <span className="pdf-eyebrow-dot" />
+              Podrida
+            </div>
+            <h1 className="pdf-title">Actualizar partida</h1>
+          </div>
+          <Link className="pdf-back-link" to="/admin/podrida">
+            Volver
           </Link>
         </div>
 
-        <form className="form-create-podrida" onSubmit={handleSubmit}>
-          <label>Fecha de la partida:</label>
-          <input
-            type="date"
-            required
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+        <form className="pdf-form" onSubmit={handleSubmit}>
+          <div className="pdf-field">
+            <label>Fecha de la partida</label>
+            <input
+              type="date"
+              required
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
 
-          <label>Jugadores:</label>
+          <h3 className="pdf-card-title">Jugadores</h3>
           {players.map((playerData, idx) => (
-            <div key={idx} className="player-row">
-              <select
-                value={playerData.player}
-                onChange={(e) =>
-                  handlePlayerChange(idx, "player", e.target.value)
-                }
-                required
-              >
-                <option value="">Seleccionar jugador</option>
-                {playerOptions.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                min="0"
-                placeholder="Puntaje"
-                value={playerData.score}
-                onChange={(e) =>
-                  handlePlayerChange(idx, "score", e.target.value)
-                }
-                required
-              />
+            <div key={idx} className="pdf-player-row">
+              <div className="pdf-field">
+                <label>Jugador {idx + 1}</label>
+                <select
+                  value={playerData.player}
+                  onChange={(e) =>
+                    handlePlayerChange(idx, "player", e.target.value)
+                  }
+                  required
+                >
+                  <option value="">Seleccionar jugador</option>
+                  {playerOptions.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="pdf-field">
+                <label>Puntaje</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Puntaje"
+                  value={playerData.score}
+                  onChange={(e) =>
+                    handlePlayerChange(idx, "score", e.target.value)
+                  }
+                  required
+                />
+              </div>
             </div>
           ))}
 
-          <div className="player-actions">
+          <div className="pdf-player-actions">
             <button
               type="button"
               onClick={handleAddPlayer}
               disabled={players.length >= 8}
             >
-              ➕ Agregar jugador
+              <i className="fa-solid fa-plus"></i> Agregar jugador
             </button>
 
             <button
               type="button"
-              onClick={() => handleRemovePlayer(players.length - 1)}
+              onClick={handleRemovePlayer}
               disabled={players.length <= 5}
             >
-              ➖ Quitar jugador
+              <i className="fa-solid fa-minus"></i> Quitar jugador
             </button>
           </div>
 
-          <label>Highlight:</label>
-          <div className="player-row">
-            <select
-              value={highlight.player}
-              onChange={(e) =>
-                setHighlight({ ...highlight, player: e.target.value })
-              }
-              required
-            >
-              <option value="">Seleccionar jugador</option>
-              {matchPlayersOptions.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
+          <h3 className="pdf-card-title">Highlight</h3>
+          <div className="pdf-player-row">
+            <div className="pdf-field">
+              <label>Jugador</label>
+              <select
+                value={highlight.player}
+                onChange={(e) =>
+                  setHighlight({ ...highlight, player: e.target.value })
+                }
+                required
+              >
+                <option value="">Seleccionar jugador</option>
+                {matchPlayersOptions.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="pdf-field">
+              <label>Puntaje</label>
+              <input
+                type="number"
                 min="0"
-              placeholder="Puntaje"
-              value={highlight.score}
-              onChange={(e) =>
-                setHighlight({ ...highlight, score: e.target.value })
-              }
-              required
-            />
+                placeholder="Puntaje"
+                value={highlight.score}
+                onChange={(e) =>
+                  setHighlight({ ...highlight, score: e.target.value })
+                }
+                required
+              />
+            </div>
           </div>
 
-          <label>Racha cumpliendo:</label>
-          <div className="player-row">
-            <select
-              value={longestStreakOnTime.player}
-              onChange={(e) =>
-                setLongestStreakOnTime({
-                  ...longestStreakOnTime,
-                  player: e.target.value,
-                })
-              }
-              required
-            >
-              <option value="">Seleccionar jugador</option>
-              {matchPlayersOptions.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
+          <h3 className="pdf-card-title">Racha cumpliendo</h3>
+          <div className="pdf-player-row">
+            <div className="pdf-field">
+              <label>Jugador</label>
+              <select
+                value={longestStreakOnTime.player}
+                onChange={(e) =>
+                  setLongestStreakOnTime({
+                    ...longestStreakOnTime,
+                    player: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">Seleccionar jugador</option>
+                {matchPlayersOptions.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="pdf-field">
+              <label>Cantidad</label>
+              <input
+                type="number"
                 min="0"
-              placeholder="Cantidad"
-              value={longestStreakOnTime.count}
-              onChange={(e) =>
-                setLongestStreakOnTime({
-                  ...longestStreakOnTime,
-                  count: e.target.value,
-                })
-              }
-              required
-            />
+                placeholder="Cantidad"
+                value={longestStreakOnTime.count}
+                onChange={(e) =>
+                  setLongestStreakOnTime({
+                    ...longestStreakOnTime,
+                    count: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
           </div>
 
-          <label>Racha sin cumplir:</label>
-          <div className="player-row">
-            <select
-              value={longestStreakFailing.player}
-              onChange={(e) =>
-                setLongestStreakFailing({
-                  ...longestStreakFailing,
-                  player: e.target.value,
-                })
-              }
-              required
-            >
-              <option value="">Seleccionar jugador</option>
-              {matchPlayersOptions.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
+          <h3 className="pdf-card-title">Racha sin cumplir</h3>
+          <div className="pdf-player-row">
+            <div className="pdf-field">
+              <label>Jugador</label>
+              <select
+                value={longestStreakFailing.player}
+                onChange={(e) =>
+                  setLongestStreakFailing({
+                    ...longestStreakFailing,
+                    player: e.target.value,
+                  })
+                }
+                required
+              >
+                <option value="">Seleccionar jugador</option>
+                {matchPlayersOptions.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="pdf-field">
+              <label>Cantidad</label>
+              <input
+                type="number"
                 min="0"
-              placeholder="Cantidad"
-              value={longestStreakFailing.count}
-              onChange={(e) =>
-                setLongestStreakFailing({
-                  ...longestStreakFailing,
-                  count: e.target.value,
-                })
-              }
-              required
-            />
+                placeholder="Cantidad"
+                value={longestStreakFailing.count}
+                onChange={(e) =>
+                  setLongestStreakFailing({
+                    ...longestStreakFailing,
+                    count: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            className="submit-btn"
+            className="pdf-submit-btn"
             disabled={mutation.isPending}
           >
             {mutation.isPending ? "Cargando..." : "Actualizar partida"}

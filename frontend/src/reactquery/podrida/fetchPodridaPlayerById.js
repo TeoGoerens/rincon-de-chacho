@@ -19,7 +19,7 @@ const fetchPodridaPlayerById = async (id) => {
     return response.data.player;
   } catch (error) {
     console.error("❌ Error al obtener jugador:", error);
-    throw error?.response?.data?.message || error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al obtener el jugador");
   }
 };
 

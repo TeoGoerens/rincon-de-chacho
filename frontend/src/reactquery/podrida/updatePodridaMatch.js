@@ -26,7 +26,7 @@ const updatePodridaMatch = async ({ matchId, matchData }) => {
     return response.data;
   } catch (error) {
     console.error("❌ Error al actualizar la partida de Podrida:", error);
-    throw error?.response?.data?.message || error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al actualizar la partida");
   }
 };
 

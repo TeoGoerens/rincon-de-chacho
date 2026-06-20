@@ -12,6 +12,7 @@ import createCronica from "../../../../reactquery/cronica/createCronica";
 
 // Import components
 import AdminMenu from "../../AdminMenu";
+import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
 
 // import React Quill & options configurations
 import ReactQuill from "react-quill";
@@ -199,11 +200,7 @@ const CreateCronica = () => {
       <AdminMenu />
 
       {/* Spinner Overlay */}
-      {mutation.isPending && (
-        <div className="spinner-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
+      {mutation.isPending && <SpinnerOverlay />}
 
       <div className={`container ${mutation.isPending ? "blurred" : ""}`}>
         {/*    Titulo para crear nueva crónica */}

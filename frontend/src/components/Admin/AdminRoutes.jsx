@@ -12,9 +12,11 @@ import AdminPodridaPanel from "./AdminPodrida/AdminPodridaPanel";
 import PodridaIndex from "./AdminPodrida/Podridas/PodridaIndex";
 import CreatePodrida from "./AdminPodrida/Podridas/CreatePodrida";
 import UpdatePodrida from "./AdminPodrida/Podridas/UpdatePodrida";
+import PodridaDetail from "./AdminPodrida/Podridas/PodridaDetail";
 import PodridaPlayerIndex from "./AdminPodrida/Podridas/PodridaPlayerIndex";
 import CreatePodridaPlayer from "./AdminPodrida/Podridas/CreatePodridaPlayer";
 import UpdatePodridaPlayer from "./AdminPodrida/Podridas/UpdatePodridaPlayer";
+import PodridaPlayerDetail from "./AdminPodrida/Podridas/PodridaPlayerDetail";
 
 //Admin PRODE Components
 import ProdePlayersIndex from "./AdminProde/Players/ProdePlayersIndex";
@@ -96,6 +98,7 @@ const AdminRoutes = () => {
           <Route index element={<PodridaIndex />} />
           <Route path="crear" element={<CreatePodrida />} />
           <Route path="editar/:id" element={<UpdatePodrida />} />
+          <Route path="ver/:id" element={<PodridaDetail />} />
 
           {/* Rutas de jugadores */}
           <Route path="jugadores" element={<PodridaPlayerIndex />} />
@@ -104,6 +107,7 @@ const AdminRoutes = () => {
             path="jugadores/editar/:id"
             element={<UpdatePodridaPlayer />}
           />
+          <Route path="jugadores/ver/:id" element={<PodridaPlayerDetail />} />
         </Route>
 
         {/* --------------- ADMIN CRONICAS --------------- */}

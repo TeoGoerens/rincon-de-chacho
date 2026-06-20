@@ -26,7 +26,7 @@ const createPodridaMatch = async (matchData) => {
     return response.data;
   } catch (error) {
     console.error("❌ Error al crear la partida de Podrida:", error);
-    throw error?.response?.data?.message || error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al crear la partida");
   }
 };
 

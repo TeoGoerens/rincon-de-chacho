@@ -5,7 +5,10 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 // Imports CSS & helpers
-import "./UpdatePodridaPlayerStyles.css";
+import "./PodridaDetailStyles.css";
+
+//Import components
+import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
 
 //Import React Query functions
 import fetchPodridaPlayerById from "../../../../reactquery/podrida/fetchPodridaPlayerById";
@@ -43,12 +46,12 @@ const UpdatePodridaPlayer = () => {
   const mutation = useMutation({
     mutationFn: updatePodridaPlayer,
     onSuccess: () => {
-      toast.success("✅ Jugador actualizado correctamente");
+      toast.success("Jugador actualizado correctamente");
       queryClient.invalidateQueries(["fetchAllPodridaPlayers"]);
       navigate("/admin/podrida/jugadores");
     },
     onError: (error) => {
-      toast.error(`❌ Error al actualizar el jugador: ${error.message}`);
+      toast.error(error?.message || "Error al actualizar el jugador");
     },
   });
 
@@ -66,48 +69,67 @@ const UpdatePodridaPlayer = () => {
     });
   };
 
-  if (isLoading) return <p>Cargando jugador...</p>;
-  if (isError) return <p>Error: {error.message}</p>;
+  if (isLoading) {
+    return (
+      <div className="pdf-page">
+        <p className="pdf-state">Cargando jugador...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="pdf-page">
+        <p className="pdf-error-banner">{error?.message || "Ocurrió un error al cargar el jugador."}</p>
+      </div>
+    );
+  }
 
   return (
     <>
       {/* Spinner Overlay */}
-      {mutation.isPending && (
-        <div className="spinner-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
+      {mutation.isPending && <SpinnerOverlay />}
 
-      <div className={`container ${mutation.isPending ? "blurred" : ""}`}>
-        <div className="create-podrida-head">
-          <h2>Actualizar jugador</h2>
-          <Link className="back-btn" to="/admin/podrida/jugadores">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+      <div className="pdf-page">
+        <div className="pdf-header">
+          <div className="pdf-header-text">
+            <div className="pdf-eyebrow">
+              <span className="pdf-eyebrow-dot" />
+              Podrida
+            </div>
+            <h1 className="pdf-title">Actualizar jugador</h1>
+          </div>
+          <Link className="pdf-back-link" to="/admin/podrida/jugadores">
+            Volver
           </Link>
         </div>
 
-        <form className="form-create-podrida" onSubmit={handleSubmit}>
-          <label>Nombre:</label>
-          <input
-            type="text"
-            value={name}
-            placeholder="Ej: Teo"
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+        <form className="pdf-form" onSubmit={handleSubmit}>
+          <div className="pdf-field">
+            <label>Nombre</label>
+            <input
+              type="text"
+              value={name}
+              placeholder="Ej: Teo"
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
 
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            placeholder="Ej: correo@dominio.com"
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="pdf-field">
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              placeholder="Ej: correo@dominio.com"
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
           <button
             type="submit"
-            className="submit-btn"
+            className="pdf-submit-btn"
             disabled={mutation.isPending}
           >
             {mutation.isPending ? "Cargando..." : "Actualizar jugador"}

@@ -24,7 +24,7 @@ const updatePodridaPlayer = async ({ playerId, updateData }) => {
     return response.data.updatedPlayer;
   } catch (error) {
     console.error("❌ Error al actualizar jugador:", error);
-    throw error?.response?.data?.message || error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al actualizar el jugador");
   }
 };
 

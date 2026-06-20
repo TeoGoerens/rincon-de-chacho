@@ -5,7 +5,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 // Imports CSS & helpers
-import "./CreatePodridaPlayerStyles.css";
+import "./PodridaDetailStyles.css";
+
+//Import components
+import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
 
 //Import React Query functions
 import createPodridaPlayer from "../../../../reactquery/podrida/createPodridaPlayer";
@@ -27,7 +30,7 @@ const CreatePodridaPlayer = () => {
       navigate("/admin/podrida/jugadores");
     },
     onError: (error) => {
-      toast.error(`❌ Error al crear jugador: ${error.message || error}`);
+      toast.error(error?.message || "Error al crear el jugador");
     },
   });
 
@@ -46,42 +49,48 @@ const CreatePodridaPlayer = () => {
   return (
     <>
       {/* Spinner Overlay */}
-      {mutation.isPending && (
-        <div className="spinner-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
+      {mutation.isPending && <SpinnerOverlay />}
 
-      <div className={`container ${mutation.isPending ? "blurred" : ""}`}>
-        <div className="create-podrida-head">
-          <h2>Crear nuevo jugador</h2>
-          <Link className="back-btn" to="/admin/podrida/jugadores">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+      <div className="pdf-page">
+        <div className="pdf-header">
+          <div className="pdf-header-text">
+            <div className="pdf-eyebrow">
+              <span className="pdf-eyebrow-dot" />
+              Podrida
+            </div>
+            <h1 className="pdf-title">Crear nuevo jugador</h1>
+          </div>
+          <Link className="pdf-back-link" to="/admin/podrida/jugadores">
+            Volver
           </Link>
         </div>
 
-        <form className="form-create-podrida" onSubmit={handleSubmit}>
-          <label>Nombre:</label>
-          <input
-            type="text"
-            value={name}
-            placeholder="Ej: Teo"
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+        <form className="pdf-form" onSubmit={handleSubmit}>
+          <div className="pdf-field">
+            <label>Nombre</label>
+            <input
+              type="text"
+              value={name}
+              placeholder="Ej: Teo"
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
 
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            placeholder="Ej: correo@dominio.com"
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="pdf-field">
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              placeholder="Ej: correo@dominio.com"
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
           <button
             type="submit"
-            className="submit-btn"
+            className="pdf-submit-btn"
             disabled={mutation.isPending}
           >
             {mutation.isPending ? "Creando..." : "Crear jugador"}

@@ -16,7 +16,7 @@ const fetchPodridaPlayerProfile = async (playerId) => {
     return response.data;
   } catch (error) {
     console.error("❌ Error en fetchPodridaPlayerProfile:", error);
-    throw error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al obtener el perfil del jugador");
   }
 };
 

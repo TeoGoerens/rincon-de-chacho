@@ -29,7 +29,7 @@ const createPodridaPlayer = async ({ name, email }) => {
     return response.data.playerCreated;
   } catch (error) {
     console.error("❌ Error al crear jugador:", error);
-    throw error?.response?.data?.message || error;
+    throw new Error(error?.response?.data?.message || error.message || "Error al crear el jugador");
   }
 };
 
