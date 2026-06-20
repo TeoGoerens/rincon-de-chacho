@@ -8,6 +8,10 @@ import "../MatchStatsCreate/MatchStatsCreateStyle.css";
 
 //Import helpers
 import { formatDate } from "../../../../../helpers/dateFormatter";
+import { emptyStats } from "../../../../../helpers/matchStatsFields";
+
+//Import components
+import MatchStatsGrid from "../MatchStatsGrid";
 
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
@@ -16,16 +20,6 @@ import {
   getMatchStatsFilteredAction,
   updateMatchStatAction,
 } from "../../../../../redux/slices/match-stats/matchStatsSlices";
-
-//Campos editables por jugador (los minutos no se usan en ningún lado del sitio)
-const STAT_FIELDS = [
-  { key: "goals", label: "Goles" },
-  { key: "assists", label: "Asist." },
-  { key: "yellow_cards", label: "Amarillas" },
-  { key: "red_cards", label: "Rojas" },
-];
-
-const emptyStats = () => ({ goals: 0, assists: 0, yellow_cards: 0, red_cards: 0 });
 
 //----------------------------------------
 //COMPONENT
@@ -133,77 +127,11 @@ const MatchStatsUpdate = () => {
       </div>
 
       <form className="msc-form" onSubmit={handleSubmit}>
-        {/* ── Desktop: grid ── */}
-        <div className="msc-grid-wrap msc-desktop-only">
-          <div className="msc-grid">
-            <div className="msc-grid-header">
-              <span className="msc-col-player">Jugador</span>
-              {STAT_FIELDS.map((field) => (
-                <span className="msc-col-stat" key={field.key}>
-                  {field.label}
-                </span>
-              ))}
-            </div>
-
-            {tournamentRound?.players?.map((player) => (
-              <div className="msc-grid-row" key={player._id}>
-                <span className="msc-col-player msc-player-name">
-                  #{player.shirt} {player.first_name} {player.last_name}
-                </span>
-                {STAT_FIELDS.map((field) => (
-                  <span className="msc-col-stat" key={field.key}>
-                    <input
-                      type="number"
-                      min="0"
-                      inputMode="numeric"
-                      value={statsByPlayer[player._id]?.[field.key] ?? 0}
-                      onChange={(e) =>
-                        handleFieldChange(
-                          player._id,
-                          field.key,
-                          e.target.value
-                        )
-                      }
-                    />
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Mobile: cards apiladas ── */}
-        <div className="msc-mobile-list">
-          {tournamentRound?.players?.map((player) => (
-            <div className="msc-mobile-card" key={player._id}>
-              <span className="msc-mobile-card-name">
-                #{player.shirt} {player.first_name} {player.last_name}
-              </span>
-              <div className="msc-mobile-stats-grid">
-                {STAT_FIELDS.map((field) => (
-                  <div className="msc-mobile-stat" key={field.key}>
-                    <span className="msc-mobile-stat-label">
-                      {field.label}
-                    </span>
-                    <input
-                      type="number"
-                      min="0"
-                      inputMode="numeric"
-                      value={statsByPlayer[player._id]?.[field.key] ?? 0}
-                      onChange={(e) =>
-                        handleFieldChange(
-                          player._id,
-                          field.key,
-                          e.target.value
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <MatchStatsGrid
+          players={tournamentRound?.players}
+          statsByPlayer={statsByPlayer}
+          onFieldChange={handleFieldChange}
+        />
 
         <button className="ctr-submit-btn" type="submit">
           Guardar cambios

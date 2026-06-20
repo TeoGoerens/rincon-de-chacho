@@ -3,6 +3,7 @@ import TournamentRound from "../../dao/models/chachos/tournamentRoundModel.js";
 import Tournament from "../../dao/models/chachos/tournamentModel.js";
 import User from "../../dao/models/userModel.js";
 import MatchStat from "../../dao/models/chachos/matchStatModel.js";
+import Vote from "../../dao/models/chachos/voteModel.js";
 import baseRepository from "../baseRepository.js";
 import { sendBulkEmail } from "../../helpers/sendBulkEmail.js";
 
@@ -10,6 +11,29 @@ export default class TournamentRoundRepository extends baseRepository {
   constructor() {
     super(TournamentRound);
   }
+
+  // ---------- DELETE TOURNAMENT ROUND (con cascada a stats y votos) ----------
+  deleteTournamentRoundById = async (tournamentRoundId) => {
+    try {
+      const tournamentRoundExists = await this.model.findById(
+        tournamentRoundId
+      );
+      if (!tournamentRoundExists) {
+        throw new Error("Tournament round was not found in the database");
+      }
+
+      await MatchStat.deleteMany({ round: tournamentRoundId });
+      await Vote.deleteMany({ round: tournamentRoundId });
+
+      const tournamentRoundDeleted = await this.model.findOneAndDelete({
+        _id: tournamentRoundId,
+      });
+
+      return tournamentRoundDeleted;
+    } catch (error) {
+      throw error;
+    }
+  };
 
   // ---------- GET CURRENT CONTEXT (last round + season rounds + last round stats) ----------
   getCurrentContext = async () => {

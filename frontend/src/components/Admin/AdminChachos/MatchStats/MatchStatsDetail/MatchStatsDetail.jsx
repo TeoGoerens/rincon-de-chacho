@@ -9,17 +9,13 @@ import "../MatchStatsCreate/MatchStatsCreateStyle.css";
 //Import helpers
 import { formatDate } from "../../../../../helpers/dateFormatter";
 
+//Import components
+import MatchStatsGrid from "../MatchStatsGrid";
+
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
 import { getTournamentRoundAction } from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
 import { getMatchStatsFilteredAction } from "../../../../../redux/slices/match-stats/matchStatsSlices";
-
-const STAT_FIELDS = [
-  { key: "goals", label: "Goles" },
-  { key: "assists", label: "Asist." },
-  { key: "yellow_cards", label: "Amarillas" },
-  { key: "red_cards", label: "Rojas" },
-];
 
 //----------------------------------------
 //COMPONENT
@@ -43,6 +39,12 @@ const MatchStatsDetail = () => {
     dispatch(getTournamentRoundAction(id));
     dispatch(getMatchStatsFilteredAction({ round: id }));
   }, [dispatch, id]);
+
+  //Indexar las estadísticas guardadas por jugador para alimentar MatchStatsGrid
+  const statsByPlayer = {};
+  filteredMatchStats?.forEach((stat) => {
+    if (stat.player?._id) statsByPlayer[stat.player._id] = stat;
+  });
 
   return (
     <div className="ctr-form-page">
@@ -81,80 +83,11 @@ const MatchStatsDetail = () => {
         </span>
       </div>
 
-      {/* ── Desktop: grid ── */}
-      <div className="msc-grid-wrap msc-desktop-only">
-        <div className="msc-grid">
-          <div className="msc-grid-header">
-            <span className="msc-col-player">Jugador</span>
-            {STAT_FIELDS.map((field) => (
-              <span className="msc-col-stat" key={field.key}>
-                {field.label}
-              </span>
-            ))}
-          </div>
-
-          {tournamentRound?.players?.map((player) => {
-            const stat = filteredMatchStats?.find(
-              (s) => s.player?._id === player._id
-            );
-            return (
-              <div className="msc-grid-row" key={player._id}>
-                <span className="msc-col-player msc-player-name">
-                  #{player.shirt} {player.first_name} {player.last_name}
-                </span>
-                {STAT_FIELDS.map((field) => {
-                  const value = stat?.[field.key] ?? 0;
-                  return (
-                    <span
-                      className={`msc-col-stat msc-col-stat--readonly ${
-                        value > 0 ? "msc-col-stat--highlight" : ""
-                      }`}
-                      key={field.key}
-                    >
-                      {value}
-                    </span>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Mobile: cards apiladas ── */}
-      <div className="msc-mobile-list">
-        {tournamentRound?.players?.map((player) => {
-          const stat = filteredMatchStats?.find(
-            (s) => s.player?._id === player._id
-          );
-          return (
-            <div className="msc-mobile-card" key={player._id}>
-              <span className="msc-mobile-card-name">
-                #{player.shirt} {player.first_name} {player.last_name}
-              </span>
-              <div className="msc-mobile-stats-grid">
-                {STAT_FIELDS.map((field) => {
-                  const value = stat?.[field.key] ?? 0;
-                  return (
-                    <div className="msc-mobile-stat" key={field.key}>
-                      <span className="msc-mobile-stat-label">
-                        {field.label}
-                      </span>
-                      <span
-                        className={`msc-col-stat--readonly ${
-                          value > 0 ? "msc-col-stat--highlight" : ""
-                        }`}
-                      >
-                        {value}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <MatchStatsGrid
+        players={tournamentRound?.players}
+        statsByPlayer={statsByPlayer}
+        readOnly
+      />
     </div>
   );
 };

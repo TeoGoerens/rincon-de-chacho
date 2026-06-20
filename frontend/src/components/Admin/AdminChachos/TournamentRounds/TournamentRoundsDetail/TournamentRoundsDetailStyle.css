@@ -93,8 +93,12 @@
   gap: 0.4rem;
 }
 
-.ctrd-pearl-emoji {
-  font-size: 0.9rem;
+.ctrd-pearl-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--pearl-color);
+  flex-shrink: 0;
 }
 
 .ctrd-pearl-label {

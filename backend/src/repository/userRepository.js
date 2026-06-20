@@ -218,8 +218,9 @@ export default class UserRepository extends baseRepository {
       );
     }
 
-    // Procesar imagen con Sharp: recortar a 400x400 y convertir a WebP
+    // Procesar imagen con Sharp: auto-orientar según EXIF, recortar a 512x512 y convertir a WebP
     const processedBuffer = await sharp(fileBuffer)
+      .rotate()
       .resize(512, 512, { fit: "cover", position: "center" })
       .webp({ quality: 85 })
       .toBuffer();

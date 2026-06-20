@@ -18,18 +18,7 @@ import {
 } from "../../../../redux/slices/players/playersSlices";
 
 //Etiquetas en español para posición y rol
-const POSITION_LABEL = {
-  goalkeeper: "Arquero",
-  defender: "Defensor",
-  midfielder: "Volante",
-  forward: "Delantero",
-};
-
-const ROLE_LABEL = {
-  team: "Jugador fijo",
-  extra: "Refuerzo",
-  supporter: "Hinchada",
-};
+import { POSITION_LABEL, ROLE_LABEL } from "../../../../helpers/playerLabels";
 
 //----------------------------------------
 //COMPONENT

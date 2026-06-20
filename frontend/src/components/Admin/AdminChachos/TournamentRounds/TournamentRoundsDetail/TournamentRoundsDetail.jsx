@@ -25,10 +25,10 @@ import {
 
 //Definición de perlas (mismo mapeo de colores que el sitio público)
 const PEARLS = [
-  { key: "white_pearl", emoji: "⚪", label: "Perla Blanca", colorVar: "var(--third-color)" },
-  { key: "vanilla_pearl", emoji: "🟡", label: "Perla Vainilla", colorVar: "var(--color-podrida)" },
-  { key: "ocher_pearl", emoji: "🟠", label: "Perla Ocre", colorVar: "var(--color-prode)" },
-  { key: "black_pearl", emoji: "⚫", label: "Perla Negra", colorVar: "var(--fourth-color)" },
+  { key: "white_pearl", label: "Perla Blanca", colorVar: "var(--third-color)" },
+  { key: "vanilla_pearl", label: "Perla Vainilla", colorVar: "var(--color-podrida)" },
+  { key: "ocher_pearl", label: "Perla Ocre", colorVar: "var(--color-prode)" },
+  { key: "black_pearl", label: "Perla Negra", colorVar: "var(--fourth-color)" },
 ];
 
 //----------------------------------------
@@ -130,7 +130,7 @@ const TournamentRoundsDetail = () => {
                 style={{ "--pearl-color": pearl.colorVar }}
               >
                 <div className="ctrd-pearl-card-head">
-                  <span className="ctrd-pearl-emoji">{pearl.emoji}</span>
+                  <span className="ctrd-pearl-dot" />
                   <span className="ctrd-pearl-label">{pearl.label}</span>
                 </div>
                 <div className="ctrd-pearl-winners">
@@ -187,8 +187,7 @@ const TournamentRoundsDetail = () => {
                         key={pearl.key}
                         style={{ "--pearl-color": pearl.colorVar }}
                       >
-                        {pearl.emoji} {votedPlayer?.first_name}{" "}
-                        {votedPlayer?.last_name}
+                        {votedPlayer?.first_name} {votedPlayer?.last_name}
                       </span>
                     );
                   })}

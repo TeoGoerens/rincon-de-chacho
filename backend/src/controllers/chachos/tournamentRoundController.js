@@ -295,7 +295,7 @@ export default class TournamentRoundController {
     try {
       const tournamentRoundId = req.params.pid;
       const tournamentRoundDeleted =
-        await repository.baseDeleteById(tournamentRoundId);
+        await repository.deleteTournamentRoundById(tournamentRoundId);
       res.status(200).json({
         message: `Tournament round with id ${tournamentRoundId} has been properly deleted`,
         tournamentRoundDeleted,

@@ -20,23 +20,16 @@ import { createTournamentRoundAction } from "../../../../../redux/slices/tournam
 
 //Form schema
 const formSchema = Yup.object({
-  tournament: Yup.string().required(
-    "Por favor chacal escribi el nombre del torneo"
-  ),
-  rival: Yup.string().required(
-    "Por favor chacal escribi el nombre del equipo rival"
-  ),
-  match_date: Yup.date().required("Por favor chacal selecciona la fecha"),
+  tournament: Yup.string().required("Seleccioná el torneo"),
+  rival: Yup.string().required("Seleccioná el equipo rival"),
+  match_date: Yup.date().required("Seleccioná la fecha del partido"),
   score_chachos: Yup.number().required(
-    "Por favor chacal escribi la cantidad de goles que hizo Chachos"
+    "Ingresá la cantidad de goles de Chachos"
   ),
   score_rival: Yup.string().required(
-    "Por favor chacal esecribi la cantidad de goles que se comió Chachos"
+    "Ingresá la cantidad de goles del rival"
   ),
-  players: Yup.array().min(
-    1,
-    "Por favor chacal indica quienes jugaron el partido"
-  ),
+  players: Yup.array().min(1, "Indicá quiénes jugaron el partido"),
 });
 
 //----------------------------------------
