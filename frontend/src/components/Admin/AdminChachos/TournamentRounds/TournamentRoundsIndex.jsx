@@ -24,7 +24,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   deleteTournamentRoundAction,
   getAllTournamentRoundsAction,
+  consolidatePearlsAction,
 } from "../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
+import { getVotesFromTournamentRoundAction } from "../../../../redux/slices/votes/votesSlices";
 
 //----------------------------------------
 //COMPONENT
@@ -67,7 +69,28 @@ const TournamentRoundsIndex = () => {
     },
   });
 
-  const handleToggleOpenForVote = (id) => {
+  const handleToggleOpenForVote = async (id) => {
+    const round = tournamentRounds?.find((r) => r._id === id);
+    const isClosing = round?.open_for_vote === true;
+
+    //Al cerrar la votación, consolidar las perlas automáticamente antes de
+    //avisarle a los usuarios que los resultados están disponibles
+    if (isClosing) {
+      try {
+        const votesPayload = await dispatch(
+          getVotesFromTournamentRoundAction(id)
+        ).unwrap();
+
+        if (votesPayload?.allVotesForRound?.length > 0) {
+          await dispatch(consolidatePearlsAction(id)).unwrap();
+        }
+      } catch (error) {
+        toast.warning(
+          "No se pudieron consolidar las perlas automáticamente. Podés hacerlo manualmente desde el detalle de la fecha."
+        );
+      }
+    }
+
     toggleOpenForVoteMutation.mutate(id);
   };
 

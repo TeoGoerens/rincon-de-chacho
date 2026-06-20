@@ -550,6 +550,19 @@ export default class TournamentRoundRepository extends baseRepository {
     blackPearl
   ) => {
     try {
+      //Resetear todas las perlas del round antes de reasignarlas, para que una
+      //reconsolidacion (tras nuevos votos) no deje perlas viejas en jugadores
+      //que ya no ganaron esa categoria
+      await MatchStat.updateMany(
+        { round: tournamentRoundId },
+        {
+          white_pearl: false,
+          vanilla_pearl: false,
+          ocher_pearl: false,
+          black_pearl: false,
+        }
+      );
+
       //Update white pearl
       const whitePearlUpdate = await MatchStat.find({
         round: tournamentRoundId,

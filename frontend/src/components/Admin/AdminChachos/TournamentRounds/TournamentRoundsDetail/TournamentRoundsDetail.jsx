@@ -152,7 +152,12 @@ const TournamentRoundsDetail = () => {
 
       <div className="ctrd-votes-section">
         <div className="ctrd-votes-header">
-          <h3 className="ctrd-votes-title">Votos totales</h3>
+          <h3 className="ctrd-votes-title">
+            Votos totales{" "}
+            <span className="ctrd-votes-count">
+              ({votesByRound?.length ?? 0})
+            </span>
+          </h3>
           <button className="ctr-submit-btn" onClick={handleConsolidatePearls}>
             Consolidar perlas
           </button>

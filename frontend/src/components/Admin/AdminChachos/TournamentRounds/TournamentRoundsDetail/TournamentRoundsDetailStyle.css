@@ -147,6 +147,13 @@
   color: var(--text-bright);
 }
 
+.ctrd-votes-count {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+}
+
 .ctrd-votes-list {
   display: flex;
   flex-direction: column;
