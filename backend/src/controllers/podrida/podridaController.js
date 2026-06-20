@@ -81,6 +81,17 @@ export default class PodridaController {
     }
   };
 
+  /* --------------- GET PODRIDA PLAYER PROFILE --------------- */
+  getPodridaPlayerProfile = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const data = await repository.getPodridaPlayerProfile(id);
+      res.status(200).json({ message: "Podrida player profile retrieved successfully", ...data });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /* --------------- DELETE PODRIDA MATCH --------------- */
   deletePodridaMatch = async (req, res, next) => {
     try {

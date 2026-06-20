@@ -18,6 +18,8 @@ import {
   calculateDroughtSinceLastPlace,
   calculateRanking,
   calculatePlayerProfiles,
+  calculatePlayerDroughts,
+  calculatePlayerByYear,
 } from "../../helpers/podrida/recordCalculators.js";
 
 export default class PodridaRepository extends baseRepository {
@@ -107,16 +109,12 @@ export default class PodridaRepository extends baseRepository {
 
     if (!matches.length) throw new Error("No matches found in the database");
 
-    // Build name → playerId map from populated matches
-    const nameToPlayerId = {};
-    matches.forEach((match) => {
-      match.players.forEach(({ player }) => {
-        if (player?.name && player?._id) nameToPlayerId[player.name] = player._id.toString();
-      });
-      if (match.highlight?.player?._id) nameToPlayerId[match.highlight.player.name] = match.highlight.player._id.toString();
-      if (match.longestStreakOnTime?.player?._id) nameToPlayerId[match.longestStreakOnTime.player.name] = match.longestStreakOnTime.player._id.toString();
-      if (match.longestStreakFailing?.player?._id) nameToPlayerId[match.longestStreakFailing.player.name] = match.longestStreakFailing.player._id.toString();
-    });
+    // Build name → playerId map directly from the PodridaPlayer collection
+    // (es la fuente de verdad: pocos documentos, nombres únicos, no cambia por partida)
+    const allPodridaPlayers = await PodridaPlayer.find({}, { name: 1 });
+    const nameToPlayerId = Object.fromEntries(
+      allPodridaPlayers.map((p) => [p.name, p._id.toString()])
+    );
 
     const playerObjectIds = Object.values(nameToPlayerId).map((id) => new mongoose.Types.ObjectId(id));
     const usersWithPhotos = await User.find({ podrida_player: { $in: playerObjectIds } }, { podrida_player: 1, profile_picture: 1 });
@@ -193,6 +191,38 @@ export default class PodridaRepository extends baseRepository {
       totalMatches,
       filteredMatches: matches.length,
       availableYears,
+    };
+  };
+
+  /* --------------- GET PODRIDA PLAYER PROFILE --------------- */
+  getPodridaPlayerProfile = async (playerId) => {
+    const player = await PodridaPlayer.findById(playerId);
+    if (!player) throw new Error("Podrida player not found");
+
+    const matches = await PodridaMatch.find({})
+      .sort({ date: 1 })
+      .populate("players.player")
+      .populate("highlight.player");
+
+    const rankedProfiles = calculatePlayerProfiles(matches).sort((a, b) => b.points - a.points);
+    const rank = rankedProfiles.findIndex((p) => p.id === playerId) + 1;
+    const profile = rankedProfiles.find((p) => p.id === playerId);
+    if (!profile) throw new Error("This player has no matches yet");
+
+    const droughts = calculatePlayerDroughts(matches, playerId);
+    const byYear = calculatePlayerByYear(matches, playerId);
+
+    const user = await User.findOne({ podrida_player: playerId }, { profile_picture: 1 });
+    const hasValidPhoto = (url) => !!url && !url.includes("pixabay") && !url.includes("avatar-1577909");
+    const photo = hasValidPhoto(user?.profile_picture) ? user.profile_picture : null;
+
+    return {
+      player: { id: player._id.toString(), name: player.name, photo },
+      profile,
+      rank,
+      totalPlayers: rankedProfiles.length,
+      droughts,
+      byYear,
     };
   };
 

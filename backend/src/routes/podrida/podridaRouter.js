@@ -8,6 +8,7 @@ const controller = new PodridaController();
 
 // ---------- PLAYERS ----------
 router.post("/player", authMiddleware, adminAuthMiddleware, controller.createPodridaPlayer);
+router.get("/player/:id/profile", authMiddleware, controller.getPodridaPlayerProfile);
 router.get("/player/:id", authMiddleware, controller.getPodridaPlayerById);
 router.get("/player", authMiddleware, controller.getAllPodridaPlayers);
 router.put("/player/:id", authMiddleware, adminAuthMiddleware, controller.updatePodridaPlayer);
