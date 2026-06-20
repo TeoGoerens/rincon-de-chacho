@@ -18,6 +18,9 @@ const resetdeleteMatchStatsForARoundAction = createAction(
   "match-stats/delete-reset"
 );
 const resetcreateMatchStatAction = createAction("match-stats/create-reset");
+const resetUpdateMatchStatAction = createAction(
+  "match-stats/update-stat-reset"
+);
 
 // --------------------
 // ACTIONS
@@ -48,6 +51,42 @@ export const createMatchStatAction = createAsyncThunk(
 
       //Reset update state
       dispatch(resetcreateMatchStatAction());
+
+      return response.data;
+    } catch (error) {
+      if (!error?.response) {
+        throw error;
+      }
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+// ---------- UPDATE MATCH STAT ----------
+export const updateMatchStatAction = createAsyncThunk(
+  "match-stats/update-stat",
+  async (matchStats, { rejectWithValue, getState, dispatch }) => {
+    try {
+      //Retrieve information from the user
+      const token =
+        getState().users?.userAuth?.jwt ||
+        getState().users?.userAuth?.userToDisplay?.jwt ||
+        null;
+      const tournamentRoundId =
+        getState().tournamentRounds?.tournamentRound?.tournamentRound?._id;
+
+      //HTTP call
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+      const endpoint = `${baseURL}/api/chachos/match-stat/${tournamentRoundId}`;
+      const response = await axios.put(endpoint, matchStats, config);
+
+      //Reset update state
+      dispatch(resetUpdateMatchStatAction());
 
       return response.data;
     } catch (error) {
@@ -256,6 +295,28 @@ const matchStatsSlices = createSlice({
       state.serverError = undefined;
     });
     builder.addCase(createMatchStatAction.rejected, (state, action) => {
+      state.loading = false;
+      state.appError = action?.payload?.message;
+      state.serverError = action?.error?.message;
+    });
+
+    // ---------- UPDATE MATCH STAT ----------
+    builder.addCase(updateMatchStatAction.pending, (state, action) => {
+      state.loading = true;
+      state.appError = undefined;
+      state.serverError = undefined;
+    });
+    builder.addCase(resetUpdateMatchStatAction, (state, action) => {
+      state.isUpdated = true;
+    });
+    builder.addCase(updateMatchStatAction.fulfilled, (state, action) => {
+      state.loading = false;
+      state.matchStats = action?.payload;
+      state.isUpdated = false;
+      state.appError = undefined;
+      state.serverError = undefined;
+    });
+    builder.addCase(updateMatchStatAction.rejected, (state, action) => {
       state.loading = false;
       state.appError = action?.payload?.message;
       state.serverError = action?.error?.message;

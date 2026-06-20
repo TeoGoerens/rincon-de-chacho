@@ -7,6 +7,7 @@ a {
   cursor: pointer;
   font-size: inherit;
   color: inherit;
+  position: relative;
 }
 
 button span,
@@ -16,22 +17,7 @@ a span {
 }
 
 a {
-  position: relative;
   text-decoration: none;
-}
-
-.tooltip-text {
-  display: none;
-  position: fixed;
-  font-size: 0.7rem;
-  background-color: var(--primary-color);
-  padding: 0.25rem 1rem;
-  color: white;
-  font-weight: 400;
-  border-radius: 20px;
-  height: 24px;
-  z-index: 10000;
-  margin-left: 0.3rem;
 }
 
 a img {
@@ -53,107 +39,230 @@ a img {
 
 /* CREATE STAT BUTTON / LINK */
 .create-stat-button {
-  color: green;
-  margin: 0 0.2rem;
+  color: var(--status-green);
 }
 
-/* VIEW BUTTON / LINK */
+/* ── Íconos de acción (Ver / Editar / Eliminar) ── */
+.view-button,
+.edit-button,
+.delete-button,
+.create-stat-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  margin: 0 0.15rem;
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+.view-button svg,
+.edit-button svg,
+.delete-button svg,
+.create-stat-button svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.view-button svg, .view-button svg * { color: var(--third-color); }
+.edit-button svg, .edit-button svg * { color: var(--status-yellow); }
+.delete-button svg, .delete-button svg * { color: var(--status-red); }
+.create-stat-button svg, .create-stat-button svg * { color: var(--status-green); }
+
 .view-button {
-  color: #3498db;
-  margin: 0 0.2rem;
+  color: var(--third-color);
 }
 
-/* EDIT BUTTON / LINK */
 .edit-button {
-  color: #f39c12;
-  margin: 0 0.2rem;
+  color: var(--status-yellow);
 }
 
-/* DELETE BUTTON / LINK */
 .delete-button {
-  color: #e74c3c;
-  margin: 0 0.2rem;
+  color: var(--status-red);
 }
 
-/* HOVER EFFECTS */
-button:hover span,
-a:hover > span {
-  scale: 1.1;
-  transition: all ease 0.3s;
+a:hover .view-button,
+button:hover .view-button {
+  background: rgba(168, 218, 220, 0.14);
 }
 
-a:hover span:nth-child(2),
-button:hover span:nth-child(2) {
-  display: inline-block;
+a:hover .edit-button,
+button:hover .edit-button {
+  background: rgba(245, 158, 11, 0.14);
 }
 
-/* ---------- DELETE MODAL ---------- */
+a:hover .delete-button,
+button:hover .delete-button {
+  background: rgba(230, 57, 70, 0.14);
+}
+
+a:hover .create-stat-button,
+button:hover .create-stat-button {
+  background: rgba(34, 197, 94, 0.14);
+}
+
+/* ── Tooltip ── */
+.tooltip-text {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-tight);
+  white-space: nowrap;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-body-dark);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-sm);
+  height: auto;
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--transition-base), transform var(--transition-base),
+    visibility var(--transition-base);
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--bg-panel);
+}
+
+a:hover .tooltip-text,
+button:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- CONFIRMATION MODAL (delete / toggle) ---------- */
 .delete-confirmation-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  animation: dcm-fade-in var(--transition-base);
 }
+
+@keyframes dcm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .delete-confirmation-modal {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  width: clamp(0px, 80%, 500px);
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: var(--space-lg);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  width: clamp(280px, 90%, 420px);
   text-align: center;
+  animation: dcm-rise var(--transition-panel);
+}
+
+@keyframes dcm-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.delete-confirmation-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-sm);
+  border-radius: var(--radius-full);
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--status-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-confirmation-icon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--status-red);
 }
 
 .delete-confirmation-modal h4 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+  margin-bottom: 0.6rem;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
 }
 
 .delete-confirmation-modal p {
-  margin-bottom: 3.5rem;
-  font-size: 0.85rem;
+  margin-bottom: var(--space-lg);
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--text-muted-dark);
 }
 
 .delete-confirmation-btn-container {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 0.75rem;
 }
 
 .delete-confirmation-modal button {
-  padding: 0.5rem 1rem;
+  flex: 1;
+  padding: 0.65rem 1rem;
   cursor: pointer;
-  width: 120px;
-  border-radius: 20px;
-  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  transition: background var(--transition-base), color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.delete-confirmation-btn-cancel {
+  color: var(--text-subtle-dark);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.delete-confirmation-btn-cancel:hover {
+  color: var(--text-bright);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.delete-confirmation-btn-confirm {
+  color: var(--bg-deep);
+  background: var(--third-color);
+  border: 1px solid var(--third-color);
+}
+
+.delete-confirmation-btn-confirm:hover {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: var(--text-bright);
+}
+
+.delete-confirmation-btn-confirm--danger {
   color: white;
+  background: var(--status-red);
+  border: 1px solid var(--status-red);
 }
 
-.delete-confirmation-modal button:first-child {
-  color: green;
-  border: 1px solid green;
-  background-color: white;
-  justify-content: center;
-}
-
-.delete-confirmation-modal button:first-child:hover {
-  color: white;
-  background-color: green;
-}
-
-.delete-confirmation-modal button:last-child {
-  color: red;
-  border: 1px solid red;
-  background-color: white;
-  justify-content: center;
-}
-
-.delete-confirmation-modal button:last-child:hover {
-  color: white;
-  background-color: red;
+.delete-confirmation-btn-confirm--danger:hover {
+  background: #c92e3a;
+  border-color: #c92e3a;
 }

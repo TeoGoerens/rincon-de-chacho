@@ -1,0 +1,281 @@
+/* ═══════════════════════════════════════════════════════════
+   TOURNAMENT ROUNDS INDEX (Admin Chachos)  —  El Rincón de Chacho
+   Prefijo: ctr
+   ═══════════════════════════════════════════════════════════ */
+
+.ctr {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Header ── */
+.ctr-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.ctr-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ctr-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--third-color);
+}
+
+.ctr-eyebrow-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--third-color);
+  flex-shrink: 0;
+}
+
+.ctr-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+}
+
+.ctr-subtitle {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+.ctr-create-btn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--bg-deep);
+  background: var(--third-color);
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--transition-base);
+}
+
+.ctr-create-btn:hover {
+  background: var(--secondary-color);
+  color: var(--text-bright);
+}
+
+/* ── Tabla ── */
+.ctr-table-wrap {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.ctr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ctr-table thead tr {
+  background: var(--bg-panel);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.ctr-table th {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ctr-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background var(--transition-base);
+}
+
+.ctr-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.ctr-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ctr-table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.ctr-cell-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  white-space: nowrap;
+}
+
+.ctr-cell-rival {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.ctr-cell-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-body-dark);
+}
+
+/* ── Estados loading / error ── */
+.ctr-state {
+  padding: 4rem 2rem;
+  text-align: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Acciones ── */
+.ctr-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ctr-actions .view-button,
+.ctr-actions .edit-button,
+.ctr-actions .delete-button {
+  font-size: 0.95rem;
+}
+
+.ctr-actions .view-button { color: var(--third-color); }
+.ctr-actions .edit-button { color: var(--status-yellow); }
+.ctr-actions .delete-button { color: var(--status-red); }
+
+/* ── Toggle abrir/cerrar votación ── */
+.ctr-toggle-vote {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-tight);
+  text-transform: uppercase;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  transition: filter var(--transition-base);
+}
+
+.ctr-toggle-vote.open-vote {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--status-green);
+}
+
+.ctr-toggle-vote.close-vote {
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--status-red);
+}
+
+.ctr-toggle-vote:hover {
+  filter: brightness(1.2);
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .ctr-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ctr-create-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Toggle entre vista desktop (tabla) y mobile (cards) ── */
+.ctr-mobile-list {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .ctr-desktop-only {
+    display: none;
+  }
+
+  .ctr-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .ctr-mobile-card {
+    background: var(--bg-card-dark);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-lg);
+    padding: 0.7rem var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .ctr-mobile-row-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .ctr-mobile-row-top .ctr-cell-rival {
+    font-size: var(--text-base);
+  }
+
+  .ctr-mobile-row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .ctr-mobile-row-bottom .ctr-cell-date {
+    font-size: var(--text-xs);
+    flex-shrink: 0;
+  }
+
+  .ctr-toggle-vote--mobile {
+    width: 64px;
+    flex-shrink: 0;
+    text-align: center;
+    padding: 0.3rem 0;
+    font-size: var(--text-2xs);
+  }
+
+  .ctr-actions {
+    justify-content: flex-end;
+    gap: 0.2rem;
+  }
+}

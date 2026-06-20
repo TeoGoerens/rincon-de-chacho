@@ -1,0 +1,252 @@
+/* ═══════════════════════════════════════════════════════════
+   TOURNAMENT ROUNDS — DETALLE (Admin Chachos)
+   Prefijo: ctrd
+   ═══════════════════════════════════════════════════════════ */
+
+.ctrd-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.ctrd-state {
+  padding: 4rem 2rem;
+  text-align: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Match card ── */
+.ctrd-match-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+}
+
+.ctrd-match-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.ctrd-match-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+.ctrd-match-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.ctrd-match-rival {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  margin-bottom: var(--space-sm);
+}
+
+.ctrd-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ctrd-player-chip {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-body-dark);
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.65rem;
+}
+
+/* ── Perlas (resumen consolidado) ── */
+.ctrd-pearls-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+}
+
+.ctrd-pearl-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 3px solid var(--pearl-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ctrd-pearl-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ctrd-pearl-emoji {
+  font-size: 0.9rem;
+}
+
+.ctrd-pearl-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.ctrd-pearl-winners {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.ctrd-pearl-winners span {
+  color: var(--text-bright);
+}
+
+.ctrd-pearl-winners span.ctrd-pearl-empty {
+  color: var(--text-subtle-dark);
+  font-family: var(--secondary-font);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-xs);
+}
+
+/* ── Votos ── */
+.ctrd-votes-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.ctrd-votes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.ctrd-votes-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.ctrd-votes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ctrd-vote-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ctrd-vote-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ctrd-vote-voter {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.ctrd-vote-delete {
+  font-size: 0.9rem;
+  color: var(--status-red);
+}
+
+.ctrd-vote-pearls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ctrd-vote-pearl-chip {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-body-dark);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--pearl-color);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.6rem;
+}
+
+.ctrd-vote-evaluations {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ctrd-eval-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-muted-dark);
+  background: var(--bg-panel);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.7rem;
+}
+
+.ctrd-eval-chip strong {
+  color: var(--third-color);
+  font-weight: var(--fw-bold);
+  margin-left: 0.2rem;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .ctrd-pearls-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .ctrd-pearls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ctrd-votes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .ctrd-vote-card-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}

@@ -1,10 +1,14 @@
 //Import React & Hooks
 import React, { useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, Link } from "react-router-dom";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
 import * as Yup from "yup";
+
+//Import CSS & styles
+import "../TournamentRounds/TournamentRoundsFormStyle.css";
+import "./TeamsFormStyle.css";
 
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +20,7 @@ import {
 //Form schema
 const formSchema = Yup.object({
   avatar: Yup.string(),
-  name: Yup.string().required("Por favor chacal escribi el nombre del equipo"),
+  name: Yup.string().required("Ingresá el nombre del equipo"),
 });
 
 //----------------------------------------
@@ -29,7 +33,7 @@ const TeamsUpdate = () => {
   //Dispatch const creation
   const dispatch = useDispatch();
 
-  //Get category information from database every time the component renders
+  //Get team information from database every time the component renders
   useEffect(() => {
     dispatch(getTeamAction(id));
   }, [dispatch, id]);
@@ -60,37 +64,76 @@ const TeamsUpdate = () => {
     validationSchema: formSchema,
   });
 
-  //Navigate to index in case there is an updated category
+  //Navigate to index in case there is an updated team
   if (storeData?.isEdited) return <Navigate to="/admin/chachos/teams" />;
 
   return (
-    <>
-      <h2>Editar equipo</h2>
-      {appError || serverError ? <h5>{appError}</h5> : null}
+    <div className="ctr-form-page">
+      <div className="ctr-form-header">
+        <div className="ctr-form-header-text">
+          <div className="ctr-eyebrow">
+            <span className="ctr-eyebrow-dot" />
+            Chachos
+          </div>
+          <h1 className="ctr-form-title">Editar equipo</h1>
+        </div>
+        <Link className="ctr-back-link" to="/admin/chachos/teams">
+          Volver
+        </Link>
+      </div>
 
-      <form onSubmit={formik.handleSubmit}>
-        <label>Avatar</label>
-        <input
-          value={formik.values.avatar}
-          onChange={formik.handleChange("avatar")}
-          onBlur={formik.handleBlur("avatar")}
-          type="text"
-          name="avatar"
-        ></input>
-        <div>{formik.touched.avatar && formik.errors.avatar}</div>
-        <label>Nombre</label>
-        <input
-          value={formik.values.name}
-          onChange={formik.handleChange("name")}
-          onBlur={formik.handleBlur("name")}
-          type="text"
-          name="name"
-        ></input>
-        <div>{formik.touched.name && formik.errors.name}</div>
+      {appError || serverError ? (
+        <p className="ctr-form-error-banner">{appError}</p>
+      ) : null}
 
-        <button type="submit">Editar equipo</button>
+      <form className="ctr-form" onSubmit={formik.handleSubmit}>
+        <div className="tmf-avatar-preview-row">
+          {formik.values.avatar ? (
+            <img
+              src={formik.values.avatar}
+              className="tmf-avatar-preview"
+              alt="Preview"
+            />
+          ) : (
+            <span className="tmf-avatar-preview tmf-avatar-preview--empty">
+              Sin logo
+            </span>
+          )}
+
+          <div className="ctr-field tmf-avatar-field">
+            <label>Avatar (URL)</label>
+            <input
+              value={formik.values.avatar ?? ""}
+              onChange={formik.handleChange("avatar")}
+              onBlur={formik.handleBlur("avatar")}
+              type="text"
+              name="avatar"
+            />
+            <div className="error-message">
+              {formik.touched.avatar && formik.errors.avatar}
+            </div>
+          </div>
+        </div>
+
+        <div className="ctr-field">
+          <label>Nombre</label>
+          <input
+            value={formik.values.name ?? ""}
+            onChange={formik.handleChange("name")}
+            onBlur={formik.handleBlur("name")}
+            type="text"
+            name="name"
+          />
+          <div className="error-message">
+            {formik.touched.name && formik.errors.name}
+          </div>
+        </div>
+
+        <button className="ctr-submit-btn" type="submit">
+          Guardar cambios
+        </button>
       </form>
-    </>
+    </div>
   );
 };
 

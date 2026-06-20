@@ -4,6 +4,9 @@ import React, { useState } from "react";
 //Import CSS & styles
 import "./ButtonsStyle.css";
 
+//Import icons
+import { IconTrash } from "./ActionIcons";
+
 const DeleteButton = ({ onClick, id, customCSSClass }) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
@@ -19,24 +22,40 @@ const DeleteButton = ({ onClick, id, customCSSClass }) => {
   const handleCancelDelete = () => {
     setConfirmationOpen(false);
   };
+
   return (
     <>
       <button onClick={handleOpenModal} className={customCSSClass}>
-        <i class="fa-solid fa-trash"></i>
+        <span className="delete-button">
+          <IconTrash />
+        </span>
         <span className="tooltip-text">Eliminar</span>
       </button>
 
       {confirmationOpen && (
         <div className="delete-confirmation-overlay">
           <div className="delete-confirmation-modal">
-            <h4>¿Estás seguro de que querés eliminar este elemento?</h4>
+            <div className="delete-confirmation-icon">
+              <IconTrash />
+            </div>
+            <h4>¿Eliminar este elemento?</h4>
             <p>
-              Asegurate de que aquello que estás borrando no esté asociado a
-              otros elementos en la base de datos
+              Asegurate de que no esté asociado a otros elementos en la base
+              de datos. Esta acción no se puede deshacer.
             </p>
             <div className="delete-confirmation-btn-container">
-              <button onClick={handleConfirmDelete}>Si</button>
-              <button onClick={handleCancelDelete}>Cancelar</button>
+              <button
+                className="delete-confirmation-btn-cancel"
+                onClick={handleCancelDelete}
+              >
+                Cancelar
+              </button>
+              <button
+                className="delete-confirmation-btn-confirm delete-confirmation-btn-confirm--danger"
+                onClick={handleConfirmDelete}
+              >
+                Eliminar
+              </button>
             </div>
           </div>
         </div>

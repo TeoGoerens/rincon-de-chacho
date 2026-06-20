@@ -4,7 +4,6 @@ import PodridaPlayer from "../../dao/models/podrida/podridaPlayerModel.js";
 import PodridaMatch from "../../dao/models/podrida/podridaMatchModel.js";
 import baseRepository from "../baseRepository.js";
 
-import { sendBulkEmail } from "../../helpers/sendBulkEmail.js";
 import {
   calculateMostWins,
   calculateMostLastPlaces,

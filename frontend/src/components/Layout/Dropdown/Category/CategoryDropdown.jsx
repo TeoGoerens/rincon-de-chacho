@@ -37,7 +37,9 @@ const CategoryDropdown = ({ field, form }) => {
             </option>
           ))}
       </select>
-      <div>{form.touched["category"] && form.errors["category"]}</div>
+      <div className="error-message">
+        {form.touched["category"] && form.errors["category"]}
+      </div>
     </>
   );
 };

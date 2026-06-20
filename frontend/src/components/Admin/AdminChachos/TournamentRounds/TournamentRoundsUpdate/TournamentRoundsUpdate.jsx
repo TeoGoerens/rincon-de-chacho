@@ -1,6 +1,6 @@
 //Import React & Hooks
 import React, { useState, useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, Link } from "react-router-dom";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
@@ -13,7 +13,9 @@ import { formatDateForInput } from "../../../../../helpers/dateFormatter";
 import TournamentDropdown from "../../../../Layout/Dropdown/Tournament/TournamentDropdown";
 import RivalDropdown from "../../../../Layout/Dropdown/Rival/RivalDropdown";
 import PlayersToggleList from "../../../../Layout/ToggleList/PlayersToggleList";
-import AdminMenu from "../../../AdminMenu";
+
+//Import CSS & styles
+import "../TournamentRoundsFormStyle.css";
 
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
@@ -112,16 +114,27 @@ const TournamentRoundsUpdate = () => {
     return <Navigate to="/admin/chachos/tournament-rounds" />;
 
   return (
-    <>
-      <AdminMenu />
-      <h2>Editar fecha</h2>
+    <div className="ctr-form-page">
+      <div className="ctr-form-header">
+        <div className="ctr-form-header-text">
+          <div className="ctr-eyebrow">
+            <span className="ctr-eyebrow-dot" />
+            Chachos
+          </div>
+          <h1 className="ctr-form-title">Editar fecha</h1>
+        </div>
+        <Link className="ctr-back-link" to="/admin/chachos/tournament-rounds">
+          Volver
+        </Link>
+      </div>
+
       {appError || serverError ? (
-        <h5>
+        <p className="ctr-form-error-banner">
           {appError} {serverError}
-        </h5>
+        </p>
       ) : null}
 
-      <form onSubmit={formik.handleSubmit}>
+      <form className="ctr-form" onSubmit={formik.handleSubmit}>
         <TournamentDropdown
           field={{
             value: formik.values.tournament,
@@ -136,45 +149,64 @@ const TournamentRoundsUpdate = () => {
           }}
           form={formik}
         />
-        <label>Fecha</label>
-        <input
-          value={formatDateForInput(formik.values.match_date)}
-          onChange={formik.handleChange("match_date")}
-          onBlur={formik.handleBlur("match_date")}
-          type="date"
-          name="match_date"
-        ></input>
-        <div>{formik.touched.match_date && formik.errors.match_date}</div>
-        <label>Goles Chachos</label>
-        <input
-          value={formik.values.score_chachos}
-          onChange={formik.handleChange("score_chachos")}
-          onBlur={formik.handleBlur("score_chachos")}
-          type="number"
-          min="0"
-          name="score_chachos"
-        ></input>
-        <div>{formik.touched.score_chachos && formik.errors.score_chachos}</div>
-        <label>Goles rival</label>
-        <input
-          value={formik.values.score_rival}
-          onChange={formik.handleChange("score_rival")}
-          onBlur={formik.handleBlur("score_rival")}
-          type="number"
-          min="0"
-          name="score_rival"
-        ></input>
-        <div>{formik.touched.score_rival && formik.errors.score_rival}</div>
+
+        <div className="ctr-form-row">
+          <div className="ctr-field">
+            <label>Fecha</label>
+            <input
+              value={formatDateForInput(formik.values.match_date)}
+              onChange={formik.handleChange("match_date")}
+              onBlur={formik.handleBlur("match_date")}
+              type="date"
+              name="match_date"
+            ></input>
+            <div className="error-message">
+              {formik.touched.match_date && formik.errors.match_date}
+            </div>
+          </div>
+          <div className="ctr-field">
+            <label>Goles Chachos</label>
+            <input
+              value={formik.values.score_chachos}
+              onChange={formik.handleChange("score_chachos")}
+              onBlur={formik.handleBlur("score_chachos")}
+              type="number"
+              min="0"
+              name="score_chachos"
+            ></input>
+            <div className="error-message">
+              {formik.touched.score_chachos && formik.errors.score_chachos}
+            </div>
+          </div>
+          <div className="ctr-field">
+            <label>Goles rival</label>
+            <input
+              value={formik.values.score_rival}
+              onChange={formik.handleChange("score_rival")}
+              onBlur={formik.handleBlur("score_rival")}
+              type="number"
+              min="0"
+              name="score_rival"
+            ></input>
+            <div className="error-message">
+              {formik.touched.score_rival && formik.errors.score_rival}
+            </div>
+          </div>
+        </div>
 
         <PlayersToggleList
           selectedPlayers={selectedPlayers}
           setSelectedPlayers={setSelectedPlayers}
         />
-        <div>{formik.touched.players && formik.errors.players}</div>
+        <div className="error-message">
+          {formik.touched.players && formik.errors.players}
+        </div>
 
-        <button type="submit">Editar fecha</button>
+        <button className="ctr-submit-btn" type="submit">
+          Editar fecha
+        </button>
       </form>
-    </>
+    </div>
   );
 };
 

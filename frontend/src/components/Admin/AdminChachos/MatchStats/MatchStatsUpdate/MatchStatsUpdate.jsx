@@ -1,17 +1,10 @@
 //Import React & Hooks
 import React, { useState, useEffect } from "react";
-import { Navigate, Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
-
-//Import Formik & Yup
-import { useFormik } from "formik";
-import * as Yup from "yup";
-
-//Import components
-import AdminMenu from "../../../AdminMenu";
+import { Navigate, Link, useParams } from "react-router-dom";
 
 //Import CSS & styles
-import "./MatchStatsUpdateStyle.css";
+import "../../TournamentRounds/TournamentRoundsFormStyle.css";
+import "../MatchStatsCreate/MatchStatsCreateStyle.css";
 
 //Import helpers
 import { formatDate } from "../../../../../helpers/dateFormatter";
@@ -19,10 +12,20 @@ import { formatDate } from "../../../../../helpers/dateFormatter";
 //Import redux
 import { useDispatch, useSelector } from "react-redux";
 import { getTournamentRoundAction } from "../../../../../redux/slices/tournament-rounds/tournamentRoundsSlices";
-import { createMatchStatAction } from "../../../../../redux/slices/match-stats/matchStatsSlices";
+import {
+  getMatchStatsFilteredAction,
+  updateMatchStatAction,
+} from "../../../../../redux/slices/match-stats/matchStatsSlices";
 
-//Form schema
-const formSchema = Yup.object({});
+//Campos editables por jugador (los minutos no se usan en ningún lado del sitio)
+const STAT_FIELDS = [
+  { key: "goals", label: "Goles" },
+  { key: "assists", label: "Asist." },
+  { key: "yellow_cards", label: "Amarillas" },
+  { key: "red_cards", label: "Rojas" },
+];
+
+const emptyStats = () => ({ goals: 0, assists: 0, yellow_cards: 0, red_cards: 0 });
 
 //----------------------------------------
 //COMPONENT
@@ -39,203 +42,174 @@ const MatchStatsUpdate = () => {
   const { appError, serverError } = storeData;
   const tournamentRound = storeData?.tournamentRound?.tournamentRound;
   const storeDataStats = useSelector((store) => store.stats);
+  const filteredMatchStats = storeDataStats?.filteredMatchStats?.filteredMatchStats;
 
-  //Define the empty array matchStats
-  const [matchStats, setMatchStats] = useState([]);
+  //Estadísticas por jugador
+  const [statsByPlayer, setStatsByPlayer] = useState({});
 
-  //Define the array for errors on minutes played
-  const [minutesPlayedErrors, setMinutesPlayedErrors] = useState([]);
-  useEffect(() => {
-    if (tournamentRound?.players) {
-      setMinutesPlayedErrors(
-        tournamentRound?.players?.map((player) => player._id)
-      );
-    } else {
-      setMinutesPlayedErrors([]);
-    }
-  }, [tournamentRound?.players]);
-
-  //Get tournament round information from database every time the component renders
+  //Get tournament round + existing match stats every time the component renders
   useEffect(() => {
     dispatch(getTournamentRoundAction(id));
-  }, [id]);
+    dispatch(getMatchStatsFilteredAction({ round: id }));
+  }, [dispatch, id]);
 
-  //OnBlur function
-  const handleBlur = (fieldName, playerId) => (event) => {
-    //Tomo el valor proveniente del input
-    const inputValue = event.target.value === "" ? 0 : event.target.value;
-
-    //Tomo el array de playersId para ir limpiandolo a medida que cumpla con el requisito de minutos jugados
-    const minutesPlayedErrorsSupport = minutesPlayedErrors;
-
-    if (fieldName === "minutes_played") {
-      if (
-        inputValue > 90 ||
-        inputValue <= 0 ||
-        inputValue === null ||
-        inputValue === ""
-      ) {
-      } else {
-        const playerIndex = minutesPlayedErrorsSupport.indexOf(playerId);
-        minutesPlayedErrorsSupport.splice(playerIndex, 1);
-      }
+  //Inicializar el estado con las estadísticas ya guardadas para cada jugador convocado
+  useEffect(() => {
+    if (tournamentRound?.players) {
+      const initial = {};
+      tournamentRound.players.forEach((player) => {
+        const existingStat = filteredMatchStats?.find(
+          (stat) => stat.player?._id === player._id
+        );
+        initial[player._id] = existingStat
+          ? {
+              goals: existingStat.goals ?? 0,
+              assists: existingStat.assists ?? 0,
+              yellow_cards: existingStat.yellow_cards ?? 0,
+              red_cards: existingStat.red_cards ?? 0,
+            }
+          : emptyStats();
+      });
+      setStatsByPlayer(initial);
     }
+  }, [tournamentRound?.players, filteredMatchStats]);
 
-    setMinutesPlayedErrors(minutesPlayedErrorsSupport);
-
-    if (minutesPlayedErrors.length > 0) {
-      formik.errors.minutes_played =
-        "Inserta un valor logico de minutos jugados";
-    } else {
-      delete formik.errors.minutes_played;
-    }
-
-    //Tomo referencia del array matchStat y copio su contenido en un array soporte
-    let updatedMatchStats = matchStats;
-
-    //Verifico si existe informacion del jugador en cuestion. En caso de existir, me devuelve el indice dentro del array donde figura el objeto. De lo contrario devuelve -1
-    const existingPlayerIndex = matchStats.findIndex(
-      (jugador) => jugador.playerId === playerId
-    );
-
-    if (existingPlayerIndex >= 0) {
-      //Si el jugador existe crear/sobreescribir la propiedad con el valor que viene desde el input
-      updatedMatchStats[existingPlayerIndex][fieldName] = inputValue;
-    } else {
-      //Si el jugador no existe, entonces creo un nuevo objeto donde se agreguen dos valores, el playerId y el valor asociado al campo en cuestion
-      updatedMatchStats.push({ playerId: playerId, [fieldName]: inputValue });
-    }
-
-    setMatchStats(updatedMatchStats);
+  const handleFieldChange = (playerId, field, value) => {
+    const numericValue = value === "" ? 0 : Math.max(0, Number(value));
+    setStatsByPlayer((prev) => ({
+      ...prev,
+      [playerId]: { ...prev[playerId], [field]: numericValue },
+    }));
   };
 
-  //Formik configuration
-  const formik = useFormik({
-    initialValues: { matchStats: [] },
-    onSubmit: (values) => {
-      values = matchStats;
-      //Dispatch the action
-      dispatch(createMatchStatAction(values));
-    },
-    validationSchema: formSchema,
-  });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const payload = Object.entries(statsByPlayer).map(([playerId, stats]) => ({
+      playerId,
+      ...stats,
+    }));
+    dispatch(updateMatchStatAction(payload));
+  };
 
-  //Navigate to index in case there is an updated category
-  if (storeDataStats?.isCreated)
+  //Navigate to index once the stats have been updated
+  if (storeDataStats?.isUpdated)
     return <Navigate to="/admin/chachos/match-stats" />;
 
   return (
-    <>
-      <AdminMenu />
-      <div className="container update-match-stat-container">
-        <div className="update-match-stat-title">
-          <h2>Crear estadísticas para la fecha</h2>
-          <Link className="return-link" to="/admin/chachos/match-stats">
-            Volver
-          </Link>
+    <div className="ctr-form-page">
+      <div className="ctr-form-header">
+        <div className="ctr-form-header-text">
+          <div className="ctr-eyebrow">
+            <span className="ctr-eyebrow-dot" />
+            Chachos
+          </div>
+          <h1 className="ctr-form-title">Editar estadísticas de la fecha</h1>
+        </div>
+        <Link className="ctr-back-link" to="/admin/chachos/match-stats">
+          Volver
+        </Link>
+      </div>
+
+      {appError || serverError ? (
+        <p className="ctr-form-error-banner">{appError}</p>
+      ) : null}
+
+      <div className="msc-match-summary">
+        <span className="msc-match-summary-item">
+          {formatDate(tournamentRound?.match_date)}
+        </span>
+        <span className="msc-match-summary-sep">·</span>
+        <span className="msc-match-summary-item">
+          {tournamentRound?.tournament?.name}
+        </span>
+        <span className="msc-match-summary-sep">·</span>
+        <span className="msc-match-summary-item msc-match-summary-rival">
+          vs {tournamentRound?.rival?.name}
+        </span>
+        <span className="msc-match-summary-sep">·</span>
+        <span className="msc-match-summary-score">
+          {tournamentRound?.score_chachos} - {tournamentRound?.score_rival}
+        </span>
+      </div>
+
+      <form className="msc-form" onSubmit={handleSubmit}>
+        {/* ── Desktop: grid ── */}
+        <div className="msc-grid-wrap msc-desktop-only">
+          <div className="msc-grid">
+            <div className="msc-grid-header">
+              <span className="msc-col-player">Jugador</span>
+              {STAT_FIELDS.map((field) => (
+                <span className="msc-col-stat" key={field.key}>
+                  {field.label}
+                </span>
+              ))}
+            </div>
+
+            {tournamentRound?.players?.map((player) => (
+              <div className="msc-grid-row" key={player._id}>
+                <span className="msc-col-player msc-player-name">
+                  #{player.shirt} {player.first_name} {player.last_name}
+                </span>
+                {STAT_FIELDS.map((field) => (
+                  <span className="msc-col-stat" key={field.key}>
+                    <input
+                      type="number"
+                      min="0"
+                      inputMode="numeric"
+                      value={statsByPlayer[player._id]?.[field.key] ?? 0}
+                      onChange={(e) =>
+                        handleFieldChange(
+                          player._id,
+                          field.key,
+                          e.target.value
+                        )
+                      }
+                    />
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {appError || serverError ? (
-          <h5 className="error-message">{appError}</h5>
-        ) : null}
-
-        <div className="update-match-stat-details">
-          <h4>Detalles del partido:</h4>
-          <div>
-            <p>
-              Fecha: <span>{formatDate(tournamentRound?.match_date)}</span>
-            </p>
-          </div>
-          <div>
-            <p>
-              Torneo: <span>{tournamentRound?.tournament.name}</span>
-            </p>
-          </div>
-          <div>
-            <p>
-              Rival: <span>{tournamentRound?.rival.name}</span>
-            </p>
-          </div>
-          <div>
-            <p>
-              Resultado:{" "}
-              <span>
-                {tournamentRound?.score_chachos} -{" "}
-                {tournamentRound?.score_rival}
-              </span>
-            </p>
-          </div>
-        </div>
-
-        <form className="update-match-stat-form" onSubmit={formik.handleSubmit}>
-          <h4>Estadísticas de los jugadores</h4>
-
-          <div className="error-message">{formik.errors.minutes_played}</div>
-
+        {/* ── Mobile: cards apiladas ── */}
+        <div className="msc-mobile-list">
           {tournamentRound?.players?.map((player) => (
-            <div key={player._id} className="update-match-stat-form-player">
-              <label>
-                {player.first_name} {player.last_name}
-              </label>
-
-              <div className="update-match-stat-form-player-inputs">
-                {/* Minutos jugados */}
-                <div>
-                  <p>Minutos:</p>
-                  <input
-                    onBlur={handleBlur("minutes_played", player._id)}
-                    type="number"
-                    name={`${player._id}.minutes_played`}
-                  />
-                </div>
-
-                {/* Goles */}
-                <div>
-                  <p>Goles:</p>
-                  <input
-                    onBlur={handleBlur("goals", player._id)}
-                    type="number"
-                    name={`${player._id}.goals`}
-                  />
-                </div>
-
-                {/* Asistencias */}
-                <div>
-                  <p>Asistencias:</p>
-                  <input
-                    onBlur={handleBlur("assists", player._id)}
-                    type="number"
-                    name={`${player._id}.assists`}
-                  />
-                </div>
-
-                {/* Tarjetas amarillas */}
-                <div>
-                  <p>Amarillas:</p>
-                  <input
-                    onBlur={handleBlur("yellow_cards", player._id)}
-                    type="number"
-                    name={`${player._id}.yellow_cards`}
-                  />
-                </div>
-
-                {/* Tarjetas rojas */}
-                <div>
-                  <p>Rojas:</p>
-                  <input
-                    onBlur={handleBlur("red_cards", player._id)}
-                    type="number"
-                    name={`${player._id}.red_cards`}
-                  />
-                </div>
+            <div className="msc-mobile-card" key={player._id}>
+              <span className="msc-mobile-card-name">
+                #{player.shirt} {player.first_name} {player.last_name}
+              </span>
+              <div className="msc-mobile-stats-grid">
+                {STAT_FIELDS.map((field) => (
+                  <div className="msc-mobile-stat" key={field.key}>
+                    <span className="msc-mobile-stat-label">
+                      {field.label}
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      inputMode="numeric"
+                      value={statsByPlayer[player._id]?.[field.key] ?? 0}
+                      onChange={(e) =>
+                        handleFieldChange(
+                          player._id,
+                          field.key,
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           ))}
+        </div>
 
-          <button type="submit">Actualizar estadísticas</button>
-        </form>
-      </div>
-    </>
+        <button className="ctr-submit-btn" type="submit">
+          Guardar cambios
+        </button>
+      </form>
+    </div>
   );
 };
 

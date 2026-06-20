@@ -21,9 +21,6 @@ const resetDeleteTournamentRoundAction = createAction(
 const resetCreateTournamentRoundAction = createAction(
   "tournament-rounds/create-reset"
 );
-const resetUpdateOpenForVoteAction = createAction(
-  "tournament-rounds/open-for-vote-reset"
-);
 
 // --------------------
 // ACTIONS
@@ -284,45 +281,6 @@ export const deleteTournamentRoundAction = createAsyncThunk(
   }
 );
 
-// ---------- UPDATE OPEN FOR VOTE ----------
-export const updateOpenForVoteAction = createAsyncThunk(
-  "tournament-rounds/update/open-for-vote",
-  async (tournamentRoundId, { rejectWithValue, getState, dispatch }) => {
-    try {
-      //Retrieve information from the user
-      const token =
-        getState().users?.userAuth?.jwt ||
-        getState().users?.userAuth?.userToDisplay?.jwt ||
-        null;
-
-      //HTTP call
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      };
-      const endpoint = `${baseURL}/api/chachos/tournament-round/open-for-vote/${tournamentRoundId}`;
-
-      const response = await axios.put(
-        endpoint,
-        { tournamentRoundId: tournamentRoundId },
-        config
-      );
-
-      //Reset update state
-      dispatch(resetUpdateOpenForVoteAction());
-
-      return response.data;
-    } catch (error) {
-      if (!error?.response) {
-        throw error;
-      }
-      return rejectWithValue(error?.response?.data);
-    }
-  }
-);
-
 // --------------------
 // SLICES
 // --------------------
@@ -476,28 +434,6 @@ const tournamentRoundsSlices = createSlice({
       state.serverError = undefined;
     });
     builder.addCase(deleteTournamentRoundAction.rejected, (state, action) => {
-      state.loading = false;
-      state.appError = action?.payload?.message;
-      state.serverError = action?.error?.message;
-    });
-
-    // ---------- UPDATE OPEN FOR VOTE ----------
-    builder.addCase(updateOpenForVoteAction.pending, (state, action) => {
-      state.loading = true;
-      state.appError = undefined;
-      state.serverError = undefined;
-    });
-    builder.addCase(resetUpdateOpenForVoteAction, (state, action) => {
-      state.isEdited = true;
-    });
-    builder.addCase(updateOpenForVoteAction.fulfilled, (state, action) => {
-      state.loading = false;
-      state.updatedTournamentRound = action?.payload;
-      state.isEdited = false;
-      state.appError = undefined;
-      state.serverError = undefined;
-    });
-    builder.addCase(updateOpenForVoteAction.rejected, (state, action) => {
       state.loading = false;
       state.appError = action?.payload?.message;
       state.serverError = action?.error?.message;

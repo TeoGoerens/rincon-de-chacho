@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 
 //Admin USERS Components
 import AdminUsersPanel from "./AdminUsers/AdminUsersPanel";
@@ -39,15 +39,19 @@ import AdminChachosPanel from "./AdminChachos/AdminChachosPanel";
 import FootballCategoriesIndex from "./AdminChachos/FootballCategories/FootballCategoriesIndex";
 import FootballCategoriesCreate from "./AdminChachos/FootballCategories/FootballCategoriesCreate";
 import FootballCategoriesUpdate from "./AdminChachos/FootballCategories/FootballCategoriesUpdate";
+import FootballCategoriesDetail from "./AdminChachos/FootballCategories/FootballCategoriesDetail";
 import PlayersIndex from "./AdminChachos/Players/PlayersIndex";
 import PlayersCreate from "./AdminChachos/Players/PlayersCreate/PlayersCreate";
 import PlayersUpdate from "./AdminChachos/Players/PlayersUpdate/PlayersUpdate";
+import PlayersDetail from "./AdminChachos/Players/PlayersDetail/PlayersDetail";
 import TeamsIndex from "./AdminChachos/Teams/TeamsIndex";
 import TeamsCreate from "./AdminChachos/Teams/TeamsCreate";
 import TeamsUpdate from "./AdminChachos/Teams/TeamsUpdate";
+import TeamsDetail from "./AdminChachos/Teams/TeamsDetail";
 import TournamentsIndex from "./AdminChachos/Tournaments/TournamentsIndex";
 import TournamentsCreate from "./AdminChachos/Tournaments/TournamentsCreate";
 import TournamentsUpdate from "./AdminChachos/Tournaments/TournamentsUpdate";
+import TournamentsDetail from "./AdminChachos/Tournaments/TournamentsDetail";
 import TournamentRoundsIndex from "./AdminChachos/TournamentRounds/TournamentRoundsIndex";
 import TournamentRoundsCreate from "./AdminChachos/TournamentRounds/TournamentRoundsCreate/TournamentRoundsCreate";
 import TournamentRoundsDetail from "./AdminChachos/TournamentRounds/TournamentRoundsDetail/TournamentRoundsDetail";
@@ -55,6 +59,7 @@ import TournamentRoundsUpdate from "./AdminChachos/TournamentRounds/TournamentRo
 import MatchStatsIndex from "./AdminChachos/MatchStats/MatchStatsIndex";
 import MatchStatsCreate from "./AdminChachos/MatchStats/MatchStatsCreate/MatchStatsCreate";
 import MatchStatsUpdate from "./AdminChachos/MatchStats/MatchStatsUpdate/MatchStatsUpdate";
+import MatchStatsDetail from "./AdminChachos/MatchStats/MatchStatsDetail/MatchStatsDetail";
 import CreateCronica from "./AdminCronicas/Cronicas/CreateCronica";
 import UpdateCronica from "./AdminCronicas/Cronicas/UpdateCronica";
 
@@ -127,16 +132,21 @@ const AdminRoutes = () => {
           />
         </Route>
         {/* --------------- ADMIN CHACHOS --------------- */}
-        <Route path="chachos/*">
-          <Route index element={<AdminChachosPanel />} />
+        <Route path="chachos/*" element={<AdminChachosPanel />}>
+          <Route
+            index
+            element={<Navigate to="tournament-rounds" replace />}
+          />
           {/* Players routes */}
           <Route path="players" element={<PlayersIndex />} />
           <Route path="players/create" element={<PlayersCreate />} />
           <Route path="players/update/:id" element={<PlayersUpdate />} />
+          <Route path="players/view/:id" element={<PlayersDetail />} />
           {/* Teams routes */}
           <Route path="teams" element={<TeamsIndex />} />
           <Route path="teams/create" element={<TeamsCreate />} />
           <Route path="teams/update/:id" element={<TeamsUpdate />} />
+          <Route path="teams/view/:id" element={<TeamsDetail />} />
           {/* Football Categories routes */}
           <Route
             path="football-categories"
@@ -150,6 +160,10 @@ const AdminRoutes = () => {
             path="football-categories/update/:id"
             element={<FootballCategoriesUpdate />}
           />
+          <Route
+            path="football-categories/view/:id"
+            element={<FootballCategoriesDetail />}
+          />
           {/* Tournaments routes */}
           <Route path="tournaments" element={<TournamentsIndex />} />
           <Route path="tournaments/create" element={<TournamentsCreate />} />
@@ -157,6 +171,7 @@ const AdminRoutes = () => {
             path="tournaments/update/:id"
             element={<TournamentsUpdate />}
           />
+          <Route path="tournaments/view/:id" element={<TournamentsDetail />} />
           {/* Tournament Rounds routes */}
           <Route path="tournament-rounds" element={<TournamentRoundsIndex />} />
           <Route
@@ -166,15 +181,16 @@ const AdminRoutes = () => {
           <Route
             path="tournament-rounds/view/:id"
             element={<TournamentRoundsDetail />}
-          />{" "}
+          />
           <Route
             path="tournament-rounds/update/:id"
             element={<TournamentRoundsUpdate />}
           />
-          {/* Interviews routes */}
+          {/* Match stats routes */}
           <Route path="match-stats" element={<MatchStatsIndex />} />
           <Route path="match-stats/create/:id" element={<MatchStatsCreate />} />
           <Route path="match-stats/update/:id" element={<MatchStatsUpdate />} />
+          <Route path="match-stats/view/:id" element={<MatchStatsDetail />} />
         </Route>
       </Routes>
     </>

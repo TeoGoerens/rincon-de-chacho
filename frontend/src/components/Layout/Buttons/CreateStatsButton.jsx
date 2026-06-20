@@ -5,12 +5,15 @@ import { Link } from "react-router-dom";
 //Import CSS & styles
 import "./ButtonsStyle.css";
 
-//Import components
+//Import icons
+import { IconPlusCircle } from "./ActionIcons";
 
 const CreateStatsButton = ({ to }) => {
   return (
     <Link to={to}>
-      <span class="material-icons create-stat-button">add_circle</span>
+      <span className="create-stat-button">
+        <IconPlusCircle />
+      </span>
       <span className="tooltip-text">Crear estadística</span>
     </Link>
   );

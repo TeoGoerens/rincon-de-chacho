@@ -179,17 +179,19 @@ export default class TournamentRoundController {
       tournamentRound.open_for_vote = !tournamentRound.open_for_vote;
       await tournamentRound.save();
 
+      let failedEmails = [];
       if (tournamentRound.open_for_vote === false) {
         //Send email to all users informing that the tournament round is no longer available to vote. Check results
-        await repository.sendEmailToAllUsersToDisplayResults(tournamentRoundId);
+        failedEmails = await repository.sendEmailToAllUsersToDisplayResults(tournamentRoundId);
       } else {
         //Send email to all users informing that the tournament round is open for vote
-        await repository.sendEmailToAllUsersToRequestVotes(tournamentRoundId);
+        failedEmails = await repository.sendEmailToAllUsersToRequestVotes(tournamentRoundId);
       }
 
       res.status(200).json({
         message: `Tournament round with id ${tournamentRoundId} has toggled its open_for_vote status to ${tournamentRound.open_for_vote}`,
         tournamentRound,
+        failedEmails,
       });
     } catch (error) {
       next(error);

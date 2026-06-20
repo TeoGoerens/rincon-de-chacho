@@ -5,7 +5,7 @@ import sharp from "sharp";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import s3Client from "../config/s3/s3Client.js";
 import baseRepository from "./baseRepository.js";
-import transport from "../config/email/nodemailer.js";
+import { sendBulkEmail } from "../helpers/sendBulkEmail.js";
 
 export default class UserRepository extends baseRepository {
   constructor() {
@@ -99,23 +99,108 @@ export default class UserRepository extends baseRepository {
 
   // ---------- SEND PASSWORD RESET TOKEN VIA MAIL TO USER ----------
   sendViaEmailResetToken = async (user, token) => {
-    const mailOptions = {
-      from: "chacho@elrincondechacho.com",
-      to: user.email,
-      subject: "Chacal olvidadizo... Resetea tu contraseña",
-      html: `    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+    const subject = "Resetear contraseña";
+    const generateHTML = (recipient) => `
+<!DOCTYPE html>
+<html>
+  <body style="margin:0; padding:0; background-color:#0a0a0a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px; background-color:#0d0d0d; border-radius:16px; overflow:hidden; border:1px solid rgba(168,218,220,0.12);">
+            <!-- Top accent bar -->
+            <tr>
+              <td height="3" bgcolor="#a8dadc" style="background:linear-gradient(to right,#457b9d,#a8dadc,#457b9d); font-size:1px; line-height:1px;">&nbsp;</td>
+            </tr>
+            <!-- Header -->
+            <tr>
+              <td align="center" style="padding:30px 24px 22px; border-bottom:1px solid rgba(255,255,255,0.07);">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:10px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td width="34" height="34" align="center" valign="middle" bgcolor="#457b9d" style="background-color:#457b9d; border-radius:9px; font-family:'Poppins',Arial,sans-serif; font-weight:bold; color:#0a0a0a; font-size:16px;">C</td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td valign="middle">
+                      <span style="font-family:'Poppins',Arial,sans-serif; font-size:15px; font-weight:600; color:#e8e8e8; letter-spacing:0.02em;">El Rincón de <span style="color:#a8dadc;">Chacho</span></span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Icon badge (padlock) -->
+            <tr>
+              <td align="center" style="padding:32px 28px 0;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="52" height="52" align="center" valign="middle" bgcolor="#152a30" style="background-color:#152a30; border:1px solid rgba(168,218,220,0.3); border-radius:14px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td align="center" height="11" style="font-size:1px; line-height:1px;">
+                            <div style="width:14px; height:10px; border:2px solid #a8dadc; border-bottom:none; border-radius:7px 7px 0 0;">&nbsp;</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="22" height="15" bgcolor="#a8dadc" style="background-color:#a8dadc; border-radius:3px;">&nbsp;</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td align="center" style="padding:18px 28px 6px;">
+                <p style="margin:0 0 6px; font-family:'Poppins',Arial,sans-serif; font-size:12px; letter-spacing:0.18em; color:#98a8b8; text-transform:uppercase;">Cuenta</p>
+                <h1 style="margin:0 0 14px; font-family:'Poppins',Arial,sans-serif; font-size:23px; font-weight:700; color:#e8e8e8;">Resetear contraseña</h1>
+                <p style="margin:0; font-family:Roboto,Arial,sans-serif; font-size:15px; line-height:1.65; color:#c0cdd8; max-width:360px;">
+                  Hola ${recipient.first_name} ${recipient.last_name}, recibimos una solicitud para resetear tu contraseña. El siguiente link es válido por los próximos 10 minutos.
+                </p>
+              </td>
+            </tr>
+            <!-- CTA -->
+            <tr>
+              <td align="center" style="padding:26px 28px 8px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" bgcolor="#a8dadc" style="background-color:#a8dadc; border-radius:8px;">
+                      <a href="https://elrincondechacho.com/reset-password/${token}" style="display:inline-block; padding:13px 36px; font-family:'Poppins',Arial,sans-serif; font-size:14px; font-weight:600; color:#0a0a0a; text-decoration:none; letter-spacing:0.02em;">Resetear contraseña</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="padding:28px 28px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td height="1" style="background:linear-gradient(to right, transparent, rgba(168,218,220,0.35), transparent); font-size:1px; line-height:1px;">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:18px 28px 28px;">
+                <p style="margin:0 0 6px; font-family:'Poppins',Arial,sans-serif; font-size:10px; letter-spacing:0.25em; color:#5d7a87; text-transform:uppercase;">amigos &middot; f&uacute;tbol &middot; apuestas &middot; memoria</p>
+                <p style="margin:0; font-family:Roboto,Arial,sans-serif; font-size:11px; color:#4a5a6a;">
+                  Si no solicitaste este cambio, podés ignorar este mail.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+    `;
 
-      <h1>Hola ${user.first_name} ${user.last_name}</h1>
-      <h3>Sos un chacal muy distraído</h3>
-      <p>
-        Por favor hace click en el siguiente link, el cuál será válido por los próximos 10 minutos
-        <a href="https://elrincondechacho.com/reset-password/${token}">Resetear contraseña</a>
-      </p>
-    </div>`,
-    };
-    let mailSent = await transport.sendMail(mailOptions);
-
-    return mailSent;
+    await sendBulkEmail({ recipients: [user], subject, generateHTML });
   };
 
   // ---------- UPDATE PROFILE PICTURE ----------

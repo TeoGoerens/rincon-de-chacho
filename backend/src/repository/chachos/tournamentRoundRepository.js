@@ -4,7 +4,7 @@ import Tournament from "../../dao/models/chachos/tournamentModel.js";
 import User from "../../dao/models/userModel.js";
 import MatchStat from "../../dao/models/chachos/matchStatModel.js";
 import baseRepository from "../baseRepository.js";
-import transport from "../../config/email/nodemailer.js";
+import { sendBulkEmail } from "../../helpers/sendBulkEmail.js";
 
 export default class TournamentRoundRepository extends baseRepository {
   constructor() {
@@ -309,44 +309,236 @@ export default class TournamentRoundRepository extends baseRepository {
   sendEmailToAllUsersToRequestVotes = async (tournamentRoundId) => {
     const registeredUsers = await User.find({}, { first_name: 1, email: 1 });
 
-    const mailOptionsList = registeredUsers.map((user) => ({
-      from: "chacho@elrincondechacho.com",
-      to: user.email,
-      subject: "¡Atención chacal! Nueva fecha para votar",
-      html: `
-      <h1>Hola ${user.first_name},</h1>
-      <h3>Se abrió la votación para una nueva fecha de Chachos.</h3>
-      <p>No te pierdas la posibilidad de elegir las perlas y puntuar a cada uno de los jugadores.</p>
-      <p>Apurate e ingresá en el link debajo para dejar tu voto:</p>
-      <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/vote">Ver Fecha</a>
-    `,
-    }));
+    const subject = "Nueva fecha lista para votar";
+    const generateHTML = (user) => `
+<!DOCTYPE html>
+<html>
+  <body style="margin:0; padding:0; background-color:#0a0a0a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px; background-color:#0d0d0d; border-radius:16px; overflow:hidden; border:1px solid rgba(168,218,220,0.12);">
+            <!-- Top accent bar -->
+            <tr>
+              <td height="3" bgcolor="#a8dadc" style="background:linear-gradient(to right,#457b9d,#a8dadc,#457b9d); font-size:1px; line-height:1px;">&nbsp;</td>
+            </tr>
+            <!-- Header -->
+            <tr>
+              <td align="center" style="padding:30px 24px 22px; border-bottom:1px solid rgba(255,255,255,0.07);">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:10px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td width="34" height="34" align="center" valign="middle" bgcolor="#457b9d" style="background-color:#457b9d; border-radius:9px; font-family:'Poppins',Arial,sans-serif; font-weight:bold; color:#0a0a0a; font-size:16px;">C</td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td valign="middle">
+                      <span style="font-family:'Poppins',Arial,sans-serif; font-size:15px; font-weight:600; color:#e8e8e8; letter-spacing:0.02em;">El Rincón de <span style="color:#a8dadc;">Chacho</span></span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Icon badge -->
+            <tr>
+              <td align="center" style="padding:32px 28px 0;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="52" height="52" align="center" valign="middle" bgcolor="#152a30" style="background-color:#152a30; border:1px solid rgba(168,218,220,0.3); border-radius:14px;">
+                      <span style="font-family:Arial,sans-serif; font-size:22px; line-height:22px; color:#a8dadc;">&#10003;</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td align="center" style="padding:18px 28px 6px;">
+                <p style="margin:0 0 6px; font-family:'Poppins',Arial,sans-serif; font-size:12px; letter-spacing:0.18em; color:#98a8b8; text-transform:uppercase;">Chachos</p>
+                <h1 style="margin:0 0 14px; font-family:'Poppins',Arial,sans-serif; font-size:23px; font-weight:700; color:#e8e8e8;">Se abrió la votación</h1>
+                <p style="margin:0; font-family:Roboto,Arial,sans-serif; font-size:15px; line-height:1.65; color:#c0cdd8; max-width:360px;">
+                  Hola ${user.first_name}, se abrió la votación de la última fecha. Elegí las perlas y puntuá a cada jugador antes de que cierre.
+                </p>
+              </td>
+            </tr>
+            <!-- CTA -->
+            <tr>
+              <td align="center" style="padding:26px 28px 8px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" bgcolor="#a8dadc" style="background-color:#a8dadc; border-radius:8px;">
+                      <a href="https://elrincondechacho.com/chachos" style="display:inline-block; padding:13px 36px; font-family:'Poppins',Arial,sans-serif; font-size:14px; font-weight:600; color:#0a0a0a; text-decoration:none; letter-spacing:0.02em;">Votar ahora</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="padding:28px 28px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td height="1" style="background:linear-gradient(to right, transparent, rgba(168,218,220,0.35), transparent); font-size:1px; line-height:1px;">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:18px 28px 28px;">
+                <p style="margin:0 0 6px; font-family:'Poppins',Arial,sans-serif; font-size:10px; letter-spacing:0.25em; color:#5d7a87; text-transform:uppercase;">amigos &middot; f&uacute;tbol &middot; apuestas &middot; memoria</p>
+                <p style="margin:0; font-family:Roboto,Arial,sans-serif; font-size:11px; color:#4a5a6a;">
+                  Recib&iacute;s este mail porque est&aacute;s registrado en elrincondechacho.com
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+    `;
 
-    await Promise.all(
-      mailOptionsList.map((mailOptions) => transport.sendMail(mailOptions))
+    const results = await Promise.allSettled(
+      registeredUsers.map((user) =>
+        sendBulkEmail({ recipients: [user], subject, generateHTML })
+      )
     );
+    const failedEmails = [];
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.error(
+          `Failed to send vote-request email to ${registeredUsers[index].email}:`,
+          result.reason
+        );
+        failedEmails.push(registeredUsers[index].email);
+      }
+    });
+    return failedEmails;
   };
 
   // ---------- SEND EMAIL TO USERS TO DISPLAY RESULTS ----------
   sendEmailToAllUsersToDisplayResults = async (tournamentRoundId) => {
     const registeredUsers = await User.find({}, { first_name: 1, email: 1 });
 
-    const mailOptionsList = registeredUsers.map((user) => ({
-      from: "chacho@elrincondechacho.com",
-      to: user.email,
-      subject: "¡Se cerró la votación! Mirá los resultados",
-      html: `
-        <h1>Hola ${user.first_name},</h1>
-        <h3>Espero que no te hayas dormido y hayas dejado tu voto a tiempo.</h3>
-        <p>Ya cerró la fecha así que vas a poder consultar quiénes fueron los jugadores más destacados.</p>
-        <p>Ingresá en el link debajo para ver los resultados:</p>
-        <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/results">Ver Fecha</a>
-      `,
-    }));
+    const subject = "Resultados de la fecha disponibles";
+    const generateHTML = (user) => `
+<!DOCTYPE html>
+<html>
+  <body style="margin:0; padding:0; background-color:#0a0a0a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px; background-color:#0d0d0d; border-radius:16px; overflow:hidden; border:1px solid rgba(168,218,220,0.12);">
+            <!-- Top accent bar -->
+            <tr>
+              <td height="3" bgcolor="#a8dadc" style="background:linear-gradient(to right,#457b9d,#a8dadc,#457b9d); font-size:1px; line-height:1px;">&nbsp;</td>
+            </tr>
+            <!-- Header -->
+            <tr>
+              <td align="center" style="padding:30px 24px 22px; border-bottom:1px solid rgba(255,255,255,0.07);">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:10px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td width="34" height="34" align="center" valign="middle" bgcolor="#457b9d" style="background-color:#457b9d; border-radius:9px; font-family:'Poppins',Arial,sans-serif; font-weight:bold; color:#0a0a0a; font-size:16px;">C</td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td valign="middle">
+                      <span style="font-family:'Poppins',Arial,sans-serif; font-size:15px; font-weight:600; color:#e8e8e8; letter-spacing:0.02em;">El Rincón de <span style="color:#a8dadc;">Chacho</span></span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Icon badge -->
+            <tr>
+              <td align="center" style="padding:32px 28px 0;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="52" height="52" align="center" valign="middle" bgcolor="#152a30" style="background-color:#152a30; border:1px solid rgba(168,218,220,0.3); border-radius:14px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td width="5" height="12" bgcolor="#5d8a93" style="background-color:#5d8a93; border-radius:1px;">&nbsp;</td>
+                          <td width="3" style="font-size:1px;">&nbsp;</td>
+                          <td width="5" height="18" bgcolor="#83b8bd" style="background-color:#83b8bd; border-radius:1px;">&nbsp;</td>
+                          <td width="3" style="font-size:1px;">&nbsp;</td>
+                          <td width="5" height="22" bgcolor="#a8dadc" style="background-color:#a8dadc; border-radius:1px;">&nbsp;</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td align="center" style="padding:18px 28px 6px;">
+                <p style="margin:0 0 6px; font-family:'Poppins',Arial,sans-serif; font-size:12px; letter-spacing:0.18em; color:#98a8b8; text-transform:uppercase;">Chachos</p>
+                <h1 style="margin:0 0 14px; font-family:'Poppins',Arial,sans-serif; font-size:23px; font-weight:700; color:#e8e8e8;">Resultados disponibles</h1>
+                <p style="margin:0; font-family:Roboto,Arial,sans-serif; font-size:15px; line-height:1.65; color:#c0cdd8; max-width:360px;">
+                  Hola ${user.first_name}, la votación cerró. Ya podés ver quiénes fueron los jugadores más destacados de la fecha.
+                </p>
+              </td>
+            </tr>
+            <!-- CTA -->
+            <tr>
+              <td align="center" style="padding:26px 28px 8px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" bgcolor="#a8dadc" style="background-color:#a8dadc; border-radius:8px;">
+                      <a href="https://elrincondechacho.com/chachos/tournament-rounds/${tournamentRoundId}/results" style="display:inline-block; padding:13px 36px; font-family:'Poppins',Arial,sans-serif; font-size:14px; font-weight:600; color:#0a0a0a; text-decoration:none; letter-spacing:0.02em;">Ver resultados</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="padding:28px 28px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td height="1" style="background:linear-gradient(to right, transparent, rgba(168,218,220,0.35), transparent); font-size:1px; line-height:1px;">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:18px 28px 28px;">
+                <p style="margin:0 0 6px; font-family:'Poppins',Arial,sans-serif; font-size:10px; letter-spacing:0.25em; color:#5d7a87; text-transform:uppercase;">amigos &middot; f&uacute;tbol &middot; apuestas &middot; memoria</p>
+                <p style="margin:0; font-family:Roboto,Arial,sans-serif; font-size:11px; color:#4a5a6a;">
+                  Recib&iacute;s este mail porque est&aacute;s registrado en elrincondechacho.com
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+      `;
 
-    await Promise.all(
-      mailOptionsList.map((mailOptions) => transport.sendMail(mailOptions))
+    const results = await Promise.allSettled(
+      registeredUsers.map((user) =>
+        sendBulkEmail({ recipients: [user], subject, generateHTML })
+      )
     );
+    const failedEmails = [];
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.error(
+          `Failed to send results email to ${registeredUsers[index].email}:`,
+          result.reason
+        );
+        failedEmails.push(registeredUsers[index].email);
+      }
+    });
+    return failedEmails;
   };
 
   // ---------- UPDATE MATCH STATS FROM VOTES ----------

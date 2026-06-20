@@ -121,7 +121,7 @@ const AdminUsersPanel = () => {
         <div className="aup-header">
           <div className="aup-eyebrow">
             <span className="aup-eyebrow-dot" />
-            Panel de administración
+            Panel admin
           </div>
           <h1 className="aup-title">Usuarios</h1>
           <p className="aup-subtitle">

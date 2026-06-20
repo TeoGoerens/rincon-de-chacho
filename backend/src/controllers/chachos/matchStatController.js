@@ -138,19 +138,44 @@ export default class MatchStatController {
   // ---------- UPDATE MATCH STATS ----------
   updateMatchStat = async (req, res, next) => {
     try {
-      const matchStatId = req.params.pid;
+      const tournamentRoundId = req.params.pid;
+      const matchStats = req.body;
 
-      const newMatchStatInfo = {
-        goals: 2,
-      };
+      if (
+        !matchStats ||
+        !Array.isArray(matchStats) ||
+        matchStats.length === 0
+      ) {
+        return res.status(400).json({
+          message:
+            "Invalid request body. Please provide an array of match stats.",
+        });
+      }
 
-      const matchStatUpdated = await repository.updateMatchStat(
-        newMatchStatInfo,
-        matchStatId
-      );
+      let updatedMatchStats = [];
+      for (const matchStat of matchStats) {
+        try {
+          const newMatchStatInfo = {
+            goals: matchStat.goals,
+            assists: matchStat.assists,
+            yellow_cards: matchStat.yellow_cards,
+            red_cards: matchStat.red_cards,
+          };
+
+          const updatedMatchStat = await repository.updateMatchStat(
+            newMatchStatInfo,
+            { round: tournamentRoundId, player: matchStat.playerId }
+          );
+          updatedMatchStats.push(updatedMatchStat);
+        } catch (error) {
+          console.error(`Error updating match stat: ${error.message}`);
+          continue;
+        }
+      }
+
       res.status(200).json({
-        message: `Match stat with id ${matchStatId} has been properly updated`,
-        matchStatUpdated,
+        message: "Match stats have been successfully updated",
+        updatedMatchStats,
       });
     } catch (error) {
       next(error);

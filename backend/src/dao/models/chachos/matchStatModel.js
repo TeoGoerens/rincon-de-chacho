@@ -29,7 +29,7 @@ const matchStatSchema = new mongoose.Schema(
     },
     minutes_played: {
       type: Number,
-      required: true,
+      default: 90,
     },
     points: {
       type: Number,

@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════
+   TEAMS — LISTADO / CREAR / EDITAR / VER (Admin Chachos)
+   Prefijo: tmf
+   Reutiliza ctr-* / ctr-form-* de TournamentRounds
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Avatar en listado ── */
+.tmf-cell-team {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tmf-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tmf-avatar--empty {
+  display: inline-block;
+  background: var(--bg-panel);
+}
+
+/* ── Preview de avatar en formularios ── */
+.tmf-avatar-preview-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tmf-avatar-field {
+  flex: 1;
+}
+
+.tmf-avatar-preview {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tmf-avatar-preview--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+  text-align: center;
+}
+
+/* ── Vista de detalle ── */
+.tmfd-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.tmfd-avatar {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tmfd-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}

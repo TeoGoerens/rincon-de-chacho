@@ -4,7 +4,7 @@ import React, { useState } from "react";
 //Import CSS & styles
 import "./ButtonsStyle.css";
 
-const ToggleOpenForVote = ({ isOpen, onClick, id }) => {
+const ToggleOpenForVote = ({ isOpen, onClick, id, customCSSClass }) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -20,7 +20,10 @@ const ToggleOpenForVote = ({ isOpen, onClick, id }) => {
     setConfirmationOpen(false);
   };
 
-  const buttonClassName = isOpen ? "close-vote" : "open-vote";
+  const buttonClassName = `${isOpen ? "close-vote" : "open-vote"}${
+    customCSSClass ? ` ${customCSSClass}` : ""
+  }`;
+
   return (
     <>
       <button className={buttonClassName} onClick={handleOpenModal}>
@@ -30,11 +33,21 @@ const ToggleOpenForVote = ({ isOpen, onClick, id }) => {
       {confirmationOpen && (
         <div className="delete-confirmation-overlay">
           <div className="delete-confirmation-modal">
-            <h4>¿Estás seguro de que querés cambiar el estado de la fecha?</h4>
-            <p>Se informará a todos los usuarios registrados vía mail</p>
+            <h4>¿Cambiar el estado de la fecha?</h4>
+            <p>Se informará a todos los usuarios registrados vía mail.</p>
             <div className="delete-confirmation-btn-container">
-              <button onClick={handleConfirmToggle}>Si</button>
-              <button onClick={handleCancelToggle}>Cancelar</button>
+              <button
+                className="delete-confirmation-btn-cancel"
+                onClick={handleCancelToggle}
+              >
+                Cancelar
+              </button>
+              <button
+                className="delete-confirmation-btn-confirm"
+                onClick={handleConfirmToggle}
+              >
+                Confirmar
+              </button>
             </div>
           </div>
         </div>

@@ -1,10 +1,13 @@
 //Import React & Hooks
 import React, { useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, Link } from "react-router-dom";
 
 //Import Formik & Yup
 import { useFormik } from "formik";
 import * as Yup from "yup";
+
+//Import CSS & styles
+import "../TournamentRounds/TournamentRoundsFormStyle.css";
 
 //Import components
 import CategoryDropdown from "../../../Layout/Dropdown/Category/CategoryDropdown";
@@ -18,11 +21,9 @@ import {
 
 //Form schema
 const formSchema = Yup.object({
-  category: Yup.string().required(
-    "Por favor chacal elegi la categoria del torneo"
-  ),
-  name: Yup.string().required("Por favor chacal escribi el nombre del torneo"),
-  year: Yup.number().required("Por favor chacal escribi el año del torneo"),
+  category: Yup.string().required("Seleccioná la categoría del torneo"),
+  name: Yup.string().required("Ingresá el nombre del torneo"),
+  year: Yup.number().required("Ingresá el año del torneo"),
 });
 
 //----------------------------------------
@@ -35,7 +36,7 @@ const TournamentsUpdate = () => {
   //Dispatch const creation
   const dispatch = useDispatch();
 
-  //Get category information from database every time the component renders
+  //Get tournament information from database every time the component renders
   useEffect(() => {
     dispatch(getTournamentAction(id));
   }, [dispatch, id]);
@@ -46,6 +47,7 @@ const TournamentsUpdate = () => {
   const name = storeData?.tournament?.tournament?.name;
   const year = storeData?.tournament?.tournament?.year;
   const category = storeData?.tournament?.tournament?.category;
+  const categoryId = category?._id ?? category;
 
   //Formik configuration
   const formik = useFormik({
@@ -53,7 +55,7 @@ const TournamentsUpdate = () => {
     initialValues: {
       name,
       year,
-      category,
+      category: categoryId,
     },
     onSubmit: (values) => {
       //Dispatch the action
@@ -62,7 +64,6 @@ const TournamentsUpdate = () => {
           name: values.name,
           year: values.year,
           category: values.category,
-
           id,
         })
       );
@@ -70,46 +71,74 @@ const TournamentsUpdate = () => {
     validationSchema: formSchema,
   });
 
-  //Navigate to index in case there is an updated category
+  //Navigate to index in case there is an updated tournament
   if (storeData?.isEdited) return <Navigate to="/admin/chachos/tournaments" />;
 
   return (
-    <>
-      <h2>Editar torneo</h2>
-      {appError || serverError ? <h5>{appError}</h5> : null}
+    <div className="ctr-form-page">
+      <div className="ctr-form-header">
+        <div className="ctr-form-header-text">
+          <div className="ctr-eyebrow">
+            <span className="ctr-eyebrow-dot" />
+            Chachos
+          </div>
+          <h1 className="ctr-form-title">Editar torneo</h1>
+        </div>
+        <Link className="ctr-back-link" to="/admin/chachos/tournaments">
+          Volver
+        </Link>
+      </div>
 
-      <form onSubmit={formik.handleSubmit}>
-        <label>Nombre</label>
-        <input
-          value={formik.values.name}
-          onChange={formik.handleChange("name")}
-          onBlur={formik.handleBlur("name")}
-          type="text"
-          name="name"
-        ></input>
-        <div>{formik.touched.name && formik.errors.name}</div>
+      {appError || serverError ? (
+        <p className="ctr-form-error-banner">{appError}</p>
+      ) : null}
 
-        <CategoryDropdown
-          field={{
-            value: formik.values.category,
-            onBlur: formik.handleBlur("category"),
-          }}
-          form={formik}
-        />
+      <form className="ctr-form" onSubmit={formik.handleSubmit}>
+        <div className="ctr-form-row">
+          <div className="ctr-field">
+            <label>Nombre</label>
+            <input
+              value={formik.values.name ?? ""}
+              onChange={formik.handleChange("name")}
+              onBlur={formik.handleBlur("name")}
+              type="text"
+              name="name"
+            />
+            <div className="error-message">
+              {formik.touched.name && formik.errors.name}
+            </div>
+          </div>
 
-        <label>Año</label>
-        <input
-          value={formik.values.year}
-          onChange={formik.handleChange("year")}
-          onBlur={formik.handleBlur("year")}
-          type="text"
-          name="year"
-        ></input>
-        <div>{formik.touched.year && formik.errors.year}</div>
+          <div className="ctr-field">
+            <label>Año</label>
+            <input
+              value={formik.values.year ?? ""}
+              onChange={formik.handleChange("year")}
+              onBlur={formik.handleBlur("year")}
+              type="number"
+              name="year"
+            />
+            <div className="error-message">
+              {formik.touched.year && formik.errors.year}
+            </div>
+          </div>
+        </div>
 
-        <button type="submit">Editar torneo</button>
+        <div className="ctr-field">
+          <CategoryDropdown
+            field={{
+              value: formik.values.category,
+              onBlur: formik.handleBlur("category"),
+            }}
+            form={formik}
+          />
+        </div>
+
+        <button className="ctr-submit-btn" type="submit">
+          Guardar cambios
+        </button>
       </form>
-    </>
+    </div>
   );
 };
 

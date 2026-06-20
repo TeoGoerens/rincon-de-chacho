@@ -1,0 +1,178 @@
+/* ═══════════════════════════════════════════════════════════
+   PLAYERS — CREAR / EDITAR / VER (Admin Chachos)
+   Prefijo: plf
+   Reutiliza ctr-form-* de TournamentRoundsFormStyle.css
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Bio con contador ── */
+.plf-bio-wrap {
+  position: relative;
+}
+
+.ctr-form textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+  font-family: var(--secondary-font);
+  font-size: var(--text-base);
+  color: var(--text-body-dark);
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.75rem;
+  outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.ctr-form textarea:focus {
+  border-color: rgba(168, 218, 220, 0.45);
+  box-shadow: 0 0 0 3px rgba(168, 218, 220, 0.08);
+}
+
+.plf-bio-counter {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+}
+
+/* ── React Quill (Entrevista) ── */
+.plf-quill-wrap .quill {
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.plf-quill-wrap .ql-toolbar.ql-snow {
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.plf-quill-wrap .ql-snow .ql-stroke {
+  stroke: var(--text-subtle-dark);
+}
+
+.plf-quill-wrap .ql-snow .ql-fill {
+  fill: var(--text-subtle-dark);
+}
+
+.plf-quill-wrap .ql-snow .ql-picker {
+  color: var(--text-subtle-dark);
+}
+
+.plf-quill-wrap .ql-container.ql-snow {
+  border: none;
+}
+
+.plf-quill-wrap .ql-editor {
+  min-height: 160px;
+  font-family: var(--secondary-font);
+  font-size: var(--text-base);
+  color: var(--text-body-dark);
+}
+
+.plf-quill-wrap .ql-editor.ql-blank::before {
+  color: var(--text-subtle-dark);
+  font-style: normal;
+}
+
+/* ── Vista de detalle (solo lectura) ── */
+.plfd-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.plfd-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.plfd-shirt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--avatar-gradient);
+  font-family: "Urbanist", var(--secondary-font);
+  font-weight: var(--fw-extrabold);
+  font-size: var(--text-lg);
+  color: var(--bg-deep);
+}
+
+.plfd-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.plfd-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plfd-chip {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-tight);
+  color: var(--third-color);
+  background: rgba(168, 218, 220, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.75rem;
+}
+
+.plfd-section-title {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.plfd-bio {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-body-dark);
+  white-space: pre-wrap;
+}
+
+.plfd-interview {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-body-dark);
+}
+
+.plfd-empty {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+  font-style: italic;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .plfd-card {
+    padding: var(--space-md);
+  }
+}

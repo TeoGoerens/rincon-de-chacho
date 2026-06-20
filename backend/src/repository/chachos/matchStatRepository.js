@@ -62,24 +62,21 @@ export default class MatchStatRepository extends baseRepository {
     }
   };
 
-  // ---------- UPDATE VOTE ----------
-  updateMatchStat = async (newMatchStatInfo, matchStatId) => {
+  // ---------- UPDATE MATCH STAT ----------
+  updateMatchStat = async (newMatchStatInfo, filter) => {
     try {
       //Search in database based on dynamic filter options
-      const documentExists = await this.model.findOne({
-        _id: matchStatId,
-      });
+      const documentExists = await this.model.findOne(filter);
 
       if (!documentExists) {
         throw new Error(
           `This match stat document does not currently exist in database`
         );
       }
-      const document = await this.model.updateOne(
-        {
-          _id: matchStatId,
-        },
-        newMatchStatInfo
+      const document = await this.model.findOneAndUpdate(
+        filter,
+        newMatchStatInfo,
+        { new: true }
       );
       return document;
     } catch (error) {

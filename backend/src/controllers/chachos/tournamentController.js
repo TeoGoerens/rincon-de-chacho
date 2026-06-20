@@ -6,7 +6,9 @@ export default class TournamentController {
   getTournamentById = async (req, res, next) => {
     try {
       const tournamentId = req.params.pid;
-      const tournament = await repository.baseGetById(tournamentId);
+      const tournament = await repository.baseGetById(tournamentId, [
+        "category",
+      ]);
       res.status(200).json({
         message: `Tournament with id ${tournamentId} has been properly retrieved`,
         tournament,
