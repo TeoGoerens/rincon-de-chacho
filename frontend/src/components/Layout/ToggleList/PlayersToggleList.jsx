@@ -31,7 +31,7 @@ const PlayersToggleList = ({ selectedPlayers, setSelectedPlayers }) => {
 
   const matchesByPlayer = {};
   statsSummary?.individualRankings?.forEach((entry) => {
-    matchesByPlayer[entry._id] = entry.matches;
+    matchesByPlayer[entry.player?._id] = entry.matches;
   });
 
   //Ordenar por partidos jugados (desc) y, en caso de igualdad, por camiseta (asc)
