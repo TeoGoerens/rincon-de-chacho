@@ -1,0 +1,338 @@
+/* ═══════════════════════════════════════════════════════════
+   PRODE INDEX (Admin Podrida)  —  El Rincón de Chacho
+   Prefijo: pri
+   Compartido entre PodridaIndex y PodridaPlayerIndex
+   ═══════════════════════════════════════════════════════════ */
+
+.pri {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── Header ── */
+.pri-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.pri-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pri-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--third-color);
+}
+
+.pri-eyebrow-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--third-color);
+  flex-shrink: 0;
+}
+
+.pri-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+}
+
+.pri-subtitle {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+.pri-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--bg-deep);
+  background: var(--third-color);
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--transition-base);
+}
+
+.pri-create-btn:hover {
+  background: var(--secondary-color);
+  color: var(--text-bright);
+}
+
+/* ── Tabla ── */
+.pri-table-wrap {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.pri-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pri-table thead tr {
+  background: var(--bg-panel);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.pri-table th {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pri-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background var(--transition-base);
+}
+
+.pri-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.pri-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.pri-table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.pri-cell-date {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  white-space: nowrap;
+}
+
+.pri-cell-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.pri-cell-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-body-dark);
+}
+
+.pri-cell-email {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+/* ── Estados loading / error ── */
+.pri-state {
+  padding: 4rem 2rem;
+  text-align: center;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Acciones ── */
+.pri-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pri-actions .view-button,
+.pri-actions .edit-button,
+.pri-actions .delete-button {
+  font-size: 0.95rem;
+}
+
+.pri-actions .view-button { color: var(--third-color); }
+.pri-actions .edit-button { color: var(--status-yellow); }
+.pri-actions .delete-button { color: var(--status-red); }
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .pri-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pri-create-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Toggle entre vista desktop (tabla) y mobile (cards) ── */
+.pri-mobile-list {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .pri-desktop-only {
+    display: none;
+  }
+
+  .pri-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .pri-mobile-card {
+    background: var(--bg-card-dark);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-lg);
+    padding: 0.7rem var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .pri-mobile-row-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .pri-mobile-row-top .pri-cell-name {
+    font-size: var(--text-base);
+  }
+
+  .pri-mobile-row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .pri-mobile-row-bottom .pri-cell-date,
+  .pri-mobile-row-bottom .pri-cell-email {
+    font-size: var(--text-xs);
+  }
+
+  .pri-actions {
+    justify-content: flex-end;
+    gap: 0.2rem;
+  }
+}
+
+/* ── Badge de estado (torneos y jugadores) ──
+   Fondo tintado + punto de color: cada estado con identidad propia.
+   Contrastes verificados ≥ 7:1 sobre #111 (WebAIM). */
+.pri-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  padding: 0.28rem 0.75rem;
+}
+
+.pri-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.pri-badge--active {
+  color: var(--status-green);
+  background: var(--status-green-bg);
+}
+
+.pri-badge--draft {
+  color: var(--status-yellow);
+  background: var(--status-yellow-bg);
+}
+
+.pri-badge--finished {
+  color: var(--status-blue);
+  background: var(--status-blue-bg);
+}
+
+.pri-badge--inactive {
+  color: var(--text-muted-dark);
+  background: var(--status-neutral-bg);
+}
+
+.pri-badge--inplay {
+  color: var(--third-color);
+  background: var(--status-teal-bg);
+}
+
+/* ── Filtro superior (selector de torneo) ── */
+.pri-filter {
+  margin-bottom: var(--space-md);
+}
+
+.pri-filter select {
+  font-family: var(--secondary-font);
+  font-size: var(--text-base);
+  color: var(--text-body-dark);
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 2.2rem 0.55rem 0.75rem;
+  outline: none;
+  cursor: pointer;
+  color-scheme: dark;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%23909fb0' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  transition: border-color var(--transition-base);
+}
+
+.pri-filter select:focus {
+  border-color: rgba(168, 218, 220, 0.45);
+}
+
+.pri-filter select option {
+  background: var(--bg-panel);
+  color: var(--text-body-dark);
+}

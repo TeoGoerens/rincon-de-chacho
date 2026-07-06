@@ -5,7 +5,16 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import AdminUsersPanel from "./AdminUsers/AdminUsersPanel";
 
 //Admin PRODE Components
-import ProdePlaceholder from "../Prode/ProdePlaceholder";
+import AdminProdePanel from "./AdminProde/AdminProdePanel";
+import ProdeTournamentsIndex from "./AdminProde/Tournaments/ProdeTournamentsIndex";
+import CreateProdeTournament from "./AdminProde/Tournaments/CreateProdeTournament";
+import UpdateProdeTournament from "./AdminProde/Tournaments/UpdateProdeTournament";
+import ProdePlayersIndex from "./AdminProde/Players/ProdePlayersIndex";
+import CreateProdePlayer from "./AdminProde/Players/CreateProdePlayer";
+import UpdateProdePlayer from "./AdminProde/Players/UpdateProdePlayer";
+import ProdeMatchdaysIndex from "./AdminProde/Matchdays/ProdeMatchdaysIndex";
+import CreateProdeMatchday from "./AdminProde/Matchdays/CreateProdeMatchday";
+import UpdateProdeMatchday from "./AdminProde/Matchdays/UpdateProdeMatchday";
 
 //Admin PODRIDA Components
 import AdminPodridaPanel from "./AdminPodrida/AdminPodridaPanel";
@@ -58,7 +67,28 @@ const AdminRoutes = () => {
         <Route path="users" element={<AdminUsersPanel />} />
 
         {/* --------------- ADMIN PRODE --------------- */}
-        <Route path="prode/*" element={<ProdePlaceholder />} />
+        <Route path="prode/*" element={<AdminProdePanel />}>
+          <Route index element={<ProdeTournamentsIndex />} />
+          <Route path="torneos/crear" element={<CreateProdeTournament />} />
+          <Route
+            path="torneos/editar/:id"
+            element={<UpdateProdeTournament />}
+          />
+
+          <Route path="jugadores" element={<ProdePlayersIndex />} />
+          <Route path="jugadores/crear" element={<CreateProdePlayer />} />
+          <Route
+            path="jugadores/editar/:id"
+            element={<UpdateProdePlayer />}
+          />
+
+          <Route path="fechas" element={<ProdeMatchdaysIndex />} />
+          <Route path="fechas/crear" element={<CreateProdeMatchday />} />
+          <Route
+            path="fechas/editar/:id"
+            element={<UpdateProdeMatchday />}
+          />
+        </Route>
         {/* --------------- ADMIN PODRIDA --------------- */}
 
         <Route path="podrida/*" element={<AdminPodridaPanel />}>
