@@ -1,8 +1,82 @@
 import ProdePlayer from "../../dao/models/prode/ProdePlayerModel.js";
+import ProdeTournament from "../../dao/models/prode/ProdeTournamentModel.js";
+import ProdeMatchday from "../../dao/models/prode/ProdeMatchdayModel.js";
+import ProdePrediction from "../../dao/models/prode/ProdePredictionModel.js";
+import GdtSquad from "../../dao/models/prode/GdtSquadModel.js";
 
 export default class ProdePlayerRepository {
+  /* --------------- CREATE PRODE PLAYER --------------- */
+  createProdePlayer = async ({ name, active }) => {
+    const exists = await ProdePlayer.findOne({ name: name.trim() });
+    if (exists) throw new Error("Ya existe un jugador con ese nombre");
+
+    return ProdePlayer.create({ name: name.trim(), active });
+  };
+
   /* --------------- GET ALL PRODE PLAYERS --------------- */
   getAllProdePlayers = async () => {
     return ProdePlayer.find().sort({ name: 1 });
+  };
+
+  /* --------------- GET PRODE PLAYER BY ID --------------- */
+  getProdePlayerById = async (playerId) => {
+    const player = await ProdePlayer.findById(playerId);
+    if (!player) throw new Error("Jugador no encontrado");
+    return player;
+  };
+
+  /* --------------- UPDATE PRODE PLAYER --------------- */
+  updateProdePlayer = async (playerId, { name, active }) => {
+    const player = await ProdePlayer.findById(playerId);
+    if (!player) throw new Error("Jugador no encontrado");
+
+    if (name !== undefined) {
+      const duplicate = await ProdePlayer.findOne({
+        name: name.trim(),
+        _id: { $ne: playerId },
+      });
+      if (duplicate) throw new Error("Ya existe un jugador con ese nombre");
+      player.name = name.trim();
+    }
+    if (active !== undefined) player.active = active;
+
+    return player.save();
+  };
+
+  /* --------------- DELETE PRODE PLAYER --------------- */
+  /* Un jugador con historial no se borra (se desactiva): borrar rompería
+     las estadísticas de fechas y torneos ya jugados. */
+  deleteProdePlayer = async (playerId) => {
+    const player = await ProdePlayer.findById(playerId);
+    if (!player) throw new Error("Jugador no encontrado");
+
+    const [inDuels, inTournaments, inPredictions, inSquads] =
+      await Promise.all([
+        ProdeMatchday.exists({
+          $or: [
+            { "duels.playerA": playerId },
+            { "duels.playerB": playerId },
+          ],
+        }),
+        ProdeTournament.exists({
+          $or: [
+            { participants: playerId },
+            { champion: playerId },
+            { lastPlace: playerId },
+            { "monthlyWinners.winnerPlayerIds": playerId },
+            { "monthlyWinners.monthlyLoser": playerId },
+          ],
+        }),
+        ProdePrediction.exists({ player: playerId }),
+        GdtSquad.exists({ player: playerId }),
+      ]);
+
+    if (inDuels || inTournaments || inPredictions || inSquads) {
+      throw new Error(
+        "No se puede eliminar: el jugador tiene historial en el Prode. Podés desactivarlo en su lugar.",
+      );
+    }
+
+    return ProdePlayer.findByIdAndDelete(playerId);
   };
 }
