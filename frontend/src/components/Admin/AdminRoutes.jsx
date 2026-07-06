@@ -5,7 +5,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import AdminUsersPanel from "./AdminUsers/AdminUsersPanel";
 
 //Admin PRODE Components
-import AdminProdePanel from "./AdminProde/AdminProdePanel";
+import ProdePlaceholder from "../Prode/ProdePlaceholder";
 
 //Admin PODRIDA Components
 import AdminPodridaPanel from "./AdminPodrida/AdminPodridaPanel";
@@ -17,20 +17,6 @@ import PodridaPlayerIndex from "./AdminPodrida/Podridas/PodridaPlayerIndex";
 import CreatePodridaPlayer from "./AdminPodrida/Podridas/CreatePodridaPlayer";
 import UpdatePodridaPlayer from "./AdminPodrida/Podridas/UpdatePodridaPlayer";
 import PodridaPlayerDetail from "./AdminPodrida/Podridas/PodridaPlayerDetail";
-
-//Admin PRODE Components
-import ProdePlayersIndex from "./AdminProde/Players/ProdePlayersIndex";
-import CreateProdePlayer from "./AdminProde/Players/CreateProdePlayer";
-import UpdateProdePlayer from "./AdminProde/Players/UpdateProdePlayer";
-import ProdeTournamentsIndex from "./AdminProde/Tournaments/ProdeTournamentsIndex";
-import CreateProdeTournament from "./AdminProde/Tournaments/CreateProdeTournament";
-import UpdateProdeTournament from "./AdminProde/Tournaments/UpdateProdeTournament";
-import ProdeMatchdaysIndex from "./AdminProde/Matchdays/ProdeMatchdaysIndex";
-import CreateProdeMatchday from "./AdminProde/Matchdays/CreateProdeMatchday";
-import UpdateProdeMatchday from "./AdminProde/Matchdays/UpdateProdeMatchday";
-import UpdateProdeMatchdayFull from "./AdminProde/Matchdays/UpdateProdeMatchdayFull";
-import ViewProdeMatchday from "./AdminProde/Matchdays/ViewProdeMatchday";
-import ViewProdeTournament from "./AdminProde/Tournaments/ViewProdeTournament";
 
 //Admin CRONICAS Components
 import AdminCronicasPanel from "./AdminCronicas/AdminCronicasPanel";
@@ -72,25 +58,7 @@ const AdminRoutes = () => {
         <Route path="users" element={<AdminUsersPanel />} />
 
         {/* --------------- ADMIN PRODE --------------- */}
-        <Route path="prode/*" element={<AdminProdePanel />}>
-          <Route index element={<ProdePlayersIndex />} />
-          <Route path="crear" element={<CreateProdePlayer />} />
-          <Route path="editar/:id" element={<UpdateProdePlayer />} />
-
-          <Route path="torneos" element={<ProdeTournamentsIndex />} />
-          <Route path="torneos/crear" element={<CreateProdeTournament />} />
-          <Route
-            path="torneos/editar/:id"
-            element={<UpdateProdeTournament />}
-          />
-          <Route path="torneos/ver/:id" element={<ViewProdeTournament />} />
-
-          <Route path="fechas" element={<ProdeMatchdaysIndex />} />
-          <Route path="fechas/crear" element={<CreateProdeMatchday />} />
-          <Route path="fechas/editar/:id" element={<UpdateProdeMatchday />} />
-          <Route path="fechas/:id" element={<UpdateProdeMatchdayFull />} />
-          <Route path="fechas/:id/view" element={<ViewProdeMatchday />} />
-        </Route>
+        <Route path="prode/*" element={<ProdePlaceholder />} />
         {/* --------------- ADMIN PODRIDA --------------- */}
 
         <Route path="podrida/*" element={<AdminPodridaPanel />}>

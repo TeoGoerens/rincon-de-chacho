@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import prodeItemSchema from "./schemas/prodeItemSchema.js";
+import { MATCHDAY_PHASES } from "./prodeConstants.js";
 
 /* -------- Challenge -------- */
 const challengeSchema = new mongoose.Schema(
@@ -83,10 +85,62 @@ const prodeMatchdaySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    status: {
+
+    /* Ciclo de vida de la fecha (rebuild 2026). Única fuente de verdad del
+       estado: el campo legacy `status` (scheduled/played) fue retirado y las
+       fechas históricas reciben phase:"consolidated" vía script de backfill. */
+    phase: {
       type: String,
-      enum: ["scheduled", "played"],
-      default: "scheduled",
+      enum: MATCHDAY_PHASES,
+      default: "draft",
+    },
+
+    /* Deadline oficial de carga de pronósticos, lo fija el admin al crear. */
+    predictionsDeadline: {
+      type: Date,
+      default: null,
+    },
+
+    /* Partidos y preguntas de ARG + MISC (schema compartido). */
+    items: {
+      type: [prodeItemSchema],
+      default: [],
+    },
+
+    /* Con qué equipo GDT se juega esta fecha. */
+    gdtTeam: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "GdtTeam",
+      default: null,
+    },
+
+    /* Puntaje GDT por jugador real: se carga UNA vez y se replica en todos
+       los planteles que lo incluyen. */
+    gdtScores: {
+      type: [
+        {
+          _id: false,
+          realPlayer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "GdtRealPlayer",
+            required: true,
+          },
+          points: { type: Number, required: true },
+        },
+      ],
+      default: [],
+    },
+
+    /* Participantes con la carga reabierta por el admin post-deadline.
+       Los ítems con kickoff pasado igual quedan bloqueados para ellos. */
+    reopenedFor: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ProdePlayer",
+        },
+      ],
+      default: [],
     },
 
     // ✅ Fixture permitido: puede estar vacío al crear
@@ -97,6 +151,8 @@ const prodeMatchdaySchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+prodeMatchdaySchema.index({ tournament: 1, roundNumber: 1 });
 
 const ProdeMatchday = mongoose.model("ProdeMatchday", prodeMatchdaySchema);
 export default ProdeMatchday;

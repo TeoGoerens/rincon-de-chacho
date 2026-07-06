@@ -14,7 +14,7 @@ import ForgotPassword from "./components/Users/PasswordManagement/ForgotPassword
 import ResetPassword from "./components/Users/PasswordManagement/ResetPassword";
 import PodridaRoutes from "./components/Podrida/PodridaRoutes";
 import CronicaRoutes from "./components/Cronicas/CronicaRoutes";
-import ProdeRoutes from "./components/Prode/ProdeRoutes.jsx";
+import ProdePlaceholder from "./components/Prode/ProdePlaceholder.jsx";
 
 /* --------------- REACT QUERY --------------- */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -57,7 +57,7 @@ function App() {
             <Route path="/home" Component={Home} />
             <Route path="/photo-gallery" Component={PhotoGallery} />
             <Route path="/podrida/*" Component={PodridaRoutes} />
-            <Route path="/prode/*" Component={ProdeRoutes} />
+            <Route path="/prode/*" Component={ProdePlaceholder} />
             <Route path="/cronicas/*" Component={CronicaRoutes} />
             <Route path="/chachos/*" Component={ChachosRoutes} />
 

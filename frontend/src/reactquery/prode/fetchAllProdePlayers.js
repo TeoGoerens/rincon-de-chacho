@@ -20,10 +20,12 @@ const fetchAllProdePlayers = async () => {
       },
     });
 
-    return response.data;
+    return response.data.players;
   } catch (error) {
-    console.error("❌ Error en fetchAllProdePlayers:", error);
-    throw error;
+    throw new Error(
+      error?.response?.data?.message ||
+        "No se pudieron obtener los jugadores del Prode",
+    );
   }
 };
 

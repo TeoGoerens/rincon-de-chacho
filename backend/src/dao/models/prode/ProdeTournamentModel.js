@@ -100,6 +100,18 @@ const prodeTournamentSchema = new mongoose.Schema(
       type: [monthlyWinnerSchema],
       default: [],
     },
+
+    /* Participantes habilitados a jugar este torneo (rebuild 2026).
+       Los torneos históricos quedan con [] y las estadísticas no lo usan. */
+    participants: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ProdePlayer",
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true },
 );
