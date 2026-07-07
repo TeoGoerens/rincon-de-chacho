@@ -3,6 +3,19 @@ import ProdePlayerRepository from "../../repository/prode/prodePlayerRepository.
 const repository = new ProdePlayerRepository();
 
 export default class ProdePlayerController {
+  /* --------------- GET MY PRODE PLAYER --------------- */
+  getMyProdePlayer = async (req, res, next) => {
+    try {
+      const player = await repository.getMyProdePlayer(req.user.id);
+      res.status(200).json({
+        message: "My Prode player retrieved successfully",
+        player,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /* --------------- CREATE PRODE PLAYER --------------- */
   createProdePlayer = async (req, res, next) => {
     try {

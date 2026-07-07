@@ -13,8 +13,8 @@ import "./AdminProdePanelStyles.css";
 //----------------------------------------
 
 const SUB_SECTIONS = [
-  { label: "Torneos", to: "", end: true, icon: "fa-trophy" },
   { label: "Fechas", to: "fechas", end: false, icon: "fa-calendar-days" },
+  { label: "Torneos", to: "torneos", end: false, icon: "fa-trophy" },
   { label: "Jugadores", to: "jugadores", end: false, icon: "fa-circle-user" },
 ];
 

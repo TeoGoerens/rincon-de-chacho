@@ -2,7 +2,8 @@ import axios from "axios";
 import { baseURL } from "../../helpers/baseURL";
 import { getUserJWT } from "../getUserInformation";
 
-const fetchProdeMatchdayById = async (matchdayId) => {
+/* Versión admin de los parciales: para la vista previa de la consolidación */
+const fetchProdeMatchdayPartialsAdmin = async (matchdayId) => {
   const token = getUserJWT();
   if (!token) {
     throw new Error("Token inválido o expirado. Volvé a iniciar sesión.");
@@ -10,19 +11,15 @@ const fetchProdeMatchdayById = async (matchdayId) => {
 
   try {
     const response = await axios.get(
-      `${baseURL}/api/prode/matchday/${matchdayId}`,
+      `${baseURL}/api/prode/matchday/${matchdayId}/partials/all`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
-    /* participantAvatars: { playerId: profile_picture } vía user vinculado */
-    return {
-      ...response.data.matchday,
-      participantAvatars: response.data.participantAvatars ?? {},
-    };
+    return response.data.partials;
   } catch (error) {
     throw new Error(
-      error?.response?.data?.message || "Error al obtener la fecha",
+      error?.response?.data?.message || "Error al obtener los parciales",
     );
   }
 };
 
-export default fetchProdeMatchdayById;
+export default fetchProdeMatchdayPartialsAdmin;

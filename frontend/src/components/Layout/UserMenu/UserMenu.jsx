@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { logoutUserAction, updateLocalProfilePictureAction } from "../../../redux/slices/users/usersSlices";
 import uploadProfilePicture from "../../../reactquery/users/uploadProfilePicture";
@@ -12,6 +12,7 @@ const hasCustomPhoto = (pic) => pic && !pic.includes("pixabay.com");
 function UserMenu({ userMenuOpen, handleToggleUserMenu }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { userAuth } = useSelector((store) => store.users);
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -38,6 +39,10 @@ function UserMenu({ userMenuOpen, handleToggleUserMenu }) {
 
   const handleLogout = () => {
     dispatch(logoutUserAction());
+    /* El cache de React Query es del USUARIO: si queda vivo, el próximo
+       login en este navegador arranca viendo datos del anterior (ej. el
+       pronóstico de otro participante en el form del Prode) */
+    queryClient.clear();
     handleToggleUserMenu();
     navigate("/");
   };

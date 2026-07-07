@@ -2,7 +2,9 @@ import axios from "axios";
 import { baseURL } from "../../helpers/baseURL";
 import { getUserJWT } from "../getUserInformation";
 
-const fetchProdeMatchdayById = async (matchdayId) => {
+/* Versión admin: pronósticos de todos sin exigir ser participante
+   (el admin la necesita para arbitrar las preguntas) */
+const fetchProdeMatchdayAllPredictions = async (matchdayId) => {
   const token = getUserJWT();
   if (!token) {
     throw new Error("Token inválido o expirado. Volvé a iniciar sesión.");
@@ -10,19 +12,15 @@ const fetchProdeMatchdayById = async (matchdayId) => {
 
   try {
     const response = await axios.get(
-      `${baseURL}/api/prode/matchday/${matchdayId}`,
+      `${baseURL}/api/prode/matchday/${matchdayId}/predictions/all`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
-    /* participantAvatars: { playerId: profile_picture } vía user vinculado */
-    return {
-      ...response.data.matchday,
-      participantAvatars: response.data.participantAvatars ?? {},
-    };
+    return response.data.predictions;
   } catch (error) {
     throw new Error(
-      error?.response?.data?.message || "Error al obtener la fecha",
+      error?.response?.data?.message || "Error al obtener los pronósticos",
     );
   }
 };
 
-export default fetchProdeMatchdayById;
+export default fetchProdeMatchdayAllPredictions;

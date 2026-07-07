@@ -68,7 +68,9 @@ const AdminRoutes = () => {
 
         {/* --------------- ADMIN PRODE --------------- */}
         <Route path="prode/*" element={<AdminProdePanel />}>
-          <Route index element={<ProdeTournamentsIndex />} />
+          {/* Fechas es la sub-sección por defecto: es la operación frecuente */}
+          <Route index element={<Navigate to="fechas" replace />} />
+          <Route path="torneos" element={<ProdeTournamentsIndex />} />
           <Route path="torneos/crear" element={<CreateProdeTournament />} />
           <Route
             path="torneos/editar/:id"

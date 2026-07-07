@@ -3,8 +3,21 @@ import ProdeTournament from "../../dao/models/prode/ProdeTournamentModel.js";
 import ProdeMatchday from "../../dao/models/prode/ProdeMatchdayModel.js";
 import ProdePrediction from "../../dao/models/prode/ProdePredictionModel.js";
 import GdtSquad from "../../dao/models/prode/GdtSquadModel.js";
+import User from "../../dao/models/userModel.js";
 
 export default class ProdePlayerRepository {
+  /* --------------- GET MY PRODE PLAYER --------------- */
+  /* Jugador de Prode vinculado al usuario logueado (null si no está
+     vinculado): el frontend lo usa para saber qué mostrar sin exigir ser
+     participante */
+  getMyProdePlayer = async (userId) => {
+    const user = await User.findById(userId, { prode_player: 1 }).populate(
+      "prode_player",
+      "name active",
+    );
+    return user?.prode_player ?? null;
+  };
+
   /* --------------- CREATE PRODE PLAYER --------------- */
   createProdePlayer = async ({ name, active }) => {
     const exists = await ProdePlayer.findOne({ name: name.trim() });

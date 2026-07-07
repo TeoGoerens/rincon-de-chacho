@@ -35,7 +35,7 @@ const CreateProdeTournament = () => {
     onSuccess: () => {
       toast.success("Torneo creado con éxito");
       queryClient.invalidateQueries(["prode-tournaments"]);
-      navigate("/admin/prode");
+      navigate("/admin/prode/torneos");
     },
     onError: (error) => {
       toast.error(error?.message || "Error al crear el torneo");
@@ -100,7 +100,7 @@ const CreateProdeTournament = () => {
             </div>
             <h1 className="prf-title">Crear nuevo torneo</h1>
           </div>
-          <Link className="prf-back-link" to="/admin/prode">
+          <Link className="prf-back-link" to="/admin/prode/torneos">
             Volver
           </Link>
         </div>

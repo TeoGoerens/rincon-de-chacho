@@ -225,7 +225,8 @@
 }
 
 .prf-form input,
-.prf-form select {
+.prf-form select,
+.prf-form textarea {
   font-family: var(--secondary-font);
   font-size: var(--text-base);
   color: var(--text-body-dark);
@@ -259,9 +260,31 @@
 }
 
 .prf-form input:focus,
-.prf-form select:focus {
+.prf-form select:focus,
+.prf-form textarea:focus {
   border-color: rgba(168, 218, 220, 0.45);
   box-shadow: 0 0 0 3px rgba(168, 218, 220, 0.08);
+}
+
+/* Campo bloqueado: grisado evidente (ej. deadline en fecha en juego) */
+.prf-form input:disabled,
+.prf-form select:disabled,
+.prf-form textarea:disabled {
+  opacity: 0.45;
+  color: var(--text-subtle-dark);
+  background: var(--status-neutral-bg);
+  border-color: rgba(255, 255, 255, 0.05);
+  cursor: not-allowed;
+}
+
+.prf-form input:disabled::-webkit-calendar-picker-indicator {
+  cursor: not-allowed;
+  filter: invert(0.4);
+}
+
+.prf-form textarea {
+  resize: vertical;
+  min-height: 2.6rem;
 }
 
 .prf-field {
@@ -384,6 +407,243 @@
   cursor: not-allowed;
 }
 
+/* ════════════════════════════════════════════════════════════
+   RESULTADOS Y ARBITRAJE (fecha en juego)
+   ════════════════════════════════════════════════════════════ */
+
+.prf-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+}
+
+.prf-result-item + .prf-result-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prf-result-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+/* Pill de estado canónica: fondo tintado + punto currentColor */
+.prf-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  border-radius: var(--radius-full);
+  padding: 0.2rem 0.65rem;
+  white-space: nowrap;
+}
+
+.prf-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background-color: currentColor;
+}
+
+.prf-status--scheduled {
+  color: var(--text-subtle-dark);
+  background-color: var(--status-neutral-bg);
+}
+
+.prf-status--finished {
+  color: var(--status-green);
+  background-color: var(--status-green-bg);
+}
+
+.prf-status--annulled {
+  color: var(--status-red);
+  background-color: rgba(230, 57, 70, 0.12);
+}
+
+.prf-result-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.prf-result-score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.prf-result-score input {
+  width: 56px;
+  text-align: center;
+}
+
+.prf-result-dash {
+  font-family: var(--secondary-font);
+  color: var(--text-subtle-dark);
+}
+
+.prf-annul-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid rgba(230, 57, 70, 0.4);
+  border-radius: var(--radius-xs);
+  padding: 0.3rem 0.8rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--status-red);
+  cursor: pointer;
+  transition: border-color var(--transition-base);
+}
+
+.prf-annul-btn:hover:not(:disabled) {
+  border-color: var(--status-red);
+}
+
+.prf-annul-btn--restore {
+  border-color: rgba(168, 218, 220, 0.4);
+  color: var(--third-color);
+}
+
+.prf-annul-btn--restore:hover:not(:disabled) {
+  border-color: var(--third-color);
+}
+
+.prf-answers-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.prf-answer-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.45rem 0;
+}
+
+.prf-answer-row + .prf-answer-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.prf-answer-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  min-width: 90px;
+}
+
+.prf-answer-text {
+  flex: 1;
+  font-family: var(--primary-font);
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  overflow-wrap: anywhere;
+}
+
+.prf-verdict-group {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.prf-verdict-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.7rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    color var(--transition-base);
+}
+
+.prf-verdict-btn--yes.prf-verdict-btn--selected {
+  color: var(--status-green);
+  background-color: var(--status-green-bg);
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.prf-verdict-btn--no.prf-verdict-btn--selected {
+  color: var(--status-red);
+  background-color: rgba(230, 57, 70, 0.12);
+  border-color: rgba(230, 57, 70, 0.5);
+}
+
+/* ── Consolidación ── */
+.prf-cons-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) 0;
+}
+
+.prf-cons-row + .prf-cons-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prf-cons-names {
+  font-family: var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.prf-cons-names span {
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-regular);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  margin-inline: 0.3rem;
+}
+
+.prf-cons-sums {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-muted-dark);
+}
+
+.prf-cons-gdt-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.prf-cons-preview {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--third-color);
+}
+
+@media (max-width: 600px) {
+  .prf-answer-row {
+    flex-wrap: wrap;
+  }
+
+  .prf-answer-name {
+    min-width: 0;
+  }
+
+  .prf-verdict-group {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
 .prf-hint {
   font-family: var(--primary-font);
   font-size: var(--text-xs);
@@ -424,11 +684,179 @@
   flex-shrink: 0;
 }
 
+/* Mobile: cada duelo como card con los selects apilados y el vs entre ambos */
 @media (max-width: 600px) {
   .prf-duel-row {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    row-gap: 0.4rem;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.75rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .prf-duel-number {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    width: auto;
+    text-align: left;
+  }
+
+  .prf-duel-row select {
+    grid-column: 2;
+  }
+
+  .prf-duel-vs {
+    grid-column: 2;
+    justify-self: center;
+  }
+}
+
+/* ── Carrito de ítems ARG / MISC ── */
+.prf-card-count {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+  margin-left: var(--space-xs);
+}
+
+.prf-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.prf-item-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.6rem 0.85rem;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+}
+
+.prf-item-kind {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.prf-item-kind--match {
+  color: var(--third-color);
+  background: var(--status-teal-bg);
+}
+
+.prf-item-kind--question {
+  color: var(--status-yellow);
+  background: var(--status-yellow-bg);
+}
+
+.prf-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.prf-item-main {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  overflow-wrap: anywhere;
+}
+
+.prf-item-meta {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+}
+
+.prf-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+}
+
+.prf-item-form-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.prf-item-form-actions .prf-submit-btn {
+  margin-top: 0;
+}
+
+.prf-cancel-btn {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-subtle-dark);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.65rem 1.2rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+.prf-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-bright);
+}
+
+.prf-item-add-row {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.prf-add-item-btn {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-body-dark);
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+.prf-add-item-btn:hover {
+  border-color: var(--third-color);
+  color: var(--third-color);
+}
+
+.prf-points-row {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.prf-points-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .prf-item-row {
     flex-wrap: wrap;
   }
-  .prf-duel-row select {
-    flex-basis: 100%;
+
+  .prf-item-body {
+    flex-basis: calc(100% - 5.5rem);
   }
 }

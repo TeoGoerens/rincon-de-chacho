@@ -68,7 +68,7 @@ const ProdeTournamentsIndex = () => {
               : "Cargando..."}
           </p>
         </div>
-        <Link className="pri-create-btn" to="torneos/crear">
+        <Link className="pri-create-btn" to="crear">
           <i className="fa-solid fa-plus"></i>
           Nuevo torneo
         </Link>
@@ -127,7 +127,7 @@ const ProdeTournamentsIndex = () => {
                     </td>
                     <td>
                       <div className="pri-actions">
-                        <EditButton to={`torneos/editar/${tournament._id}`} />
+                        <EditButton to={`editar/${tournament._id}`} />
                         <DeleteButton
                           onClick={deleteMutation.mutate}
                           id={{ tournamentId: tournament._id }}
@@ -147,7 +147,7 @@ const ProdeTournamentsIndex = () => {
                 <div className="pri-mobile-row-top">
                   <span className="pri-cell-name">{tournament.name}</span>
                   <div className="pri-actions">
-                    <EditButton to={`torneos/editar/${tournament._id}`} />
+                    <EditButton to={`editar/${tournament._id}`} />
                     <DeleteButton
                       onClick={deleteMutation.mutate}
                       id={{ tournamentId: tournament._id }}

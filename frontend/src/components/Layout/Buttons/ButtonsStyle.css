@@ -199,6 +199,16 @@ button:hover .tooltip-text {
   color: var(--status-red);
 }
 
+/* Variante teal para confirmaciones no destructivas (ej: abrir fecha) */
+.delete-confirmation-icon--teal {
+  background: var(--status-teal-bg);
+  color: var(--third-color);
+}
+
+.delete-confirmation-icon--teal svg {
+  color: var(--third-color);
+}
+
 .delete-confirmation-modal h4 {
   margin-bottom: 0.6rem;
   font-family: "Urbanist", var(--secondary-font);

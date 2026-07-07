@@ -24,6 +24,12 @@
   --color-cronicas: #e63946;
   --color-admin:    #6b8a9a;
 
+  /* Acentos del Prode sobre dark: -soft para tipografía sobre cards
+     (8.34:1 vs #111, AAA), -bg y -border para selección y estados */
+  --color-prode-soft:   #fb923c;
+  --color-prode-bg:     rgba(249, 115, 22, 0.12);
+  --color-prode-border: rgba(249, 115, 22, 0.45);
+
   /* ── Fondos oscuros ── */
   --bg-deep:        #0a0a0a;
   --bg-panel:       #0d0d0d;

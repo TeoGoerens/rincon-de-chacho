@@ -145,24 +145,23 @@ const CreateProdeMatchday = () => {
 
           <div className="prf-field">
             <label>Mes</label>
-            {selectedTournament ? (
-              <div className="prf-chips">
-                {selectedTournament.months.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className={`prf-chip${
-                      month === m ? " prf-chip--selected" : ""
-                    }`}
-                    onClick={() => setMonth(m)}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="prf-hint">Seleccioná primero un torneo</p>
-            )}
+            <select
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              disabled={!selectedTournament}
+              required
+            >
+              <option value="">
+                {selectedTournament
+                  ? "Elegí el mes"
+                  : "Seleccioná primero un torneo"}
+              </option>
+              {(selectedTournament?.months ?? []).map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="prf-field">

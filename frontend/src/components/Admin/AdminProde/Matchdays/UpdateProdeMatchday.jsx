@@ -14,11 +14,17 @@ import {
 
 //Import components
 import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
+import ProdeMatchdayItems from "./ProdeMatchdayItems";
+import ProdeMatchdayResults from "./ProdeMatchdayResults";
+import ProdeMatchdayConsolidate from "./ProdeMatchdayConsolidate";
 
 //Import React Query functions
 import fetchProdeMatchdayById from "../../../../reactquery/prode/fetchProdeMatchdayById";
 import updateProdeMatchdayMeta from "../../../../reactquery/prode/updateProdeMatchdayMeta";
 import updateProdeMatchdayDuels from "../../../../reactquery/prode/updateProdeMatchdayDuels";
+import openProdeMatchday from "../../../../reactquery/prode/openProdeMatchday";
+import notifyProdeMatchdayChanges from "../../../../reactquery/prode/notifyProdeMatchdayChanges";
+import reopenProdeMatchday from "../../../../reactquery/prode/reopenProdeMatchday";
 
 const UpdateProdeMatchday = () => {
   const { id } = useParams();
@@ -28,6 +34,9 @@ const UpdateProdeMatchday = () => {
   const [roundNumber, setRoundNumber] = useState("");
   const [deadline, setDeadline] = useState("");
   const [duels, setDuels] = useState([]);
+  const [confirmOpenVisible, setConfirmOpenVisible] = useState(false);
+  const [confirmNotifyVisible, setConfirmNotifyVisible] = useState(false);
+  const [reopenPlayerId, setReopenPlayerId] = useState("");
 
   const {
     data: matchday,
@@ -44,6 +53,9 @@ const UpdateProdeMatchday = () => {
   const expectedDuels = Math.floor(participants.length / 2);
   const phase = MATCHDAY_PHASES[matchday?.phase] ?? MATCHDAY_PHASES.draft;
   const metaLocked = matchday?.phase === "consolidated";
+  /* En una fecha en juego el deadline ya no tiene efecto (la fase manda):
+     queda grisado; mes y número siguen editables */
+  const deadlineLocked = metaLocked || matchday?.phase === "in_play";
   const duelsLocked =
     matchday?.phase !== "draft" && matchday?.phase !== "open";
 
@@ -91,8 +103,85 @@ const UpdateProdeMatchday = () => {
     },
   });
 
-  const handleMetaSubmit = (e) => {
+  const openMutation = useMutation({
+    /* Abre con lo que está en pantalla: persiste los datos del form antes de
+       abrir, para que el deadline validado sea el que el admin está viendo */
+    mutationFn: async () => {
+      await updateProdeMatchdayMeta({
+        matchdayId: id,
+        month,
+        roundNumber: Number(roundNumber),
+        predictionsDeadline: new Date(deadline).toISOString(),
+      });
+      return openProdeMatchday({ matchdayId: id });
+    },
+    onSuccess: (data) => {
+      toast.success("Fecha abierta: mail de apertura enviado");
+      if (data?.failedEmails?.length > 0) {
+        toast.warn(
+          `No se pudo enviar el mail a: ${data.failedEmails.join(", ")}`,
+        );
+      }
+      if (data?.participantsWithoutUser?.length > 0) {
+        toast.warn(
+          `Participantes sin usuario vinculado (no reciben mail): ${data.participantsWithoutUser.join(", ")}`,
+        );
+      }
+      queryClient.invalidateQueries(["prode-matchday", id]);
+      queryClient.invalidateQueries(["prode-matchdays"]);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error al abrir la fecha");
+    },
+  });
+
+  const notifyMutation = useMutation({
+    mutationFn: notifyProdeMatchdayChanges,
+    onSuccess: (data) => {
+      toast.success("Mail de cambios enviado a los participantes");
+      if (data?.failedEmails?.length > 0) {
+        toast.warn(
+          `No se pudo enviar el mail a: ${data.failedEmails.join(", ")}`,
+        );
+      }
+      if (data?.participantsWithoutUser?.length > 0) {
+        toast.warn(
+          `Participantes sin usuario vinculado (no reciben mail): ${data.participantsWithoutUser.join(", ")}`,
+        );
+      }
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error al notificar los cambios");
+    },
+  });
+
+  const handleConfirmNotify = () => {
+    setConfirmNotifyVisible(false);
+    notifyMutation.mutate({ matchdayId: id });
+  };
+
+  const reopenMutation = useMutation({
+    mutationFn: reopenProdeMatchday,
+    onSuccess: () => {
+      toast.success("Carga reabierta para el participante");
+      setReopenPlayerId("");
+      queryClient.invalidateQueries(["prode-matchday", id]);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error al reabrir la carga");
+    },
+  });
+
+  const handleReopenSubmit = (e) => {
     e.preventDefault();
+    if (!reopenPlayerId) {
+      toast.error("Seleccioná el participante al que reabrirle la carga");
+      return;
+    }
+    reopenMutation.mutate({ matchdayId: id, playerId: reopenPlayerId });
+  };
+
+  const handleOpenClick = () => {
     if (!month) {
       toast.error("Seleccioná el mes de la fecha");
       return;
@@ -105,11 +194,40 @@ const UpdateProdeMatchday = () => {
       toast.error("Fijá el deadline de pronósticos");
       return;
     }
+    if (new Date(deadline) <= new Date()) {
+      toast.error("El deadline de pronósticos debe estar en el futuro");
+      return;
+    }
+    setConfirmOpenVisible(true);
+  };
+
+  const handleConfirmOpen = () => {
+    setConfirmOpenVisible(false);
+    openMutation.mutate();
+  };
+
+  const handleMetaSubmit = (e) => {
+    e.preventDefault();
+    if (!month) {
+      toast.error("Seleccioná el mes de la fecha");
+      return;
+    }
+    if (!roundNumber || Number(roundNumber) < 1) {
+      toast.error("Ingresá el número de fecha");
+      return;
+    }
+    if (!deadlineLocked && !deadline) {
+      toast.error("Fijá el deadline de pronósticos");
+      return;
+    }
     metaMutation.mutate({
       matchdayId: id,
       month,
       roundNumber: Number(roundNumber),
-      predictionsDeadline: new Date(deadline).toISOString(),
+      /* El deadline no viaja cuando está bloqueado (fecha en juego) */
+      ...(deadlineLocked
+        ? {}
+        : { predictionsDeadline: new Date(deadline).toISOString() }),
     });
   };
 
@@ -151,9 +269,11 @@ const UpdateProdeMatchday = () => {
 
   return (
     <>
-      {(metaMutation.isPending || duelsMutation.isPending) && (
-        <SpinnerOverlay />
-      )}
+      {(metaMutation.isPending ||
+        duelsMutation.isPending ||
+        openMutation.isPending ||
+        notifyMutation.isPending ||
+        reopenMutation.isPending) && <SpinnerOverlay />}
 
       <div className="prf-page">
         <div className="prf-header">
@@ -178,21 +298,19 @@ const UpdateProdeMatchday = () => {
 
           <div className="prf-field">
             <label>Mes</label>
-            <div className="prf-chips">
+            <select
+              value={month}
+              disabled={metaLocked}
+              onChange={(e) => setMonth(e.target.value)}
+              required
+            >
+              <option value="">Elegí el mes</option>
               {(tournament?.months ?? []).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  disabled={metaLocked}
-                  className={`prf-chip${
-                    month === m ? " prf-chip--selected" : ""
-                  }${metaLocked ? " prf-chip--disabled" : ""}`}
-                  onClick={() => setMonth(m)}
-                >
+                <option key={m} value={m}>
                   {m}
-                </button>
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
           <div className="prf-field">
@@ -212,10 +330,16 @@ const UpdateProdeMatchday = () => {
             <input
               type="datetime-local"
               value={deadline}
-              disabled={metaLocked}
+              disabled={deadlineLocked}
               onChange={(e) => setDeadline(e.target.value)}
               required
             />
+            {matchday.phase === "in_play" && (
+              <p className="prf-hint">
+                En una fecha en juego el deadline ya no tiene efecto. Para
+                habilitar a un rezagado usá "Reabrir carga".
+              </p>
+            )}
           </div>
 
           {!metaLocked && (
@@ -296,7 +420,191 @@ const UpdateProdeMatchday = () => {
             </>
           )}
         </form>
+
+        {/* ── Ítems ARG / MISC: carrito en borrador/abierta, resultados y
+            arbitraje en juego/consolidada ── */}
+        {matchday.phase === "draft" || matchday.phase === "open" ? (
+          <ProdeMatchdayItems matchday={matchday} />
+        ) : (
+          <ProdeMatchdayResults matchday={matchday} />
+        )}
+
+        {/* ── Notificar cambios (solo fecha abierta) ── */}
+        {matchday.phase === "open" && (
+          <section className="prf-form">
+            <div className="prf-card-title">Notificar cambios</div>
+            <p className="prf-hint">
+              Manda un mail a todos los participantes avisando que los ítems
+              de la fecha cambiaron, para que revisen sus pronósticos.
+            </p>
+            <button
+              type="button"
+              className="prf-submit-btn"
+              onClick={() => setConfirmNotifyVisible(true)}
+              disabled={notifyMutation.isPending}
+            >
+              {notifyMutation.isPending
+                ? "Enviando..."
+                : "Notificar cambios"}
+            </button>
+          </section>
+        )}
+
+        {/* ── Reabrir carga a un rezagado (solo fecha en juego) ── */}
+        {matchday.phase === "in_play" && (
+          <form className="prf-form" onSubmit={handleReopenSubmit}>
+            <div className="prf-card-title">Reabrir carga</div>
+            <p className="prf-hint">
+              Habilita a un participante a cargar pronósticos post-deadline.
+              Los partidos ya empezados quedan bloqueados para él, y su
+              guardado cierra la reapertura.
+            </p>
+
+            {(matchday.reopenedFor ?? []).length > 0 && (
+              <p className="prf-hint">
+                Con carga reabierta ahora:{" "}
+                {(matchday.reopenedFor ?? [])
+                  .map((p) => p?.name ?? "—")
+                  .join(", ")}
+              </p>
+            )}
+
+            <div className="prf-field">
+              <label>Participante</label>
+              <select
+                value={reopenPlayerId}
+                onChange={(e) => setReopenPlayerId(e.target.value)}
+              >
+                <option value="">Elegí un participante</option>
+                {participants
+                  .filter(
+                    (p) =>
+                      !(matchday.reopenedFor ?? []).some(
+                        (r) => String(r?._id ?? r) === String(p._id),
+                      ),
+                  )
+                  .map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="prf-submit-btn"
+              disabled={reopenMutation.isPending}
+            >
+              {reopenMutation.isPending ? "Reabriendo..." : "Reabrir carga"}
+            </button>
+          </form>
+        )}
+
+        {/* ── Consolidar fecha (solo en juego) ── */}
+        {matchday.phase === "in_play" && (
+          <ProdeMatchdayConsolidate matchday={matchday} />
+        )}
+
+        {/* ── Abrir fecha (solo en borrador) ── */}
+        {matchday.phase === "draft" && (
+          <section className="prf-form">
+            <div className="prf-card-title">Abrir fecha</div>
+            <p className="prf-hint">
+              Guarda los datos tal como están en pantalla y envía el mail de
+              apertura a los participantes.
+            </p>
+            <button
+              type="button"
+              className="prf-submit-btn"
+              onClick={handleOpenClick}
+              disabled={openMutation.isPending}
+            >
+              {openMutation.isPending ? "Abriendo..." : "Abrir fecha"}
+            </button>
+          </section>
+        )}
       </div>
+
+      {confirmNotifyVisible && (
+        <div className="delete-confirmation-overlay">
+          <div className="delete-confirmation-modal">
+            <div className="delete-confirmation-icon delete-confirmation-icon--teal">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+                <path d="m22 6-10 7L2 6" />
+              </svg>
+            </div>
+            <h4>¿Notificar los cambios de la fecha {matchday.roundNumber}?</h4>
+            <p>
+              Se enviará un mail a todos los participantes del torneo avisando
+              que los partidos o preguntas de la fecha cambiaron.
+            </p>
+            <div className="delete-confirmation-btn-container">
+              <button
+                className="delete-confirmation-btn-cancel"
+                onClick={() => setConfirmNotifyVisible(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="delete-confirmation-btn-confirm"
+                onClick={handleConfirmNotify}
+              >
+                Enviar mail
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmOpenVisible && (
+        <div className="delete-confirmation-overlay">
+          <div className="delete-confirmation-modal">
+            <div className="delete-confirmation-icon delete-confirmation-icon--teal">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+                <path d="m22 6-10 7L2 6" />
+              </svg>
+            </div>
+            <h4>¿Abrir la fecha {matchday.roundNumber}?</h4>
+            <p>
+              Se enviará el mail de apertura a los participantes del torneo y
+              la fecha quedará disponible para cargar pronósticos.
+            </p>
+            <div className="delete-confirmation-btn-container">
+              <button
+                className="delete-confirmation-btn-cancel"
+                onClick={() => setConfirmOpenVisible(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="delete-confirmation-btn-confirm"
+                onClick={handleConfirmOpen}
+              >
+                Abrir fecha
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

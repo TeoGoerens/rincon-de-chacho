@@ -112,6 +112,7 @@ const ProdeMatchdaysIndex = () => {
                   <th>Mes</th>
                   <th>Deadline</th>
                   <th>Duelos</th>
+                  <th>Ítems</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -138,6 +139,11 @@ const ProdeMatchdaysIndex = () => {
                       <td>
                         <span className="pri-cell-score">
                           {matchday.duels?.length || 0}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="pri-cell-score">
+                          {matchday.items?.length || 0}
                         </span>
                       </td>
                       <td>
