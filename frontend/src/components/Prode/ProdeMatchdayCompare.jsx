@@ -17,6 +17,10 @@ const CHALLENGE_BLOCKS = [
   { code: "MISC", title: "Prode Resto del Mundo", short: "Resto del Mundo" },
 ];
 
+/* El hero del duelo muestra los 3 desafíos: el GDT en juego aparece como
+   pendiente (se tipea recién al consolidar) y consolidado con su total */
+const HERO_BLOCKS = [...CHALLENGE_BLOCKS, { code: "GDT", short: "Gran DT" }];
+
 const toId = (value) => String(value?._id ?? value);
 
 const formatKickoff = (isoDate) => {
@@ -124,6 +128,15 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
         duel.playerB === String(myPlayerId),
     ) ?? null;
   const iAmSideA = myDuelPartial?.playerA === String(myPlayerId);
+
+  /* Consolidada: los totales definitivos (GDT incluido) viven en el propio
+     documento del duelo, no en los parciales */
+  const isConsolidated = matchday.phase === "consolidated";
+  const iAmDuelA = myDuel
+    ? toId(myDuel.playerA) === String(myPlayerId)
+    : false;
+  const duelChallenge = (type) =>
+    myDuel?.challenges?.find((challenge) => challenge.type === type) ?? null;
 
   if (isLoading) return <SpinnerOverlay />;
 
@@ -254,6 +267,46 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
     );
   };
 
+  /* Cierre del duelo consolidado: quién lo ganó y qué puntos deja */
+  const renderDuelVerdict = () => {
+    const points = myDuel.points ?? {};
+    const myPts =
+      ((iAmDuelA ? points.playerA : points.playerB) ?? 0) +
+      ((iAmDuelA ? points.bonusA : points.bonusB) ?? 0);
+    const myBonus = (iAmDuelA ? points.bonusA : points.bonusB) ?? 0;
+    const rivalPts =
+      ((iAmDuelA ? points.playerB : points.playerA) ?? 0) +
+      ((iAmDuelA ? points.bonusB : points.bonusA) ?? 0);
+    const rivalBonus = (iAmDuelA ? points.bonusB : points.bonusA) ?? 0;
+    const iWon = myDuel.duelResult === (iAmDuelA ? "A" : "B");
+    const isDraw = myDuel.duelResult === "draw";
+
+    const text = isDraw
+      ? "Empate en el duelo · +1 pt cada uno"
+      : iWon
+        ? `Ganaste el duelo · +${myPts} pts${
+            myBonus > 0 ? " (incluye bonus)" : ""
+          }`
+        : `Ganó ${rival?.name} · +${rivalPts} pts${
+            rivalBonus > 0 ? " (incluye bonus)" : ""
+          }`;
+
+    return (
+      <div
+        className={`prp-verdict${
+          iWon
+            ? " prp-verdict--won"
+            : isDraw
+              ? " prp-verdict--draw"
+              : " prp-verdict--lost"
+        }`}
+      >
+        <span className="prp-verdict-dot" />
+        {text}
+      </div>
+    );
+  };
+
   /* Tablero compacto: avatares a los costados, los marcadores apilados en
      el centro ENTRE los jugadores — sin espacio muerto */
   const renderDuelHero = () => (
@@ -264,46 +317,67 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
       </div>
 
       <div className="prp-hero-center">
-        {myDuelPartial &&
-          CHALLENGE_BLOCKS.map(({ code, short }) => {
+        {HERO_BLOCKS.map(({ code, short }) => {
+          let mine = null;
+          let theirs = null;
+          let caption = null;
+
+          if (isConsolidated) {
+            const challenge = duelChallenge(code);
+            if (!challenge) return null;
+            mine = iAmDuelA ? challenge.scoreA : challenge.scoreB;
+            theirs = iAmDuelA ? challenge.scoreB : challenge.scoreA;
+          } else if (code === "GDT") {
+            caption = "se define al consolidar";
+          } else {
+            if (!myDuelPartial) return null;
             const challenge = myDuelPartial.challenges[code];
-            const mine = iAmSideA ? challenge.a : challenge.b;
-            const theirs = iAmSideA ? challenge.b : challenge.a;
+            mine = iAmSideA ? challenge.a : challenge.b;
+            theirs = iAmSideA ? challenge.b : challenge.a;
             const blockItems = items.filter((i) => i.challenge === code);
             if (blockItems.length === 0) return null;
             const settled = blockItems.filter(isItemSettled).length;
-            return (
-              <div className="prp-hero-ch" key={code}>
-                <span className="prp-hero-label">{short}</span>
-                <div className="prp-hero-score">
-                  <span
-                    className={`prp-hero-num${
-                      mine > theirs ? " prp-hero-num--leading" : ""
-                    }`}
-                  >
-                    {mine}
-                  </span>
-                  <span className="prp-hero-dash">–</span>
-                  <span
-                    className={`prp-hero-num${
-                      theirs > mine ? " prp-hero-num--leading" : ""
-                    }`}
-                  >
-                    {theirs}
-                  </span>
-                </div>
-                <span className="prp-hero-caption">
-                  {settled} de {blockItems.length} definidos
-                </span>
+            caption = `${settled} de ${blockItems.length} definidos`;
+          }
+
+          return (
+            <div className="prp-hero-ch" key={code}>
+              <span className="prp-hero-label">{short}</span>
+              <div className="prp-hero-score">
+                {mine === null ? (
+                  <span className="prp-hero-num prp-hero-num--pending">–</span>
+                ) : (
+                  <>
+                    <span
+                      className={`prp-hero-num${
+                        mine > theirs ? " prp-hero-num--leading" : ""
+                      }`}
+                    >
+                      {mine}
+                    </span>
+                    <span className="prp-hero-dash">–</span>
+                    <span
+                      className={`prp-hero-num${
+                        theirs > mine ? " prp-hero-num--leading" : ""
+                      }`}
+                    >
+                      {theirs}
+                    </span>
+                  </>
+                )}
               </div>
-            );
-          })}
+              {caption && <span className="prp-hero-caption">{caption}</span>}
+            </div>
+          );
+        })}
       </div>
 
       <div className="prp-hero-side">
         {renderAvatar(toId(rival), rival?.name)}
         <span className="prp-hero-side-name">{rival?.name}</span>
       </div>
+
+      {isConsolidated && myDuel?.duelResult && renderDuelVerdict()}
     </div>
   );
 
@@ -403,18 +477,50 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
 
   /* ---------- Vista Todos ---------- */
 
-  const sortedParticipants = [...participants].sort(
-    (a, b) => totalsFor(toId(b)).total - totalsFor(toId(a)).total,
-  );
+  /* Lado, GDT y puntos definitivos de un participante en su duelo (solo
+     tienen sentido con la fecha consolidada) */
+  const duelEntryFor = (playerId) => {
+    const duel = (matchday.duels ?? []).find(
+      (d) =>
+        toId(d.playerA) === String(playerId) ||
+        toId(d.playerB) === String(playerId),
+    );
+    if (!duel) return null;
+    const isA = toId(duel.playerA) === String(playerId);
+    const gdt = duel.challenges?.find((c) => c.type === "GDT");
+    const points = duel.points ?? {};
+    return {
+      gdt: (isA ? gdt?.scoreA : gdt?.scoreB) ?? 0,
+      duelPoints:
+        ((isA ? points.playerA : points.playerB) ?? 0) +
+        ((isA ? points.bonusA : points.bonusB) ?? 0),
+    };
+  };
+
+  /* Consolidada manda el puntaje del duelo (la moneda del torneo);
+     los ítems desempatan. En juego, solo los ítems. */
+  const sortedParticipants = [...participants].sort((a, b) => {
+    if (isConsolidated) {
+      const diff =
+        (duelEntryFor(toId(b))?.duelPoints ?? 0) -
+        (duelEntryFor(toId(a))?.duelPoints ?? 0);
+      if (diff !== 0) return diff;
+    }
+    return totalsFor(toId(b)).total - totalsFor(toId(a)).total;
+  });
 
   const renderLeaderboard = () => (
     <div className="prp-lb">
-      <div className="prp-totals-title">Parciales de la fecha</div>
+      <div className="prp-totals-title">
+        {isConsolidated ? "Resultados de la fecha" : "Parciales de la fecha"}
+      </div>
       {sortedParticipants.map((participant, index) => {
         const playerId = toId(participant);
         const totals = totalsFor(playerId);
+        const entry = isConsolidated ? duelEntryFor(playerId) : null;
         const isMe = playerId === String(myPlayerId);
-        const isLeader = index === 0 && totals.total > 0;
+        const isLeader =
+          index === 0 && (entry ? entry.duelPoints > 0 : totals.total > 0);
         return (
           <div
             className={`prp-lb-row${isMe ? " prp-lb-row--me" : ""}${
@@ -436,8 +542,16 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
               </span>
               <span className="prp-lb-breakdown">
                 ARG {totals.ARG} · MISC {totals.MISC}
+                {entry ? ` · GDT ${entry.gdt}` : ""}
               </span>
-              <span className="prp-lb-total">{totals.total}</span>
+              {entry ? (
+                <span className="prp-lb-total">
+                  {entry.duelPoints}
+                  <span className="prp-lb-total-unit"> pts</span>
+                </span>
+              ) : (
+                <span className="prp-lb-total">{totals.total}</span>
+              )}
             </div>
           </div>
         );

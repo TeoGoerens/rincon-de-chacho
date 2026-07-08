@@ -83,8 +83,9 @@ const isValidPoints = (value) => Number.isInteger(value) && value >= 0;
 
 /* Manda un mail a todos los usuarios vinculados a un participante del torneo
    (el Prode se juega entre participantes). Si algún envío falla, la operación
-   que lo disparó sigue en pie y se informan los fallidos. */
-const emailTournamentParticipants = async (
+   que lo disparó sigue en pie y se informan los fallidos. Exportado porque
+   también lo usa el cron de recordatorios de deadline. */
+export const emailTournamentParticipants = async (
   participants,
   subject,
   generateHTML,

@@ -101,6 +101,17 @@ const prodeMatchdaySchema = new mongoose.Schema(
       default: null,
     },
 
+    /* Recordatorios de deadline ya enviados (cron cada 15 min). Persistidos
+       en Mongo para que un reinicio del proceso nunca duplique el mail. */
+    reminder24SentAt: {
+      type: Date,
+      default: null,
+    },
+    reminder3SentAt: {
+      type: Date,
+      default: null,
+    },
+
     /* Partidos y preguntas de ARG + MISC (schema compartido). */
     items: {
       type: [prodeItemSchema],

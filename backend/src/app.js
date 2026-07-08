@@ -32,12 +32,18 @@ import cronicaCommentRouter from "./routes/cronica/cronicaCommentRouter.js";
 import podridaRouter from "./routes/podrida/podridaRouter.js";
 import prodeRouter from "./routes/prode/prodeRouter.js";
 
+// ---------- CRON JOBS ----------
+import { startProdeDeadlineReminders } from "./crons/prodeDeadlineReminders.js";
+
 // ---------- FUNCION DE INICIO DEL SERVIDOR ----------
 const startServer = async () => {
   try {
     // Inicializar conexión a MongoDB
     await initMongoDB();
     console.log("✅ MongoDB connected successfully");
+
+    // Recordatorios de deadline del Prode (cron cada 15 min)
+    startProdeDeadlineReminders();
 
     // ---------- CONFIGURAR RUTAS ----------
     app.use("/api/users", userRouter);

@@ -191,7 +191,7 @@ const ProdeMatchdayConsolidate = ({ matchday }) => {
                             : duel.playerB?.name
                         } · ${Math.max(preview.pointsA, preview.pointsB)} pts${
                           Math.max(preview.pointsA, preview.pointsB) === 4
-                            ? " (incluye barrida)"
+                            ? " (incluye bonus)"
                             : ""
                         }`}
                   </span>

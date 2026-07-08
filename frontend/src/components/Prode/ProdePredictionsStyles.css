@@ -730,6 +730,53 @@
   color: var(--text-subtle-dark);
 }
 
+/* GDT en juego: todavía no existe, se tipea recién al consolidar */
+.prp-hero-num--pending {
+  color: var(--text-subtle-dark);
+}
+
+/* Cierre del duelo consolidado: pill a lo ancho del hero, patrón canónico
+   de badge (fondo tintado + punto currentColor) */
+.prp-verdict {
+  grid-column: 1 / -1;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.85rem;
+  border-radius: var(--radius-full);
+  background-color: var(--status-neutral-bg);
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-body-dark);
+}
+
+.prp-verdict-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  color: inherit;
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+/* Semáforo del duelo: ganado verde, empatado naranja, perdido rojo */
+.prp-verdict--won {
+  background-color: var(--status-green-bg);
+  color: var(--status-green);
+}
+
+.prp-verdict--draw {
+  background-color: var(--status-yellow-bg);
+  color: var(--status-yellow);
+}
+
+.prp-verdict--lost {
+  background-color: var(--status-red-bg);
+  color: var(--status-red);
+}
+
 
 /* ---------- Sub-secciones En juego / Definidos ---------- */
 
@@ -1041,6 +1088,13 @@
 /* El puntero de la fecha */
 .prp-lb-row--leader .prp-lb-total {
   color: var(--status-green);
+}
+
+/* Unidad de los puntos de duelo definitivos (fecha consolidada) */
+.prp-lb-total-unit {
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-subtle-dark);
 }
 
 /* Distribución de picks en un partido pendiente */
