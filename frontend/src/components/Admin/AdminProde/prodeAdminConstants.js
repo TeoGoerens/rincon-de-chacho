@@ -19,6 +19,39 @@ export const TOURNAMENT_STATUSES = [
   { value: "finished", label: "Finalizado" },
 ];
 
+/* Resúmenes del trigger del desplegable de selección múltiple del form de
+   torneo: "Julio – Diciembre · 6 meses" / "8 participantes" */
+export const monthsSummary = (months) => {
+  const ordered = PRODE_MONTHS.filter((m) => months.includes(m));
+  if (ordered.length === 0) return "";
+  if (ordered.length === 1) return ordered[0];
+  return `${ordered[0]} – ${ordered[ordered.length - 1]} · ${ordered.length} meses`;
+};
+
+export const participantsSummary = (participants) =>
+  participants.length === 1
+    ? "1 participante"
+    : `${participants.length} participantes`;
+
+export const GDT_POSITION_OPTIONS = [
+  { value: "ARQ", label: "Arquero" },
+  { value: "DEF", label: "Defensor" },
+  { value: "VOL", label: "Volante" },
+  { value: "DEL", label: "Delantero" },
+];
+
+export const GDT_POSITION_LABELS = Object.fromEntries(
+  GDT_POSITION_OPTIONS.map(({ value, label }) => [value, label]),
+);
+
+export const GDT_DRAFT_STATUS = {
+  setup: { label: "En preparación", badge: "pri-badge--draft" },
+  open: { label: "Draft abierto", badge: "pri-badge--active" },
+  revealed: { label: "Revelado", badge: "pri-badge--inplay" },
+  resolving: { label: "Resolviendo quemas", badge: "pri-badge--inplay" },
+  final: { label: "Definitivo", badge: "pri-badge--finished" },
+};
+
 export const MATCHDAY_PHASES = {
   draft: { label: "Borrador", badge: "pri-badge--draft" },
   open: { label: "Abierta", badge: "pri-badge--active" },
@@ -43,4 +76,22 @@ export const formatDeadline = (isoDate) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+/* Versión corta armada por partes, hour12:false (nunca "p. m."):
+   "sáb 12/07 · 21:00" — mismo formato que los kickoffs del sitio */
+export const formatShortDateTime = (isoDate) => {
+  if (!isoDate) return "";
+  const date = new Date(isoDate);
+  const weekday = date.toLocaleDateString("es-AR", { weekday: "short" });
+  const dayMonth = date.toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+  });
+  const time = date.toLocaleTimeString("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return `${weekday} ${dayMonth} · ${time}`;
 };

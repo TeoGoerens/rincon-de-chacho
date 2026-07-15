@@ -72,15 +72,45 @@ export default class ProdeTournamentController {
   /* --------------- UPDATE PRODE TOURNAMENT --------------- */
   updateProdeTournament = async (req, res, next) => {
     try {
-      const { name, year, months, status, participants } = req.body;
+      const { name, year, months, participants } = req.body;
       if (months !== undefined) validateMonths(months);
 
       const tournamentUpdated = await repository.updateProdeTournament(
         req.params.id,
-        { name, year, months, status, participants },
+        { name, year, months, participants },
       );
       res.status(200).json({
         message: "Prode tournament updated successfully",
+        tournamentUpdated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- ACTIVATE PRODE TOURNAMENT --------------- */
+  activateProdeTournament = async (req, res, next) => {
+    try {
+      const tournamentUpdated = await repository.activateProdeTournament(
+        req.params.id,
+      );
+      res.status(200).json({
+        message: "Prode tournament activated successfully",
+        tournamentUpdated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- FINISH PRODE TOURNAMENT --------------- */
+  finishProdeTournament = async (req, res, next) => {
+    try {
+      const tournamentUpdated = await repository.finishProdeTournament(
+        req.params.id,
+      );
+      res.status(200).json({
+        message: "Prode tournament finished successfully",
         tournamentUpdated,
       });
     } catch (error) {

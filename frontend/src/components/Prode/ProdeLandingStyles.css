@@ -2,7 +2,7 @@
    del sitio. Prefijo prl-. */
 
 .prl-wrap {
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px - 42px);
   background-color: var(--bg-deep);
   display: flex;
   align-items: center;
@@ -136,4 +136,9 @@
     align-items: flex-start;
     gap: var(--space-xs);
   }
+}
+
+/* Cards de draft GDT: mismo lenguaje que las fechas, separadas del listado */
+.prl-draft-list {
+  margin-bottom: var(--space-sm);
 }

@@ -39,11 +39,25 @@ export default class ProdeTournamentRepository {
 
   /* --------------- GET ALL PRODE TOURNAMENTS --------------- */
   getAllProdeTournaments = async () => {
-    return ProdeTournament.find()
+    const tournaments = await ProdeTournament.find()
       .populate("participants", "name active")
       .populate("champion", "name")
       .populate("lastPlace", "name")
-      .sort({ year: -1, createdAt: -1 });
+      .sort({ year: -1, createdAt: -1 })
+      .lean();
+
+    /* El índice del admin muestra cuántas fechas tiene cada torneo */
+    const counts = await ProdeMatchday.aggregate([
+      { $group: { _id: "$tournament", count: { $sum: 1 } } },
+    ]);
+    const countByTournament = new Map(
+      counts.map((c) => [String(c._id), c.count]),
+    );
+
+    return tournaments.map((t) => ({
+      ...t,
+      matchdayCount: countByTournament.get(String(t._id)) ?? 0,
+    }));
   };
 
   /* --------------- GET PRODE TOURNAMENT BY ID --------------- */
@@ -59,9 +73,11 @@ export default class ProdeTournamentRepository {
   };
 
   /* --------------- UPDATE PRODE TOURNAMENT --------------- */
+  /* El estado NO se edita acá: cambia solo por las transiciones formales
+     activate/finish, cada una con sus propias validaciones. */
   updateProdeTournament = async (
     tournamentId,
-    { name, year, months, status, participants },
+    { name, year, months, participants },
   ) => {
     const tournament = await ProdeTournament.findById(tournamentId);
     if (!tournament) throw new Error("Torneo no encontrado");
@@ -69,13 +85,64 @@ export default class ProdeTournamentRepository {
     if (name !== undefined) tournament.name = name.trim();
     if (year !== undefined) tournament.year = year;
     if (months !== undefined) tournament.months = months;
-    if (status !== undefined) tournament.status = status;
 
     if (participants !== undefined) {
       if (participants.length > 0) await validateParticipants(participants);
       tournament.participants = participants;
     }
 
+    return tournament.save();
+  };
+
+  /* --------------- ACTIVATE PRODE TOURNAMENT --------------- */
+  activateProdeTournament = async (tournamentId) => {
+    const tournament = await ProdeTournament.findById(tournamentId);
+    if (!tournament) throw new Error("Torneo no encontrado");
+
+    if (tournament.status !== "draft") {
+      throw new Error("Solo un torneo en borrador puede activarse");
+    }
+    if (tournament.participants.length === 0) {
+      throw new Error(
+        "Para activar el torneo primero cargá sus participantes",
+      );
+    }
+    if (tournament.participants.length % 2 !== 0) {
+      throw new Error(
+        "La cantidad de participantes debe ser par (los duelos son 1 vs 1)",
+      );
+    }
+
+    tournament.status = "active";
+    return tournament.save();
+  };
+
+  /* --------------- FINISH PRODE TOURNAMENT --------------- */
+  finishProdeTournament = async (tournamentId) => {
+    const tournament = await ProdeTournament.findById(tournamentId);
+    if (!tournament) throw new Error("Torneo no encontrado");
+
+    if (tournament.status !== "active") {
+      throw new Error("Solo un torneo activo puede finalizarse");
+    }
+
+    const pending = await ProdeMatchday.find({
+      tournament: tournamentId,
+      phase: { $ne: "consolidated" },
+    })
+      .select("roundNumber")
+      .sort({ roundNumber: 1 });
+
+    if (pending.length > 0) {
+      const rounds = pending.map((m) => m.roundNumber).join(", ");
+      throw new Error(
+        pending.length === 1
+          ? `No se puede finalizar: falta consolidar la fecha ${rounds}`
+          : `No se puede finalizar: falta consolidar las fechas ${rounds}`,
+      );
+    }
+
+    tournament.status = "finished";
     return tournament.save();
   };
 

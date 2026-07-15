@@ -17,9 +17,17 @@ const CHALLENGE_BLOCKS = [
   { code: "MISC", title: "Prode Resto del Mundo", short: "Resto del Mundo" },
 ];
 
-/* El hero del duelo muestra los 3 desafíos: el GDT en juego aparece como
-   pendiente (se tipea recién al consolidar) y consolidado con su total */
+/* El hero del duelo muestra los 3 desafíos: el GDT en vivo con el marcador
+   de mini-duelos (4.5); "se define al consolidar" solo si la fecha no tiene
+   universo GDT */
 const HERO_BLOCKS = [...CHALLENGE_BLOCKS, { code: "GDT", short: "Gran DT" }];
+
+const GDT_POSITION_LABELS = {
+  ARQ: "Arquero",
+  DEF: "Defensor",
+  VOL: "Volante",
+  DEL: "Delantero",
+};
 
 const toId = (value) => String(value?._id ?? value);
 
@@ -128,6 +136,27 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
         duel.playerB === String(myPlayerId),
     ) ?? null;
   const iAmSideA = myDuelPartial?.playerA === String(myPlayerId);
+
+  /* Mi duelo GDT en vivo: marcador de mini-duelos + desglose slot a slot
+     (null en fechas sin universo, las históricas) */
+  const myGdtDuel =
+    partials?.gdt?.duels?.find(
+      (duel) =>
+        duel.playerA === String(myPlayerId) ||
+        duel.playerB === String(myPlayerId),
+    ) ?? null;
+  const iAmGdtA = myGdtDuel?.playerA === String(myPlayerId);
+
+  /* Mini-duelos ganados por un participante en su duelo GDT (vista Todos) */
+  const gdtWinsFor = (playerId) => {
+    const duel =
+      partials?.gdt?.duels?.find(
+        (d) =>
+          d.playerA === String(playerId) || d.playerB === String(playerId),
+      ) ?? null;
+    if (!duel) return null;
+    return duel.playerA === String(playerId) ? duel.score.a : duel.score.b;
+  };
 
   /* Consolidada: los totales definitivos (GDT incluido) viven en el propio
      documento del duelo, no en los parciales */
@@ -328,7 +357,13 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
             mine = iAmDuelA ? challenge.scoreA : challenge.scoreB;
             theirs = iAmDuelA ? challenge.scoreB : challenge.scoreA;
           } else if (code === "GDT") {
-            caption = "se define al consolidar";
+            if (myGdtDuel) {
+              mine = iAmGdtA ? myGdtDuel.score.a : myGdtDuel.score.b;
+              theirs = iAmGdtA ? myGdtDuel.score.b : myGdtDuel.score.a;
+              caption = `${11 - myGdtDuel.score.pending} de 11 definidos`;
+            } else {
+              caption = "se define al consolidar";
+            }
           } else {
             if (!myDuelPartial) return null;
             const challenge = myDuelPartial.challenges[code];
@@ -438,6 +473,103 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
     </div>
   );
 
+  /* ---------- Bloque Gran DT: mini-duelos slot a slot ---------- */
+
+  const renderGdtSide = (side, winner) => {
+    if (!side?.playerName) {
+      return <span className="prp-cmp-empty">—</span>;
+    }
+    const pending = side.value === null || side.value === undefined;
+    return (
+      <>
+        <span
+          className={`prp-gdt-name${
+            side.blocked ? " prp-gdt-name--blocked" : ""
+          }`}
+          title={
+            side.blocked
+              ? "Bloqueado por conflicto de club: vale 0 mientras dure"
+              : side.club
+          }
+        >
+          {side.playerName}
+        </span>
+        <span
+          className={`prp-gdt-num${winner ? " prp-gdt-num--won" : ""}${
+            pending ? " prp-gdt-num--pending" : ""
+          }`}
+        >
+          {pending ? "—" : side.value}
+        </span>
+      </>
+    );
+  };
+
+  /* Los 11 mini-duelos en el orden de la formación (1 arquero, 2-5
+     defensores, 6-9 volantes, 10-11 delanteros); ganador en verde,
+     pendiente atenuado, bloqueado tachado */
+  const renderGdtBlock = () => {
+    if (!myGdtDuel) return null;
+    return (
+      <section className="prp-block">
+        <div className="prp-block-head">
+          <div className="prp-block-name">Gran DT</div>
+          <div className="prp-gdt-count">
+            {11 - myGdtDuel.score.pending} de 11 definidos
+          </div>
+        </div>
+        <div className="prp-duel-table-wrap">
+          <table className="prp-duel-table">
+            <thead>
+              <tr>
+                <th className="prp-dt-item" />
+                <th className="prp-dt-th--me">Vos</th>
+                <th>{rival?.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {myGdtDuel.miniDuels.map((miniDuel) => {
+                const mineSide = iAmGdtA ? miniDuel.a : miniDuel.b;
+                const theirSide = iAmGdtA ? miniDuel.b : miniDuel.a;
+                const myCode = iAmGdtA ? "A" : "B";
+                const theirCode = iAmGdtA ? "B" : "A";
+                return (
+                  <tr
+                    key={miniDuel.slotNumber}
+                    className={
+                      miniDuel.result === null ? "prp-gdt-row--pending" : ""
+                    }
+                  >
+                    <td className="prp-dt-item">
+                      <span className="prp-dt-title">
+                        {miniDuel.slotNumber} ·{" "}
+                        {GDT_POSITION_LABELS[miniDuel.position] ??
+                          miniDuel.position}
+                      </span>
+                    </td>
+                    <td className="prp-dt-pick prp-dt-pick--me">
+                      <div className="prp-dt-val">
+                        {renderGdtSide(mineSide, miniDuel.result === myCode)}
+                      </div>
+                    </td>
+                    <td className="prp-dt-pick">
+                      <div className="prp-dt-val">
+                        {renderGdtSide(
+                          theirSide,
+                          miniDuel.result === theirCode,
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    );
+  };
+
   const renderDuelView = () => (
     <>
       {renderDuelHero()}
@@ -472,6 +604,8 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
           </section>
         );
       })}
+
+      {renderGdtBlock()}
     </>
   );
 
@@ -518,6 +652,8 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
         const playerId = toId(participant);
         const totals = totalsFor(playerId);
         const entry = isConsolidated ? duelEntryFor(playerId) : null;
+        /* GDT en vivo: mini-duelos ganados hasta ahora en su duelo */
+        const gdtWins = entry ? null : gdtWinsFor(playerId);
         const isMe = playerId === String(myPlayerId);
         const isLeader =
           index === 0 && (entry ? entry.duelPoints > 0 : totals.total > 0);
@@ -542,7 +678,11 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
               </span>
               <span className="prp-lb-breakdown">
                 ARG {totals.ARG} · MISC {totals.MISC}
-                {entry ? ` · GDT ${entry.gdt}` : ""}
+                {entry
+                  ? ` · GDT ${entry.gdt}`
+                  : gdtWins !== null
+                    ? ` · GDT ${gdtWins}`
+                    : ""}
               </span>
               {entry ? (
                 <span className="prp-lb-total">

@@ -2,9 +2,9 @@ import axios from "axios";
 import { baseURL } from "../../helpers/baseURL";
 import { getUserJWT } from "../getUserInformation";
 
-/* Consolidación definitiva: gdtScores = [{scoreA, scoreB}] en el orden de
-   los duelos de la fecha */
-const consolidateProdeMatchday = async ({ matchdayId, gdtScores }) => {
+/* Consolidación definitiva: ARG/MISC salen de los parciales y el GDT de los
+   mini-duelos (los puntajes ya cargados en la fecha); no viaja nada */
+const consolidateProdeMatchday = async ({ matchdayId }) => {
   const token = getUserJWT();
   if (!token) {
     throw new Error("Token inválido o expirado. Volvé a iniciar sesión.");
@@ -13,7 +13,7 @@ const consolidateProdeMatchday = async ({ matchdayId, gdtScores }) => {
   try {
     const response = await axios.put(
       `${baseURL}/api/prode/matchday/${matchdayId}/consolidate`,
-      { gdtScores },
+      {},
       { headers: { Authorization: `Bearer ${token}` } },
     );
     /* Devuelve también failedEmails y participantsWithoutUser */

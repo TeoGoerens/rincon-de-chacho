@@ -1,6 +1,6 @@
 // Import React dependencies
 import React, { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 // Imports CSS & helpers
@@ -17,6 +17,9 @@ import { IconEdit } from "../../../Layout/Buttons/ActionIcons";
 import addProdeMatchdayItem from "../../../../reactquery/prode/addProdeMatchdayItem";
 import updateProdeMatchdayItem from "../../../../reactquery/prode/updateProdeMatchdayItem";
 import deleteProdeMatchdayItem from "../../../../reactquery/prode/deleteProdeMatchdayItem";
+import fetchProdeSportsLeagues from "../../../../reactquery/prode/fetchProdeSportsLeagues";
+import fetchProdeLeagueUpcomingEvents from "../../../../reactquery/prode/fetchProdeLeagueUpcomingEvents";
+import addProdeMatchdayItemsFromCatalog from "../../../../reactquery/prode/addProdeMatchdayItemsFromCatalog";
 
 const CHALLENGE_CARDS = [
   { code: "ARG", title: "Prode Argentina" },
@@ -49,8 +52,17 @@ const ProdeMatchdayItems = ({ matchday }) => {
   const items = matchday.items ?? [];
   const locked = matchday.phase !== "draft" && matchday.phase !== "open";
 
-  /* form = { challenge, kind, itemId (null = alta), values } */
+  /* form = { challenge, kind, itemId (null = alta), source, values } */
   const [form, setForm] = useState(null);
+
+  /* catalog = { challenge, leagueId, selected: [providerEventId] } */
+  const [catalog, setCatalog] = useState(null);
+
+  const addedProviderIds = new Set(
+    items
+      .filter((item) => item.providerEventId)
+      .map((item) => String(item.providerEventId)),
+  );
 
   const invalidate = () => {
     queryClient.invalidateQueries(["prode-matchday", matchday._id]);
@@ -92,9 +104,46 @@ const ProdeMatchdayItems = ({ matchday }) => {
     },
   });
 
+  /* Catálogo: ligas solo cuando el panel está abierto; partidos próximos al
+     elegir liga. El server cachea 5 min, acá alcanza con no re-pedir al toque */
+  const leaguesQuery = useQuery({
+    queryKey: ["prode-sports-leagues"],
+    queryFn: fetchProdeSportsLeagues,
+    enabled: catalog !== null,
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const upcomingQuery = useQuery({
+    queryKey: ["prode-sports-upcoming", catalog?.leagueId],
+    queryFn: () => fetchProdeLeagueUpcomingEvents(catalog.leagueId),
+    enabled: Boolean(catalog?.leagueId),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const catalogMutation = useMutation({
+    mutationFn: addProdeMatchdayItemsFromCatalog,
+    onSuccess: (data, variables) => {
+      toast.success(
+        plural(
+          variables.providerEventIds.length,
+          "partido agregado",
+          "partidos agregados",
+        ),
+      );
+      invalidate();
+      setCatalog(null);
+    },
+    onError: (error) => {
+      toast.error(
+        error?.message || "Error al agregar los partidos del catálogo",
+      );
+    },
+  });
+
   const saving = addMutation.isPending || updateMutation.isPending;
 
   const openAdd = (challenge, kind) => {
+    setCatalog(null);
     setForm({
       challenge,
       kind,
@@ -104,10 +153,12 @@ const ProdeMatchdayItems = ({ matchday }) => {
   };
 
   const openEdit = (item) => {
+    setCatalog(null);
     setForm({
       challenge: item.challenge,
       kind: item.kind,
       itemId: item._id,
+      source: item.source,
       values:
         item.kind === "match"
           ? {
@@ -115,6 +166,7 @@ const ProdeMatchdayItems = ({ matchday }) => {
               homeName: item.homeName ?? "",
               awayName: item.awayName ?? "",
               kickoff: toDatetimeLocalValue(item.kickoffAt),
+              kickoffIso: item.kickoffAt ?? "",
               pointsHome: String(item.pointsHome ?? 5),
               pointsDraw: String(item.pointsDraw ?? 5),
               pointsAway: String(item.pointsAway ?? 5),
@@ -123,6 +175,29 @@ const ProdeMatchdayItems = ({ matchday }) => {
               questionText: item.questionText ?? "",
               pointsCorrect: String(item.pointsCorrect ?? 5),
             },
+    });
+  };
+
+  const openCatalog = (challenge) => {
+    setForm(null);
+    setCatalog({ challenge, leagueId: "", selected: [] });
+  };
+
+  const toggleCatalogEvent = (providerEventId) => {
+    setCatalog((prev) => ({
+      ...prev,
+      selected: prev.selected.includes(providerEventId)
+        ? prev.selected.filter((id) => id !== providerEventId)
+        : [...prev.selected, providerEventId],
+    }));
+  };
+
+  const submitCatalog = () => {
+    catalogMutation.mutate({
+      matchdayId: matchday._id,
+      challenge: catalog.challenge,
+      leagueId: catalog.leagueId,
+      providerEventIds: catalog.selected,
     });
   };
 
@@ -138,7 +213,24 @@ const ProdeMatchdayItems = ({ matchday }) => {
     const { challenge, kind, itemId, values } = form;
 
     let item;
-    if (kind === "match") {
+    if (kind === "match" && form.source === "api") {
+      /* Ítem del catálogo: solo los puntos son del admin */
+      if (
+        !isValidPoints(values.pointsHome) ||
+        !isValidPoints(values.pointsDraw) ||
+        !isValidPoints(values.pointsAway)
+      ) {
+        toast.error("Los puntos del partido deben ser enteros de 0 o más");
+        return;
+      }
+      item = {
+        challenge,
+        kind,
+        pointsHome: Number(values.pointsHome),
+        pointsDraw: Number(values.pointsDraw),
+        pointsAway: Number(values.pointsAway),
+      };
+    } else if (kind === "match") {
       if (!values.homeName.trim() || !values.awayName.trim()) {
         toast.error("El partido debe tener equipo local y visitante");
         return;
@@ -197,9 +289,60 @@ const ProdeMatchdayItems = ({ matchday }) => {
     }
   };
 
+  const renderPointsField = () => (
+    <div className="prf-field">
+      <label>Puntos por acertar (local / empate / visitante)</label>
+      <div className="prf-points-row">
+        <input
+          type="number"
+          min="0"
+          value={form.values.pointsHome}
+          onChange={(e) => setValue("pointsHome", e.target.value)}
+          required
+        />
+        <input
+          type="number"
+          min="0"
+          value={form.values.pointsDraw}
+          onChange={(e) => setValue("pointsDraw", e.target.value)}
+          required
+        />
+        <input
+          type="number"
+          min="0"
+          value={form.values.pointsAway}
+          onChange={(e) => setValue("pointsAway", e.target.value)}
+          required
+        />
+      </div>
+      <p className="prf-hint">
+        El bonus por marcador exacto es siempre 5 puntos fijos.
+      </p>
+    </div>
+  );
+
   const renderForm = () => (
     <form className="prf-item-form" onSubmit={handleSubmit}>
-      {form.kind === "match" ? (
+      {form.kind === "match" && form.source === "api" ? (
+        <>
+          <div className="prf-field">
+            <label>Partido del catálogo</label>
+            <p className="prf-catalog-locked">
+              {form.values.homeName} vs {form.values.awayName}
+            </p>
+            <p className="prf-hint">
+              {[
+                form.values.leagueName,
+                formatDeadline(form.values.kickoffIso),
+              ]
+                .filter(Boolean)
+                .join(" · ")}{" "}
+              — equipos y horario vienen del catálogo y no se editan a mano.
+            </p>
+          </div>
+          {renderPointsField()}
+        </>
+      ) : form.kind === "match" ? (
         <>
           <div className="prf-field">
             <label>Liga / competencia (opcional)</label>
@@ -239,35 +382,7 @@ const ProdeMatchdayItems = ({ matchday }) => {
               required
             />
           </div>
-          <div className="prf-field">
-            <label>Puntos por acertar (local / empate / visitante)</label>
-            <div className="prf-points-row">
-              <input
-                type="number"
-                min="0"
-                value={form.values.pointsHome}
-                onChange={(e) => setValue("pointsHome", e.target.value)}
-                required
-              />
-              <input
-                type="number"
-                min="0"
-                value={form.values.pointsDraw}
-                onChange={(e) => setValue("pointsDraw", e.target.value)}
-                required
-              />
-              <input
-                type="number"
-                min="0"
-                value={form.values.pointsAway}
-                onChange={(e) => setValue("pointsAway", e.target.value)}
-                required
-              />
-            </div>
-            <p className="prf-hint">
-              El bonus por marcador exacto es siempre 5 puntos fijos.
-            </p>
-          </div>
+          {renderPointsField()}
         </>
       ) : (
         <>
@@ -313,11 +428,142 @@ const ProdeMatchdayItems = ({ matchday }) => {
     </form>
   );
 
+  const renderCatalog = () => {
+    const leagues = leaguesQuery.data ?? [];
+    const events = upcomingQuery.data ?? [];
+    const adding = catalogMutation.isPending;
+
+    return (
+      <div className="prf-catalog">
+        <div className="prf-field">
+          <label>Liga del catálogo</label>
+          <select
+            value={catalog.leagueId}
+            onChange={(e) =>
+              setCatalog((prev) => ({
+                ...prev,
+                leagueId: e.target.value,
+                selected: [],
+              }))
+            }
+          >
+            <option value="">Elegí una liga...</option>
+            {leagues.map((league) => (
+              <option key={league.id} value={league.id}>
+                {league.name}
+              </option>
+            ))}
+          </select>
+          {leaguesQuery.isLoading && (
+            <p className="prf-hint">Cargando ligas...</p>
+          )}
+          {leaguesQuery.isError && (
+            <p className="prf-hint">
+              {leaguesQuery.error?.message ||
+                "Error al cargar las ligas del catálogo"}
+            </p>
+          )}
+        </div>
+
+        {Boolean(catalog.leagueId) && (
+          <>
+            {upcomingQuery.isLoading && (
+              <p className="prf-hint">Buscando partidos próximos...</p>
+            )}
+            {upcomingQuery.isError && (
+              <p className="prf-hint">
+                {upcomingQuery.error?.message ||
+                  "Error al cargar los partidos próximos de la liga"}
+              </p>
+            )}
+            {upcomingQuery.isSuccess && events.length === 0 && (
+              <p className="prf-hint">
+                La liga no tiene partidos próximos en el catálogo.
+              </p>
+            )}
+            {events.length > 0 && (
+              <div className="prf-catalog-list">
+                {events.map((event) => {
+                  const added = addedProviderIds.has(
+                    String(event.providerEventId),
+                  );
+                  const selected = catalog.selected.includes(
+                    event.providerEventId,
+                  );
+                  return (
+                    <button
+                      type="button"
+                      key={event.providerEventId}
+                      className={`prf-catalog-row${
+                        added ? " prf-catalog-row--added" : ""
+                      }`}
+                      disabled={added || adding}
+                      onClick={() => toggleCatalogEvent(event.providerEventId)}
+                    >
+                      {/* divs (no spans): button:hover span escala globalmente */}
+                      <div
+                        className={`prf-catalog-check${
+                          selected ? " prf-catalog-check--on" : ""
+                        }`}
+                      />
+                      <div className="prf-item-body">
+                        <div className="prf-item-main">
+                          {event.homeTeam} vs {event.awayTeam}
+                        </div>
+                        <div className="prf-item-meta">
+                          {[
+                            formatDeadline(event.kickoff),
+                            event.round ? `Fecha ${event.round}` : "",
+                            added ? "Ya está en la fecha" : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+
+        <div className="prf-item-form-actions">
+          <button
+            type="button"
+            className="prf-submit-btn"
+            disabled={catalog.selected.length === 0 || adding}
+            onClick={submitCatalog}
+          >
+            {adding
+              ? "Agregando..."
+              : catalog.selected.length === 0
+                ? "Agregar partidos"
+                : `Agregar ${plural(
+                    catalog.selected.length,
+                    "partido",
+                    "partidos",
+                  )}`}
+          </button>
+          <button
+            type="button"
+            className="prf-cancel-btn"
+            onClick={() => setCatalog(null)}
+            disabled={adding}
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderItemRow = (item) => (
     <div className="prf-item-row" key={item._id}>
       <span className={`prf-item-kind prf-item-kind--${item.kind}`}>
         {item.kind === "match" ? "Partido" : "Pregunta"}
       </span>
+      {item.source === "api" && <span className="prf-item-source">API</span>}
       <div className="prf-item-body">
         <span className="prf-item-main">
           {item.kind === "match"
@@ -396,6 +642,8 @@ const ProdeMatchdayItems = ({ matchday }) => {
 
             {formIsHere && !form.itemId && renderForm()}
 
+            {catalog?.challenge === code && renderCatalog()}
+
             {locked ? (
               <p className="prf-hint">
                 Los ítems ya no pueden modificarse en esta instancia de la
@@ -403,6 +651,13 @@ const ProdeMatchdayItems = ({ matchday }) => {
               </p>
             ) : (
               <div className="prf-item-add-row">
+                <button
+                  type="button"
+                  className="prf-add-item-btn"
+                  onClick={() => openCatalog(code)}
+                >
+                  + Desde catálogo
+                </button>
                 <button
                   type="button"
                   className="prf-add-item-btn"

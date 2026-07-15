@@ -3,6 +3,9 @@ import ProdePlayerController from "../../controllers/prode/prodePlayerController
 import ProdeTournamentController from "../../controllers/prode/prodeTournamentController.js";
 import ProdeMatchdayController from "../../controllers/prode/prodeMatchdayController.js";
 import ProdePredictionController from "../../controllers/prode/prodePredictionController.js";
+import ProdeSportsController from "../../controllers/prode/prodeSportsController.js";
+import ProdeGdtController from "../../controllers/prode/prodeGdtController.js";
+import ProdeStatsController from "../../controllers/prode/prodeStatsController.js";
 import authMiddleware from "../../middlewares/auth/authMiddleware.js";
 import adminAuthMiddleware from "../../middlewares/auth/adminAuthMiddleware.js";
 import prodeParticipantMiddleware from "../../middlewares/auth/prodeParticipantMiddleware.js";
@@ -12,6 +15,215 @@ const playerController = new ProdePlayerController();
 const tournamentController = new ProdeTournamentController();
 const matchdayController = new ProdeMatchdayController();
 const predictionController = new ProdePredictionController();
+const sportsController = new ProdeSportsController();
+const gdtController = new ProdeGdtController();
+const statsController = new ProdeStatsController();
+
+/* ---------- STATS PÚBLICAS (todo usuario logueado) ---------- */
+router.get(
+  "/stats/tournament/:tournamentId/standings",
+  authMiddleware,
+  statsController.getTournamentStandings,
+);
+router.get(
+  "/stats/all-time/standings",
+  authMiddleware,
+  statsController.getAllTimeStandings,
+);
+
+/* ---------- SPORTS CATALOG (API externa, solo admin) ---------- */
+router.get(
+  "/sports/leagues",
+  authMiddleware,
+  adminAuthMiddleware,
+  sportsController.getSupportedLeagues,
+);
+router.get(
+  "/sports/leagues/:leagueId/upcoming-events",
+  authMiddleware,
+  adminAuthMiddleware,
+  sportsController.getUpcomingEventsByLeague,
+);
+
+/* ---------- GDT: UNIVERSOS Y SU POOL ---------- */
+router.post(
+  "/gdt/universes",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.createGdtUniverse,
+);
+router.get(
+  "/gdt/universes/tournament/:tournamentId",
+  authMiddleware,
+  gdtController.getGdtUniversesByTournament,
+);
+router.get("/gdt/universes/:id", authMiddleware, gdtController.getGdtUniverseById);
+router.put(
+  "/gdt/universes/:id",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.updateGdtUniverse,
+);
+router.delete(
+  "/gdt/universes/:id",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.deleteGdtUniverse,
+);
+router.get(
+  "/gdt/universes/:id/players",
+  authMiddleware,
+  gdtController.getGdtUniversePlayers,
+);
+router.post(
+  "/gdt/universes/:id/players",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.createGdtRealPlayer,
+);
+router.post(
+  "/gdt/universes/:id/players/import",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.importGdtUniversePool,
+);
+/* ---------- GDT: DRAFT A CIEGAS ---------- */
+router.put(
+  "/gdt/universes/:id/draft/open",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.openGdtDraft,
+);
+router.put(
+  "/gdt/universes/:id/draft/deadline",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.updateGdtDraftDeadline,
+);
+router.get(
+  "/gdt/universes/:id/draft/overview",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.getGdtDraftOverview,
+);
+router.put(
+  "/gdt/universes/:id/draft/reveal",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.revealGdtDraft,
+);
+router.put(
+  "/gdt/universes/:id/draft/round/open",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.openGdtReplacementRound,
+);
+router.put(
+  "/gdt/universes/:id/draft/round/close",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.closeGdtReplacementRound,
+);
+router.put(
+  "/gdt/universes/:id/draft/finalize",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.finalizeGdtDraft,
+);
+router.put(
+  "/gdt/universes/:id/my-replacements",
+  authMiddleware,
+  prodeParticipantMiddleware,
+  gdtController.stageMyGdtReplacements,
+);
+
+/* ---------- GDT: VENTANA DE CAMBIOS MENSUAL ---------- */
+router.post(
+  "/gdt/universes/:id/window/open",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.openGdtChangeWindow,
+);
+router.put(
+  "/gdt/universes/:id/window/close",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.closeGdtChangeWindow,
+);
+router.get(
+  "/gdt/universes/:id/window/overview",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.getGdtWindowOverview,
+);
+router.put(
+  "/gdt/universes/:id/my-window-changes",
+  authMiddleware,
+  prodeParticipantMiddleware,
+  gdtController.stageMyGdtWindowChanges,
+);
+router.put(
+  "/gdt/universes/:id/window/reopen",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.reopenGdtWindowFor,
+);
+
+/* ---------- GDT: PLANTELES (admin) + BLOQUEO PUNTUAL ---------- */
+router.get(
+  "/gdt/universes/:id/squads/admin",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.getGdtAdminSquads,
+);
+router.put(
+  "/gdt/universes/:id/squads/:playerId/block",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.setGdtSlotBlock,
+);
+router.put(
+  "/gdt/universes/:id/correction/grant",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.grantGdtCorrection,
+);
+router.get(
+  "/gdt/universes/:id/squads",
+  authMiddleware,
+  prodeParticipantMiddleware,
+  gdtController.getRevealedGdtSquads,
+);
+router.get(
+  "/gdt/universes/:id/my-squad",
+  authMiddleware,
+  prodeParticipantMiddleware,
+  gdtController.getMyGdtSquad,
+);
+router.put(
+  "/gdt/universes/:id/my-squad",
+  authMiddleware,
+  prodeParticipantMiddleware,
+  gdtController.upsertMyGdtSquad,
+);
+
+router.get(
+  "/gdt/players/:id",
+  authMiddleware,
+  gdtController.getGdtRealPlayerById,
+);
+router.put(
+  "/gdt/players/:id",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.updateGdtRealPlayer,
+);
+router.delete(
+  "/gdt/players/:id",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.deleteGdtRealPlayer,
+);
 
 /* ---------- PLAYERS ---------- */
 router.get(
@@ -67,6 +279,18 @@ router.put(
   adminAuthMiddleware,
   tournamentController.updateProdeTournament,
 );
+router.put(
+  "/tournament/:id/activate",
+  authMiddleware,
+  adminAuthMiddleware,
+  tournamentController.activateProdeTournament,
+);
+router.put(
+  "/tournament/:id/finish",
+  authMiddleware,
+  adminAuthMiddleware,
+  tournamentController.finishProdeTournament,
+);
 router.delete(
   "/tournament/:id",
   authMiddleware,
@@ -114,6 +338,18 @@ router.post(
   authMiddleware,
   adminAuthMiddleware,
   matchdayController.addProdeMatchdayItem,
+);
+router.post(
+  "/matchday/:id/items/from-catalog",
+  authMiddleware,
+  adminAuthMiddleware,
+  matchdayController.addProdeMatchdayItemsFromCatalog,
+);
+router.post(
+  "/matchday/:id/items/refresh-results",
+  authMiddleware,
+  adminAuthMiddleware,
+  matchdayController.refreshProdeMatchdayResults,
 );
 router.put(
   "/matchday/:id/items/:itemId",
@@ -171,16 +407,40 @@ router.get(
   predictionController.getMatchdayPredictionsAdmin,
 );
 router.get(
+  "/matchday/:id/predictions/overview",
+  authMiddleware,
+  adminAuthMiddleware,
+  predictionController.getMatchdayPredictionOverview,
+);
+router.get(
   "/matchday/:id/partials/all",
   authMiddleware,
   adminAuthMiddleware,
   predictionController.getMatchdayPartialsAdmin,
 );
 router.put(
+  "/matchday/:id/gdt-scores",
+  authMiddleware,
+  adminAuthMiddleware,
+  matchdayController.setProdeMatchdayGdtScores,
+);
+router.get(
+  "/matchday/:id/gdt-board",
+  authMiddleware,
+  adminAuthMiddleware,
+  matchdayController.getProdeMatchdayGdtBoard,
+);
+router.put(
   "/matchday/:id/consolidate",
   authMiddleware,
   adminAuthMiddleware,
   matchdayController.consolidateProdeMatchday,
+);
+router.put(
+  "/matchday/:id/reopen-consolidated",
+  authMiddleware,
+  adminAuthMiddleware,
+  matchdayController.reopenConsolidatedProdeMatchday,
 );
 
 /* ---------- PREDICTIONS (solo participantes) ---------- */

@@ -3,6 +3,7 @@ import ProdeTournament from "../../dao/models/prode/ProdeTournamentModel.js";
 import ProdePrediction from "../../dao/models/prode/ProdePredictionModel.js";
 import { PICK_1X2 } from "../../dao/models/prode/prodeConstants.js";
 import { promoteExpiredMatchday } from "./promoteExpiredMatchdays.js";
+import { getMatchdayGdtPartials } from "./prodeMatchdayRepository.js";
 import { computeMatchdayPartials } from "../../helpers/prodeScoring.js";
 
 const isValidScore = (value) => Number.isInteger(value) && value >= 0;
@@ -226,6 +227,58 @@ export default class ProdePredictionRepository {
     );
   };
 
+  /* --------------- GET PREDICTION OVERVIEW (admin) --------------- */
+  /* Tablero de carga de la fecha abierta (patrón del overview del draft a
+     ciegas): SOLO conteos por participante, JAMÁS contenido — el admin
+     también juega y la regla "antes del deadline nadie ve pronósticos
+     ajenos" vale también para él. Los picks guardados siempre son ítems
+     completos (el server rechaza parciales), así que pickedCount es la
+     misma cuenta que usa el cron de recordatorios. */
+  getMatchdayPredictionOverview = async (matchdayId) => {
+    await promoteExpiredMatchday(matchdayId);
+    const matchday = await ProdeMatchday.findById(matchdayId);
+    if (!matchday) throw new Error("Fecha no encontrada");
+    /* En juego también: ahí el tablero sirve para decidir una reapertura
+       excepcional a quien quedó sin cargar (pedido del dueño 2026-07-12) */
+    if (matchday.phase !== "open" && matchday.phase !== "in_play") {
+      throw new Error(
+        "El progreso de carga se muestra con la fecha abierta o en juego",
+      );
+    }
+
+    const tournament = await ProdeTournament.findById(matchday.tournament, {
+      participants: 1,
+    }).populate("participants", "name");
+
+    const predictions = await ProdePrediction.find(
+      { matchday: matchdayId },
+      { player: 1, submittedAt: 1, "picks.item": 1 },
+    );
+    const byPlayer = new Map(predictions.map((p) => [String(p.player), p]));
+
+    const totalItems = matchday.items.length;
+    const participants = (tournament?.participants ?? [])
+      .map((p) => {
+        const prediction = byPlayer.get(String(p._id));
+        const pickedCount = prediction?.picks?.length ?? 0;
+        return {
+          player: p._id,
+          name: p.name,
+          pickedCount,
+          complete: totalItems > 0 && pickedCount >= totalItems,
+          lastSavedAt: prediction?.submittedAt ?? null,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "es"));
+
+    return {
+      totalItems,
+      completeCount: participants.filter((p) => p.complete).length,
+      totalCount: participants.length,
+      participants,
+    };
+  };
+
   /* --------------- JUDGE QUESTION --------------- */
   /* Arbitraje manual de una pregunta: escribe isCorrect en el pick de cada
      participante (true/false, o null para des-arbitrar). Solo quienes
@@ -301,7 +354,14 @@ export default class ProdePredictionRepository {
     }
 
     const predictions = await ProdePrediction.find({ matchday: matchdayId });
-    return computeMatchdayPartials(matchday, predictions);
+    const partials = computeMatchdayPartials(matchday, predictions);
+
+    /* GDT en vivo (4.5): mini-duelos de cada duelo con el mismo motor que
+       usa el admin. null en fechas sin universo (históricas). Los planteles
+       son públicos entre participantes desde el draft final y los puntajes
+       son objetivos: no hay nada que ocultar acá. */
+    const gdt = await getMatchdayGdtPartials(matchday);
+    return { ...partials, gdt };
   };
 
   /* --------------- GET MATCHDAY PARTIALS (admin) --------------- */

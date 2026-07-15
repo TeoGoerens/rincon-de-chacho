@@ -1387,3 +1387,45 @@
     font-size: var(--text-xs);
   }
 }
+
+/* ── Gran DT: mini-duelos slot a slot en el tablero en vivo (4.5) ── */
+
+.prp-gdt-count {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--ls-tight);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+}
+
+.prp-gdt-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-body-dark);
+  line-height: 1.3;
+}
+
+.prp-gdt-name--blocked {
+  text-decoration: line-through;
+  color: var(--status-red);
+}
+
+.prp-gdt-num {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-extrabold);
+  color: var(--text-bright);
+}
+
+.prp-gdt-num--won {
+  color: var(--status-green);
+}
+
+.prp-gdt-num--pending {
+  font-weight: var(--fw-regular);
+  color: var(--text-subtle-dark);
+}
+
+.prp-gdt-row--pending .prp-gdt-name {
+  color: var(--text-subtle-dark);
+}

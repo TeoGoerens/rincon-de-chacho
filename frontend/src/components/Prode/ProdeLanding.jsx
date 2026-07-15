@@ -8,11 +8,13 @@ import "./ProdeLandingStyles.css";
 
 //Import components
 import SpinnerOverlay from "../Layout/Spinner/SpinnerOverlay";
+import ProdeMenu from "./ProdeMenu";
 
 //Import React Query functions
 import fetchAllProdeTournaments from "../../reactquery/prode/fetchAllProdeTournaments";
 import fetchProdeMatchdaysByTournament from "../../reactquery/prode/fetchProdeMatchdaysByTournament";
 import fetchMyProdePlayer from "../../reactquery/prode/fetchMyProdePlayer";
+import fetchGdtUniversesByTournament from "../../reactquery/prode/fetchGdtUniversesByTournament";
 import { getUserId } from "../../reactquery/getUserInformation";
 
 const formatDeadline = (isoDate) => {
@@ -60,6 +62,53 @@ const ProdeLanding = () => {
     enabled: Boolean(activeTournament) && isParticipant,
   });
 
+  /* Drafts GDT abiertos del torneo activo: el participante arma su equipo */
+  const { data: gdtUniversesData, isLoading: gdtUniversesLoading } = useQuery({
+    queryKey: ["gdt-universes", activeTournament?._id],
+    queryFn: () => fetchGdtUniversesByTournament(activeTournament._id),
+    enabled: Boolean(activeTournament) && isParticipant,
+  });
+
+  /* Abiertos (armar equipo) y revelados/resolviendo (ver planteles y
+     quemas); los finales ya no necesitan card acá */
+  const activeDrafts = useMemo(
+    () =>
+      (gdtUniversesData ?? []).filter((universe) =>
+        ["open", "revealed", "resolving"].includes(universe.draftStatus),
+      ),
+    [gdtUniversesData],
+  );
+
+  /* Universos con ventana de cambios en curso: el participante entra a
+     hacer sus cambios (o a confirmar que no cambia nada) */
+  const activeWindows = useMemo(
+    () =>
+      (gdtUniversesData ?? [])
+        .map((universe) => ({
+          universe,
+          window:
+            (universe.changeWindows ?? []).find(
+              (item) => item.status !== "final",
+            ) ?? null,
+        }))
+        .filter((item) => item.window),
+    [gdtUniversesData],
+  );
+
+  /* Universos definitivos sin proceso en curso: entrada PERMANENTE para
+     consultar los planteles vigentes */
+  const finalUniverses = useMemo(
+    () =>
+      (gdtUniversesData ?? []).filter(
+        (universe) =>
+          universe.draftStatus === "final" &&
+          !(universe.changeWindows ?? []).some(
+            (item) => item.status !== "final",
+          ),
+      ),
+    [gdtUniversesData],
+  );
+
   /* Abiertas (a cargar), en juego (a comparar) y consolidadas del rebuild
      (con ítems — las históricas del Excel no tienen nada que mostrar acá) */
   const visibleMatchdays = useMemo(
@@ -81,17 +130,143 @@ const ProdeLanding = () => {
       .map((p) => String(p?._id ?? p))
       .includes(String(myPlayer._id));
 
-  if (tournamentsLoading || matchdaysLoading || myPlayerLoading)
-    return <SpinnerOverlay />;
+  if (
+    tournamentsLoading ||
+    matchdaysLoading ||
+    myPlayerLoading ||
+    gdtUniversesLoading
+  )
+    return (
+      <>
+        <ProdeMenu />
+        <SpinnerOverlay />
+      </>
+    );
 
   return (
-    <div className="prl-wrap">
+    <>
+      <ProdeMenu />
+      <div className="prl-wrap">
       <div className="prl-content">
         <p className="prl-eyebrow">Prode</p>
         {activeTournament && (
           <h1 className="prl-title">
             {activeTournament.name} {activeTournament.year}
           </h1>
+        )}
+
+        {isParticipant && activeDrafts.length > 0 && (
+          <div className="prl-matchday-list prl-draft-list">
+            {activeDrafts.map((universe) => (
+              <Link
+                className="prl-matchday-card"
+                to={`/prode/gdt/${universe._id}`}
+                key={universe._id}
+              >
+                <div className="prl-matchday-info">
+                  <span className="prl-matchday-name">
+                    Draft del Gran DT · {universe.label}
+                  </span>
+                  <span className="prl-matchday-deadline">
+                    {universe.draftStatus === "open"
+                      ? `Armá tu equipo antes del ${formatDeadline(universe.draftDeadline)}`
+                      : "Planteles revelados · mirá las quemas"}
+                  </span>
+                </div>
+                <span className="prl-matchday-cta">
+                  {universe.draftStatus === "open"
+                    ? "Armar mi equipo"
+                    : "Ver planteles"}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {isParticipant && activeWindows.length > 0 && (
+          <div className="prl-matchday-list prl-draft-list">
+            {activeWindows.map(({ universe, window: win }) => (
+              <Link
+                className="prl-matchday-card"
+                to={`/prode/gdt/${universe._id}`}
+                key={`window-${universe._id}`}
+              >
+                <div className="prl-matchday-info">
+                  <span className="prl-matchday-name">
+                    Ventana de cambios de {win.month} · {universe.label}
+                  </span>
+                  <span className="prl-matchday-deadline">
+                    {win.status === "open"
+                      ? `Hasta 2 cambios antes del ${formatDeadline(win.deadline)} (o confirmá sin cambios)`
+                      : "Ronda de la ventana en curso · re-elecciones por quemas"}
+                  </span>
+                </div>
+                <span className="prl-matchday-cta">
+                  {win.status === "open" ? "Hacer mis cambios" : "Ver la ronda"}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {isParticipant && finalUniverses.length > 0 && (
+          <div className="prl-matchday-list prl-draft-list">
+            {finalUniverses.map((universe) => (
+              <Link
+                className="prl-matchday-card"
+                to={`/prode/gdt/${universe._id}`}
+                key={`final-${universe._id}`}
+              >
+                <div className="prl-matchday-info">
+                  <span className="prl-matchday-name">
+                    Gran DT · {universe.label}
+                  </span>
+                  <span className="prl-matchday-deadline">
+                    Planteles vigentes del universo
+                  </span>
+                </div>
+                <span className="prl-matchday-cta">
+                  Ver planteles
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </span>
+              </Link>
+            ))}
+          </div>
         )}
 
         {!isParticipant ? (
@@ -164,11 +339,12 @@ const ProdeLanding = () => {
         )}
 
         <p className="prl-note">
-          El resto de la sección — tabla, records y estadísticas — está siendo
-          reconstruida y llega muy pronto.
+          La tabla del torneo ya está disponible en la pestaña Torneo. Records
+          y estadísticas llegan muy pronto.
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

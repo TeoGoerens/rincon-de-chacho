@@ -2,6 +2,7 @@ import cron from "node-cron";
 import ProdeMatchday from "../dao/models/prode/ProdeMatchdayModel.js";
 import ProdePrediction from "../dao/models/prode/ProdePredictionModel.js";
 import { emailTournamentParticipants } from "../repository/prode/prodeMatchdayRepository.js";
+import { promoteAllExpiredMatchdays } from "../repository/prode/promoteExpiredMatchdays.js";
 import {
   buildProdeEmailHTML,
   formatDeadlineForEmail,
@@ -116,16 +117,92 @@ export const runProdeDeadlineReminders = async () => {
   }
 };
 
+/* --------------- AVISO DE CIERRE DE FECHA --------------- */
+/* "Cerró la fecha: los pronósticos de todos ya están visibles" — a TODOS
+   los participantes del torneo, con el rival del duelo personalizado.
+   La fase puede haber cambiado por el barrido de acá o por una lectura
+   perezosa: la marca closedNoticeSentAt (persistida ANTES de enviar, como
+   los recordatorios) garantiza un solo mail sea cual sea el camino. */
+const sendClosedNotice = async (matchday) => {
+  const participants = matchday.tournament?.participants ?? [];
+  if (participants.length === 0) return;
+
+  const nameById = new Map(
+    participants.map((p) => [String(p._id), p.name]),
+  );
+  const rivalByPlayer = {};
+  for (const duel of matchday.duels ?? []) {
+    const a = String(duel.playerA);
+    const b = String(duel.playerB);
+    rivalByPlayer[a] = nameById.get(b) ?? null;
+    rivalByPlayer[b] = nameById.get(a) ?? null;
+  }
+
+  const subject = `Cerró la fecha ${matchday.roundNumber} del Prode: los pronósticos ya están visibles`;
+
+  const generateHTML = (user) => {
+    const rival = rivalByPlayer[String(user.prode_player)];
+    const duelHtml = rival
+      ? ` Tu duelo de la fecha: <strong style="color:#e8e8e8;">vos vs ${rival}</strong>.`
+      : "";
+    return buildProdeEmailHTML({
+      iconHtml: "&#128064;",
+      title: `Cerr&oacute; la fecha ${matchday.roundNumber}`,
+      bodyHtml: `Hola ${user.first_name}, la carga de la fecha ${matchday.roundNumber} de ${matchday.tournament.name} termin&oacute;: la fecha est&aacute; en juego y los pron&oacute;sticos de todos ya est&aacute;n visibles.${duelHtml}`,
+      ctaLabel: "Ver la fecha en vivo",
+      ctaUrl: `https://elrincondechacho.com/prode/fecha/${matchday._id}`,
+    });
+  };
+
+  const { failedEmails } = await emailTournamentParticipants(
+    participants,
+    subject,
+    generateHTML,
+  );
+  if (failedEmails.length > 0) {
+    console.error(
+      `Prode closed notice (fecha ${matchday.roundNumber}): fallaron ${failedEmails.length} mails`,
+      failedEmails,
+    );
+  }
+};
+
+export const runProdeClosedNotices = async () => {
+  /* Primero el barrido: una fecha recién vencida pasa a en juego y recibe
+     su aviso en el mismo tick, sin depender de que alguien la lea */
+  await promoteAllExpiredMatchdays();
+
+  const matchdays = await ProdeMatchday.find({
+    phase: "in_play",
+    closedNoticeSentAt: null,
+  }).populate({
+    path: "tournament",
+    select: "name participants",
+    populate: { path: "participants", select: "name" },
+  });
+
+  for (const matchday of matchdays) {
+    matchday.closedNoticeSentAt = new Date();
+    await matchday.save();
+    await sendClosedNotice(matchday);
+  }
+};
+
+const runAll = async () => {
+  await runProdeDeadlineReminders();
+  await runProdeClosedNotices();
+};
+
 export const startProdeDeadlineReminders = () => {
   cron.schedule("*/15 * * * *", () => {
-    runProdeDeadlineReminders().catch((error) => {
+    runAll().catch((error) => {
       console.error("Prode deadline reminders cron failed:", error);
     });
   });
 
   /* Corrida inmediata al bootear: cubre la ventana que un reinicio de PM2
      cerca de un deadline podría dejar sin recordar */
-  runProdeDeadlineReminders().catch((error) => {
+  runAll().catch((error) => {
     console.error("Prode deadline reminders startup run failed:", error);
   });
 };

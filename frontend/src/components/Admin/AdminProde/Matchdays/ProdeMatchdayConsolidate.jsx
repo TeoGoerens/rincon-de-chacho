@@ -9,13 +9,12 @@ import "../ProdeIndexStyles.css";
 
 //Import components
 import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
+import InfoTip from "../InfoTip";
 
 //Import React Query functions
 import fetchProdeMatchdayPartialsAdmin from "../../../../reactquery/prode/fetchProdeMatchdayPartialsAdmin";
+import fetchProdeMatchdayGdtBoard from "../../../../reactquery/prode/fetchProdeMatchdayGdtBoard";
 import consolidateProdeMatchday from "../../../../reactquery/prode/consolidateProdeMatchday";
-
-const isValidScore = (value) =>
-  value !== "" && Number.isInteger(Number(value)) && Number(value) >= 0;
 
 /* Espejo SOLO VISUAL de la fórmula del duelo para la vista previa (la
    escritura definitiva la calcula el backend con el motor único):
@@ -54,18 +53,25 @@ const previewOutcome = (gdtA, gdtB, arg, misc) => {
   };
 };
 
-/* Consolidación de la fecha: sumas ARG/MISC del motor + GDT tipeado a mano
-   (puente hasta el fantasy nativo de la Etapa 4) */
+/* Consolidación de la fecha: ARG/MISC desde los parciales y GDT desde los
+   mini-duelos slot vs slot (4.5) — ya no se tipea nada. Consolidar declara
+   terminada la carga de puntajes: los jugadores sin puntaje valen 0. */
 const ProdeMatchdayConsolidate = ({ matchday }) => {
   const queryClient = useQueryClient();
   const duels = matchday.duels ?? [];
 
-  const [gdt, setGdt] = useState({});
   const [confirmVisible, setConfirmVisible] = useState(false);
 
   const { data: partials } = useQuery({
     queryKey: ["prode-matchday-partials-admin", matchday._id],
     queryFn: () => fetchProdeMatchdayPartialsAdmin(matchday._id),
+  });
+
+  /* Misma query (y cache) que la card de puntajes GDT */
+  const { data: board } = useQuery({
+    queryKey: ["prode-matchday-gdt-board", matchday._id],
+    queryFn: () => fetchProdeMatchdayGdtBoard(matchday._id),
+    enabled: Boolean(matchday.gdtUniverse),
   });
 
   const consolidateMutation = useMutation({
@@ -84,68 +90,68 @@ const ProdeMatchdayConsolidate = ({ matchday }) => {
       }
       queryClient.invalidateQueries(["prode-matchday", matchday._id]);
       queryClient.invalidateQueries(["prode-matchdays"]);
+      queryClient.invalidateQueries(["prode-matchday-gdt-board", matchday._id]);
     },
     onError: (error) => {
       toast.error(error?.message || "Error al consolidar la fecha");
     },
   });
 
-  const setGdtField = (index, side, value) => {
-    setGdt((prev) => ({
-      ...prev,
-      [index]: { ...(prev[index] ?? { a: "", b: "" }), [side]: value },
-    }));
-  };
+  const challengeSums = (index, code) =>
+    partials?.duels?.[index]?.challenges?.[code] ?? { a: 0, b: 0 };
 
-  const gdtComplete = duels.every((_, index) => {
-    const score = gdt[index] ?? { a: "", b: "" };
-    return isValidScore(score.a) && isValidScore(score.b);
-  });
+  /* Bloqueos de la consolidación (regla del dueño 2026-07-10): nada se
+     resuelve por omisión — todos los ítems con resultado (o anulados) y
+     todos los jugadores GDT de la fecha con puntaje (0 si no jugó) */
+  const unresolvedItems = (matchday.items ?? []).filter(
+    (item) => item.status === "scheduled",
+  ).length;
+  const missingGdt = matchday.gdtUniverse
+    ? (board?.missingScores?.length ?? null)
+    : 0;
 
-  const handleConsolidateClick = () => {
-    if (!gdtComplete) {
-      toast.error(
-        "Cargá el resultado GDT de todos los duelos (enteros de 0 o más)",
-      );
-      return;
-    }
-    setConfirmVisible(true);
-  };
+  const blockers = [];
+  if (unresolvedItems > 0) {
+    blockers.push(
+      `Faltan resultados en ${unresolvedItems} ítem${
+        unresolvedItems === 1 ? "" : "s"
+      } (cargalos o anulalos)`,
+    );
+  }
+  if (missingGdt === null) {
+    blockers.push("Cargando el tablero GDT...");
+  } else if (missingGdt > 0) {
+    blockers.push(
+      `Faltan puntajes GDT de ${missingGdt} jugador${
+        missingGdt === 1 ? "" : "es"
+      } — cargá 0 si no jugó`,
+    );
+  }
 
   const handleConfirm = () => {
     setConfirmVisible(false);
-    consolidateMutation.mutate({
-      matchdayId: matchday._id,
-      gdtScores: duels.map((_, index) => ({
-        scoreA: Number(gdt[index].a),
-        scoreB: Number(gdt[index].b),
-      })),
-    });
+    consolidateMutation.mutate({ matchdayId: matchday._id });
   };
-
-  const challengeSums = (index, code) =>
-    partials?.duels?.[index]?.challenges?.[code] ?? { a: 0, b: 0 };
 
   return (
     <>
       {consolidateMutation.isPending && <SpinnerOverlay />}
 
       <section className="prf-form">
-        <div className="prf-card-title">Consolidar fecha</div>
-        <p className="prf-hint">
-          Cierre definitivo: escribe los resultados finales (ARG y MISC salen
-          de los parciales; el GDT se tipea a mano), calcula los duelos y
-          envía el mail de resultados. No tiene vuelta atrás.
-        </p>
+        <div className="prf-card-title">
+          Consolidar fecha
+          <InfoTip text="Cierre de la fecha: escribe los resultados finales de los duelos (ARG y MISC salen de los parciales; el GDT, de los mini-duelos con los puntajes cargados) y envía el mail de resultados. Si encontrás un error después, podés reabrirla para corregir y volver a consolidar." />
+        </div>
 
         {duels.map((duel, index) => {
           const arg = challengeSums(index, "ARG");
           const misc = challengeSums(index, "MISC");
-          const score = gdt[index] ?? { a: "", b: "" };
-          const preview =
-            isValidScore(score.a) && isValidScore(score.b)
-              ? previewOutcome(Number(score.a), Number(score.b), arg, misc)
-              : null;
+          const boardDuel = board?.duels?.[index];
+          const gdt = boardDuel?.finalScore ?? null;
+          const gdtPending = boardDuel?.score?.pending ?? 0;
+          const preview = gdt
+            ? previewOutcome(gdt.a, gdt.b, arg, misc)
+            : null;
 
           return (
             <div className="prf-cons-row" key={index}>
@@ -155,57 +161,52 @@ const ProdeMatchdayConsolidate = ({ matchday }) => {
 
               <div className="prf-cons-sums">
                 ARG {arg.a}-{arg.b} · MISC {misc.a}-{misc.b}
-              </div>
-
-              <div className="prf-result-controls">
-                <span className="prf-cons-gdt-label">GDT</span>
-                <div className="prf-result-score">
-                  <input
-                    type="number"
-                    min="0"
-                    inputMode="numeric"
-                    aria-label={`GDT de ${duel.playerA?.name}`}
-                    value={score.a}
-                    onFocus={(e) => e.target.select()}
-                    onChange={(e) => setGdtField(index, "a", e.target.value)}
-                  />
-                  <span className="prf-result-dash">–</span>
-                  <input
-                    type="number"
-                    min="0"
-                    inputMode="numeric"
-                    aria-label={`GDT de ${duel.playerB?.name}`}
-                    value={score.b}
-                    onFocus={(e) => e.target.select()}
-                    onChange={(e) => setGdtField(index, "b", e.target.value)}
-                  />
-                </div>
-
-                {preview && (
-                  <span className="prf-cons-preview">
-                    {preview.duelResult === "draw"
-                      ? `Empate · ${preview.pointsA} y ${preview.pointsB} pts`
-                      : `Gana ${
-                          preview.duelResult === "A"
-                            ? duel.playerA?.name
-                            : duel.playerB?.name
-                        } · ${Math.max(preview.pointsA, preview.pointsB)} pts${
-                          Math.max(preview.pointsA, preview.pointsB) === 4
-                            ? " (incluye bonus)"
-                            : ""
-                        }`}
-                  </span>
+                {gdt && (
+                  <>
+                    {" "}
+                    · GDT {gdt.a}-{gdt.b}
+                    {gdtPending > 0 && (
+                      <span className="prf-cons-pending">
+                        {" "}
+                        ({gdtPending} mini-duelo
+                        {gdtPending === 1 ? "" : "s"} sin definir)
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
+
+              {preview && (
+                <span className="prf-cons-preview">
+                  {preview.duelResult === "draw"
+                    ? `Empate · ${preview.pointsA} y ${preview.pointsB} pts`
+                    : `Gana ${
+                        preview.duelResult === "A"
+                          ? duel.playerA?.name
+                          : duel.playerB?.name
+                      } · ${Math.max(preview.pointsA, preview.pointsB)} pts${
+                        Math.max(preview.pointsA, preview.pointsB) === 4
+                          ? " (incluye bonus)"
+                          : ""
+                      }`}
+                </span>
+              )}
             </div>
           );
         })}
 
+        {blockers.length > 0 && (
+          <p className="prf-hint prf-cons-warning">
+            Para consolidar: {blockers.join(" · ")}.
+          </p>
+        )}
+
         <button
           type="button"
           className="prf-submit-btn"
-          onClick={handleConsolidateClick}
-          disabled={consolidateMutation.isPending}
+          onClick={() => setConfirmVisible(true)}
+          disabled={consolidateMutation.isPending || blockers.length > 0}
+          title={blockers.length > 0 ? blockers.join(" · ") : undefined}
         >
           {consolidateMutation.isPending
             ? "Consolidando..."

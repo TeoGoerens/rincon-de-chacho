@@ -1,12 +1,23 @@
 import ProdeMatchday from "../../dao/models/prode/ProdeMatchdayModel.js";
 import ProdeTournament from "../../dao/models/prode/ProdeTournamentModel.js";
 import ProdePrediction from "../../dao/models/prode/ProdePredictionModel.js";
+import GdtUniverse from "../../dao/models/prode/GdtUniverseModel.js";
+import GdtSquad from "../../dao/models/prode/GdtSquadModel.js";
+import GdtRealPlayer from "../../dao/models/prode/GdtRealPlayerModel.js";
 import User from "../../dao/models/userModel.js";
-import { PRODE_CHALLENGES } from "../../dao/models/prode/prodeConstants.js";
+import {
+  PRODE_CHALLENGES,
+  GDT_POSITIONS,
+  GDT_SLOT_LAYOUT,
+} from "../../dao/models/prode/prodeConstants.js";
 import {
   promoteExpiredMatchday,
   promoteExpiredMatchdaysForTournament,
 } from "./promoteExpiredMatchdays.js";
+import {
+  monthIndexOf,
+  latestSquadsByPlayer,
+} from "./gdtSquadVersioning.js";
 import { sendBulkEmail } from "../../helpers/sendBulkEmail.js";
 import {
   buildProdeEmailHTML,
@@ -16,7 +27,13 @@ import {
   computeMatchdayPartials,
   calcChallengeResult,
   calcDuelOutcome,
+  computeGdtDuel,
+  gdtScoresMap,
 } from "../../helpers/prodeScoring.js";
+import {
+  getUpcomingEventsByLeague,
+  getEventResult,
+} from "../../integrations/sportsProvider/index.js";
 
 /* Los duelos nacen con los 3 challenges vacíos (scores null): es el mismo
    shape que usan las fechas históricas antes de tener resultados, y lo que
@@ -80,6 +97,187 @@ const assertItemsEditable = (matchday) => {
 };
 
 const isValidPoints = (value) => Number.isInteger(value) && value >= 0;
+
+/* El universo GDT de la fecha es opcional (torneos sin GDT siguen andando),
+   pero si viene debe ser un universo DEL MISMO torneo y con el DRAFT CERRADO
+   (regla del dueño: no se juega una fecha con planteles sin definir).
+   currentId permite conservar el universo ya asignado sin re-validar. */
+const validateGdtUniverseForTournament = async (
+  gdtUniverseId,
+  tournamentId,
+  currentId = null,
+) => {
+  if (!gdtUniverseId) return null;
+  if (currentId && String(gdtUniverseId) === String(currentId)) {
+    return currentId;
+  }
+  const gdtUniverse = await GdtUniverse.findById(gdtUniverseId);
+  if (!gdtUniverse) throw new Error("Universo GDT no encontrado");
+  if (String(gdtUniverse.tournament) !== String(tournamentId)) {
+    throw new Error("El universo GDT no pertenece al torneo de esta fecha");
+  }
+  if (gdtUniverse.draftStatus !== "final") {
+    throw new Error(
+      "El draft de ese universo GDT todavía no está cerrado: no puede asignarse a una fecha",
+    );
+  }
+  return gdtUniverse._id;
+};
+
+/* Planteles con los que se juega una fecha: para cada participante, la
+   versión vigente AL MES de la fecha (la exacta del mes → si no existe, la
+   más reciente anterior → la base del draft, month null). Point-in-time:
+   las ventanas de meses posteriores no alteran una fecha ya jugada.
+   Devuelve el mapa playerId → squad (slots.realPlayer populado). */
+const squadsForMatchdayMonth = async (matchday, months) => {
+  const matchdayIndex = monthIndexOf(months, matchday.month);
+  const universeId = matchday.gdtUniverse?._id ?? matchday.gdtUniverse;
+
+  const allSquads = await GdtSquad.find(
+    { gdtUniverse: universeId },
+    { player: 1, month: 1, slots: 1 },
+  ).populate("slots.realPlayer", "name club position photoUrl");
+
+  const upToMonth = allSquads.filter(
+    (squad) => monthIndexOf(months, squad.month) <= matchdayIndex,
+  );
+  return latestSquadsByPlayer(upToMonth, months);
+};
+
+/* Estado GDT completo de una fecha — COMPARTIDO entre el tablero del admin
+   y los parciales del participante (mismo motor, nunca difieren):
+   - players: jugadores de los planteles del mes, deduplicados, ordenados
+     por club y adentro ARQ→DEF→VOL→DEL, con su puntaje cargado
+   - duels: por duelo (ids), score parcial {a,b,pending}, finalScore
+     proyectado (sin puntaje = 0) y los 11 mini-duelos slot a slot
+   - missingScores: los que bloquean la consolidación
+   Devuelve null si la fecha no tiene universo GDT (históricas). Acepta
+   matchday con o sin tournament populado. */
+const computeMatchdayGdt = async (matchday) => {
+  if (!matchday.gdtUniverse) return null;
+
+  let months = matchday.tournament?.months;
+  if (!months) {
+    const tournament = await ProdeTournament.findById(
+      matchday.tournament?._id ?? matchday.tournament,
+      { months: 1 },
+    );
+    months = tournament?.months ?? [];
+  }
+
+  const squadByPlayer = await squadsForMatchdayMonth(matchday, months);
+  const gdtPoints = gdtScoresMap(matchday.gdtScores);
+
+  /* Jugadores deduplicados (los compartidos aparecen una sola vez: el
+     puntaje es del jugador real, no del plantel) */
+  const playersById = new Map();
+  for (const squad of squadByPlayer.values()) {
+    for (const slot of squad.slots ?? []) {
+      const realPlayer = slot.realPlayer;
+      const playerId = String(realPlayer?._id ?? realPlayer);
+      const existing = playersById.get(playerId);
+      if (existing) {
+        existing.squadCount += 1;
+      } else {
+        playersById.set(playerId, {
+          _id: playerId,
+          name: realPlayer?.name ?? "?",
+          club: realPlayer?.club ?? "",
+          position: realPlayer?.position ?? null,
+          photoUrl: realPlayer?.photoUrl ?? "",
+          squadCount: 1,
+          points: gdtPoints[playerId] ?? null,
+        });
+      }
+    }
+  }
+  /* Orden pedido por el dueño (2026-07-10): por club, y dentro del club
+     arquero → defensores → volantes → delanteros (como lee el diario) */
+  const positionOrder = (position) => {
+    const index = GDT_POSITIONS.indexOf(position);
+    return index === -1 ? GDT_POSITIONS.length : index;
+  };
+  const players = [...playersById.values()].sort(
+    (a, b) =>
+      a.club.localeCompare(b.club) ||
+      positionOrder(a.position) - positionOrder(b.position) ||
+      a.name.localeCompare(b.name),
+  );
+
+  const slotSide = (squad, slotNumber) => {
+    const slot = (squad?.slots ?? []).find((s) => s.slotNumber === slotNumber);
+    if (!slot) return null;
+    const playerId = String(slot.realPlayer?._id ?? slot.realPlayer);
+    return {
+      playerName: slot.realPlayer?.name ?? "?",
+      club: slot.realPlayer?.club ?? "",
+      photoUrl: slot.realPlayer?.photoUrl ?? "",
+      blocked: slot.blocked === true,
+      points: gdtPoints[playerId] ?? null,
+    };
+  };
+
+  const duels = (matchday.duels ?? []).map((duel) => {
+    const playerA = String(duel.playerA?._id ?? duel.playerA);
+    const playerB = String(duel.playerB?._id ?? duel.playerB);
+    const squadA = squadByPlayer.get(playerA);
+    const squadB = squadByPlayer.get(playerB);
+
+    const partial = computeGdtDuel(squadA?.slots, squadB?.slots, gdtPoints);
+    const projected = computeGdtDuel(squadA?.slots, squadB?.slots, gdtPoints, {
+      final: true,
+    });
+
+    return {
+      playerA,
+      playerB,
+      score: { a: partial.a, b: partial.b, pending: partial.pending },
+      finalScore: { a: projected.a, b: projected.b },
+      miniDuels: partial.miniDuels.map((miniDuel) => ({
+        slotNumber: miniDuel.slotNumber,
+        position: GDT_SLOT_LAYOUT[miniDuel.slotNumber - 1],
+        result: miniDuel.result,
+        /* value = valor EFECTIVO en el mini-duelo (bloqueado→0, sin
+           puntaje→null); points = el puntaje crudo cargado */
+        a: { ...slotSide(squadA, miniDuel.slotNumber), value: miniDuel.a },
+        b: { ...slotSide(squadB, miniDuel.slotNumber), value: miniDuel.b },
+      })),
+    };
+  });
+
+  return { players, duels, missingScores: missingGdtScores(squadByPlayer, gdtPoints) };
+};
+
+/* Parciales GDT para el participante (los usa prodePredictionRepository):
+   sin la lista de jugadores ni los faltantes — solo los duelos */
+export const getMatchdayGdtPartials = async (matchday) => {
+  const gdt = await computeMatchdayGdt(matchday);
+  return gdt ? { duels: gdt.duels } : null;
+};
+
+/* Jugadores que NECESITAN puntaje para poder consolidar: los que ocupan
+   algún slot NO bloqueado y todavía no lo tienen cargado (un bloqueado vale
+   0 siempre, con o sin puntaje). Regla del dueño (2026-07-10): la fecha no
+   se consolida con puntajes GDT faltantes — el 0 del que no jugó se carga
+   explícito. */
+const missingGdtScores = (squadByPlayer, gdtPoints) => {
+  const missingById = new Map();
+  for (const squad of squadByPlayer.values()) {
+    for (const slot of squad.slots ?? []) {
+      if (slot.blocked) continue;
+      const playerId = String(slot.realPlayer?._id ?? slot.realPlayer);
+      if (gdtPoints[playerId] !== undefined) continue;
+      if (!missingById.has(playerId)) {
+        missingById.set(playerId, {
+          _id: playerId,
+          name: slot.realPlayer?.name ?? "?",
+          club: slot.realPlayer?.club ?? "",
+        });
+      }
+    }
+  }
+  return [...missingById.values()];
+};
 
 /* Manda un mail a todos los usuarios vinculados a un participante del torneo
    (el Prode se juega entre participantes). Si algún envío falla, la operación
@@ -176,6 +374,7 @@ export default class ProdeMatchdayRepository {
     month,
     roundNumber,
     predictionsDeadline,
+    gdtUniverse,
   }) => {
     const tournament = await ProdeTournament.findById(tournamentId);
     if (!tournament) throw new Error("Torneo no encontrado");
@@ -196,11 +395,22 @@ export default class ProdeMatchdayRepository {
       );
     }
 
+    /* Regla del dueño (ajustada 2026-07-09): el universo GDT es OPCIONAL
+       hasta el deadline — la fecha se puede crear y hasta ABRIR sin él,
+       para que el draft GDT y los pronósticos corran en simultáneo. El
+       candado está en la promoción a en juego: una fecha sin universo no
+       pasa de abierta (ver promoteExpiredMatchdays). */
+    const gdtUniverseId = await validateGdtUniverseForTournament(
+      gdtUniverse,
+      tournamentId,
+    );
+
     return ProdeMatchday.create({
       tournament: tournamentId,
       month,
       roundNumber,
       predictionsDeadline,
+      gdtUniverse: gdtUniverseId,
       phase: "draft",
       duels: [],
     });
@@ -226,7 +436,8 @@ export default class ProdeMatchdayRepository {
       })
       .populate("duels.playerA", "name")
       .populate("duels.playerB", "name")
-      .populate("reopenedFor", "name");
+      .populate("reopenedFor", "name")
+      .populate("gdtUniverse", "label league isPrimary");
     if (!matchday) throw new Error("Fecha no encontrada");
     return matchday;
   };
@@ -256,7 +467,7 @@ export default class ProdeMatchdayRepository {
   /* --------------- UPDATE MATCHDAY META --------------- */
   updateProdeMatchdayMeta = async (
     matchdayId,
-    { month, roundNumber, predictionsDeadline },
+    { month, roundNumber, predictionsDeadline, gdtUniverse },
   ) => {
     const matchday = await ProdeMatchday.findById(matchdayId);
     if (!matchday) throw new Error("Fecha no encontrada");
@@ -296,6 +507,23 @@ export default class ProdeMatchdayRepository {
         );
       }
       matchday.predictionsDeadline = predictionsDeadline;
+    }
+
+    if (gdtUniverse !== undefined) {
+      /* El universo con el que se juega se decide antes del deadline */
+      if (matchday.phase === "in_play") {
+        throw new Error(
+          "El universo GDT no puede cambiarse en una fecha en juego",
+        );
+      }
+      /* En borrador y abierta el universo puede asignarse, cambiarse o
+         quitarse libremente: el candado real es la promoción a en juego,
+         que no ocurre sin universo (ver promoteExpiredMatchdays) */
+      matchday.gdtUniverse = await validateGdtUniverseForTournament(
+        gdtUniverse,
+        matchday.tournament,
+        matchday.gdtUniverse,
+      );
     }
 
     return matchday.save();
@@ -384,14 +612,17 @@ export default class ProdeMatchdayRepository {
   /* --------------- CONSOLIDATE MATCHDAY --------------- */
   /* Cierre definitivo de la fecha (siempre manual: hay plata real). Escribe
      los resultados en el shape histórico duels[].challenges — ARG/MISC con
-     las sumas del motor de puntaje (idénticas a los parciales) y GDT tipeado
-     por el admin como PUENTE hasta la Etapa 4. Fechas nuevas indistinguibles
-     de las del Excel. gdtScores: [{scoreA, scoreB}] en el orden de duels. */
-  consolidateProdeMatchday = async (matchdayId, gdtScores) => {
+     las sumas del motor de puntaje (idénticas a los parciales) y GDT
+     calculado con los mini-duelos slot vs slot (4.5, retiró el puente
+     tipeado de 1.8). Exige la carga COMPLETA: todos los ítems resueltos,
+     todas las preguntas arbitradas y todos los jugadores GDT de slots no
+     bloqueados con puntaje (el 0 del que no jugó se carga explícito).
+     Fechas nuevas indistinguibles de las del Excel. */
+  consolidateProdeMatchday = async (matchdayId) => {
     await promoteExpiredMatchday(matchdayId);
     const matchday = await ProdeMatchday.findById(matchdayId).populate({
       path: "tournament",
-      select: "name year participants",
+      select: "name year participants months",
       populate: { path: "participants", select: "name" },
     });
     if (!matchday) throw new Error("Fecha no encontrada");
@@ -437,39 +668,53 @@ export default class ProdeMatchdayRepository {
       }
     }
 
-    /* GDT tipeado para todos los duelos */
-    if (
-      !Array.isArray(gdtScores) ||
-      gdtScores.length !== matchday.duels.length
-    ) {
+    /* GDT desde los mini-duelos: exige universo (toda fecha llega a en juego
+       con universo asignado desde 4.2; las históricas ya están consolidadas) */
+    if (!matchday.gdtUniverse) {
       throw new Error(
-        `Cargá el resultado GDT de los ${matchday.duels.length} duelos`,
+        "La fecha no tiene universo GDT asignado: no puede consolidarse",
       );
     }
-    for (const score of gdtScores) {
-      if (
-        !Number.isInteger(score?.scoreA) ||
-        !Number.isInteger(score?.scoreB) ||
-        score.scoreA < 0 ||
-        score.scoreB < 0
-      ) {
-        throw new Error(
-          "Cada resultado GDT debe tener los dos valores como enteros de 0 o más",
-        );
-      }
+    const squadByPlayer = await squadsForMatchdayMonth(
+      matchday,
+      matchday.tournament?.months ?? [],
+    );
+    const gdtPoints = gdtScoresMap(matchday.gdtScores);
+
+    /* Todos los jugadores GDT de la fecha con puntaje (regla del dueño):
+       nada se resuelve por omisión, el 0 del que no jugó se carga explícito */
+    const missing = missingGdtScores(squadByPlayer, gdtPoints);
+    if (missing.length > 0) {
+      const names = missing
+        .slice(0, 3)
+        .map((player) => player.name)
+        .join(", ");
+      throw new Error(
+        `Faltan puntajes GDT de ${missing.length} jugador(es): ${names}${
+          missing.length > 3 ? "..." : ""
+        } — cargá 0 si no jugó`,
+      );
     }
 
     /* ARG/MISC desde el MISMO motor que alimentó los parciales */
     const { totals } = computeMatchdayPartials(matchday, predictions);
 
-    matchday.duels.forEach((duel, index) => {
+    matchday.duels.forEach((duel) => {
       const playerA = String(duel.playerA?._id ?? duel.playerA);
       const playerB = String(duel.playerB?._id ?? duel.playerB);
 
+      /* final=true: sin puntaje = 0 ("no jugó"); bloqueado = 0 */
+      const gdtOutcome = computeGdtDuel(
+        squadByPlayer.get(playerA)?.slots,
+        squadByPlayer.get(playerB)?.slots,
+        gdtPoints,
+        { final: true },
+      );
+
       for (const challenge of duel.challenges) {
         if (challenge.type === "GDT") {
-          challenge.scoreA = gdtScores[index].scoreA;
-          challenge.scoreB = gdtScores[index].scoreB;
+          challenge.scoreA = gdtOutcome.a;
+          challenge.scoreB = gdtOutcome.b;
         } else {
           challenge.scoreA = totals[playerA]?.[challenge.type] ?? 0;
           challenge.scoreB = totals[playerB]?.[challenge.type] ?? 0;
@@ -543,6 +788,145 @@ export default class ProdeMatchdayRepository {
     return { matchday, failedEmails, participantsWithoutUser };
   };
 
+  /* --------------- REOPEN CONSOLIDATED MATCHDAY --------------- */
+  /* Válvula de corrección (pedido del dueño 2026-07-10): una fecha
+     consolidada vuelve a "en juego" para corregir resultados, arbitraje o
+     puntajes GDT, y consolidarse de nuevo (la re-consolidación recalcula
+     todo desde el motor y vuelve a mandar el mail de resultados). Solo
+     fechas del rebuild: las históricas del Excel (sin universo GDT) no se
+     tocan — reabrirlas las dejaría trabadas, porque la consolidación exige
+     universo y en juego el universo no se puede asignar. */
+  reopenConsolidatedProdeMatchday = async (matchdayId) => {
+    const matchday = await ProdeMatchday.findById(matchdayId);
+    if (!matchday) throw new Error("Fecha no encontrada");
+    if (matchday.phase !== "consolidated") {
+      throw new Error("Solo una fecha consolidada puede reabrirse");
+    }
+    if (!matchday.gdtUniverse) {
+      throw new Error(
+        "Las fechas históricas (sin universo GDT) no pueden reabrirse",
+      );
+    }
+    matchday.phase = "in_play";
+    /* Una consolidada pre-aviso-de-cierre no tiene la marca: se sella acá
+       para que el cron no la confunda con una fecha recién cerrada y mande
+       el mail de "pronósticos visibles" fuera de contexto */
+    if (!matchday.closedNoticeSentAt) {
+      matchday.closedNoticeSentAt = new Date();
+    }
+    return matchday.save();
+  };
+
+  /* --------------- SET GDT SCORES --------------- */
+  /* Carga PROGRESIVA de puntajes GDT (fecha en juego): un número final por
+     jugador real (diario + bonus ya sumados), replicado a todos los
+     planteles que lo tengan. Reemplaza el set completo con lo que viene en
+     pantalla: sacar un puntaje = vuelve a pendiente. */
+  setProdeMatchdayGdtScores = async (matchdayId, scores) => {
+    await promoteExpiredMatchday(matchdayId);
+    const matchday = await ProdeMatchday.findById(matchdayId);
+    if (!matchday) throw new Error("Fecha no encontrada");
+    if (matchday.phase !== "in_play") {
+      throw new Error(
+        "Los puntajes GDT se cargan con la fecha en juego (post-deadline)",
+      );
+    }
+    if (!matchday.gdtUniverse) {
+      throw new Error("La fecha no tiene universo GDT asignado");
+    }
+
+    if (!Array.isArray(scores)) {
+      throw new Error("Formato de puntajes inválido");
+    }
+    const seen = new Set();
+    for (const score of scores) {
+      const playerId = String(score?.realPlayer ?? "");
+      if (!playerId) throw new Error("Falta el jugador de un puntaje");
+      if (seen.has(playerId)) {
+        throw new Error("Hay un jugador con más de un puntaje cargado");
+      }
+      seen.add(playerId);
+      if (!Number.isInteger(score?.points) || score.points < 0) {
+        throw new Error(
+          "Cada puntaje debe ser un número entero de 0 o más",
+        );
+      }
+    }
+
+    /* Los jugadores deben existir en el universo de la fecha (la pantalla
+       solo ofrece los de planteles, pero el server no confía en el browser) */
+    if (scores.length > 0) {
+      const validCount = await GdtRealPlayer.countDocuments({
+        _id: { $in: [...seen] },
+        gdtUniverse: matchday.gdtUniverse,
+      });
+      if (validCount !== seen.size) {
+        throw new Error(
+          "Hay puntajes de jugadores que no pertenecen al universo de la fecha",
+        );
+      }
+    }
+
+    matchday.gdtScores = scores.map((score) => ({
+      realPlayer: score.realPlayer,
+      points: score.points,
+    }));
+    return matchday.save();
+  };
+
+  /* --------------- GDT BOARD --------------- */
+  /* Tablero GDT de la fecha para el admin (en juego o consolidada): los
+     jugadores de los planteles del MES de la fecha con su puntaje cargado,
+     y los mini-duelos slot vs slot de cada duelo computados con la regla
+     canónica de parciales (pendiente hasta que ambos slots estén
+     determinados). También devuelve el resultado final proyectado (sin
+     puntaje = 0) para la vista previa de consolidación. */
+  getProdeMatchdayGdtBoard = async (matchdayId) => {
+    await promoteExpiredMatchday(matchdayId);
+    const matchday = await ProdeMatchday.findById(matchdayId)
+      .populate({
+        path: "tournament",
+        select: "name months participants",
+        populate: { path: "participants", select: "name" },
+      })
+      .populate("gdtUniverse", "label league");
+    if (!matchday) throw new Error("Fecha no encontrada");
+    if (matchday.phase !== "in_play" && matchday.phase !== "consolidated") {
+      throw new Error(
+        "El tablero GDT está disponible con la fecha en juego o consolidada",
+      );
+    }
+    if (!matchday.gdtUniverse) {
+      throw new Error("La fecha no tiene universo GDT asignado");
+    }
+
+    /* Todo el cálculo vive en computeMatchdayGdt (compartido con los
+       parciales del participante); acá solo se suman los nombres */
+    const gdt = await computeMatchdayGdt(matchday);
+
+    const namesById = {};
+    for (const participant of matchday.tournament?.participants ?? []) {
+      namesById[String(participant._id)] = participant.name;
+    }
+
+    const players = gdt.players;
+    const duels = gdt.duels.map((duel) => ({
+      ...duel,
+      playerA: { _id: duel.playerA, name: namesById[duel.playerA] ?? "?" },
+      playerB: { _id: duel.playerB, name: namesById[duel.playerB] ?? "?" },
+    }));
+
+    return {
+      universe: matchday.gdtUniverse,
+      month: matchday.month,
+      phase: matchday.phase,
+      players,
+      duels,
+      /* Los que bloquean la consolidación (slots no bloqueados sin puntaje) */
+      missingScores: gdt.missingScores,
+    };
+  };
+
   /* --------------- SET ITEM RESULT --------------- */
   /* Resultado real de un ítem (fecha en juego): marcador para partidos,
      respuesta oficial para preguntas. Marca el ítem como finished. */
@@ -588,6 +972,82 @@ export default class ProdeMatchdayRepository {
 
     item.status = "finished";
     return matchday.save();
+  };
+
+  /* --------------- REFRESH CATALOG RESULTS --------------- */
+  /* Trae del proveedor los resultados de los partidos del catálogo que
+     siguen sin resultado (fecha en juego). Solo escribe marcadores de
+     partidos TERMINADOS: uno en juego se descarta y se volverá a consultar
+     en el próximo refresh. Nunca pisa un resultado ya cargado (la
+     corrección manual le gana al proveedor). Los postergados solo se
+     informan: anular es decisión del admin. */
+  refreshProdeMatchdayResults = async (matchdayId) => {
+    await promoteExpiredMatchday(matchdayId);
+    const matchday = await ProdeMatchday.findById(matchdayId);
+    if (!matchday) throw new Error("Fecha no encontrada");
+    if (matchday.phase !== "in_play") {
+      throw new Error(
+        "Los resultados se traen con la fecha en juego (post-deadline)",
+      );
+    }
+
+    const pendingItems = matchday.items.filter(
+      (item) =>
+        item.kind === "match" &&
+        item.source === "api" &&
+        item.status === "scheduled" &&
+        item.providerEventId,
+    );
+    if (pendingItems.length === 0) {
+      throw new Error(
+        "No hay partidos del catálogo pendientes de resultado en esta fecha",
+      );
+    }
+
+    const summary = {
+      updated: 0,
+      updatedItemIds: [],
+      stillPending: [],
+      postponed: [],
+      failed: [],
+    };
+
+    /* Secuencial a propósito: el adapter espacia los requests para el rate
+       limit; una falla puntual no aborta el resto del lote */
+    for (const item of pendingItems) {
+      const label = `${item.homeName} vs ${item.awayName}`;
+
+      let event;
+      try {
+        event = await getEventResult(item.providerEventId);
+      } catch (error) {
+        console.error(
+          `Refresh de resultado falló para ${label}:`,
+          error.message,
+        );
+        summary.failed.push(label);
+        continue;
+      }
+
+      if (
+        event.status === "finished" &&
+        Number.isInteger(event.homeScore) &&
+        Number.isInteger(event.awayScore)
+      ) {
+        item.scoreHome = event.homeScore;
+        item.scoreAway = event.awayScore;
+        item.status = "finished";
+        summary.updated += 1;
+        summary.updatedItemIds.push(String(item._id));
+      } else if (event.status === "postponed") {
+        summary.postponed.push(label);
+      } else {
+        summary.stillPending.push(label);
+      }
+    }
+
+    if (summary.updated > 0) await matchday.save();
+    return { matchday, summary };
   };
 
   /* --------------- ANNUL / RESTORE ITEM --------------- */
@@ -718,6 +1178,79 @@ export default class ProdeMatchdayRepository {
     return matchday.save();
   };
 
+  /* --------------- ADD MATCHDAY ITEMS FROM CATALOG --------------- */
+  /* Alta masiva desde el catálogo de la API deportiva. El server recibe solo
+     los IDs y rearma cada ítem con los datos oficiales del provider (nunca
+     confía en equipos/horarios que vengan del navegador). Gracias al cache
+     del adapter la re-consulta normalmente no cuesta requests extra. */
+  addProdeMatchdayItemsFromCatalog = async (
+    matchdayId,
+    { challenge, leagueId, providerEventIds },
+  ) => {
+    const matchday = await ProdeMatchday.findById(matchdayId);
+    if (!matchday) throw new Error("Fecha no encontrada");
+    assertItemsEditable(matchday);
+
+    if (!CART_CHALLENGES.includes(challenge)) {
+      throw new Error(
+        "El ítem debe pertenecer a Prode Argentina (ARG) o Prode Resto del Mundo (MISC)",
+      );
+    }
+
+    const ids = [...new Set((providerEventIds ?? []).map(String))];
+    if (ids.length === 0) {
+      throw new Error("Elegí al menos un partido del catálogo");
+    }
+
+    const upcoming = await getUpcomingEventsByLeague(leagueId);
+    const eventsById = new Map(
+      upcoming.map((event) => [event.providerEventId, event]),
+    );
+
+    const missing = ids.filter((id) => !eventsById.has(id));
+    if (missing.length > 0) {
+      throw new Error(
+        "Algunos partidos elegidos ya no están disponibles en el catálogo (pueden haber empezado): actualizá la lista",
+      );
+    }
+
+    /* Sin duplicados en la fecha, aunque estén en el otro desafío */
+    const alreadyAdded = new Set(
+      matchday.items
+        .filter((item) => item.providerEventId)
+        .map((item) => String(item.providerEventId)),
+    );
+    const duplicated = ids.filter((id) => alreadyAdded.has(id));
+    if (duplicated.length > 0) {
+      const names = duplicated
+        .map((id) => {
+          const event = eventsById.get(id);
+          return `${event.homeTeam} vs ${event.awayTeam}`;
+        })
+        .join(", ");
+      throw new Error(`Estos partidos ya están en la fecha: ${names}`);
+    }
+
+    for (const id of ids) {
+      const event = eventsById.get(id);
+      matchday.items.push({
+        challenge,
+        kind: "match",
+        source: "api",
+        providerEventId: event.providerEventId,
+        leagueName: event.leagueName ?? "",
+        homeName: event.homeTeam,
+        awayName: event.awayTeam,
+        kickoffAt: new Date(event.kickoff),
+        pointsHome: 5,
+        pointsDraw: 5,
+        pointsAway: 5,
+      });
+    }
+
+    return matchday.save();
+  };
+
   /* --------------- UPDATE MATCHDAY ITEM --------------- */
   updateProdeMatchdayItem = async (matchdayId, itemId, itemData) => {
     const matchday = await ProdeMatchday.findById(matchdayId);
@@ -732,15 +1265,28 @@ export default class ProdeMatchdayRepository {
       );
     }
 
+    /* En ítems del catálogo (source "api") equipos/kickoff/liga son del
+       proveedor: se preservan siempre, o el refresh de resultados por
+       providerEventId quedaría vinculado a datos mentirosos. Solo los
+       puntos (y el desafío) siguen siendo del admin. */
+    const fromCatalog = item.source === "api";
     const merged =
       item.kind === "match"
         ? {
             challenge: itemData.challenge ?? item.challenge,
             kind: "match",
-            leagueName: itemData.leagueName ?? item.leagueName,
-            homeName: itemData.homeName ?? item.homeName,
-            awayName: itemData.awayName ?? item.awayName,
-            kickoffAt: itemData.kickoffAt ?? item.kickoffAt,
+            leagueName: fromCatalog
+              ? item.leagueName
+              : (itemData.leagueName ?? item.leagueName),
+            homeName: fromCatalog
+              ? item.homeName
+              : (itemData.homeName ?? item.homeName),
+            awayName: fromCatalog
+              ? item.awayName
+              : (itemData.awayName ?? item.awayName),
+            kickoffAt: fromCatalog
+              ? item.kickoffAt
+              : (itemData.kickoffAt ?? item.kickoffAt),
             pointsHome: itemData.pointsHome ?? item.pointsHome,
             pointsDraw: itemData.pointsDraw ?? item.pointsDraw,
             pointsAway: itemData.pointsAway ?? item.pointsAway,

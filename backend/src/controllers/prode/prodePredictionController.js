@@ -69,6 +69,21 @@ export default class ProdePredictionController {
     }
   };
 
+  /* --------------- GET PREDICTION OVERVIEW (admin) --------------- */
+  getMatchdayPredictionOverview = async (req, res, next) => {
+    try {
+      const overview = await repository.getMatchdayPredictionOverview(
+        req.params.id,
+      );
+      res.status(200).json({
+        message: "Prode matchday prediction overview retrieved successfully",
+        overview,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /* --------------- JUDGE QUESTION --------------- */
   judgeProdeQuestion = async (req, res, next) => {
     try {

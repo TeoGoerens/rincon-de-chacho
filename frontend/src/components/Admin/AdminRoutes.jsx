@@ -15,6 +15,11 @@ import UpdateProdePlayer from "./AdminProde/Players/UpdateProdePlayer";
 import ProdeMatchdaysIndex from "./AdminProde/Matchdays/ProdeMatchdaysIndex";
 import CreateProdeMatchday from "./AdminProde/Matchdays/CreateProdeMatchday";
 import UpdateProdeMatchday from "./AdminProde/Matchdays/UpdateProdeMatchday";
+import GdtUniversesIndex from "./AdminProde/Gdt/GdtUniversesIndex";
+import CreateGdtUniverse from "./AdminProde/Gdt/CreateGdtUniverse";
+import GdtUniverseDetail from "./AdminProde/Gdt/GdtUniverseDetail";
+import CreateGdtPlayer from "./AdminProde/Gdt/CreateGdtPlayer";
+import UpdateGdtPlayer from "./AdminProde/Gdt/UpdateGdtPlayer";
 
 //Admin PODRIDA Components
 import AdminPodridaPanel from "./AdminPodrida/AdminPodridaPanel";
@@ -89,6 +94,18 @@ const AdminRoutes = () => {
           <Route
             path="fechas/editar/:id"
             element={<UpdateProdeMatchday />}
+          />
+
+          <Route path="gdt" element={<GdtUniversesIndex />} />
+          <Route path="gdt/crear" element={<CreateGdtUniverse />} />
+          <Route path="gdt/:universeId" element={<GdtUniverseDetail />} />
+          <Route
+            path="gdt/:universeId/jugadores/crear"
+            element={<CreateGdtPlayer />}
+          />
+          <Route
+            path="gdt/:universeId/jugadores/editar/:id"
+            element={<UpdateGdtPlayer />}
           />
         </Route>
         {/* --------------- ADMIN PODRIDA --------------- */}

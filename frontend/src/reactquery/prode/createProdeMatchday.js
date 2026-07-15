@@ -7,6 +7,7 @@ const createProdeMatchday = async ({
   month,
   roundNumber,
   predictionsDeadline,
+  gdtUniverse,
 }) => {
   const token = getUserJWT();
   if (!token) {
@@ -16,7 +17,7 @@ const createProdeMatchday = async ({
   try {
     const response = await axios.post(
       `${baseURL}/api/prode/matchday`,
-      { tournament, month, roundNumber, predictionsDeadline },
+      { tournament, month, roundNumber, predictionsDeadline, gdtUniverse },
       { headers: { Authorization: `Bearer ${token}` } },
     );
     return response.data.matchdayCreated;

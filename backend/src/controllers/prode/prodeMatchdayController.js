@@ -50,7 +50,8 @@ export default class ProdeMatchdayController {
   /* --------------- CREATE PRODE MATCHDAY --------------- */
   createProdeMatchday = async (req, res, next) => {
     try {
-      const { tournament, month, roundNumber, predictionsDeadline } = req.body;
+      const { tournament, month, roundNumber, predictionsDeadline, gdtUniverse } =
+        req.body;
       if (!tournament) throw new Error("El torneo es obligatorio");
       if (!month) throw new Error("El mes es obligatorio");
       if (!roundNumber || Number.isNaN(Number(roundNumber))) {
@@ -65,6 +66,7 @@ export default class ProdeMatchdayController {
         month,
         roundNumber: Number(roundNumber),
         predictionsDeadline: parseDeadline(predictionsDeadline),
+        gdtUniverse: gdtUniverse || null,
       });
       res.status(201).json({
         message: "Prode matchday created successfully",
@@ -109,7 +111,7 @@ export default class ProdeMatchdayController {
   /* --------------- UPDATE MATCHDAY META --------------- */
   updateProdeMatchdayMeta = async (req, res, next) => {
     try {
-      const { month, roundNumber, predictionsDeadline } = req.body;
+      const { month, roundNumber, predictionsDeadline, gdtUniverse } = req.body;
 
       const matchdayUpdated = await repository.updateProdeMatchdayMeta(
         req.params.id,
@@ -121,6 +123,8 @@ export default class ProdeMatchdayController {
             predictionsDeadline !== undefined
               ? parseDeadline(predictionsDeadline)
               : undefined,
+          /* "" (sin equipo) → null; undefined no toca */
+          gdtUniverse: gdtUniverse !== undefined ? gdtUniverse || null : undefined,
         },
       );
       res.status(200).json({
@@ -172,21 +176,64 @@ export default class ProdeMatchdayController {
   /* --------------- CONSOLIDATE MATCHDAY --------------- */
   consolidateProdeMatchday = async (req, res, next) => {
     try {
-      const { gdtScores } = req.body;
-      const parsed = Array.isArray(gdtScores)
-        ? gdtScores.map((score) => ({
-            scoreA: Number(score?.scoreA),
-            scoreB: Number(score?.scoreB),
-          }))
-        : gdtScores;
-
       const { matchday, failedEmails, participantsWithoutUser } =
-        await repository.consolidateProdeMatchday(req.params.id, parsed);
+        await repository.consolidateProdeMatchday(req.params.id);
       res.status(200).json({
         message: "Prode matchday consolidated successfully",
         matchdayUpdated: matchday,
         failedEmails,
         participantsWithoutUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- REOPEN CONSOLIDATED MATCHDAY --------------- */
+  reopenConsolidatedProdeMatchday = async (req, res, next) => {
+    try {
+      const matchdayUpdated =
+        await repository.reopenConsolidatedProdeMatchday(req.params.id);
+      res.status(200).json({
+        message: "Prode matchday reopened for correction successfully",
+        matchdayUpdated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- SET GDT SCORES --------------- */
+  setProdeMatchdayGdtScores = async (req, res, next) => {
+    try {
+      const { scores } = req.body;
+      const parsed = Array.isArray(scores)
+        ? scores.map((score) => ({
+            realPlayer: score?.realPlayer,
+            points: Number(score?.points),
+          }))
+        : scores;
+
+      const matchdayUpdated = await repository.setProdeMatchdayGdtScores(
+        req.params.id,
+        parsed,
+      );
+      res.status(200).json({
+        message: "Prode matchday GDT scores set successfully",
+        matchdayUpdated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- GDT BOARD --------------- */
+  getProdeMatchdayGdtBoard = async (req, res, next) => {
+    try {
+      const board = await repository.getProdeMatchdayGdtBoard(req.params.id);
+      res.status(200).json({
+        message: "Prode matchday GDT board retrieved successfully",
+        board,
       });
     } catch (error) {
       next(error);
@@ -213,6 +260,21 @@ export default class ProdeMatchdayController {
       res.status(200).json({
         message: "Prode matchday item result set successfully",
         matchdayUpdated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- REFRESH CATALOG RESULTS --------------- */
+  refreshProdeMatchdayResults = async (req, res, next) => {
+    try {
+      const { matchday, summary } =
+        await repository.refreshProdeMatchdayResults(req.params.id);
+      res.status(200).json({
+        message: "Prode matchday catalog results refreshed successfully",
+        matchdayUpdated: matchday,
+        summary,
       });
     } catch (error) {
       next(error);
@@ -284,6 +346,30 @@ export default class ProdeMatchdayController {
       );
       res.status(201).json({
         message: "Prode matchday item added successfully",
+        matchdayUpdated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- ADD MATCHDAY ITEMS FROM CATALOG --------------- */
+  addProdeMatchdayItemsFromCatalog = async (req, res, next) => {
+    try {
+      const { challenge, leagueId, providerEventIds } = req.body;
+      if (!leagueId) throw new Error("La liga del catálogo es obligatoria");
+      if (!Array.isArray(providerEventIds)) {
+        throw new Error("Los partidos del catálogo deben enviarse como lista");
+      }
+
+      const matchdayUpdated =
+        await repository.addProdeMatchdayItemsFromCatalog(req.params.id, {
+          challenge,
+          leagueId,
+          providerEventIds,
+        });
+      res.status(201).json({
+        message: "Prode matchday items added from catalog successfully",
         matchdayUpdated,
       });
     } catch (error) {

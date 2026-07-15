@@ -1,0 +1,405 @@
+/* ═══════════════════════════════════════════════════════════
+   PRODE — PESTAÑA TORNEO
+   Prefijo: prt-
+   Tabla: formato canónico de la tabla de Podrida (pr-table)
+   ═══════════════════════════════════════════════════════════ */
+
+.prt-root {
+  min-height: calc(100vh - 80px - 42px);
+  background: var(--bg-deep);
+  padding: var(--space-xl) var(--space-xl) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ── Header de página ── */
+.prt-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prt-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--color-prode);
+}
+
+.prt-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-prode);
+  flex-shrink: 0;
+}
+
+.prt-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+  margin: 0;
+}
+
+/* ── Estados ── */
+.prt-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) 0;
+}
+
+.prt-state-text {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+  text-align: center;
+  margin: 0;
+}
+
+/* ── Controles: selector de torneo + pills de período ── */
+.prt-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.prt-select {
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: var(--input-text-dark);
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  padding: 0.55rem 0.75rem;
+  max-width: 320px;
+  cursor: pointer;
+  transition: border-color var(--transition-base);
+}
+
+.prt-select:hover,
+.prt-select:focus {
+  border-color: var(--third-color);
+  outline: none;
+}
+
+.prt-select option {
+  background: var(--bg-panel);
+  color: var(--text-body-dark);
+}
+
+.prt-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.prt-pill {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-full);
+  color: var(--text-label-dark);
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.prt-pill:hover:not(:disabled):not(.prt-pill--active) {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-body-dark);
+}
+
+/* Selección "encendida en claro" — código de colores canónico del Prode */
+.prt-pill--active {
+  background: var(--text-bright);
+  border-color: var(--text-bright);
+  color: var(--bg-deep);
+}
+
+.prt-pill:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Banner de contexto: qué tabla se está mirando ── */
+.prt-context {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 1rem;
+}
+
+.prt-context-main {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.prt-context-meta {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Tabla de posiciones (formato pr-table de Podrida) ── */
+.prt-table-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prt-table-wrap {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.prt-table-wrap::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.prt-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prt-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+/* Columnas */
+.prt-col--name {
+  width: 32%;
+}
+
+.prt-col--stat {
+  width: 72px;
+}
+
+.prt-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Urbanist", var(--secondary-font);
+}
+
+/* ── Headers ── */
+.prt-th {
+  padding: 0.6rem 0.75rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  background: #111111;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  white-space: nowrap;
+}
+
+/* Los spans del toggle Bonus/B heredan explícito: el selector universal
+   de App.css (* { color }) les pisa el color del th si no se declara acá */
+.prt-bonus-full,
+.prt-bonus-short {
+  color: var(--text-label-dark);
+}
+
+.prt-bonus-short {
+  display: none;
+}
+
+/* ── Rows ── */
+.prt-tr {
+  transition: background var(--transition-base);
+}
+
+.prt-tr:nth-child(even) .prt-td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.prt-tr:hover .prt-td {
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+/* Los mejores — tinte del color de sección: el líder en la acumulada,
+   los 4 de la comida en la mensual */
+.prt-tr.prt-row--best .prt-td {
+  background: rgba(249, 115, 22, 0.05);
+}
+
+.prt-tr.prt-row--best:hover .prt-td {
+  background: rgba(249, 115, 22, 0.08) !important;
+}
+
+.prt-row--best .prt-name-text,
+.prt-row--best .prt-td-pos {
+  color: var(--color-prode-soft);
+}
+
+/* ── Cells ── */
+.prt-td {
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.prt-td.prt-td--name {
+  text-align: left;
+  overflow: hidden;
+  max-width: 0;
+}
+
+.prt-td-name-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prt-td-pos {
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--text-subtle-dark);
+  flex-shrink: 0;
+  min-width: 14px;
+  text-align: right;
+}
+
+.prt-name-text {
+  font-weight: var(--fw-regular);
+  color: var(--text-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* PTS siempre en el acento de la sección (tipográfico AAA sobre #111) */
+.prt-td--pts {
+  font-weight: var(--fw-bold);
+  color: var(--color-prode-soft);
+}
+
+/* Zero: disimulado — especificidad 0-2-0 */
+.prt-tr .prt-td--zero {
+  color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Zona de comida (solo vista mensual) ── */
+.prt-row--cut .prt-td {
+  border-bottom: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+/* Último del mes = organiza la comida — rojo, como el último de Podrida */
+.prt-tr.prt-row--organizer .prt-td {
+  background: var(--status-red-bg);
+}
+
+.prt-tr.prt-row--organizer:hover .prt-td {
+  background: rgba(230, 57, 70, 0.16) !important;
+}
+
+.prt-row--organizer .prt-name-text {
+  color: rgba(230, 57, 70, 0.75);
+}
+
+.prt-org-tag {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--status-red);
+  flex-shrink: 0;
+}
+
+.prt-legend {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--text-subtle-dark);
+  margin: 0;
+  padding-left: 0.25rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .prt-root {
+    padding: var(--space-lg) var(--space-lg) var(--space-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .prt-root {
+    padding: var(--space-md) var(--space-md) var(--space-lg);
+  }
+
+  .prt-select {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .prt-col--name {
+    width: 38%;
+  }
+
+  .prt-col--stat {
+    width: auto;
+  }
+
+  .prt-th {
+    padding: 0.55rem 0.2rem;
+  }
+
+  .prt-td {
+    padding: 0.5rem 0.2rem;
+    font-size: var(--text-xs);
+  }
+
+  .prt-td.prt-td--name {
+    padding-left: 0.6rem;
+  }
+
+  .prt-bonus-full {
+    display: none;
+  }
+
+  .prt-bonus-short {
+    display: inline;
+  }
+
+  .prt-org-tag {
+    display: none;
+  }
+}

@@ -6,10 +6,18 @@ import { toast } from "react-toastify";
 
 // Imports CSS & helpers
 import "../ProdeFormStyles.css";
-import { PRODE_MONTHS, TOURNAMENT_STATUSES } from "../prodeAdminConstants";
+import "../ProdeIndexStyles.css";
+import {
+  PRODE_MONTHS,
+  TOURNAMENT_STATUSES,
+  monthsSummary,
+  participantsSummary,
+} from "../prodeAdminConstants";
 
 //Import components
 import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
+import MultiSelectDropdown from "../MultiSelectDropdown";
+import InfoTip from "../InfoTip";
 
 //Import React Query functions
 import fetchProdeTournamentById from "../../../../reactquery/prode/fetchProdeTournamentById";
@@ -25,7 +33,6 @@ const UpdateProdeTournament = () => {
   const [year, setYear] = useState("");
   const [months, setMonths] = useState([]);
   const [participants, setParticipants] = useState([]);
-  const [status, setStatus] = useState("draft");
 
   const {
     data: tournament,
@@ -50,7 +57,6 @@ const UpdateProdeTournament = () => {
       setParticipants(
         (tournament.participants ?? []).map((p) => p._id ?? p),
       );
-      setStatus(tournament.status ?? "draft");
     }
   }, [tournament]);
 
@@ -115,7 +121,6 @@ const UpdateProdeTournament = () => {
       name: name.trim(),
       year: Number(year),
       months: orderedMonths,
-      status,
       participants,
     });
   };
@@ -173,39 +178,28 @@ const UpdateProdeTournament = () => {
           </div>
 
           <div className="prf-field">
-            <label>Estado</label>
-            <div className="prf-chips">
-              {TOURNAMENT_STATUSES.map((s) => (
-                <button
-                  key={s.value}
-                  type="button"
-                  className={`prf-chip${
-                    status === s.value ? " prf-chip--selected" : ""
-                  }`}
-                  onClick={() => setStatus(s.value)}
-                >
-                  {s.label}
-                </button>
-              ))}
+            <label>
+              Estado
+              <InfoTip text="El estado ya no se edita acá: se cambia con los botones Activar / Finalizar del índice de torneos." />
+            </label>
+            <div>
+              <span className={`pri-badge pri-badge--${tournament.status}`}>
+                {TOURNAMENT_STATUSES.find(
+                  (s) => s.value === tournament.status,
+                )?.label ?? tournament.status}
+              </span>
             </div>
           </div>
 
           <div className="prf-field">
             <label>Meses del torneo</label>
-            <div className="prf-chips">
-              {PRODE_MONTHS.map((month) => (
-                <button
-                  key={month}
-                  type="button"
-                  className={`prf-chip${
-                    months.includes(month) ? " prf-chip--selected" : ""
-                  }`}
-                  onClick={() => toggleMonth(month)}
-                >
-                  {month}
-                </button>
-              ))}
-            </div>
+            <MultiSelectDropdown
+              placeholder="Elegí los meses"
+              summary={monthsSummary(months)}
+              options={PRODE_MONTHS.map((m) => ({ value: m, label: m }))}
+              selected={months}
+              onToggle={toggleMonth}
+            />
           </div>
 
           <div className="prf-field">
@@ -217,22 +211,16 @@ const UpdateProdeTournament = () => {
               </p>
             ) : (
               <>
-                <div className="prf-chips">
-                  {candidates.map((player) => (
-                    <button
-                      key={player._id}
-                      type="button"
-                      className={`prf-chip${
-                        participants.includes(player._id)
-                          ? " prf-chip--selected"
-                          : ""
-                      }`}
-                      onClick={() => toggleParticipant(player._id)}
-                    >
-                      {player.name}
-                    </button>
-                  ))}
-                </div>
+                <MultiSelectDropdown
+                  placeholder="Elegí los participantes"
+                  summary={participantsSummary(participants)}
+                  options={candidates.map((p) => ({
+                    value: p._id,
+                    label: p.name,
+                  }))}
+                  selected={participants}
+                  onToggle={toggleParticipant}
+                />
                 <p className="prf-hint">
                   {participants.length} seleccionados
                   {participants.length % 2 !== 0

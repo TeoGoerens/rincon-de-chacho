@@ -1,5 +1,5 @@
 // Import React dependencies
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -13,6 +13,7 @@ import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
 //Import React Query functions
 import fetchAllProdeTournaments from "../../../../reactquery/prode/fetchAllProdeTournaments";
 import fetchProdeMatchdaysByTournament from "../../../../reactquery/prode/fetchProdeMatchdaysByTournament";
+import fetchGdtUniversesByTournament from "../../../../reactquery/prode/fetchGdtUniversesByTournament";
 import createProdeMatchday from "../../../../reactquery/prode/createProdeMatchday";
 
 const CreateProdeMatchday = () => {
@@ -23,6 +24,7 @@ const CreateProdeMatchday = () => {
   const [month, setMonth] = useState("");
   const [roundNumber, setRoundNumber] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [gdtUniverseId, setGdtUniverseId] = useState("");
 
   const { data: tournamentsData } = useQuery({
     queryKey: ["prode-tournaments"],
@@ -66,6 +68,37 @@ const CreateProdeMatchday = () => {
     }
   }, [matchdaysData]);
 
+  /* Universos GDT del torneo elegido: solo con el draft CERRADO se puede
+     jugar una fecha; default = el principal */
+  const { data: gdtUniversesData } = useQuery({
+    queryKey: ["gdt-universes", tournamentId],
+    queryFn: () => fetchGdtUniversesByTournament(tournamentId),
+    enabled: !!tournamentId,
+  });
+  const gdtUniverses = useMemo(
+    () =>
+      (gdtUniversesData ?? []).filter(
+        (universe) => universe.draftStatus === "final",
+      ),
+    [gdtUniversesData],
+  );
+
+  /* Default: el universo principal. El default SIGUE a los datos (si el
+     refetch trae un universo recién cerrado, se aplica igual) hasta que el
+     admin toca el select — su elección explícita, incluida "Sin universo",
+     no se pisa jamás. El one-shot anterior por useRef podía consumirse con
+     la lista vacía/cacheada vieja y dejar "" para siempre (bug real del
+     dueño 2026-07-12: fecha creada sin universo pese al default). */
+  const gdtTouched = useRef(false);
+  useEffect(() => {
+    gdtTouched.current = false;
+  }, [tournamentId]);
+  useEffect(() => {
+    if (gdtTouched.current) return;
+    const primary = gdtUniverses.find((universe) => universe.isPrimary);
+    setGdtUniverseId(primary?._id ?? gdtUniverses[0]?._id ?? "");
+  }, [gdtUniverses]);
+
   const mutation = useMutation({
     mutationFn: createProdeMatchday,
     onSuccess: (matchdayCreated) => {
@@ -97,12 +130,12 @@ const CreateProdeMatchday = () => {
       toast.error("Fijá el deadline de pronósticos");
       return;
     }
-
     mutation.mutate({
       tournament: tournamentId,
       month,
       roundNumber: Number(roundNumber),
       predictionsDeadline: new Date(deadline).toISOString(),
+      gdtUniverse: gdtUniverseId || null,
     });
   };
 
@@ -192,6 +225,43 @@ const CreateProdeMatchday = () => {
               Día y hora límite para cargar pronósticos. Si es la primera
               fecha del mes, también cierra los cambios de GDT.
             </p>
+          </div>
+
+          <div className="prf-field">
+            <label>Universo GDT</label>
+            {gdtUniverses.length > 0 ? (
+              <>
+                <select
+                  value={gdtUniverseId}
+                  onChange={(e) => {
+                    gdtTouched.current = true;
+                    setGdtUniverseId(e.target.value);
+                  }}
+                >
+                  <option value="">
+                    Sin universo (asignar antes del deadline)
+                  </option>
+                  {gdtUniverses.map((universe) => (
+                    <option key={universe._id} value={universe._id}>
+                      {universe.label} ({universe.league})
+                      {universe.isPrimary ? " — principal" : ""}
+                    </option>
+                  ))}
+                </select>
+                <p className="prf-hint">
+                  Con qué universo GDT se juega esta fecha. Podés dejarlo
+                  pendiente (draft y pronósticos pueden correr en
+                  simultáneo), pero sin universo la fecha no pasa a "en
+                  juego" al vencer el deadline.
+                </p>
+              </>
+            ) : (
+              <p className="prf-hint">
+                El torneo todavía no tiene un universo GDT con draft cerrado.
+                Podés crear la fecha, armarla y hasta abrirla; asignale el
+                universo antes del deadline para que pase a "en juego".
+              </p>
+            )}
           </div>
 
           <button

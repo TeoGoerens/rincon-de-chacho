@@ -14,6 +14,7 @@ import "./AdminProdePanelStyles.css";
 
 const SUB_SECTIONS = [
   { label: "Fechas", to: "fechas", end: false, icon: "fa-calendar-days" },
+  { label: "Gran DT", to: "gdt", end: false, icon: "fa-shirt" },
   { label: "Torneos", to: "torneos", end: false, icon: "fa-trophy" },
   { label: "Jugadores", to: "jugadores", end: false, icon: "fa-circle-user" },
 ];

@@ -112,16 +112,24 @@ const prodeMatchdaySchema = new mongoose.Schema(
       default: null,
     },
 
+    /* Aviso de cierre ("la fecha está en juego, los pronósticos ya se ven")
+       enviado por el cron al detectar la fecha en juego sin marca. Persistido
+       para no duplicar aunque la promoción la dispare una lectura perezosa. */
+    closedNoticeSentAt: {
+      type: Date,
+      default: null,
+    },
+
     /* Partidos y preguntas de ARG + MISC (schema compartido). */
     items: {
       type: [prodeItemSchema],
       default: [],
     },
 
-    /* Con qué equipo GDT se juega esta fecha. */
-    gdtTeam: {
+    /* Con qué universo GDT se juega esta fecha. */
+    gdtUniverse: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "GdtTeam",
+      ref: "GdtUniverse",
       default: null,
     },
 

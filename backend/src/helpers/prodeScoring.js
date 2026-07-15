@@ -174,3 +174,72 @@ export const computeMatchdayPartials = (matchday, predictions) => {
 
   return { picks, totals, duels };
 };
+
+/* ---------- GDT: mini-duelos slot vs slot (Etapa 4.5) ---------- */
+
+/* Mapa realPlayerId → puntaje desde matchday.gdtScores */
+export const gdtScoresMap = (gdtScores) => {
+  const map = {};
+  for (const score of gdtScores ?? []) {
+    map[String(score.realPlayer?._id ?? score.realPlayer)] = score.points;
+  }
+  return map;
+};
+
+/* Valor de un slot en su mini-duelo:
+   - slot BLOQUEADO por el admin → 0 SIEMPRE (sanción por conflicto de club
+     sobrevenido; determinado aunque no tenga puntaje cargado)
+   - puntaje cargado → ese número
+   - sin puntaje → null = PENDIENTE en los parciales; con final=true
+     (consolidación) vale 0: "no jugó". El admin que quiera resolver un
+     mini-duelo en el parcial carga el 0 explícito. */
+export const gdtSlotValue = (slot, scoresByPlayer, { final = false } = {}) => {
+  if (!slot) return final ? 0 : null;
+  if (slot.blocked) return 0;
+  const points = scoresByPlayer[String(slot.realPlayer?._id ?? slot.realPlayer)];
+  if (points === null || points === undefined) return final ? 0 : null;
+  return points;
+};
+
+/* Desafío GDT de un duelo: 11 mini-duelos slot contra slot (arquero vs
+   arquero, DEF1 vs DEF1, ...). Regla canónica de parciales: un mini-duelo se
+   computa SOLO cuando ambos slots tienen valor determinado; empate de
+   puntaje = no lo gana nadie (pero cuenta como definido). El score del
+   desafío es la cantidad de mini-duelos GANADOS por cada lado.
+   Devuelve { miniDuels: [{slotNumber, a, b, result}], a, b, pending }. */
+export const computeGdtDuel = (
+  slotsA,
+  slotsB,
+  scoresByPlayer,
+  { final = false } = {},
+) => {
+  const bySlotNumber = (slots) => {
+    const map = {};
+    for (const slot of slots ?? []) map[slot.slotNumber] = slot;
+    return map;
+  };
+  const mapA = bySlotNumber(slotsA);
+  const mapB = bySlotNumber(slotsB);
+
+  const miniDuels = [];
+  let winsA = 0;
+  let winsB = 0;
+  let pending = 0;
+
+  for (let slotNumber = 1; slotNumber <= 11; slotNumber++) {
+    const a = gdtSlotValue(mapA[slotNumber], scoresByPlayer, { final });
+    const b = gdtSlotValue(mapB[slotNumber], scoresByPlayer, { final });
+
+    let result = null;
+    if (a !== null && b !== null) {
+      result = a > b ? "A" : b > a ? "B" : "draw";
+      if (result === "A") winsA += 1;
+      else if (result === "B") winsB += 1;
+    } else {
+      pending += 1;
+    }
+    miniDuels.push({ slotNumber, a, b, result });
+  }
+
+  return { miniDuels, a: winsA, b: winsB, pending };
+};

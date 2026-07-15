@@ -22,20 +22,28 @@ const squadSlotSchema = new mongoose.Schema(
       ref: "GdtRealPlayer",
       required: true,
     },
+    /* BLOQUEO PUNTUAL del admin (regla canónica): un conflicto sobrevenido
+       por el mercado de pases (transferencia a un club del que el dueño ya
+       tiene otro jugador) no se corrige — se sanciona: el jugador bloqueado
+       suma 0 en los mini-duelos mientras dure. Reversible, discrecional. */
+    blocked: {
+      type: Boolean,
+      default: false,
+    },
   },
   { _id: false },
 );
 
-/* Plantel de un participante en un equipo GDT, VERSIONADO POR MES:
+/* Plantel de un participante en un universo GDT, VERSIONADO POR MES:
    la fecha de un mes se calcula con la versión de ese mes, "máx. 2 cambios"
    se valida comparando versiones consecutivas, y el saliente queda ocupado
    hasta el mes siguiente. Equipos suplentes (fijos): una sola versión con
    month = null. */
 const gdtSquadSchema = new mongoose.Schema(
   {
-    gdtTeam: {
+    gdtUniverse: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "GdtTeam",
+      ref: "GdtUniverse",
       required: true,
     },
     player: {
@@ -58,6 +66,43 @@ const gdtSquadSchema = new mongoose.Schema(
         message: "A squad cannot have more than 11 slots",
       },
     },
+    /* Staging A CIEGAS de elecciones pendientes de cierre — jamás se
+       expone a otros participantes. Lo usan DOS procesos que nunca se
+       superponen en el tiempo: las rondas de reemplazo del draft (sobre la
+       versión base) y los cambios de la ventana mensual (sobre la versión
+       vigente). Al cerrar, se aplican o se descartan si el entrante se
+       quema por colisión de 4+. */
+    pendingReplacements: {
+      type: [
+        {
+          slotNumber: { type: Number, required: true, min: 1, max: 11 },
+          realPlayer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "GdtRealPlayer",
+            required: true,
+          },
+          _id: false,
+        },
+      ],
+      default: [],
+    },
+
+    /* "Confirmar sin cambios": acción expresa y OPCIONAL del participante
+       durante la ventana — informativa, para que el admin distinga
+       "decidió no cambiar" de "no entró" y pueda cerrar anticipado */
+    windowNoChanges: {
+      type: Boolean,
+      default: false,
+    },
+
+    /* Slots cuyo cambio de ventana fue DESCARTADO por una quema nueva al
+       cerrar: sus dueños re-eligen a ciegas en la ronda de la ventana
+       (vive en la versión del MES creada al primer cierre) */
+    windowRetrySlots: {
+      type: [{ type: Number, min: 1, max: 11 }],
+      default: [],
+    },
+
     status: {
       type: String,
       enum: ["pending", "final"],
@@ -71,7 +116,7 @@ const gdtSquadSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-gdtSquadSchema.index({ gdtTeam: 1, player: 1, month: 1 }, { unique: true });
+gdtSquadSchema.index({ gdtUniverse: 1, player: 1, month: 1 }, { unique: true });
 
 const GdtSquad = mongoose.model("GdtSquad", gdtSquadSchema);
 export default GdtSquad;
