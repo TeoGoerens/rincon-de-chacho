@@ -34,6 +34,19 @@ import {
   getUpcomingEventsByLeague,
   getEventResult,
 } from "../../integrations/sportsProvider/index.js";
+import ProdeStatsRepository from "./prodeStatsRepository.js";
+
+const statsRepository = new ProdeStatsRepository();
+
+/* Barrido de honores mensuales (3.5) al abrir y al consolidar: nunca rompe
+   la operación principal — si falla, el próximo barrido lo reintenta */
+const sealHonorsSafely = async (tournamentId) => {
+  try {
+    await statsRepository.sealMonthlyHonors(tournamentId);
+  } catch (error) {
+    console.error("Error al sellar honores mensuales del Prode:", error.message);
+  }
+};
 
 /* Los duelos nacen con los 3 challenges vacíos (scores null): es el mismo
    shape que usan las fechas históricas antes de tener resultados, y lo que
@@ -592,6 +605,9 @@ export default class ProdeMatchdayRepository {
     matchday.phase = "open";
     await matchday.save();
 
+    /* Abrir una fecha puede cerrar meses anteriores (disparador de 3.5) */
+    await sealHonorsSafely(matchday.tournament._id);
+
     const subject = `Fecha ${matchday.roundNumber} del Prode abierta`;
     const deadlineText = formatDeadlineForEmail(matchday.predictionsDeadline);
     const generateHTML = (user) =>
@@ -732,6 +748,10 @@ export default class ProdeMatchdayRepository {
 
     matchday.phase = "consolidated";
     await matchday.save();
+
+    /* Consolidar puede cerrar meses anteriores — y si esta fecha es de un
+       mes ya sellado (reapertura), el barrido lo autocorrige (3.5) */
+    await sealHonorsSafely(matchday.tournament._id);
 
     /* Mail de resultados personalizado: cada participante recibe cómo le
        fue en SU duelo */
@@ -1343,6 +1363,19 @@ export default class ProdeMatchdayRepository {
       );
     }
 
+    return ProdeMatchday.findByIdAndDelete(matchdayId);
+  };
+
+  /* --------------- SUPER DELETE PRODE MATCHDAY --------------- */
+  /* SOLO super admin (middleware): borra la fecha en CUALQUIER fase,
+     consolidada incluida, arrastrando sus pronósticos. Los puntos que la
+     fecha aportó desaparecen de tablas y records; los honores ya sellados
+     de su mes NO se recalculan solos. */
+  superDeleteProdeMatchday = async (matchdayId) => {
+    const matchday = await ProdeMatchday.findById(matchdayId);
+    if (!matchday) throw new Error("Fecha no encontrada");
+
+    await ProdePrediction.deleteMany({ matchday: matchdayId });
     return ProdeMatchday.findByIdAndDelete(matchdayId);
   };
 }

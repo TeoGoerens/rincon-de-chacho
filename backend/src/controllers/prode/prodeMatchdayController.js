@@ -421,4 +421,16 @@ export default class ProdeMatchdayController {
       next(error);
     }
   };
+
+  /* --------------- SUPER DELETE PRODE MATCHDAY (super admin) --------------- */
+  superDeleteProdeMatchday = async (req, res, next) => {
+    try {
+      await repository.superDeleteProdeMatchday(req.params.id);
+      res
+        .status(200)
+        .json({ message: "Prode matchday super deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -86,12 +86,16 @@ const run = async () => {
     );
   }
 
-  const header = `${"#".padStart(2)}  ${"Participante".padEnd(20)} ${"PJ".padStart(3)} ${"G".padStart(3)} ${"E".padStart(3)} ${"P".padStart(3)} ${"Bonus".padStart(6)} ${"Pts".padStart(4)}`;
+  /* ARG/RES/GDT/EF% son el desglose por desafío de 3.4 — las mismas sumas
+     que usa la cadena de desempate (pts → pts sin bonus → GDT → ARG → MISC) */
+  const header = `${"#".padStart(2)}  ${"Participante".padEnd(20)} ${"PJ".padStart(3)} ${"G".padStart(3)} ${"E".padStart(3)} ${"P".padStart(3)} ${"Bonus".padStart(6)} ${"Pts".padStart(4)}   ${"ARG".padStart(5)} ${"RESTO".padStart(5)} ${"GDT".padStart(5)} ${"EF%".padStart(6)}`;
   console.log(header);
   console.log("-".repeat(header.length));
   for (const row of result.standings) {
+    const efficiency =
+      row.efficiency === null ? "—" : `${(row.efficiency * 100).toFixed(1)}%`;
     console.log(
-      `${String(row.position).padStart(2)}  ${row.player.name.padEnd(20)} ${String(row.played).padStart(3)} ${String(row.won).padStart(3)} ${String(row.drawn).padStart(3)} ${String(row.lost).padStart(3)} ${String(row.bonus).padStart(6)} ${String(row.points).padStart(4)}`,
+      `${String(row.position).padStart(2)}  ${row.player.name.padEnd(20)} ${String(row.played).padStart(3)} ${String(row.won).padStart(3)} ${String(row.drawn).padStart(3)} ${String(row.lost).padStart(3)} ${String(row.bonus).padStart(6)} ${String(row.points).padStart(4)}   ${String(row.challenges.arg).padStart(5)} ${String(row.challenges.misc).padStart(5)} ${String(row.challenges.gdt).padStart(5)} ${efficiency.padStart(6)}`,
     );
   }
 

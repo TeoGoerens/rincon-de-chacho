@@ -23,3 +23,19 @@ export const getUserRole = () => {
     null
   );
 };
+
+export const getUserEmail = () => {
+  return (
+    store.getState().users?.userAuth?.email ||
+    store.getState().users?.userAuth?.userToDisplay?.email ||
+    null
+  );
+};
+
+/* Único super admin del sitio (habilita las super eliminaciones del admin
+   Prode). Este chequeo solo OCULTA/MUESTRA el botón: el que vale es el del
+   backend (superAdminMiddleware, mismo mail). */
+export const SUPER_ADMIN_EMAIL = "goerens_teo@hotmail.com";
+
+export const isSuperAdmin = () =>
+  (getUserEmail() ?? "").toLowerCase() === SUPER_ADMIN_EMAIL;

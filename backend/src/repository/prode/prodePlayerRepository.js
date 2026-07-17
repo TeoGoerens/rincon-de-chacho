@@ -92,4 +92,60 @@ export default class ProdePlayerRepository {
 
     return ProdePlayer.findByIdAndDelete(playerId);
   };
+
+  /* --------------- SUPER DELETE PRODE PLAYER --------------- */
+  /* SOLO super admin (middleware): borra al jugador CON TODO su rastro —
+     pronósticos, planteles GDT, sus duelos en todas las fechas (sin el
+     jugador no significan nada; el rival pierde esos resultados), su lugar
+     en participantes/honores de los torneos y el vínculo con el user. */
+  superDeleteProdePlayer = async (playerId) => {
+    const player = await ProdePlayer.findById(playerId);
+    if (!player) throw new Error("Jugador no encontrado");
+
+    await ProdePrediction.deleteMany({ player: playerId });
+    await GdtSquad.deleteMany({ player: playerId });
+
+    await ProdeMatchday.updateMany(
+      { $or: [{ "duels.playerA": playerId }, { "duels.playerB": playerId }] },
+      {
+        $pull: {
+          duels: { $or: [{ playerA: playerId }, { playerB: playerId }] },
+        },
+      },
+    );
+    await ProdeMatchday.updateMany(
+      { reopenedFor: playerId },
+      { $pull: { reopenedFor: playerId } },
+    );
+
+    await ProdeTournament.updateMany(
+      {},
+      {
+        $pull: {
+          participants: playerId,
+          "monthlyWinners.$[].winnerPlayerIds": playerId,
+        },
+      },
+    );
+    await ProdeTournament.updateMany(
+      { champion: playerId },
+      { $set: { champion: null } },
+    );
+    await ProdeTournament.updateMany(
+      { lastPlace: playerId },
+      { $set: { lastPlace: null } },
+    );
+    await ProdeTournament.updateMany(
+      { "monthlyWinners.monthlyLoser": playerId },
+      { $set: { "monthlyWinners.$[entry].monthlyLoser": null } },
+      { arrayFilters: [{ "entry.monthlyLoser": playerId }] },
+    );
+
+    await User.updateMany(
+      { prode_player: playerId },
+      { $set: { prode_player: null } },
+    );
+
+    return ProdePlayer.findByIdAndDelete(playerId);
+  };
 }

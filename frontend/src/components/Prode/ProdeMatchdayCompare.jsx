@@ -19,15 +19,12 @@ const CHALLENGE_BLOCKS = [
 
 /* El hero del duelo muestra los 3 desafíos: el GDT en vivo con el marcador
    de mini-duelos (4.5); "se define al consolidar" solo si la fecha no tiene
-   universo GDT */
-const HERO_BLOCKS = [...CHALLENGE_BLOCKS, { code: "GDT", short: "Gran DT" }];
-
-const GDT_POSITION_LABELS = {
-  ARQ: "Arquero",
-  DEF: "Defensor",
-  VOL: "Volante",
-  DEL: "Delantero",
-};
+   universo GDT. En desktop van en fila; en mobile apilados compactos */
+const HERO_BLOCKS = [
+  { code: "ARG", label: "Argentina" },
+  { code: "MISC", label: "Resto del Mundo" },
+  { code: "GDT", label: "Gran DT" },
+];
 
 const toId = (value) => String(value?._id ?? value);
 
@@ -346,7 +343,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
       </div>
 
       <div className="prp-hero-center">
-        {HERO_BLOCKS.map(({ code, short }) => {
+        {HERO_BLOCKS.map(({ code, label }) => {
           let mine = null;
           let theirs = null;
           let caption = null;
@@ -377,7 +374,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
 
           return (
             <div className="prp-hero-ch" key={code}>
-              <span className="prp-hero-label">{short}</span>
+              <span className="prp-hero-label">{label}</span>
               <div className="prp-hero-score">
                 {mine === null ? (
                   <span className="prp-hero-num prp-hero-num--pending">–</span>
@@ -475,24 +472,41 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
 
   /* ---------- Bloque Gran DT: mini-duelos slot a slot ---------- */
 
+  /* Celda con el formato del comparador de planteles: foto + nombre con
+     club debajo + puntaje a la derecha */
   const renderGdtSide = (side, winner) => {
     if (!side?.playerName) {
       return <span className="prp-cmp-empty">—</span>;
     }
     const pending = side.value === null || side.value === undefined;
     return (
-      <>
-        <span
-          className={`prp-gdt-name${
-            side.blocked ? " prp-gdt-name--blocked" : ""
-          }`}
-          title={
-            side.blocked
-              ? "Bloqueado por conflicto de club: vale 0 mientras dure"
-              : side.club
-          }
-        >
-          {side.playerName}
+      <div className="prp-gdt-cell">
+        {side.photoUrl ? (
+          <img
+            className="prp-gdt-photo"
+            src={side.photoUrl}
+            alt=""
+            loading="lazy"
+          />
+        ) : (
+          <span className="prp-gdt-photo prp-gdt-photo--initial">
+            {side.playerName.charAt(0)}
+          </span>
+        )}
+        <span className="prp-gdt-id">
+          <span
+            className={`prp-gdt-name${
+              side.blocked ? " prp-gdt-name--blocked" : ""
+            }`}
+            title={
+              side.blocked
+                ? "Bloqueado por conflicto de club: vale 0 mientras dure"
+                : undefined
+            }
+          >
+            {side.playerName}
+          </span>
+          <span className="prp-gdt-club">{side.club}</span>
         </span>
         <span
           className={`prp-gdt-num${winner ? " prp-gdt-num--won" : ""}${
@@ -501,7 +515,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
         >
           {pending ? "—" : side.value}
         </span>
-      </>
+      </div>
     );
   };
 
@@ -510,6 +524,21 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
      pendiente atenuado, bloqueado tachado */
   const renderGdtBlock = () => {
     if (!myGdtDuel) return null;
+
+    /* ARQ, DEF1..DEF4, VOL1..VOL4, DEL1, DEL2 — índice solo cuando la
+       posición se repite (mismo criterio que la guía del comparador) */
+    const totals = {};
+    for (const miniDuel of myGdtDuel.miniDuels) {
+      totals[miniDuel.position] = (totals[miniDuel.position] ?? 0) + 1;
+    }
+    const seen = {};
+    const slotLabels = myGdtDuel.miniDuels.map((miniDuel) => {
+      seen[miniDuel.position] = (seen[miniDuel.position] ?? 0) + 1;
+      return totals[miniDuel.position] > 1
+        ? `${miniDuel.position}${seen[miniDuel.position]}`
+        : miniDuel.position;
+    });
+
     return (
       <section className="prp-block">
         <div className="prp-block-head">
@@ -519,7 +548,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
           </div>
         </div>
         <div className="prp-duel-table-wrap">
-          <table className="prp-duel-table">
+          <table className="prp-duel-table prp-duel-table--gdt">
             <thead>
               <tr>
                 <th className="prp-dt-item" />
@@ -528,24 +557,23 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
               </tr>
             </thead>
             <tbody>
-              {myGdtDuel.miniDuels.map((miniDuel) => {
+              {myGdtDuel.miniDuels.map((miniDuel, index, arr) => {
                 const mineSide = iAmGdtA ? miniDuel.a : miniDuel.b;
                 const theirSide = iAmGdtA ? miniDuel.b : miniDuel.a;
                 const myCode = iAmGdtA ? "A" : "B";
                 const theirCode = iAmGdtA ? "B" : "A";
+                /* Hairline entre bloques de posición */
+                const isNewBlock =
+                  index > 0 && arr[index - 1].position !== miniDuel.position;
                 return (
                   <tr
                     key={miniDuel.slotNumber}
-                    className={
+                    className={`${
                       miniDuel.result === null ? "prp-gdt-row--pending" : ""
-                    }
+                    }${isNewBlock ? " prp-gdt-row--block" : ""}`}
                   >
                     <td className="prp-dt-item">
-                      <span className="prp-dt-title">
-                        {miniDuel.slotNumber} ·{" "}
-                        {GDT_POSITION_LABELS[miniDuel.position] ??
-                          miniDuel.position}
-                      </span>
+                      <span className="prp-dt-title">{slotLabels[index]}</span>
                     </td>
                     <td className="prp-dt-pick prp-dt-pick--me">
                       <div className="prp-dt-val">

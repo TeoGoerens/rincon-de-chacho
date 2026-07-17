@@ -186,6 +186,24 @@ export default class GdtUniverseRepository {
     return GdtUniverse.findByIdAndDelete(universeId);
   };
 
+  /* --------------- SUPER DELETE GDT UNIVERSE --------------- */
+  /* SOLO super admin (middleware): borra el universo aunque tenga planteles
+     completos o fechas jugándose con él. Las fechas que lo usaban quedan
+     sin universo asignado y pierden sus puntajes GDT cargados (los scores
+     ya consolidados en los duelos NO se tocan). */
+  superDeleteGdtUniverse = async (universeId) => {
+    const team = await GdtUniverse.findById(universeId);
+    if (!team) throw new Error("Universo GDT no encontrado");
+
+    await ProdeMatchday.updateMany(
+      { gdtUniverse: universeId },
+      { $set: { gdtUniverse: null, gdtScores: [] } },
+    );
+    await GdtSquad.deleteMany({ gdtUniverse: universeId });
+    await GdtRealPlayer.deleteMany({ gdtUniverse: universeId });
+    return GdtUniverse.findByIdAndDelete(universeId);
+  };
+
   /* --------------- OPEN GDT DRAFT --------------- */
   /* El draft arranca cuando el admin lo abre explícitamente: fija el
      deadline y avisa por mail a los participantes. El armado es A CIEGAS:

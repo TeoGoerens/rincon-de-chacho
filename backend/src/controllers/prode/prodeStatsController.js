@@ -32,4 +32,31 @@ export default class ProdeStatsController {
       next(error);
     }
   };
+
+  /* --------------- GET RECORDS --------------- */
+  getProdeRecords = async (req, res, next) => {
+    try {
+      const records = await repository.getProdeRecords();
+      res.status(200).json({
+        message: "Prode records retrieved successfully",
+        records,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- GET HEAD TO HEAD --------------- */
+  getProdeH2H = async (req, res, next) => {
+    try {
+      const { playerA, playerB } = req.query;
+      const h2h = await repository.getProdeH2H(playerA, playerB);
+      res.status(200).json({
+        message: "Prode head to head retrieved successfully",
+        h2h,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

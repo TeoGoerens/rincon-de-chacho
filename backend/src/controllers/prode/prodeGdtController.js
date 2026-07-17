@@ -85,6 +85,16 @@ export default class ProdeGdtController {
     }
   };
 
+  /* --------------- SUPER DELETE GDT UNIVERSE (super admin) --------------- */
+  superDeleteGdtUniverse = async (req, res, next) => {
+    try {
+      await teamRepository.superDeleteGdtUniverse(req.params.id);
+      res.status(200).json({ message: "GDT team super deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /* ============ POOL DE JUGADORES DEL UNIVERSO ============ */
 
   /* --------------- GET TEAM POOL --------------- */
@@ -161,6 +171,18 @@ export default class ProdeGdtController {
       await realPlayerRepository.deleteGdtRealPlayer(req.params.id);
       res.status(200).json({
         message: "GDT real player deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- SUPER DELETE GDT REAL PLAYER (super admin) --------------- */
+  superDeleteGdtRealPlayer = async (req, res, next) => {
+    try {
+      await realPlayerRepository.superDeleteGdtRealPlayer(req.params.id);
+      res.status(200).json({
+        message: "GDT real player super deleted successfully",
       });
     } catch (error) {
       next(error);

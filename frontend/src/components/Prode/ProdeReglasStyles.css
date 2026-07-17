@@ -1,0 +1,231 @@
+/* ═══════════════════════════════════════════════════════════
+   PRODE — REGLAS (3.12)
+   Prefijo: prl-
+   Página estática de lectura: wrap full-width dark + contenido
+   centrado 860px (patrón pin-root/pin-content del Inicio),
+   secciones numeradas como el salón de records.
+   ═══════════════════════════════════════════════════════════ */
+
+.prl-root {
+  min-height: calc(100vh - 80px - 42px);
+  background: var(--bg-deep);
+  padding: var(--space-xl) var(--space-xl) var(--space-2xl);
+}
+
+.prl-content {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ── Header ── */
+.prl-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prl-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--color-prode);
+}
+
+.prl-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-prode);
+  flex-shrink: 0;
+}
+
+.prl-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+  margin: 0;
+}
+
+.prl-subtitle {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+  margin: 0;
+}
+
+/* ── Secciones ── */
+.prl-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: var(--space-sm);
+}
+
+.prl-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.prl-section-index {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-black);
+  color: var(--color-prode-soft);
+  letter-spacing: var(--ls-wide);
+}
+
+.prl-section-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+  margin: 0;
+}
+
+.prl-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prl-card p {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  color: var(--text-body-dark);
+  margin: 0;
+}
+
+.prl-card strong {
+  color: var(--text-bright);
+  font-weight: var(--fw-semibold);
+}
+
+.prl-card em {
+  color: var(--text-bright);
+}
+
+/* Listas de reglas: viñeta cuadrada en el acento de la sección */
+.prl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.prl-list li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-body-dark);
+}
+
+.prl-list li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 0.15rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: rgba(249, 115, 22, 0.55);
+}
+
+/* Cadena de desempate: pasos numerados en Urbanist naranja */
+.prl-chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  counter-reset: prl-chain;
+}
+
+.prl-chain li {
+  position: relative;
+  counter-increment: prl-chain;
+  padding: 0.45rem 0 0.45rem 2.1rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+}
+
+.prl-chain li + li {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prl-chain li::before {
+  content: counter(prl-chain);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(249, 115, 22, 0.12);
+  border-radius: var(--radius-xs);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--color-prode-soft);
+}
+
+/* ── Pie ── */
+.prl-footer {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prl-footer-link {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--third-color);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+.prl-footer-link:hover {
+  color: var(--text-bright);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .prl-root {
+    padding: var(--space-lg) var(--space-lg) var(--space-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .prl-root {
+    padding: var(--space-md) var(--space-md) var(--space-lg);
+  }
+
+  .prl-card {
+    padding: 0.8rem 0.9rem;
+  }
+}

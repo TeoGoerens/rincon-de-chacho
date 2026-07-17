@@ -87,4 +87,16 @@ export default class ProdePlayerController {
       next(error);
     }
   };
+
+  /* --------------- SUPER DELETE PRODE PLAYER (super admin) --------------- */
+  superDeleteProdePlayer = async (req, res, next) => {
+    try {
+      await repository.superDeleteProdePlayer(req.params.id);
+      res
+        .status(200)
+        .json({ message: "Prode player super deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

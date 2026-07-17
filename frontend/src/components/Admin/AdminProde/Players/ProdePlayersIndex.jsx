@@ -10,10 +10,15 @@ import "../ProdeIndexStyles.css";
 //Import React Query functions
 import fetchAllProdePlayers from "../../../../reactquery/prode/fetchAllProdePlayers";
 import deleteProdePlayer from "../../../../reactquery/prode/deleteProdePlayer";
+import superDeleteProdeEntity from "../../../../reactquery/prode/superDeleteProdeEntity";
 
 // Import components
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
+import SuperDeleteButton from "../../../Layout/Buttons/SuperDeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
+
+const PLAYER_SUPER_DELETE_WARNING =
+  "Borra al jugador con TODO su rastro: pronósticos, planteles GDT, sus duelos en todas las fechas (el rival pierde esos resultados) y su lugar en participantes y honores de los torneos.";
 
 const ProdePlayersIndex = () => {
   const queryClient = useQueryClient();
@@ -36,6 +41,18 @@ const ProdePlayersIndex = () => {
     },
     onError: (error) => {
       toast.error(error?.message || "Error al eliminar el jugador");
+    },
+  });
+
+  const superDeleteMutation = useMutation({
+    mutationFn: (playerId) =>
+      superDeleteProdeEntity({ kind: "player", id: playerId }),
+    onSuccess: () => {
+      toast.success("Super eliminación completada");
+      queryClient.invalidateQueries(["prode-players"]);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error en la super eliminación");
     },
   });
 
@@ -108,6 +125,11 @@ const ProdePlayersIndex = () => {
                           onClick={deletePlayerMutation.mutate}
                           id={{ playerId: player._id }}
                         />
+                        <SuperDeleteButton
+                          onClick={superDeleteMutation.mutate}
+                          id={player._id}
+                          warning={PLAYER_SUPER_DELETE_WARNING}
+                        />
                       </div>
                     </td>
                   </tr>
@@ -127,6 +149,11 @@ const ProdePlayersIndex = () => {
                     <DeleteButton
                       onClick={deletePlayerMutation.mutate}
                       id={{ playerId: player._id }}
+                    />
+                    <SuperDeleteButton
+                      onClick={superDeleteMutation.mutate}
+                      id={player._id}
+                      warning={PLAYER_SUPER_DELETE_WARNING}
                     />
                   </div>
                 </div>

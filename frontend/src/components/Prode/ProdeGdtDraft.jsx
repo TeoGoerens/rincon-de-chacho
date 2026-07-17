@@ -1,6 +1,6 @@
 // Import React dependencies
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
@@ -78,6 +78,15 @@ const draftStorageKey = (userId, universeId) =>
 
 const ProdeGdtDraft = () => {
   const { universeId } = useParams();
+  const navigate = useNavigate();
+
+  /* Volver a la última pantalla desde la que se llegó; ruta absoluta solo
+     como fallback de link directo */
+  const goBack = (event) => {
+    event.preventDefault();
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate("/prode");
+  };
   const queryClient = useQueryClient();
   const userId = getUserId();
 
@@ -424,7 +433,7 @@ const ProdeGdtDraft = () => {
               ? error.message
               : error?.message || "Ocurrió un error al cargar el draft."}
           </p>
-          <Link className="prg-back" to="/prode">
+          <Link className="prg-back" to="/prode" onClick={goBack}>
             Volver al Prode
           </Link>
         </div>
@@ -586,7 +595,11 @@ const ProdeGdtDraft = () => {
             )}
           </header>
           <div className="prg-rev-slots">
-            {(squad.slots ?? []).map((slot) => {
+            {(squad.slots ?? []).map((slot, slotIndex, slotsArr) => {
+              /* Divisor entre bloques de posición (ARQ / DEF / VOL / DEL) */
+              const isNewBlock =
+                slotIndex > 0 &&
+                slotsArr[slotIndex - 1].position !== slot.position;
               const player = slot.realPlayer;
               const burned = burnedSet.has(String(player?._id ?? player));
               const draftEditThis = isMine && canReplace && burned;
@@ -609,7 +622,7 @@ const ProdeGdtDraft = () => {
               return (
                 <React.Fragment key={slot.slotNumber}>
                   <div
-                    className={`prg-rev-slot${burned ? " prg-rev-slot--burned" : ""}${slot.blocked ? " prg-rev-slot--blocked" : ""}`}
+                    className={`prg-rev-slot${burned ? " prg-rev-slot--burned" : ""}${slot.blocked ? " prg-rev-slot--blocked" : ""}${isNewBlock ? " prg-rev-slot--block" : ""}`}
                   >
                     <span className="prg-slot-number">
                       {slot.slotNumber}
@@ -828,7 +841,7 @@ const ProdeGdtDraft = () => {
             afectados por quemas están re-eligiendo.
           </div>
         ) : isFinal ? (
-          <div className="prg-banner prg-banner--teal">
+          <div className="prg-banner prg-banner--teal prg-banner--sm">
             Draft cerrado: estos son los planteles definitivos del universo.
           </div>
         ) : canReplace ? (
@@ -851,9 +864,80 @@ const ProdeGdtDraft = () => {
           </div>
         )}
 
-        <div className="prg-rev-grid">
-          {revealedData.squads.map(renderSquadCard)}
-        </div>
+        {/* Comparador (desktop y mobile): columna guía única con slot y
+            posición + mi plantel fijo a la izquierda + carrusel horizontal
+            con los rivales, filas de alto fijo alineadas slot a slot. Con
+            un picker abierto (o sin plantel propio) vuelve al apilado
+            clásico para dar lugar a la edición. */}
+        {(() => {
+          const othersSquads = revealedData.squads.filter(
+            (squad) =>
+              String(squad.player?._id ?? squad.player) !==
+              revealedData.myPlayerId,
+          );
+          const splitView = Boolean(mySquad) && activeSlot === null;
+          return (
+            <div
+              className={`prg-rev-grid${
+                splitView ? " prg-rev-compare" : " prg-rev-grid--stacked"
+              }`}
+            >
+              {splitView && (
+                <div className="prg-rev-spine" aria-hidden="true">
+                  <div className="prg-rev-spine-head" />
+                  {(() => {
+                    /* ARQ, DEF1..DEF4, VOL1..VOL4, DEL1, DEL2: la posición
+                       lleva índice solo cuando se repite */
+                    const totals = {};
+                    for (const slot of mySquad.slots ?? []) {
+                      totals[slot.position] = (totals[slot.position] ?? 0) + 1;
+                    }
+                    const seen = {};
+                    return (mySquad.slots ?? []).map(
+                      (slot, slotIndex, slotsArr) => {
+                        seen[slot.position] = (seen[slot.position] ?? 0) + 1;
+                        const label =
+                          totals[slot.position] > 1
+                            ? `${slot.position}${seen[slot.position]}`
+                            : slot.position;
+                        const isNewBlock =
+                          slotIndex > 0 &&
+                          slotsArr[slotIndex - 1].position !== slot.position;
+                        return (
+                          <div
+                            key={slot.slotNumber}
+                            className={`prg-rev-spine-row${
+                              isNewBlock ? " prg-rev-spine-row--block" : ""
+                            }`}
+                          >
+                            <span className="prg-rev-spine-pos">{label}</span>
+                          </div>
+                        );
+                      },
+                    );
+                  })()}
+                </div>
+              )}
+              {mySquad && (
+                <div className="prg-rev-pane prg-rev-pane--mine">
+                  {renderSquadCard(mySquad)}
+                </div>
+              )}
+              <div className="prg-rev-pane prg-rev-pane--others">
+                <div className="prg-rev-carousel">
+                  {(mySquad ? othersSquads : revealedData.squads).map(
+                    renderSquadCard,
+                  )}
+                </div>
+                {splitView && othersSquads.length > 1 && (
+                  <span className="prg-rev-swipe-hint">
+                    Deslizá para comparar con los demás →
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {canReplace && (
           <div className="prg-save-bar">

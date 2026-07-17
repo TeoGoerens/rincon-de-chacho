@@ -98,6 +98,36 @@ button:hover .delete-button {
   background: rgba(230, 57, 70, 0.14);
 }
 
+/* ── Super eliminación (solo super admin): en reposo ya viene tintado —
+      más grave que el tacho clásico ── */
+.super-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  margin: 0 0.15rem;
+  background: var(--status-red-bg);
+  transition: background var(--transition-base);
+}
+
+.super-delete-button svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.super-delete-button svg,
+.super-delete-button svg * {
+  color: var(--status-red);
+}
+
+a:hover .super-delete-button,
+button:hover .super-delete-button {
+  background: rgba(230, 57, 70, 0.3);
+}
+
 a:hover .create-stat-button,
 button:hover .create-stat-button {
   background: rgba(34, 197, 94, 0.14);
@@ -207,6 +237,23 @@ button:hover .tooltip-text {
 
 .delete-confirmation-icon--teal svg {
   color: var(--third-color);
+}
+
+/* Variante SUPER: ícono encendido en rojo pleno */
+.delete-confirmation-icon--super {
+  background: var(--status-red);
+}
+
+.delete-confirmation-icon--super svg,
+.delete-confirmation-icon--super svg * {
+  color: var(--text-bright);
+}
+
+.delete-confirmation-modal .delete-confirmation-super-note {
+  margin-top: calc(-1 * var(--space-sm));
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--status-red);
 }
 
 .delete-confirmation-modal h4 {

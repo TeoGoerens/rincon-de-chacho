@@ -1,0 +1,799 @@
+/* ═══════════════════════════════════════════════════════════
+   PRODE — PESTAÑA RECORDS
+   Prefijo: prr-
+   Dirección estética: "salón de records" — hero con atmósfera,
+   cards podio (el 1° protagonista con avatar y valor gigante),
+   vitrinas de palmarés con el número enorme, acentos al hover y
+   reveal escalonado. Tabla: formato canónico de Podrida.
+   ═══════════════════════════════════════════════════════════ */
+
+.prr-root {
+  min-height: calc(100vh - 80px - 42px);
+  background: var(--bg-deep);
+  padding: var(--space-xl) var(--space-xl) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ── Header de página ── */
+.prr-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prr-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--color-prode);
+}
+
+.prr-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-prode);
+  flex-shrink: 0;
+}
+
+.prr-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+  margin: 0;
+}
+
+/* ── Estados ── */
+.prr-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) 0;
+}
+
+.prr-state-text {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+  text-align: center;
+  margin: 0;
+}
+
+/* ── Reveal escalonado al cargar ── */
+@keyframes prr-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.prr-hero {
+  animation: prr-rise 0.5s ease both;
+}
+
+.prr-delay-1 {
+  animation: prr-rise 0.5s ease 0.06s both;
+}
+
+.prr-delay-2 {
+  animation: prr-rise 0.5s ease 0.12s both;
+}
+
+.prr-delay-3 {
+  animation: prr-rise 0.5s ease 0.18s both;
+}
+
+.prr-delay-4 {
+  animation: prr-rise 0.5s ease 0.24s both;
+}
+
+.prr-delay-5 {
+  animation: prr-rise 0.5s ease 0.3s both;
+}
+
+/* ── Hero del salón: atmósfera naranja + datos con presencia ── */
+.prr-hero {
+  background:
+    radial-gradient(
+      ellipse 55% 90% at 12% 0%,
+      rgba(249, 115, 22, 0.08),
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 45% 80% at 95% 100%,
+      rgba(168, 218, 220, 0.04),
+      transparent 60%
+    ),
+    var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.prr-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.prr-hero-main {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-extrabold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+}
+
+.prr-hero-caption {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-muted-dark);
+}
+
+.prr-hero-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.prr-hero-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.85rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-body-dark);
+  white-space: nowrap;
+}
+
+.prr-hero-chip strong {
+  font-family: "Urbanist", var(--secondary-font);
+  font-weight: var(--fw-extrabold);
+  color: var(--text-bright);
+}
+
+/* ── Secciones ── */
+.prr-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: var(--space-sm);
+}
+
+.prr-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* Índice de sección: guiño editorial, marca el recorrido del salón */
+.prr-section-index {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-black);
+  color: var(--color-prode-soft);
+  letter-spacing: var(--ls-wide);
+}
+
+.prr-section-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+  margin: 0;
+}
+
+.prr-section-hint {
+  margin-left: auto;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+  letter-spacing: var(--ls-normal);
+}
+
+/* ── Grillas ── */
+.prr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-sm);
+}
+
+.prr-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-sm);
+}
+
+/* ── Card podio ── */
+.prr-card {
+  position: relative;
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  overflow: hidden;
+  transition: border-color var(--transition-slow);
+}
+
+/* Línea de acento superior que se enciende al hover (patrón del Home) */
+.prr-card::before,
+.prr-tile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(249, 115, 22, 0.55),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+}
+
+.prr-card:hover,
+.prr-tile:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.prr-card:hover::before,
+.prr-tile:hover::before {
+  opacity: 1;
+}
+
+.prr-card-title {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  margin: 0;
+}
+
+.prr-card-empty {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--text-subtle-dark);
+  margin: 0;
+}
+
+/* Avatares: inicial sobre el gradiente global, foto con borde sutil */
+.prr-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  background: var(--avatar-gradient);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--bg-deep);
+  flex-shrink: 0;
+}
+
+.prr-avatar--sm {
+  width: 22px;
+  height: 22px;
+  font-size: var(--text-2xs);
+}
+
+.prr-avatar--photo {
+  background: none;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.prr-avatar--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-full);
+}
+
+/* El 1°: protagonista absoluto de la card */
+.prr-first {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.prr-first-holders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.prr-first-holder {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.prr-first-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.prr-first-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prr-first-context {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prr-first-value {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 1.55rem;
+  font-weight: var(--fw-black);
+  color: var(--color-prode-soft);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Escoltas: filas compactas bajo el divisor */
+.prr-runners {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.prr-runner {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0;
+}
+
+.prr-runner + .prr-runner {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.prr-runner-pos {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--text-subtle-dark);
+  text-align: center;
+}
+
+.prr-runner-holders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.prr-runner-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-body-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prr-runner-value {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-extrabold);
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+
+/* Racha vigente — mismo fueguito y efecto que en Podrida (pe-card__fire) */
+.prr-fire {
+  display: inline-block;
+  font-size: 0.85rem;
+  line-height: 1;
+  animation: prr-flicker 1.8s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes prr-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-2deg);
+    filter: brightness(1);
+  }
+  30% {
+    opacity: 0.7;
+    transform: scale(0.92) rotate(3deg);
+    filter: brightness(0.75);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1) rotate(-2deg);
+    filter: brightness(1.2);
+  }
+}
+
+/* ── Vitrinas del palmarés: el número es el trofeo ── */
+.prr-tile {
+  position: relative;
+  background:
+    radial-gradient(
+      ellipse 90% 60% at 50% 0%,
+      rgba(249, 115, 22, 0.05),
+      transparent 70%
+    ),
+    var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 1rem 0.9rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  transition: border-color var(--transition-slow);
+}
+
+.prr-tile-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+}
+
+.prr-tile-value {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: 2.6rem;
+  font-weight: var(--fw-black);
+  color: var(--color-prode-soft);
+  line-height: 1;
+}
+
+.prr-tile-holders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.prr-tile-holder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.prr-tile-runners {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 0.55rem;
+  width: 100%;
+}
+
+.prr-tile-runner {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-muted-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Pills de desafío (selección "encendida en claro") ── */
+.prr-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.prr-pill {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-full);
+  color: var(--text-label-dark);
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.prr-pill:hover:not(.prr-pill--active) {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-body-dark);
+}
+
+.prr-pill--active {
+  background: var(--text-bright);
+  border-color: var(--text-bright);
+  color: var(--bg-deep);
+}
+
+/* ── Tabla histórica por desafío (formato pr-table de Podrida) ── */
+.prr-table-wrap {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.prr-table-wrap::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.prr-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prr-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+.prr-col--name {
+  width: 32%;
+}
+
+.prr-col--stat {
+  width: 72px;
+}
+
+.prr-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Urbanist", var(--secondary-font);
+}
+
+.prr-th {
+  padding: 0.6rem 0.75rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  background: #111111;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  white-space: nowrap;
+}
+
+.prr-th--sortable {
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.prr-th--sortable span {
+  color: var(--text-label-dark);
+}
+
+/* Hover de th SIEMPRE con color sólido: rgba se transparenta sobre el
+   contenido scrolleado */
+.prr-th--sortable:hover {
+  background: #171717;
+}
+
+.prr-th--sortable.prr-th--active {
+  background: #2a1d12;
+  font-weight: var(--fw-bold);
+}
+
+.prr-th--sortable.prr-th--active span {
+  color: var(--color-prode-soft);
+}
+
+.prr-sort-icon {
+  display: inline-block;
+  margin-left: 0.2rem;
+  font-size: 0.6rem;
+  opacity: 0.4;
+  vertical-align: middle;
+}
+
+.prr-th--active .prr-sort-icon {
+  opacity: 1;
+}
+
+.prr-tr {
+  transition: background var(--transition-base);
+}
+
+.prr-tr:nth-child(even) .prr-td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.prr-tr:hover .prr-td {
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.prr-td {
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.prr-td.prr-td--name {
+  text-align: left;
+  overflow: hidden;
+  max-width: 0;
+}
+
+.prr-td-name-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prr-name-text {
+  font-weight: var(--fw-regular);
+  color: var(--text-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Columna activa tintada — 0-3-0 para ganarle a la zebra de filas pares */
+.prr-tr .prr-td.prr-td--sorted {
+  background: rgba(249, 115, 22, 0.06);
+  font-weight: var(--fw-bold);
+  color: var(--color-prode-soft);
+}
+
+/* Zero: disimulado — y sigue disimulado en la columna activa */
+.prr-tr .prr-td--zero {
+  color: rgba(255, 255, 255, 0.12);
+}
+
+.prr-tr .prr-td.prr-td--sorted.prr-td--zero {
+  color: rgba(255, 255, 255, 0.12);
+}
+
+.prr-legend {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--text-subtle-dark);
+  margin: 0;
+  padding-left: 0.25rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .prr-root {
+    padding: var(--space-lg) var(--space-lg) var(--space-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .prr-root {
+    padding: var(--space-md) var(--space-md) var(--space-lg);
+  }
+
+  .prr-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .prr-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .prr-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prr-tile-value {
+    font-size: 2.1rem;
+  }
+
+  .prr-first-value {
+    font-size: 1.3rem;
+  }
+
+  .prr-col--name {
+    width: 38%;
+  }
+
+  .prr-col--stat {
+    width: auto;
+  }
+
+  .prr-th {
+    padding: 0.55rem 0.2rem;
+  }
+
+  .prr-td {
+    padding: 0.5rem 0.2rem;
+    font-size: var(--text-xs);
+  }
+
+  .prr-td.prr-td--name {
+    padding-left: 0.6rem;
+  }
+}

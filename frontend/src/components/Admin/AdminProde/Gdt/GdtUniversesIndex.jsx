@@ -12,10 +12,15 @@ import { GDT_DRAFT_STATUS } from "../prodeAdminConstants";
 import fetchAllProdeTournaments from "../../../../reactquery/prode/fetchAllProdeTournaments";
 import fetchGdtUniversesByTournament from "../../../../reactquery/prode/fetchGdtUniversesByTournament";
 import deleteGdtUniverse from "../../../../reactquery/prode/deleteGdtUniverse";
+import superDeleteProdeEntity from "../../../../reactquery/prode/superDeleteProdeEntity";
 
 // Import components
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
+import SuperDeleteButton from "../../../Layout/Buttons/SuperDeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
+
+const UNIVERSE_SUPER_DELETE_WARNING =
+  "Borra el universo con sus planteles y su pool aunque haya fechas jugándose con él: esas fechas quedan sin universo asignado y pierden los puntajes GDT cargados (lo ya consolidado en los duelos no se toca).";
 
 const GdtUniversesIndex = () => {
   const queryClient = useQueryClient();
@@ -44,6 +49,18 @@ const GdtUniversesIndex = () => {
     queryKey: ["gdt-universes", tournamentId],
     queryFn: () => fetchGdtUniversesByTournament(tournamentId),
     enabled: !!tournamentId,
+  });
+
+  const superDeleteMutation = useMutation({
+    mutationFn: (universeId) =>
+      superDeleteProdeEntity({ kind: "gdtUniverse", id: universeId }),
+    onSuccess: () => {
+      toast.success("Super eliminación completada");
+      queryClient.invalidateQueries(["gdt-universes", tournamentId]);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error en la super eliminación");
+    },
   });
 
   const deleteMutation = useMutation({
@@ -157,6 +174,11 @@ const GdtUniversesIndex = () => {
                           onClick={deleteMutation.mutate}
                           id={{ universeId: team._id }}
                         />
+                        <SuperDeleteButton
+                          onClick={superDeleteMutation.mutate}
+                          id={team._id}
+                          warning={UNIVERSE_SUPER_DELETE_WARNING}
+                        />
                       </div>
                     </td>
                   </tr>
@@ -178,6 +200,11 @@ const GdtUniversesIndex = () => {
                     <DeleteButton
                       onClick={deleteMutation.mutate}
                       id={{ universeId: team._id }}
+                    />
+                    <SuperDeleteButton
+                      onClick={superDeleteMutation.mutate}
+                      id={team._id}
+                      warning={UNIVERSE_SUPER_DELETE_WARNING}
                     />
                   </div>
                 </div>

@@ -61,6 +61,12 @@
   color: var(--text-body-dark);
 }
 
+/* Variante compacta: misma card, menos protagonismo tipográfico */
+.prg-banner--sm {
+  font-size: var(--text-xs);
+  padding: 0.45rem 0.7rem;
+}
+
 .prg-banner--yellow {
   background: var(--status-yellow-bg);
   border: 1px solid rgba(246, 201, 14, 0.25);
@@ -576,24 +582,40 @@
 .prg-rev-slots {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
 }
 
 .prg-rev-slot {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.3rem 0.4rem;
+  padding: 0.2rem 0.4rem;
   border-radius: var(--radius-sm);
 }
 
 .prg-rev-slot .prg-photo {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
 }
 
 .prg-rev-slot .prg-slot-name {
   font-size: var(--text-sm);
+}
+
+/* Nombre y club en UNA línea: los 11 slots entran en el viewport */
+.prg-rev-slot .prg-slot-player {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.prg-rev-slot .prg-slot-name {
+  min-width: 0;
+}
+
+.prg-rev-slot .prg-slot-club {
+  min-width: 0;
+  flex-shrink: 4;
 }
 
 .prg-rev-slot--burned {
@@ -677,4 +699,224 @@
 .prg-rev-slot--blocked .prg-slot-name {
   text-decoration: line-through;
   color: var(--text-muted-dark);
+}
+
+/* ══════════ Comparador de planteles (desktop Y mobile) ══════════ */
+/* Modo apilado (picker abierto o sin plantel propio): los wrappers
+   desaparecen (display: contents) y la grilla clásica ve las cards
+   directas — es el modo cómodo para editar */
+.prg-rev-grid--stacked .prg-rev-pane,
+.prg-rev-grid--stacked .prg-rev-carousel {
+  display: contents;
+}
+
+.prg-rev-swipe-hint {
+  display: none;
+}
+
+/* Vista partida: columna guía + mi plantel + carrusel de rivales.
+   Va después del @media de .prg-rev-grid para pisarlo a igual
+   especificidad en desktop. */
+.prg-rev-compare {
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.prg-rev-compare .prg-rev-pane {
+  min-width: 0;
+}
+
+/* Carrusel horizontal con snap: un rival por "página" */
+.prg-rev-compare .prg-rev-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.prg-rev-compare .prg-rev-carousel > .prg-rev-card {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.prg-rev-compare .prg-rev-swipe-hint {
+  display: block;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--text-subtle-dark);
+  text-align: right;
+  padding-top: 0.3rem;
+}
+
+/* ── Columna guía única: número y posición UNA sola vez ── */
+.prg-rev-spine {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  /* espeja el padding vertical de las cards para alinear filas */
+  padding: 0.5rem 0;
+}
+
+.prg-rev-spine-head {
+  /* espeja .prg-rev-head del modo compare (alto + margen) */
+  height: 1.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.prg-rev-spine-row {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.2rem;
+}
+
+.prg-rev-spine-pos {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  color: var(--text-subtle-dark);
+}
+
+/* ── Cards en modo compare: filas de alto FIJO alineadas con la guía;
+      el slot y la posición viven en la guía, el club queda visible ── */
+.prg-rev-compare .prg-rev-card {
+  padding: 0.5rem;
+}
+
+.prg-rev-compare .prg-rev-head {
+  height: 1.6rem;
+  margin-bottom: 0.4rem;
+  overflow: hidden;
+}
+
+.prg-rev-compare .prg-rev-owner {
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* El contador "N por reemplazar" rompe la alineación de los headers;
+   los quemados ya se ven fila por fila */
+.prg-rev-compare .prg-rev-pending {
+  display: none;
+}
+
+.prg-rev-compare .prg-rev-slot {
+  height: 34px;
+  padding: 0.1rem 0.2rem;
+  gap: 0.4rem;
+}
+
+.prg-rev-compare .prg-slot-number,
+.prg-rev-compare .prg-rev-pos {
+  display: none;
+}
+
+.prg-rev-compare .prg-rev-slot .prg-photo {
+  width: 20px;
+  height: 20px;
+}
+
+.prg-rev-compare .prg-rev-burned-tag {
+  font-size: 0.55rem;
+  padding: 0.15rem 0.4rem;
+}
+
+/* Hairline entre bloques de posición (ARQ / DEF / VOL / DEL) — mismo
+   margen y borde en guía y cards para que las filas sigan alineadas */
+/* La línea va como pseudo-elemento absoluto (no border-top): los slots
+   tienen border-radius y un borde real se curvaba en las puntas */
+.prg-rev-compare .prg-rev-slot--block,
+.prg-rev-compare .prg-rev-spine-row--block {
+  position: relative;
+  margin-top: 0.3rem;
+}
+
+.prg-rev-compare .prg-rev-slot--block::before,
+.prg-rev-compare .prg-rev-spine-row--block::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Desktop: 3 equipos en el viewport (el mío + 2 rivales), scroll de a 1 */
+@media (min-width: 900px) {
+  .prg-rev-compare {
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 2fr);
+  }
+
+  .prg-rev-compare .prg-rev-carousel {
+    gap: 0.5rem;
+  }
+
+  .prg-rev-compare .prg-rev-carousel > .prg-rev-card {
+    flex: 0 0 calc(50% - 0.25rem);
+  }
+}
+
+/* Mobile: el club vuelve DEBAJO del nombre (en media pantalla el renglón
+   único truncaba ambos) con tipografía más chica; filas más altas para
+   las dos líneas, espejadas en la guía */
+@media (max-width: 600px) {
+  .prg-rev-compare {
+    gap: 0.35rem;
+  }
+
+  .prg-rev-compare .prg-rev-card {
+    padding: 0.4rem;
+  }
+
+  .prg-rev-compare .prg-rev-spine {
+    padding: 0.4rem 0;
+  }
+
+  .prg-rev-compare .prg-rev-slot,
+  .prg-rev-compare .prg-rev-spine-row {
+    height: 36px;
+  }
+
+  /* Gap vertical mínimo entre filas (espejado en la guía): los 11 slots
+     entran en el viewport del teléfono */
+  .prg-rev-compare .prg-rev-slots,
+  .prg-rev-compare .prg-rev-spine {
+    gap: 0.1rem;
+  }
+
+  .prg-rev-compare .prg-rev-slot {
+    gap: 0.3rem;
+  }
+
+  .prg-rev-compare .prg-rev-slot .prg-photo {
+    width: 18px;
+    height: 18px;
+  }
+
+  .prg-rev-compare .prg-rev-slot .prg-slot-player {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.05rem;
+  }
+
+  .prg-rev-compare .prg-rev-slot .prg-slot-name {
+    font-size: 0.7rem;
+    line-height: 1.2;
+    max-width: 100%;
+  }
+
+  .prg-rev-compare .prg-rev-slot .prg-slot-club {
+    font-size: 0.58rem;
+    line-height: 1.2;
+    max-width: 100%;
+  }
 }

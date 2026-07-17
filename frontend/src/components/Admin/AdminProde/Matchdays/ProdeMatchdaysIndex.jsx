@@ -10,12 +10,17 @@ import { MATCHDAY_PHASES, formatDeadline } from "../prodeAdminConstants";
 
 //Import React Query functions
 import fetchAllProdeTournaments from "../../../../reactquery/prode/fetchAllProdeTournaments";
+import superDeleteProdeEntity from "../../../../reactquery/prode/superDeleteProdeEntity";
 import fetchProdeMatchdaysByTournament from "../../../../reactquery/prode/fetchProdeMatchdaysByTournament";
 import deleteProdeMatchday from "../../../../reactquery/prode/deleteProdeMatchday";
 
 // Import components
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
+import SuperDeleteButton from "../../../Layout/Buttons/SuperDeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
+
+const MATCHDAY_SUPER_DELETE_WARNING =
+  "Borra la fecha en cualquier fase —consolidada incluida— junto con todos sus pronósticos. Sus puntos desaparecen de la tabla, los records y el H2H.";
 
 const ProdeMatchdaysIndex = () => {
   const queryClient = useQueryClient();
@@ -54,6 +59,18 @@ const ProdeMatchdaysIndex = () => {
     },
     onError: (error) => {
       toast.error(error?.message || "Error al eliminar la fecha");
+    },
+  });
+
+  const superDeleteMutation = useMutation({
+    mutationFn: (matchdayId) =>
+      superDeleteProdeEntity({ kind: "matchday", id: matchdayId }),
+    onSuccess: () => {
+      toast.success("Super eliminación completada");
+      queryClient.invalidateQueries(["prode-matchdays", tournamentId]);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error en la super eliminación");
     },
   });
 
@@ -158,6 +175,11 @@ const ProdeMatchdaysIndex = () => {
                             onClick={deleteMutation.mutate}
                             id={{ matchdayId: matchday._id }}
                           />
+                          <SuperDeleteButton
+                            onClick={superDeleteMutation.mutate}
+                            id={matchday._id}
+                            warning={MATCHDAY_SUPER_DELETE_WARNING}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -183,6 +205,11 @@ const ProdeMatchdaysIndex = () => {
                       <DeleteButton
                         onClick={deleteMutation.mutate}
                         id={{ matchdayId: matchday._id }}
+                      />
+                      <SuperDeleteButton
+                        onClick={superDeleteMutation.mutate}
+                        id={matchday._id}
+                        warning={MATCHDAY_SUPER_DELETE_WARNING}
                       />
                     </div>
                   </div>

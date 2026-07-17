@@ -129,4 +129,16 @@ export default class ProdeTournamentController {
       next(error);
     }
   };
+
+  /* --------------- SUPER DELETE PRODE TOURNAMENT (super admin) --------------- */
+  superDeleteProdeTournament = async (req, res, next) => {
+    try {
+      await repository.superDeleteProdeTournament(req.params.id);
+      res
+        .status(200)
+        .json({ message: "Prode tournament super deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

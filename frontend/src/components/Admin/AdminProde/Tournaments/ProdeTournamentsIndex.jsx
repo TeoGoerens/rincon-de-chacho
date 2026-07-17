@@ -10,13 +10,18 @@ import { TOURNAMENT_STATUSES } from "../prodeAdminConstants";
 
 //Import React Query functions
 import fetchAllProdeTournaments from "../../../../reactquery/prode/fetchAllProdeTournaments";
+import superDeleteProdeEntity from "../../../../reactquery/prode/superDeleteProdeEntity";
 import deleteProdeTournament from "../../../../reactquery/prode/deleteProdeTournament";
 import activateProdeTournament from "../../../../reactquery/prode/activateProdeTournament";
 import finishProdeTournament from "../../../../reactquery/prode/finishProdeTournament";
 
 // Import components
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
+import SuperDeleteButton from "../../../Layout/Buttons/SuperDeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
+
+const TOURNAMENT_SUPER_DELETE_WARNING =
+  "Borra el torneo COMPLETO: todas sus fechas (consolidadas incluidas) con sus pronósticos, y sus universos GDT con planteles y pool. Desaparece de tablas, records y H2H.";
 
 const STATUS_LABELS = Object.fromEntries(
   TOURNAMENT_STATUSES.map(({ value, label }) => [value, label]),
@@ -68,6 +73,18 @@ const ProdeTournamentsIndex = () => {
     },
     onError: (error) => {
       toast.error(error?.message || "Error al eliminar el torneo");
+    },
+  });
+
+  const superDeleteMutation = useMutation({
+    mutationFn: (tournamentId) =>
+      superDeleteProdeEntity({ kind: "tournament", id: tournamentId }),
+    onSuccess: () => {
+      toast.success("Super eliminación completada");
+      queryClient.invalidateQueries(["prode-tournaments"]);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error en la super eliminación");
     },
   });
 
@@ -188,6 +205,11 @@ const ProdeTournamentsIndex = () => {
                           onClick={deleteMutation.mutate}
                           id={{ tournamentId: tournament._id }}
                         />
+                        <SuperDeleteButton
+                          onClick={superDeleteMutation.mutate}
+                          id={tournament._id}
+                          warning={TOURNAMENT_SUPER_DELETE_WARNING}
+                        />
                       </div>
                     </td>
                   </tr>
@@ -207,6 +229,11 @@ const ProdeTournamentsIndex = () => {
                     <DeleteButton
                       onClick={deleteMutation.mutate}
                       id={{ tournamentId: tournament._id }}
+                    />
+                    <SuperDeleteButton
+                      onClick={superDeleteMutation.mutate}
+                      id={tournament._id}
+                      warning={TOURNAMENT_SUPER_DELETE_WARNING}
                     />
                   </div>
                 </div>

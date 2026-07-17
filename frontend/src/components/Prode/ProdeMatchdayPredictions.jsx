@@ -1,6 +1,6 @@
 // Import React dependencies
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
@@ -112,6 +112,15 @@ const answersDiffer = (a, b, itemIds) =>
 
 const ProdeMatchdayPredictions = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  /* Volver a la última pantalla desde la que se llegó (Inicio, Torneo,
+     H2H...); la ruta absoluta queda solo como fallback de link directo */
+  const goBack = (event) => {
+    event.preventDefault();
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate("/prode");
+  };
   const queryClient = useQueryClient();
   const userId = getUserId();
   const draftKey = `prode-draft-${id}-${userId}`;
@@ -359,7 +368,7 @@ const ProdeMatchdayPredictions = () => {
           <p className="prp-eyebrow">Prode</p>
           <h1 className="prp-message-title">Solo para participantes</h1>
           <p className="prp-message-text">{predictionError.message}</p>
-          <Link className="prp-back-link" to="/prode">
+          <Link className="prp-back-link" to="/prode" onClick={goBack}>
             Volver al Prode
           </Link>
         </div>
@@ -378,7 +387,7 @@ const ProdeMatchdayPredictions = () => {
               predictionError?.message ||
               "No pudimos cargar la fecha."}
           </p>
-          <Link className="prp-back-link" to="/prode">
+          <Link className="prp-back-link" to="/prode" onClick={goBack}>
             Volver al Prode
           </Link>
         </div>
@@ -398,7 +407,7 @@ const ProdeMatchdayPredictions = () => {
             Cuando el admin la abra vas a recibir un mail para cargar tus
             pronósticos.
           </p>
-          <Link className="prp-back-link" to="/prode">
+          <Link className="prp-back-link" to="/prode" onClick={goBack}>
             Volver al Prode
           </Link>
         </div>
@@ -563,7 +572,7 @@ const ProdeMatchdayPredictions = () => {
                 <strong>{formatDeadline(matchday.predictionsDeadline)}</strong>
               </p>
             </div>
-            <Link className="prp-back-link" to="/prode">
+            <Link className="prp-back-link" to="/prode" onClick={goBack}>
               ← Volver
             </Link>
           </div>

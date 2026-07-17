@@ -18,6 +18,7 @@ import {
 //Import components
 import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
+import SuperDeleteButton from "../../../Layout/Buttons/SuperDeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
 
 //Import React Query functions
@@ -25,6 +26,7 @@ import fetchGdtUniverseById from "../../../../reactquery/prode/fetchGdtUniverseB
 import fetchGdtUniversePlayers from "../../../../reactquery/prode/fetchGdtUniversePlayers";
 import importGdtUniversePool from "../../../../reactquery/prode/importGdtUniversePool";
 import deleteGdtRealPlayer from "../../../../reactquery/prode/deleteGdtRealPlayer";
+import superDeleteProdeEntity from "../../../../reactquery/prode/superDeleteProdeEntity";
 import fetchGdtDraftOverview from "../../../../reactquery/prode/fetchGdtDraftOverview";
 import openGdtDraft from "../../../../reactquery/prode/openGdtDraft";
 import updateGdtDraftDeadline from "../../../../reactquery/prode/updateGdtDraftDeadline";
@@ -42,6 +44,9 @@ import grantGdtCorrection from "../../../../reactquery/prode/grantGdtCorrection"
 
 //Import components (compartidos del admin Prode)
 import InfoTip from "../InfoTip";
+
+const GDT_PLAYER_SUPER_DELETE_WARNING =
+  "Borra al jugador del pool aunque esté en planteles: sus slots quedan vacíos (suman 0 en los mini-duelos), y se lo quita de los reemplazos pendientes, de los quemados y de los puntajes de fecha cargados.";
 
 /* Slots inconsistentes de un plantel (posición ≠ slot o club duplicado):
    el alcance de la "corrección" que el admin puede habilitar */
@@ -579,6 +584,18 @@ const GdtUniverseDetail = () => {
     },
     onError: (err) => {
       toast.error(err?.message || "Error al importar los planteles");
+    },
+  });
+
+  const superDeleteMutation = useMutation({
+    mutationFn: (playerId) =>
+      superDeleteProdeEntity({ kind: "gdtPlayer", id: playerId }),
+    onSuccess: () => {
+      toast.success("Super eliminación completada");
+      invalidatePool();
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Error en la super eliminación");
     },
   });
 
@@ -1348,6 +1365,11 @@ const GdtUniverseDetail = () => {
                           onClick={deleteMutation.mutate}
                           id={{ playerId: player._id }}
                         />
+                        <SuperDeleteButton
+                          onClick={superDeleteMutation.mutate}
+                          id={player._id}
+                          warning={GDT_PLAYER_SUPER_DELETE_WARNING}
+                        />
                       </div>
                     </td>
                   </tr>
@@ -1367,6 +1389,11 @@ const GdtUniverseDetail = () => {
                     <DeleteButton
                       onClick={deleteMutation.mutate}
                       id={{ playerId: player._id }}
+                    />
+                    <SuperDeleteButton
+                      onClick={superDeleteMutation.mutate}
+                      id={player._id}
+                      warning={GDT_PLAYER_SUPER_DELETE_WARNING}
                     />
                   </div>
                 </div>

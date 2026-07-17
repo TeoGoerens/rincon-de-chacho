@@ -336,14 +336,6 @@
   color: rgba(230, 57, 70, 0.75);
 }
 
-.prt-org-tag {
-  font-family: var(--secondary-font);
-  font-size: var(--text-2xs);
-  font-style: italic;
-  color: var(--status-red);
-  flex-shrink: 0;
-}
-
 .prt-legend {
   font-family: var(--secondary-font);
   font-size: var(--text-2xs);
@@ -351,6 +343,471 @@
   color: var(--text-subtle-dark);
   margin: 0;
   padding-left: 0.25rem;
+}
+
+/* ═══ Módulos secundarios (3.4) ═══ */
+
+/* ── Encabezado de sección ── */
+.prt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: var(--space-sm);
+}
+
+.prt-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.prt-section-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  letter-spacing: var(--ls-tight);
+  margin: 0;
+}
+
+.prt-section-hint {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-medium);
+  color: var(--text-subtle-dark);
+  letter-spacing: var(--ls-normal);
+}
+
+/* ── Honores del período (3.5) ── */
+.prt-honors-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: var(--space-sm);
+}
+
+.prt-honors-eyebrow {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--color-prode-soft);
+}
+
+/* Los 4 ganan la comida por igual: grilla de celdas idénticas, sin
+   jerarquía visual más allá del número */
+.prt-honors-winners {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.prt-honor-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+  min-width: 0;
+}
+
+.prt-honor-pos {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(249, 115, 22, 0.12);
+  border-radius: var(--radius-xs);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-black);
+  color: var(--color-prode-soft);
+}
+
+.prt-honor-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prt-honors-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.65rem;
+}
+
+.prt-honors-org {
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-muted-dark);
+}
+
+.prt-honors-org-name {
+  color: var(--status-red);
+  font-weight: var(--fw-semibold);
+}
+
+.prt-honors-note {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--text-subtle-dark);
+  margin: 0;
+}
+
+.prt-honors-champion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.prt-honors-champion-name {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-prode-soft);
+  letter-spacing: var(--ls-tight);
+}
+
+/* ── Desglose por desafío: headers ordenables (patrón ci-stats-table,
+      acento naranja de la sección) ── */
+.prt-th--sortable {
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.prt-th--sortable span {
+  color: var(--text-label-dark);
+}
+
+/* Hover de th SIEMPRE con color sólido: rgba se transparenta sobre el
+   contenido scrolleado */
+.prt-th--sortable:hover {
+  background: #171717;
+}
+
+.prt-th--sortable.prt-th--active {
+  background: #2a1d12;
+  font-weight: var(--fw-bold);
+}
+
+.prt-th--sortable.prt-th--active span {
+  color: var(--color-prode-soft);
+}
+
+.prt-sort-icon {
+  display: inline-block;
+  margin-left: 0.2rem;
+  font-size: 0.6rem;
+  opacity: 0.4;
+  vertical-align: middle;
+}
+
+.prt-th--active .prt-sort-icon {
+  opacity: 1;
+}
+
+/* Columna activa tintada — 0-3-0 para ganarle a la zebra de filas pares
+   (.prt-tr:nth-child(even) .prt-td es 0-2-0) */
+.prt-tr .prt-td.prt-td--sorted {
+  background: rgba(249, 115, 22, 0.06);
+  font-weight: var(--fw-bold);
+  color: var(--color-prode-soft);
+}
+
+/* El cero disimulado sigue disimulado también en la columna activa */
+.prt-tr .prt-td.prt-td--sorted.prt-td--zero {
+  color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── H2H del período: matriz N×N de cruces ──
+   Chips separados por gaps (border-spacing) en vez de tabla de líneas:
+   cada celda es una ficha con el código de estado canónico */
+.prt-h2h-wrap {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.prt-h2h-wrap::-webkit-scrollbar {
+  height: 4px;
+}
+
+.prt-h2h-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prt-h2h-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+.prt-h2h-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-family: "Urbanist", var(--secondary-font);
+}
+
+.prt-h2h-corner {
+  min-width: 110px;
+}
+
+.prt-h2h-colhead {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  text-align: center;
+  padding: 0.35rem 0.25rem;
+  min-width: 52px;
+  cursor: default;
+}
+
+.prt-h2h-rowhead {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-regular);
+  color: var(--text-bright);
+  text-align: left;
+  padding: 0.3rem 0.6rem 0.3rem 0.25rem;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.prt-h2h-cell {
+  text-align: center;
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-bold);
+  padding: 0.5rem 0.25rem;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.02);
+  /* Sin cruces: disimulado como los ceros de las tablas */
+  color: rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  min-width: 52px;
+  cursor: default;
+  transition: filter var(--transition-base);
+}
+
+.prt-h2h-cell:hover {
+  filter: brightness(1.5);
+}
+
+.prt-h2h-cell--win {
+  background: var(--status-green-bg);
+  color: var(--status-green);
+}
+
+.prt-h2h-cell--draw {
+  background: var(--status-yellow-bg);
+  color: var(--status-yellow);
+}
+
+.prt-h2h-cell--loss {
+  background: var(--status-red-bg);
+  color: var(--status-red);
+}
+
+/* Diagonal propia: rayado sutil, sin contenido */
+.prt-h2h-cell--self {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(255, 255, 255, 0.04) 4px,
+    rgba(255, 255, 255, 0.04) 8px
+  );
+}
+
+.prt-h2h-cell--self:hover {
+  filter: none;
+}
+
+/* ── Duelos del período ── */
+.prt-md-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prt-md-card {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.prt-md-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-base);
+}
+
+.prt-md-head:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.prt-md-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.prt-md-meta {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-subtle-dark);
+  flex: 1;
+}
+
+.prt-md-chevron {
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+  transform: rotate(-90deg);
+  transition: transform var(--transition-base);
+}
+
+.prt-md-chevron--open {
+  transform: rotate(0deg);
+}
+
+.prt-md-body {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prt-duel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.7rem 1rem;
+}
+
+.prt-duel + .prt-duel {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.prt-duel-main {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prt-duel-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prt-duel-name--a {
+  text-align: right;
+}
+
+.prt-duel-name--b {
+  text-align: left;
+}
+
+.prt-duel-name--win {
+  color: var(--color-prode-soft);
+  font-weight: var(--fw-semibold);
+}
+
+.prt-duel-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.prt-duel-score {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-extrabold);
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+
+.prt-duel-bonus {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--color-prode-soft);
+}
+
+.prt-duel-challenges {
+  display: flex;
+  justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.prt-duel-challenge {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-xs);
+  color: var(--text-muted-dark);
+  white-space: nowrap;
+}
+
+.prt-duel-challenge-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  color: var(--text-subtle-dark);
+}
+
+.prt-md-link {
+  align-self: flex-end;
+  font-family: var(--secondary-font);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--third-color);
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  transition: color var(--transition-base);
+}
+
+.prt-md-link:hover {
+  color: var(--text-bright);
 }
 
 /* ── Responsive ── */
@@ -399,7 +856,62 @@
     display: inline;
   }
 
-  .prt-org-tag {
-    display: none;
+  /* Módulos secundarios */
+  .prt-honors-card {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .prt-honors-winners {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prt-honor-name {
+    font-size: var(--text-xs);
+  }
+
+  .prt-h2h-wrap {
+    padding: 0.45rem 0.5rem;
+  }
+
+  .prt-h2h-corner {
+    min-width: 80px;
+  }
+
+  .prt-h2h-rowhead {
+    font-size: var(--text-xs);
+    max-width: 90px;
+  }
+
+  .prt-h2h-colhead,
+  .prt-h2h-cell {
+    min-width: 44px;
+  }
+
+  .prt-h2h-cell {
+    padding: 0.4rem 0.2rem;
+  }
+
+  .prt-duel {
+    padding: 0.6rem 0.7rem;
+  }
+
+  .prt-duel-main {
+    gap: 0.5rem;
+  }
+
+  .prt-duel-name {
+    font-size: var(--text-xs);
+  }
+
+  .prt-duel-score {
+    font-size: var(--text-sm);
+  }
+
+  .prt-duel-challenges {
+    gap: 0.6rem;
+  }
+
+  .prt-md-head {
+    padding: 0.65rem 0.7rem;
   }
 }

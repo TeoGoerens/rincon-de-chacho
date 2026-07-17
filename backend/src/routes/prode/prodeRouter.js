@@ -8,6 +8,7 @@ import ProdeGdtController from "../../controllers/prode/prodeGdtController.js";
 import ProdeStatsController from "../../controllers/prode/prodeStatsController.js";
 import authMiddleware from "../../middlewares/auth/authMiddleware.js";
 import adminAuthMiddleware from "../../middlewares/auth/adminAuthMiddleware.js";
+import superAdminMiddleware from "../../middlewares/auth/superAdminMiddleware.js";
 import prodeParticipantMiddleware from "../../middlewares/auth/prodeParticipantMiddleware.js";
 
 const router = Router();
@@ -29,6 +30,48 @@ router.get(
   "/stats/all-time/standings",
   authMiddleware,
   statsController.getAllTimeStandings,
+);
+router.get(
+  "/stats/records",
+  authMiddleware,
+  statsController.getProdeRecords,
+);
+router.get(
+  "/stats/h2h",
+  authMiddleware,
+  statsController.getProdeH2H,
+);
+
+/* ---------- SUPER ELIMINACIONES (solo super admin) ---------- */
+router.delete(
+  "/matchday/:id/super",
+  authMiddleware,
+  superAdminMiddleware,
+  matchdayController.superDeleteProdeMatchday,
+);
+router.delete(
+  "/tournament/:id/super",
+  authMiddleware,
+  superAdminMiddleware,
+  tournamentController.superDeleteProdeTournament,
+);
+router.delete(
+  "/player/:id/super",
+  authMiddleware,
+  superAdminMiddleware,
+  playerController.superDeleteProdePlayer,
+);
+router.delete(
+  "/gdt/universes/:id/super",
+  authMiddleware,
+  superAdminMiddleware,
+  gdtController.superDeleteGdtUniverse,
+);
+router.delete(
+  "/gdt/players/:id/super",
+  authMiddleware,
+  superAdminMiddleware,
+  gdtController.superDeleteGdtRealPlayer,
 );
 
 /* ---------- SPORTS CATALOG (API externa, solo admin) ---------- */

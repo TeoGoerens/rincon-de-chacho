@@ -1,6 +1,7 @@
 import GdtRealPlayer from "../../dao/models/prode/GdtRealPlayerModel.js";
 import GdtUniverse from "../../dao/models/prode/GdtUniverseModel.js";
 import GdtSquad from "../../dao/models/prode/GdtSquadModel.js";
+import ProdeMatchday from "../../dao/models/prode/ProdeMatchdayModel.js";
 import ProdeTournament from "../../dao/models/prode/ProdeTournamentModel.js";
 import { GDT_POSITIONS } from "../../dao/models/prode/prodeConstants.js";
 import {
@@ -184,6 +185,35 @@ export default class GdtRealPlayerRepository {
         "No se puede eliminar: el jugador está en al menos un plantel GDT",
       );
     }
+
+    const deleted = await GdtRealPlayer.findByIdAndDelete(playerId);
+    if (!deleted) throw new Error("Jugador no encontrado en el pool");
+    return deleted;
+  };
+
+  /* --------------- SUPER DELETE GDT REAL PLAYER --------------- */
+  /* SOLO super admin (middleware): borra al jugador real aunque esté en
+     planteles — se lo saca de todos los slots (esos slots quedan vacíos y
+     suman 0), de los reemplazos pendientes, de los quemados del universo y
+     de los puntajes de fecha cargados. */
+  superDeleteGdtRealPlayer = async (playerId) => {
+    await GdtSquad.updateMany(
+      {},
+      {
+        $pull: {
+          slots: { realPlayer: playerId },
+          pendingReplacements: { realPlayer: playerId },
+        },
+      },
+    );
+    await GdtUniverse.updateMany(
+      { burned: playerId },
+      { $pull: { burned: playerId } },
+    );
+    await ProdeMatchday.updateMany(
+      { "gdtScores.realPlayer": playerId },
+      { $pull: { gdtScores: { realPlayer: playerId } } },
+    );
 
     const deleted = await GdtRealPlayer.findByIdAndDelete(playerId);
     if (!deleted) throw new Error("Jugador no encontrado en el pool");
