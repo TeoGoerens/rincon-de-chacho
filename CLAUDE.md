@@ -150,6 +150,8 @@ El sitio está **en producción** en `https://elrincondechacho.com`. Fue constru
 --fw-bold: 700 | --fw-extrabold: 800 | --fw-black: 900
 
 /* Font sizes */
+--text-4xs: 0.55rem   /* piso absoluto: segunda línea de metadata en tablas */
+--text-3xs: 0.6rem    /* micro-meta: liga/horario de card, pills mínimos */
 --text-2xs: 0.65rem   /* meta, bar text */
 --text-xs:  0.75rem   /* errores, links secundarios */
 --text-sm:  0.82rem   /* body small, subtítulos */

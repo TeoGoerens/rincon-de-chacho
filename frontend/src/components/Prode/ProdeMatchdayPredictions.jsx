@@ -449,10 +449,12 @@ const ProdeMatchdayPredictions = () => {
       new Date(item.kickoffAt).getTime() <= now;
     const itemEditable = editable && !locked;
 
+    /* L/E/V como protagonistas del 1X2 — los nombres ya están en el
+       marcador; el completo queda en el title/aria-label del botón */
     const options = [
-      { value: "home", label: item.homeName, points: item.pointsHome },
-      { value: "draw", label: "Empate", points: item.pointsDraw },
-      { value: "away", label: item.awayName, points: item.pointsAway },
+      { value: "home", label: item.homeName, short: "L", points: item.pointsHome },
+      { value: "draw", label: "Empate", short: "E", points: item.pointsDraw },
+      { value: "away", label: item.awayName, short: "V", points: item.pointsAway },
     ];
 
     return (
@@ -462,64 +464,79 @@ const ProdeMatchdayPredictions = () => {
         }`}
         key={itemId}
       >
-        <div className="prp-card-head">
+        <div className="prp-card-head prp-card-head--match">
           <span className="prp-item-meta">
-            {[item.leagueName, formatKickoff(item.kickoffAt)]
-              .filter(Boolean)
-              .join(" · ")}
+            {item.leagueName && (
+              <span className="prp-item-meta-league">{item.leagueName}</span>
+            )}
+            {item.leagueName && item.kickoffAt && (
+              <span className="prp-item-meta-sep">·</span>
+            )}
+            {item.kickoffAt && (
+              <span className="prp-item-meta-when">
+                {formatKickoff(item.kickoffAt)}
+              </span>
+            )}
           </span>
           {renderStateMark(done, partial, locked)}
         </div>
 
-        <div className="prp-scoreline">
-          <div className="prp-team prp-team--home">{item.homeName}</div>
-          <input
-            className="prp-goal"
-            type="number"
-            min="0"
-            inputMode="numeric"
-            aria-label={`Goles de ${item.homeName}`}
-            value={answer.home}
-            disabled={!itemEditable}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => setAnswerField(itemId, "home", e.target.value)}
-          />
-          <div className="prp-score-x">–</div>
-          <input
-            className="prp-goal"
-            type="number"
-            min="0"
-            inputMode="numeric"
-            aria-label={`Goles de ${item.awayName}`}
-            value={answer.away}
-            disabled={!itemEditable}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => setAnswerField(itemId, "away", e.target.value)}
-          />
-          <div className="prp-team prp-team--away">{item.awayName}</div>
-        </div>
+        <div className="prp-match-body">
+          <div className="prp-scoreline">
+            <div className="prp-side">
+              <div className="prp-team">{item.homeName}</div>
+              <input
+                className="prp-goal"
+                type="number"
+                min="0"
+                inputMode="numeric"
+                aria-label={`Goles de ${item.homeName}`}
+                value={answer.home}
+                disabled={!itemEditable}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setAnswerField(itemId, "home", e.target.value)}
+              />
+            </div>
+            <div className="prp-side">
+              <div className="prp-team">{item.awayName}</div>
+              <input
+                className="prp-goal"
+                type="number"
+                min="0"
+                inputMode="numeric"
+                aria-label={`Goles de ${item.awayName}`}
+                value={answer.away}
+                disabled={!itemEditable}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setAnswerField(itemId, "away", e.target.value)}
+              />
+            </div>
+          </div>
 
-        <div className="prp-1x2">
-          {options.map((option) => (
-            <button
-              type="button"
-              key={option.value}
-              className={`prp-1x2-opt${
-                answer.pick1x2 === option.value ? " prp-1x2-opt--selected" : ""
-              }`}
-              disabled={!itemEditable}
-              onClick={() =>
-                setAnswerField(
-                  itemId,
-                  "pick1x2",
-                  answer.pick1x2 === option.value ? "" : option.value,
-                )
-              }
-            >
-              <div className="prp-1x2-label">{option.label}</div>
-              <div className="prp-1x2-points">{option.points} pts</div>
-            </button>
-          ))}
+          <div className="prp-1x2">
+            {options.map((option) => (
+              <button
+                type="button"
+                key={option.value}
+                className={`prp-1x2-opt${
+                  answer.pick1x2 === option.value ? " prp-1x2-opt--selected" : ""
+                }`}
+                disabled={!itemEditable}
+                title={option.label}
+                aria-label={option.label}
+                onClick={() =>
+                  setAnswerField(
+                    itemId,
+                    "pick1x2",
+                    answer.pick1x2 === option.value ? "" : option.value,
+                  )
+                }
+              >
+                <div className="prp-1x2-label">{option.short}</div>
+                <div className="prp-1x2-points">({option.points} pts)</div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );

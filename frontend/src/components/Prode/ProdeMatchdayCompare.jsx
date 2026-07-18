@@ -55,29 +55,17 @@ const formatKickoff = (isoDate) => {
 const isItemSettled = (item) =>
   item.status === "finished" || item.status === "annulled";
 
-/* Cuánto difieren dos picks de un ítem PENDIENTE:
-   "full" = picks enfrentados (acá se define el duelo)
-   "score" = mismo ganador, distinto marcador (solo se juega el exacto)
-   "same" = neutralizado */
-const diffLevel = (item, pickA, pickB) => {
-  if (item.kind === "match") {
-    const oneXtwoA = pickA?.pick1x2 ?? null;
-    const oneXtwoB = pickB?.pick1x2 ?? null;
-    if (oneXtwoA !== oneXtwoB) return "full";
-    const scoreA = pickA ? `${pickA.predictedHome}-${pickA.predictedAway}` : "";
-    const scoreB = pickB ? `${pickB.predictedHome}-${pickB.predictedAway}` : "";
-    return scoreA !== scoreB ? "score" : "same";
-  }
-  const answerA = (pickA?.answerText ?? "").trim().toLowerCase();
-  const answerB = (pickB?.answerText ?? "").trim().toLowerCase();
-  return answerA === answerB ? "same" : "full";
-};
+/* Código de colores del comparativo: la CELDA se tiñe con el 1X2 elegido
+   (L verde / E amarillo / V rojo) y el NÚMERO se pinta con lo que dice el
+   marcador cargado — si no coinciden, la incoherencia salta sola */
+const PICK_TONE = { home: "l", draw: "e", away: "v" };
 
-const DIFF_TAGS = {
-  full: { label: "Difieren", className: "prp-diff--full" },
-  score: { label: "Otro marcador", className: "prp-diff--score" },
-  same: { label: "Iguales", className: "prp-diff--same" },
-};
+/* Puntaje estándar del 1X2 (default del schema del backend): un partido
+   que se aparta del 5-5-5 se marca como excepción con un tile lateral */
+const STANDARD_1X2_POINTS = 5;
+
+const scoreTone = (home, away) =>
+  home > away ? "l" : home === away ? "e" : "v";
 
 /* Vista post-deadline: el duelo como tablero en vivo. "Mi duelo" (vos contra
    tu rival, lo que más importa) y "Todos" (los duelos de la fecha, cada uno
@@ -244,9 +232,12 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
     ) : null;
   };
 
-  const renderMatchPick = (pick, item) => {
+  /* Celda de partido: tone = color de FONDO (el 1X2 elegido); el número va
+     coloreado por lo que dice el marcador. Nombre completo en el title */
+  const matchCell = (pick, item) => {
     const hasScore =
       pick && pick.predictedHome !== null && pick.predictedAway !== null;
+    const pickTone = pick?.pick1x2 ? PICK_TONE[pick.pick1x2] : null;
     const pickLabel =
       pick?.pick1x2 === "home"
         ? item.homeName
@@ -256,27 +247,35 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
             ? item.awayName
             : null;
 
-    if (!hasScore && !pickLabel) {
-      return <span className="prp-cmp-empty">Sin pronóstico</span>;
+    if (!hasScore && !pickTone) {
+      return { tone: null, content: <span className="prp-cmp-empty">—</span> };
     }
-    return (
-      <>
-        {hasScore && (
-          <span className="prp-cmp-score">
-            {pick.predictedHome}-{pick.predictedAway}
-          </span>
-        )}
-        {pickLabel && <span className="prp-cmp-pick">{pickLabel}</span>}
-      </>
-    );
+    const numTone = hasScore
+      ? scoreTone(pick.predictedHome, pick.predictedAway)
+      : pickTone;
+    return {
+      tone: pickTone,
+      content: (
+        <span
+          className={`prp-cmp-score prp-cmp-score--${numTone}`}
+          title={pickLabel ?? undefined}
+        >
+          {hasScore
+            ? `${pick.predictedHome}-${pick.predictedAway}`
+            : pickTone.toUpperCase()}
+        </span>
+      ),
+    };
   };
 
-  const renderQuestionPick = (pick) => {
-    if (!pick?.answerText) {
-      return <span className="prp-cmp-empty">Sin pronóstico</span>;
-    }
-    return <span className="prp-cmp-answer">{pick.answerText}</span>;
-  };
+  const questionCell = (pick) => ({
+    tone: null,
+    content: pick?.answerText ? (
+      <span className="prp-cmp-answer">{pick.answerText}</span>
+    ) : (
+      <span className="prp-cmp-empty">—</span>
+    ),
+  });
 
   const itemTitle = (item) =>
     item.kind === "match"
@@ -289,18 +288,6 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
           .filter(Boolean)
           .join(" · ")
       : "Pregunta";
-
-  const renderDiffTag = (ctx, item) => {
-    const level = diffLevel(
-      item,
-      pickFor(ctx.left.id, item._id),
-      pickFor(ctx.right.id, item._id),
-    );
-    const tag = DIFF_TAGS[level];
-    return (
-      <span className={`prp-diff ${tag.className}`}>{tag.label}</span>
-    );
-  };
 
   /* ---------- Detalle de un duelo (Mi duelo y desplegables de Todos) ---------- */
 
@@ -462,44 +449,100 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
         </thead>
         <tbody>
           {tableItems.map((item) => {
-            const level = pending
-              ? diffLevel(
-                  item,
-                  pickFor(ctx.left.id, item._id),
-                  pickFor(ctx.right.id, item._id),
-                )
-              : null;
+            const leftCell =
+              item.kind === "match"
+                ? matchCell(pickFor(ctx.left.id, item._id), item)
+                : questionCell(pickFor(ctx.left.id, item._id));
+            const rightCell =
+              item.kind === "match"
+                ? matchCell(pickFor(ctx.right.id, item._id), item)
+                : questionCell(pickFor(ctx.right.id, item._id));
+            const exceptionalPoints =
+              item.kind === "match" &&
+              (item.pointsHome !== STANDARD_1X2_POINTS ||
+                item.pointsDraw !== STANDARD_1X2_POINTS ||
+                item.pointsAway !== STANDARD_1X2_POINTS);
+            /* Definidos: la celda replica las 3 filas de la metadata —
+               primera vacía, resultado pronosticado, puntaje obtenido */
+            const valClass =
+              !pending && item.kind === "match"
+                ? "prp-dt-val prp-dt-val--settled"
+                : "prp-dt-val";
             return (
-            <tr
-              key={item._id}
-              className={level === "full" ? "prp-dt-row--diff" : ""}
-            >
-              <td className="prp-dt-item">
-                <span className="prp-dt-title">{itemTitle(item)}</span>
-                <span className="prp-dt-meta">{itemMeta(item)}</span>
-                {pending ? renderDiffTag(ctx, item) : renderItemResult(item)}
-              </td>
-              <td
-                className={`prp-dt-pick${
-                  ctx.left.isMe ? " prp-dt-pick--me" : ""
-                }`}
+              <tr
+                key={item._id}
+                className={
+                  exceptionalPoints ? "prp-dt-row--exception" : undefined
+                }
               >
-                <div className="prp-dt-val">
-                  {item.kind === "match"
-                    ? renderMatchPick(pickFor(ctx.left.id, item._id), item)
-                    : renderQuestionPick(pickFor(ctx.left.id, item._id))}
-                  {renderPoints(ctx.left.id, item._id)}
-                </div>
-              </td>
-              <td className="prp-dt-pick">
-                <div className="prp-dt-val">
-                  {item.kind === "match"
-                    ? renderMatchPick(pickFor(ctx.right.id, item._id), item)
-                    : renderQuestionPick(pickFor(ctx.right.id, item._id))}
-                  {renderPoints(ctx.right.id, item._id)}
-                </div>
-              </td>
-            </tr>
+                <td className="prp-dt-item">
+                  {item.kind === "match" && (
+                    <div className="prp-dt-sub">
+                      <span className="prp-dt-meta-league">
+                        {item.leagueName}
+                      </span>
+                      {/* Cada tramo es un span y cada punto un sep: así
+                          la separación es idéntica en todos (el gap del
+                          flex), sin espacios de texto desparejos */}
+                      {formatKickoff(item.kickoffAt)
+                        .split(" · ")
+                        .filter(Boolean)
+                        .map((part, index) => (
+                          <React.Fragment key={part}>
+                            {(item.leagueName || index > 0) && (
+                              <span className="prp-dt-meta-sep">·</span>
+                            )}
+                            <span className="prp-dt-meta-when">{part}</span>
+                          </React.Fragment>
+                        ))}
+                    </div>
+                  )}
+                  <span
+                    className="prp-dt-title"
+                    title={`${itemTitle(item)} · ${itemMeta(item)}`}
+                  >
+                    {itemTitle(item)}
+                  </span>
+                  {item.kind === "match" ? (
+                    <div className="prp-dt-points">
+                      <span className="prp-cmp-score--l">
+                        L {item.pointsHome}
+                      </span>
+                      <span className="prp-cmp-score--e">
+                        E {item.pointsDraw}
+                      </span>
+                      <span className="prp-cmp-score--v">
+                        V {item.pointsAway}
+                      </span>
+                      {!pending && renderItemResult(item)}
+                    </div>
+                  ) : (
+                    !pending && (
+                      <div className="prp-dt-sub">{renderItemResult(item)}</div>
+                    )
+                  )}
+                </td>
+                <td
+                  className={`prp-dt-pick${
+                    ctx.left.isMe ? " prp-dt-pick--me" : ""
+                  }${leftCell.tone ? ` prp-dt-pick--${leftCell.tone}` : ""}`}
+                >
+                  <div className={valClass}>
+                    {leftCell.content}
+                    {renderPoints(ctx.left.id, item._id)}
+                  </div>
+                </td>
+                <td
+                  className={`prp-dt-pick${
+                    rightCell.tone ? ` prp-dt-pick--${rightCell.tone}` : ""
+                  }`}
+                >
+                  <div className={valClass}>
+                    {rightCell.content}
+                    {renderPoints(ctx.right.id, item._id)}
+                  </div>
+                </td>
+              </tr>
             );
           })}
         </tbody>
@@ -654,6 +697,17 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
           <section className="prp-block" key={code}>
             <div className="prp-block-head">
               <div className="prp-block-name">{title}</div>
+              <div className="prp-cmp-legend">
+                <span className="prp-cmp-score--l" title="Local">
+                  L
+                </span>
+                <span className="prp-cmp-score--e" title="Empate">
+                  E
+                </span>
+                <span className="prp-cmp-score--v" title="Visitante">
+                  V
+                </span>
+              </div>
             </div>
 
             {pendingItems.length > 0 && (
