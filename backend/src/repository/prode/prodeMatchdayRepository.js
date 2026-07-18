@@ -1205,7 +1205,7 @@ export default class ProdeMatchdayRepository {
      del adapter la re-consulta normalmente no cuesta requests extra. */
   addProdeMatchdayItemsFromCatalog = async (
     matchdayId,
-    { challenge, leagueId, providerEventIds },
+    { challenge, leagueId, events },
   ) => {
     const matchday = await ProdeMatchday.findById(matchdayId);
     if (!matchday) throw new Error("Fecha no encontrada");
@@ -1217,7 +1217,13 @@ export default class ProdeMatchdayRepository {
       );
     }
 
-    const ids = [...new Set((providerEventIds ?? []).map(String))];
+    /* events: [{providerEventId, pointsHome, pointsDraw, pointsAway}] —
+       los puntos L/E/V se eligen en el carrito (default 5 si faltan) */
+    const requested = (events ?? []).filter((e) => e?.providerEventId);
+    const pointsByEvent = new Map(
+      requested.map((e) => [String(e.providerEventId), e]),
+    );
+    const ids = [...new Set(requested.map((e) => String(e.providerEventId)))];
     if (ids.length === 0) {
       throw new Error("Elegí al menos un partido del catálogo");
     }
@@ -1251,8 +1257,16 @@ export default class ProdeMatchdayRepository {
       throw new Error(`Estos partidos ya están en la fecha: ${names}`);
     }
 
+    /* Puntos elegidos en el carrito: enteros ≥ 0, cualquier otra cosa
+       cae al default 5 */
+    const toPoints = (value) => {
+      const number = Number(value);
+      return Number.isInteger(number) && number >= 0 ? number : 5;
+    };
+
     for (const id of ids) {
       const event = eventsById.get(id);
+      const chosen = pointsByEvent.get(id) ?? {};
       matchday.items.push({
         challenge,
         kind: "match",
@@ -1262,9 +1276,9 @@ export default class ProdeMatchdayRepository {
         homeName: event.homeTeam,
         awayName: event.awayTeam,
         kickoffAt: new Date(event.kickoff),
-        pointsHome: 5,
-        pointsDraw: 5,
-        pointsAway: 5,
+        pointsHome: toPoints(chosen.pointsHome),
+        pointsDraw: toPoints(chosen.pointsDraw),
+        pointsAway: toPoints(chosen.pointsAway),
       });
     }
 

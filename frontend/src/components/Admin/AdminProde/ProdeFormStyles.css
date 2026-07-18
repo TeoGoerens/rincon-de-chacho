@@ -1013,6 +1013,66 @@
   transition: border-color var(--transition-base);
 }
 
+/* ── Editor de puntos del partido tildado (L/E/V antes de agregar) ──
+   Una sola línea compacta con tinte teal, pegada a la fila de arriba.
+   Los overrides 0-2-0 le ganan al uppercase de .prf-form label */
+.prf-catalog-pts {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  padding: 0.45rem 0.85rem;
+  background: rgba(168, 218, 220, 0.04);
+  border: 1px solid rgba(168, 218, 220, 0.15);
+  border-radius: var(--radius-sm);
+}
+
+.prf-form .prf-catalog-pts-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-muted-dark);
+  margin: 0 0.15rem 0 0;
+}
+
+.prf-form .prf-catalog-pts-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: default;
+}
+
+.prf-form .prf-catalog-pts-input span {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-bold);
+  color: var(--text-label-dark);
+}
+
+.prf-catalog-pts-input input {
+  width: 48px;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xs);
+  color: var(--input-text-dark);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  padding: 0.25rem 0.35rem;
+  text-align: center;
+}
+
+.prf-catalog-pts-input input:focus {
+  outline: none;
+  border-color: var(--third-color);
+}
+
 .prf-catalog-row:hover {
   border-color: var(--third-color);
 }

@@ -2,11 +2,13 @@ import axios from "axios";
 import { baseURL } from "../../helpers/baseURL";
 import { getUserJWT } from "../getUserInformation";
 
+/* events: [{ providerEventId, pointsHome, pointsDraw, pointsAway }] — los
+   puntos por acertar L/E/V se eligen en el carrito (default 5) */
 const addProdeMatchdayItemsFromCatalog = async ({
   matchdayId,
   challenge,
   leagueId,
-  providerEventIds,
+  events,
 }) => {
   const token = getUserJWT();
   if (!token) {
@@ -16,7 +18,7 @@ const addProdeMatchdayItemsFromCatalog = async ({
   try {
     const response = await axios.post(
       `${baseURL}/api/prode/matchday/${matchdayId}/items/from-catalog`,
-      { challenge, leagueId, providerEventIds },
+      { challenge, leagueId, events },
       { headers: { Authorization: `Bearer ${token}` } },
     );
     return response.data.matchdayUpdated;

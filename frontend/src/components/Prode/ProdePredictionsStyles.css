@@ -1045,6 +1045,125 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
+/* ── Vista Todos: duelos de la fecha desplegables ──
+   Header = resumen del duelo por desafío (primer pantallazo de quién va
+   ganando); al desplegar muestra el MISMO detalle que "Mi duelo" */
+.prp-ad-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prp-ad {
+  background: var(--bg-card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Mi duelo: marcado con el teal de identidad propia */
+.prp-ad--me {
+  border-color: rgba(168, 218, 220, 0.25);
+}
+
+.prp-ad-head {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: var(--space-sm);
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.prp-ad-head:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.prp-ad-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prp-ad-name--a {
+  text-align: right;
+}
+
+.prp-ad-name--b {
+  text-align: left;
+}
+
+.prp-ad-scores {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+}
+
+.prp-ad-ch {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.prp-ad-ch-label {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  color: var(--text-subtle-dark);
+}
+
+.prp-ad-num {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-extrabold);
+  color: var(--text-body-dark);
+}
+
+/* El que va ganando ese desafío, en verde (mismo código que el hero) */
+.prp-ad-num--lead {
+  color: var(--status-green);
+}
+
+.prp-ad-num--pending {
+  color: var(--text-subtle-dark);
+}
+
+.prp-ad-dash {
+  color: var(--text-subtle-dark);
+  font-size: var(--text-xs);
+  padding: 0 0.1rem;
+}
+
+.prp-ad-chevron {
+  font-size: var(--text-sm);
+  color: var(--text-subtle-dark);
+  transform: rotate(-90deg);
+  transition: transform var(--transition-base);
+  text-align: center;
+}
+
+.prp-ad-chevron--open {
+  transform: rotate(0deg);
+}
+
+.prp-ad-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.9rem 1rem 1rem;
+}
+
 .prp-lb-row {
   padding: 0.55rem 0 0.5rem;
 }
@@ -1308,6 +1427,37 @@
 /* Mobile: navbar + progreso sticky + guardar sticky comen viewport vertical,
    así que acá TODO se compacta para que entren 2-3 cards por pantalla */
 @media (max-width: 600px) {
+  /* Duelos desplegables: mini-hero vertical (nombre / marcadores / nombre)
+     con el chevron flotando arriba a la derecha */
+  .prp-ad-head {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.65rem 1.6rem 0.65rem 1.6rem;
+  }
+
+  .prp-ad-name--a,
+  .prp-ad-name--b {
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .prp-ad-scores {
+    gap: 0.7rem;
+  }
+
+  .prp-ad-chevron {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.75rem;
+  }
+
+  .prp-ad-body {
+    padding: 0.7rem 0.7rem 0.8rem;
+  }
+
   .prp-wrap {
     padding: var(--space-md);
   }

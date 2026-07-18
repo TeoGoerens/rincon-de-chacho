@@ -24,6 +24,7 @@ const fetchGdtRevealedSquads = async (universeId) => {
       roundOpen,
       myStaged,
       window: windowInfo,
+      lastWindowChanges,
     } = response.data;
     return {
       universe,
@@ -33,6 +34,7 @@ const fetchGdtRevealedSquads = async (universeId) => {
       roundOpen,
       myStaged,
       window: windowInfo,
+      lastWindowChanges,
     };
   } catch (error) {
     const customError = new Error(

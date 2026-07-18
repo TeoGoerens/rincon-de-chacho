@@ -21,6 +21,22 @@ import { getUserId } from "../../reactquery/getUserInformation";
 
 const REVEALED_STATUSES = ["revealed", "resolving", "final"];
 
+/* Etiquetas de slot para la card de cambios (mismo criterio que la guía
+   del comparador: índice solo cuando la posición se repite) */
+const SLOT_LABELS = [
+  "ARQ",
+  "DEF1",
+  "DEF2",
+  "DEF3",
+  "DEF4",
+  "VOL1",
+  "VOL2",
+  "VOL3",
+  "VOL4",
+  "DEL1",
+  "DEL2",
+];
+
 /* Formación FIJA 1-4-4-2 (espejo del backend): índice = slot - 1 */
 const SLOT_LAYOUT = [
   "ARQ",
@@ -785,6 +801,44 @@ const ProdeGdtDraft = () => {
               );
             })}
           </div>
+
+          {/* Novedades de la última ventana cerrada: quién salió y quién
+              entró en este plantel (sin ventanas cerradas no se muestra) */}
+          {revealedData.lastWindowChanges &&
+            (() => {
+              const changes =
+                revealedData.lastWindowChanges.byPlayer?.[ownerId] ?? [];
+              return (
+                <footer className="prg-changes">
+                  <span className="prg-changes-label">
+                    Cambios de{" "}
+                    {revealedData.lastWindowChanges.month.toLowerCase()}
+                  </span>
+                  {changes.length === 0 ? (
+                    <span className="prg-changes-empty">Sin cambios</span>
+                  ) : (
+                    changes.map((change) => (
+                      <div className="prg-change-row" key={change.slotNumber}>
+                        <span className="prg-change-pos">
+                          {SLOT_LABELS[change.slotNumber - 1] ??
+                            change.position}
+                        </span>
+                        <span
+                          className="prg-change-out"
+                          title={change.out.club}
+                        >
+                          {change.out.name}
+                        </span>
+                        <span className="prg-change-arrow">→</span>
+                        <span className="prg-change-in" title={change.in.club}>
+                          {change.in.name}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </footer>
+              );
+            })()}
         </section>
       );
     };
@@ -796,12 +850,17 @@ const ProdeGdtDraft = () => {
         )}
 
         <div className="prg-header">
-          <p className="prg-eyebrow">Prode · Gran DT</p>
-          <h1 className="prg-title">{universe?.label}</h1>
-          <p className="prg-subtitle">
-            {universe?.league} · {universe?.tournament?.name}{" "}
-            {universe?.tournament?.year}
-          </p>
+          <div className="prg-header-text">
+            <p className="prg-eyebrow">Prode · Gran DT</p>
+            <h1 className="prg-title">{universe?.label}</h1>
+            <p className="prg-subtitle">
+              {universe?.league} · {universe?.tournament?.name}{" "}
+              {universe?.tournament?.year}
+            </p>
+          </div>
+          <Link className="prg-back-link" to="/prode" onClick={goBack}>
+            ← Volver
+          </Link>
         </div>
 
         {windowCorrectionPhase ? (
@@ -1026,12 +1085,17 @@ const ProdeGdtDraft = () => {
       {saveMutation.isPending && <SpinnerOverlay />}
 
       <div className="prg-header">
-        <p className="prg-eyebrow">Prode · Gran DT</p>
-        <h1 className="prg-title">{universe?.label}</h1>
-        <p className="prg-subtitle">
-          {universe?.league} · {universe?.tournament?.name}{" "}
-          {universe?.tournament?.year}
-        </p>
+        <div className="prg-header-text">
+          <p className="prg-eyebrow">Prode · Gran DT</p>
+          <h1 className="prg-title">{universe?.label}</h1>
+          <p className="prg-subtitle">
+            {universe?.league} · {universe?.tournament?.name}{" "}
+            {universe?.tournament?.year}
+          </p>
+        </div>
+        <Link className="prg-back-link" to="/prode" onClick={goBack}>
+          ← Volver
+        </Link>
       </div>
 
       {editable ? (

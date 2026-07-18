@@ -125,7 +125,7 @@ const ProdeMatchdayItems = ({ matchday }) => {
     onSuccess: (data, variables) => {
       toast.success(
         plural(
-          variables.providerEventIds.length,
+          variables.events.length,
           "partido agregado",
           "partidos agregados",
         ),
@@ -180,15 +180,44 @@ const ProdeMatchdayItems = ({ matchday }) => {
 
   const openCatalog = (challenge) => {
     setForm(null);
-    setCatalog({ challenge, leagueId: "", selected: [] });
+    setCatalog({ challenge, leagueId: "", selected: [], points: {} });
   };
 
+  /* Al tildar un partido se habilita su editor de puntos L/E/V (default 5);
+     al destildarlo, sus puntos se descartan */
   const toggleCatalogEvent = (providerEventId) => {
+    setCatalog((prev) => {
+      const isOn = prev.selected.includes(providerEventId);
+      const points = { ...prev.points };
+      if (isOn) {
+        delete points[providerEventId];
+      } else {
+        points[providerEventId] = {
+          pointsHome: "5",
+          pointsDraw: "5",
+          pointsAway: "5",
+        };
+      }
+      return {
+        ...prev,
+        selected: isOn
+          ? prev.selected.filter((id) => id !== providerEventId)
+          : [...prev.selected, providerEventId],
+        points,
+      };
+    });
+  };
+
+  const setCatalogPoints = (providerEventId, field, value) => {
     setCatalog((prev) => ({
       ...prev,
-      selected: prev.selected.includes(providerEventId)
-        ? prev.selected.filter((id) => id !== providerEventId)
-        : [...prev.selected, providerEventId],
+      points: {
+        ...prev.points,
+        [providerEventId]: {
+          ...prev.points[providerEventId],
+          [field]: value,
+        },
+      },
     }));
   };
 
@@ -197,7 +226,10 @@ const ProdeMatchdayItems = ({ matchday }) => {
       matchdayId: matchday._id,
       challenge: catalog.challenge,
       leagueId: catalog.leagueId,
-      providerEventIds: catalog.selected,
+      events: catalog.selected.map((providerEventId) => ({
+        providerEventId,
+        ...catalog.points[providerEventId],
+      })),
     });
   };
 
@@ -444,6 +476,7 @@ const ProdeMatchdayItems = ({ matchday }) => {
                 ...prev,
                 leagueId: e.target.value,
                 selected: [],
+                points: {},
               }))
             }
           >
@@ -491,36 +524,92 @@ const ProdeMatchdayItems = ({ matchday }) => {
                     event.providerEventId,
                   );
                   return (
-                    <button
-                      type="button"
-                      key={event.providerEventId}
-                      className={`prf-catalog-row${
-                        added ? " prf-catalog-row--added" : ""
-                      }`}
-                      disabled={added || adding}
-                      onClick={() => toggleCatalogEvent(event.providerEventId)}
-                    >
-                      {/* divs (no spans): button:hover span escala globalmente */}
-                      <div
-                        className={`prf-catalog-check${
-                          selected ? " prf-catalog-check--on" : ""
+                    <React.Fragment key={event.providerEventId}>
+                      <button
+                        type="button"
+                        className={`prf-catalog-row${
+                          added ? " prf-catalog-row--added" : ""
                         }`}
-                      />
-                      <div className="prf-item-body">
-                        <div className="prf-item-main">
-                          {event.homeTeam} vs {event.awayTeam}
+                        disabled={added || adding}
+                        onClick={() =>
+                          toggleCatalogEvent(event.providerEventId)
+                        }
+                      >
+                        {/* divs (no spans): button:hover span escala globalmente */}
+                        <div
+                          className={`prf-catalog-check${
+                            selected ? " prf-catalog-check--on" : ""
+                          }`}
+                        />
+                        <div className="prf-item-body">
+                          <div className="prf-item-main">
+                            {event.homeTeam} vs {event.awayTeam}
+                          </div>
+                          <div className="prf-item-meta">
+                            {[
+                              formatDeadline(event.kickoff),
+                              event.round ? `Fecha ${event.round}` : "",
+                              added ? "Ya está en la fecha" : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </div>
                         </div>
-                        <div className="prf-item-meta">
+                      </button>
+                      {/* Editor compacto de puntos del partido tildado:
+                          L/E/V abreviados con el nombre completo en el
+                          tooltip (default 5) */}
+                      {selected && (
+                        <div className="prf-catalog-pts">
+                          <span className="prf-catalog-pts-label">
+                            Puntos por acertar
+                          </span>
                           {[
-                            formatDeadline(event.kickoff),
-                            event.round ? `Fecha ${event.round}` : "",
-                            added ? "Ya está en la fecha" : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
+                            {
+                              field: "pointsHome",
+                              short: "L",
+                              full: event.homeTeam,
+                            },
+                            {
+                              field: "pointsDraw",
+                              short: "E",
+                              full: "Empate",
+                            },
+                            {
+                              field: "pointsAway",
+                              short: "V",
+                              full: event.awayTeam,
+                            },
+                          ].map(({ field, short, full }) => (
+                            <label
+                              className="prf-catalog-pts-input"
+                              key={field}
+                              title={full}
+                            >
+                              <span>{short}</span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={
+                                  catalog.points[event.providerEventId]?.[
+                                    field
+                                  ] ?? "5"
+                                }
+                                onChange={(e) =>
+                                  setCatalogPoints(
+                                    event.providerEventId,
+                                    field,
+                                    e.target.value,
+                                  )
+                                }
+                                disabled={adding}
+                              />
+                            </label>
+                          ))}
                         </div>
-                      </div>
-                    </button>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </div>

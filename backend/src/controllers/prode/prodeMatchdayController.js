@@ -356,9 +356,9 @@ export default class ProdeMatchdayController {
   /* --------------- ADD MATCHDAY ITEMS FROM CATALOG --------------- */
   addProdeMatchdayItemsFromCatalog = async (req, res, next) => {
     try {
-      const { challenge, leagueId, providerEventIds } = req.body;
+      const { challenge, leagueId, events } = req.body;
       if (!leagueId) throw new Error("La liga del catálogo es obligatoria");
-      if (!Array.isArray(providerEventIds)) {
+      if (!Array.isArray(events)) {
         throw new Error("Los partidos del catálogo deben enviarse como lista");
       }
 
@@ -366,7 +366,7 @@ export default class ProdeMatchdayController {
         await repository.addProdeMatchdayItemsFromCatalog(req.params.id, {
           challenge,
           leagueId,
-          providerEventIds,
+          events,
         });
       res.status(201).json({
         message: "Prode matchday items added from catalog successfully",

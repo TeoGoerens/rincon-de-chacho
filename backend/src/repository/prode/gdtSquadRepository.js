@@ -256,6 +256,66 @@ export default class GdtSquadRepository {
       }
     }
 
+    /* Novedades de la última ventana CERRADA: quién salió y quién entró
+       en cada plantel — la card bajo cada plantel en la vista de consulta.
+       Diff = versión del mes de esa ventana vs la vigente anterior; sin
+       versión de ese mes = ese participante no hizo cambios. */
+    const lastClosedWindow = getLastClosedWindow(universe, months);
+    let lastWindowChanges = null;
+    if (lastClosedWindow) {
+      const byPlayer = {};
+      const squadsByOwner = new Map();
+      for (const squad of allSquads) {
+        const key = squadOwnerId(squad);
+        if (!squadsByOwner.has(key)) squadsByOwner.set(key, []);
+        squadsByOwner.get(key).push(squad);
+      }
+      const windowIndex = monthIndexOf(months, lastClosedWindow.month);
+      for (const [ownerId, ownerSquads] of squadsByOwner) {
+        const monthVersion = ownerSquads.find(
+          (squad) => squad.month === lastClosedWindow.month,
+        );
+        const previous = ownerSquads
+          .filter((squad) => monthIndexOf(months, squad.month) < windowIndex)
+          .sort(
+            (a, b) =>
+              monthIndexOf(months, b.month) - monthIndexOf(months, a.month),
+          )[0];
+        if (!monthVersion || !previous) {
+          byPlayer[ownerId] = [];
+          continue;
+        }
+        const previousBySlot = new Map(
+          (previous.slots ?? []).map((slot) => [slot.slotNumber, slot]),
+        );
+        const changes = [];
+        for (const slot of monthVersion.slots ?? []) {
+          const before = previousBySlot.get(slot.slotNumber);
+          if (!before) continue;
+          const beforeId = String(
+            before.realPlayer?._id ?? before.realPlayer,
+          );
+          const afterId = String(slot.realPlayer?._id ?? slot.realPlayer);
+          if (beforeId !== afterId) {
+            changes.push({
+              slotNumber: slot.slotNumber,
+              position: slot.position,
+              out: {
+                name: before.realPlayer?.name ?? "?",
+                club: before.realPlayer?.club ?? "",
+              },
+              in: {
+                name: slot.realPlayer?.name ?? "?",
+                club: slot.realPlayer?.club ?? "",
+              },
+            });
+          }
+        }
+        byPlayer[ownerId] = changes;
+      }
+      lastWindowChanges = { month: lastClosedWindow.month, byPlayer };
+    }
+
     return {
       universe: {
         _id: universe._id,
@@ -276,6 +336,7 @@ export default class GdtSquadRepository {
       roundOpen,
       myStaged,
       window: myWindow,
+      lastWindowChanges,
     };
   };
 
