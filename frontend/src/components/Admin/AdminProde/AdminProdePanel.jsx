@@ -17,6 +17,7 @@ const SUB_SECTIONS = [
   { label: "Gran DT", to: "gdt", end: false, icon: "fa-shirt" },
   { label: "Torneos", to: "torneos", end: false, icon: "fa-trophy" },
   { label: "Jugadores", to: "jugadores", end: false, icon: "fa-circle-user" },
+  { label: "Guía", to: "guia", end: false, icon: "fa-book-open" },
 ];
 
 //----------------------------------------

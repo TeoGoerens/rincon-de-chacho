@@ -703,7 +703,7 @@ const GdtUniverseDetail = () => {
         <div className="pri-header-text">
           <div className="pri-eyebrow">
             <span className="pri-eyebrow-dot" />
-            {team.tournament?.name} ({team.tournament?.year}) · {team.league}
+            {team.tournament?.name} {team.tournament?.year} · {team.league}
           </div>
           <h1 className="pri-title">
             {team.label}{" "}

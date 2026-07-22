@@ -170,7 +170,7 @@ const CreateProdeMatchday = () => {
               )}
               {tournaments.map((t) => (
                 <option key={t._id} value={t._id}>
-                  {t.name} ({t.year})
+                  {t.name} {t.year}
                 </option>
               ))}
             </select>

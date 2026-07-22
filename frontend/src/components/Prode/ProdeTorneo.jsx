@@ -255,7 +255,7 @@ const ProdeTorneo = () => {
                 <option disabled>────────────</option>
                 {tournaments.map((t) => (
                   <option key={t._id} value={t._id}>
-                    {t.name}
+                    {t.name} {t.year}
                     {t.status === "active" ? " · En juego" : ""}
                   </option>
                 ))}
@@ -309,11 +309,9 @@ const ProdeTorneo = () => {
                         ? "1 fecha consolidada"
                         : `${matchdayCount} fechas consolidadas`
                     }`
-                  : `${standings.tournament.name} · ${
-                      matchdayCount === 1
-                        ? "1 fecha consolidada"
-                        : `${matchdayCount} fechas consolidadas`
-                    }`}
+                  : matchdayCount === 1
+                    ? "1 fecha consolidada"
+                    : `${matchdayCount} fechas consolidadas`}
               </span>
             </div>
 

@@ -340,7 +340,7 @@ const UpdateProdeMatchday = () => {
           <div className="prf-header-text">
             <div className="prf-eyebrow">
               <span className="prf-eyebrow-dot" />
-              {tournament?.name} ({tournament?.year})
+              {tournament?.name} {tournament?.year}
             </div>
             <h1 className="prf-title">
               Fecha {matchday.roundNumber}{" "}

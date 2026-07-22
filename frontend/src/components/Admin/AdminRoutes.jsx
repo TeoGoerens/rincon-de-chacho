@@ -20,6 +20,7 @@ import CreateGdtUniverse from "./AdminProde/Gdt/CreateGdtUniverse";
 import GdtUniverseDetail from "./AdminProde/Gdt/GdtUniverseDetail";
 import CreateGdtPlayer from "./AdminProde/Gdt/CreateGdtPlayer";
 import UpdateGdtPlayer from "./AdminProde/Gdt/UpdateGdtPlayer";
+import ProdeGuide from "./AdminProde/Guide/ProdeGuide";
 
 //Admin PODRIDA Components
 import AdminPodridaPanel from "./AdminPodrida/AdminPodridaPanel";
@@ -107,6 +108,8 @@ const AdminRoutes = () => {
             path="gdt/:universeId/jugadores/editar/:id"
             element={<UpdateGdtPlayer />}
           />
+
+          <Route path="guia" element={<ProdeGuide />} />
         </Route>
         {/* --------------- ADMIN PODRIDA --------------- */}
 
