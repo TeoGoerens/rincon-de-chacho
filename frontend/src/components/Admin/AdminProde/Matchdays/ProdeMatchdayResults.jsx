@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import "../ProdeFormStyles.css";
 import "../ProdeIndexStyles.css";
 import { formatDeadline } from "../prodeAdminConstants";
+import { groupProdeItems } from "../../../../helpers/prodeItemOrder";
 
 //Import components
 import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
@@ -35,9 +36,6 @@ const isValidScore = (value) =>
 const plural = (count, singular, pluralWord) =>
   `${count} ${count === 1 ? singular : pluralWord}`;
 
-const byKickoff = (a, b) =>
-  new Date(a.kickoffAt ?? 0) - new Date(b.kickoffAt ?? 0);
-
 /* Kickoff en dos niveles ("dom 26/07" / "17:00") — armado por partes con
    hour12:false (nunca "p. m."); el día separado ayuda a distinguir jornadas */
 const kickoffParts = (isoDate) => {
@@ -58,15 +56,11 @@ const kickoffParts = (isoDate) => {
 
 /* Sub-grupos dentro de cada prode: separar lo que llena el botón de refresh
    de lo que el admin completa a mano evita cargar resultados donde no era.
-   Partidos en orden cronológico de kickoff. */
+   El orden sale del helper canónico compartido con las pantallas del
+   participante (catálogo por kickoff → manuales por kickoff → preguntas). */
 const buildItemGroups = (challengeItems) => {
-  const apiMatches = challengeItems
-    .filter((i) => i.kind === "match" && i.source === "api")
-    .sort(byKickoff);
-  const manualMatches = challengeItems
-    .filter((i) => i.kind === "match" && i.source !== "api")
-    .sort(byKickoff);
-  const questions = challengeItems.filter((i) => i.kind === "question");
+  const { apiMatches, manualMatches, questions } =
+    groupProdeItems(challengeItems);
 
   return [
     { key: "api", title: "Partidos del catálogo", items: apiMatches },

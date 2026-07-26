@@ -17,6 +17,7 @@ import fetchMyProdePrediction from "../../reactquery/prode/fetchMyProdePredictio
 import fetchMyProdePlayer from "../../reactquery/prode/fetchMyProdePlayer";
 import saveMyProdePrediction from "../../reactquery/prode/saveMyProdePrediction";
 import { getUserId } from "../../reactquery/getUserInformation";
+import { orderProdeItems } from "../../helpers/prodeItemOrder";
 
 const CHALLENGE_BLOCKS = [
   { code: "ARG", title: "Prode Argentina" },
@@ -161,7 +162,12 @@ const ProdeMatchdayPredictions = () => {
     queryFn: fetchMyProdePlayer,
   });
 
-  const items = useMemo(() => matchday?.items ?? [], [matchday]);
+  /* Orden canónico compartido: catálogo por kickoff → manuales por kickoff
+     → preguntas en orden de carga */
+  const items = useMemo(
+    () => orderProdeItems(matchday?.items ?? []),
+    [matchday],
+  );
   const itemIds = useMemo(() => items.map((i) => String(i._id)), [items]);
 
   const deadlineMs = matchday?.predictionsDeadline

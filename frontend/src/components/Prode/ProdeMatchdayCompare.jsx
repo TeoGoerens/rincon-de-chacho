@@ -11,6 +11,7 @@ import SpinnerOverlay from "../Layout/Spinner/SpinnerOverlay";
 //Import React Query functions
 import fetchProdeMatchdayPredictions from "../../reactquery/prode/fetchProdeMatchdayPredictions";
 import fetchProdeMatchdayPartials from "../../reactquery/prode/fetchProdeMatchdayPartials";
+import { orderProdeItems } from "../../helpers/prodeItemOrder";
 
 const CHALLENGE_BLOCKS = [
   { code: "ARG", title: "Prode Argentina", short: "Argentina" },
@@ -92,7 +93,12 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
     queryFn: () => fetchProdeMatchdayPartials(matchday._id),
   });
 
-  const items = matchday.items ?? [];
+  /* Orden canónico compartido: catálogo por kickoff → manuales por kickoff
+     → preguntas en orden de carga */
+  const items = useMemo(
+    () => orderProdeItems(matchday.items ?? []),
+    [matchday],
+  );
 
   /* pick de cada jugador por ítem: { playerId: { itemId: pick } } */
   const picksByPlayer = useMemo(() => {
