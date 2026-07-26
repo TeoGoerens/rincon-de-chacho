@@ -554,16 +554,16 @@ export default class ProdeGdtController {
     }
   };
 
-  /* --------------- GDT TRANSFER ADD PLAYER --------------- */
-  addGdtTransferPlayer = async (req, res, next) => {
+  /* --------------- GDT TRANSFER ADD PLAYERS --------------- */
+  addGdtTransferPlayers = async (req, res, next) => {
     try {
-      const playerCreated = await realPlayerRepository.addTransferPlayer(
+      const summary = await realPlayerRepository.addTransferPlayers(
         req.params.id,
-        { providerPlayerId: req.body.providerPlayerId },
+        { providerPlayerIds: req.body.providerPlayerIds },
       );
       res.status(201).json({
-        message: "GDT player added from transfer report successfully",
-        playerCreated,
+        message: "GDT players added from transfer report successfully",
+        summary,
       });
     } catch (error) {
       next(error);

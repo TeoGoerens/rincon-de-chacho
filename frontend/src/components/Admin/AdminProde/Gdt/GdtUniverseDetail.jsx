@@ -43,7 +43,7 @@ import reopenGdtWindow from "../../../../reactquery/prode/reopenGdtWindow";
 import grantGdtCorrection from "../../../../reactquery/prode/grantGdtCorrection";
 import fetchGdtTransferReport from "../../../../reactquery/prode/fetchGdtTransferReport";
 import ignoreGdtTransfer from "../../../../reactquery/prode/ignoreGdtTransfer";
-import addGdtTransferPlayer from "../../../../reactquery/prode/addGdtTransferPlayer";
+import addGdtTransferPlayers from "../../../../reactquery/prode/addGdtTransferPlayers";
 import updateGdtRealPlayer from "../../../../reactquery/prode/updateGdtRealPlayer";
 
 //Import components (compartidos del admin Prode)
@@ -141,6 +141,31 @@ const GdtUniverseDetail = () => {
     enabled: Boolean(team) && team.draftStatus === "final",
   });
 
+  /* El bloqueo hecho desde el reporte de diferencias solo cambia un flag:
+     se parchea la copia en cache en lugar de re-pedir el reporte, que fuera
+     de la ventana de cache del snapshot volvería a recorrer la liga entera
+     (y a gastar cuota diaria de la API) */
+  const patchReportHolderBlock = ({ playerId, slotNumber, blocked }) => {
+    queryClient.setQueryData(["gdt-transfer-report", universeId], (report) => {
+      if (!report) return report;
+      const patchRows = (rows) =>
+        rows.map((row) => ({
+          ...row,
+          draftedBy: row.draftedBy.map((holder) =>
+            holder.ownerId === String(playerId) &&
+            holder.slotNumber === slotNumber
+              ? { ...holder, blocked }
+              : holder,
+          ),
+        }));
+      return {
+        ...report,
+        clubChanged: patchRows(report.clubChanged),
+        missingFromLeague: patchRows(report.missingFromLeague),
+      };
+    });
+  };
+
   const blockMutation = useMutation({
     mutationFn: setGdtSlotBlock,
     onSuccess: (squad, variables) => {
@@ -150,6 +175,7 @@ const GdtUniverseDetail = () => {
           : "Jugador desbloqueado: vuelve a sumar",
       );
       queryClient.invalidateQueries(["gdt-admin-squads", universeId]);
+      patchReportHolderBlock(variables);
     },
     onError: (err) => {
       toast.error(err?.message || "Error al actualizar el bloqueo");
@@ -641,29 +667,51 @@ const GdtUniverseDetail = () => {
     },
   });
 
-  const addTransferPlayerMutation = useMutation({
-    mutationFn: addGdtTransferPlayer,
-    onSuccess: (playerCreated) => {
-      toast.success(
-        `${playerCreated.name} (${playerCreated.club}) agregado al pool`,
-      );
-      if (!playerCreated.position) {
-        toast.warn(
-          'Quedó sin posición — completala usando el filtro "Sin posición"',
+  /* Alta desde el reporte: una fila o todo un club de una. Una fila que
+     falla no cancela el resto — el summary informa lo que se salteó */
+  const addTransferPlayersMutation = useMutation({
+    mutationFn: addGdtTransferPlayers,
+    onSuccess: (summary) => {
+      if (summary.created.length === 1) {
+        const [player] = summary.created;
+        toast.success(`${player.name} (${player.club}) agregado al pool`);
+      } else if (summary.created.length > 1) {
+        toast.success(
+          `${summary.created.length} jugadores agregados al pool`,
         );
+      }
+      if (summary.withoutPosition.length > 0) {
+        toast.warn(
+          `Sin posición (completala con el filtro "Sin posición"): ${summary.withoutPosition.join(", ")}`,
+        );
+      }
+      for (const reason of summary.skipped) {
+        toast.info(reason);
       }
       invalidatePool();
       transferReportQuery.refetch();
     },
     onError: (err) => {
-      toast.error(err?.message || "Error al agregar el jugador");
+      toast.error(err?.message || "Error al agregar los jugadores");
     },
   });
 
   const transferActionPending =
     applyTransferMutation.isPending ||
     ignoreTransferMutation.isPending ||
-    addTransferPlayerMutation.isPending;
+    addTransferPlayersMutation.isPending ||
+    blockMutation.isPending;
+
+  /* Nuevos agrupados por club: el reporte llega ya ordenado por club y
+     nombre, así que el orden de inserción alcanza */
+  const newPlayersByClub = useMemo(() => {
+    const groups = new Map();
+    for (const row of transferReport?.newPlayers ?? []) {
+      if (!groups.has(row.club)) groups.set(row.club, []);
+      groups.get(row.club).push(row);
+    }
+    return [...groups.entries()].map(([club, rows]) => ({ club, rows }));
+  }, [transferReport]);
 
   const superDeleteMutation = useMutation({
     mutationFn: (playerId) =>
@@ -764,9 +812,9 @@ const GdtUniverseDetail = () => {
   const transferHoldersMeta = (row) => (
     <>
       {row.draftedBy.length > 0
-        ? ` · En plantel de ${row.draftedBy.join(", ")}`
+        ? ` · En plantel de ${row.draftedBy.map((holder) => holder.name).join(", ")}`
         : " · Libre en el pool"}
-      {row.blocked && " · Bloqueado"}
+      {row.draftedBy.some((holder) => holder.blocked) && " · Bloqueado"}
     </>
   );
 
@@ -783,6 +831,18 @@ const GdtUniverseDetail = () => {
 
   const draftStatus =
     GDT_DRAFT_STATUS[team.draftStatus] ?? GDT_DRAFT_STATUS.open;
+
+  /* El bloqueo puntual solo existe con el draft cerrado (el server lo
+     rechaza en las fases previas: hasta el cierre el participante todavía
+     puede cambiar al jugador y no hay nada que sancionar) */
+  const canBlockFromReport = team.draftStatus === "final";
+
+  /* La carga inicial se ofrece solo con el pool vacío y liga del catálogo;
+     el alta manual, en cuanto hay pool (o siempre, si el universo no tiene
+     liga asociada y el pool solo puede armarse a mano) */
+  const showInitialImport =
+    !isLoadingPlayers && players.length === 0 && Boolean(team.leagueProviderId);
+  const showManualAdd = players.length > 0 || !team.leagueProviderId;
 
   return (
     <div className="pri">
@@ -1363,14 +1423,16 @@ const GdtUniverseDetail = () => {
           </div>
         )}
 
-      {/* ── Detector de transferencias: diff del pool contra los planteles
-           vigentes de la liga. Solo lectura; aplicar/silenciar/agregar son
-           acciones del admin fila por fila ── */}
+      {/* ── Sincronización con la liga: diff del pool contra los planteles
+           vigentes según la API. Solo lectura; actualizar / silenciar /
+           agregar / bloquear son acciones del admin fila por fila. Es el
+           ÚNICO camino de entrada de datos de la API al pool después de la
+           carga inicial (absorbió al reimport masivo) ── */}
       {!isLoadingPlayers && players.length > 0 && (
         <div className="prf-form pri-draft-card prf-compact">
           <div className="prf-card-title">
-            Transferencias
-            <InfoTip text="Compara el club de cada jugador del pool contra los planteles vigentes de la liga según la API. Nada se modifica solo: Aplicar equivale a editar el club a mano (avisa si genera conflictos 1 por club en planteles vigentes), Ignorar silencia una fila cuando tu corrección le ganó a la API, y los jugadores nuevos se agregan de a uno. Si un jugador que ya no figura en la liga está en un plantel, evaluá el bloqueo puntual desde Planteles vigentes. La primera corrida recorre toda la liga y puede tardar ~1 minuto; repetirla dentro de la media hora es instantánea." />
+            Sincronización con la liga
+            <InfoTip text="Compara el pool contra los planteles vigentes de la liga según la API y lista las tres diferencias posibles: cambios de club, jugadores que ya no figuran en la liga y refuerzos que todavía no están en el pool. Nada se modifica solo. Actualizar equivale a editar el club a mano (avisa si genera conflictos 1 por club en planteles vigentes); Ignorar silencia una fila cuando tu corrección le ganó a la API; los nuevos se agregan de a uno o por club entero. A los que ya no figuran en la liga no se los borra (romperían planteles): si alguien lo tiene drafteado, bloqueás ese slot desde la misma fila. La primera corrida recorre toda la liga y puede tardar unos minutos; repetirla dentro de la media hora es instantánea." />
           </div>
 
           <button
@@ -1383,13 +1445,13 @@ const GdtUniverseDetail = () => {
               ? "Consultando la liga..."
               : transferReport
                 ? "Volver a detectar"
-                : "Detectar transferencias"}
+                : "Detectar diferencias"}
           </button>
 
           {transferReportQuery.isError && (
             <p className="prf-hint">
               {transferReportQuery.error?.message ||
-                "Error al detectar transferencias"}
+                "Error al detectar diferencias"}
             </p>
           )}
 
@@ -1455,7 +1517,7 @@ const GdtUniverseDetail = () => {
                             }
                             disabled={transferActionPending}
                           >
-                            Aplicar
+                            Actualizar
                           </button>
                           <button
                             type="button"
@@ -1489,22 +1551,73 @@ const GdtUniverseDetail = () => {
                   <div className="pri-draft-list pri-load-list">
                     {transferReport.missingFromLeague.map((row) => (
                       <div
-                        className="pri-draft-row pri-load-row"
+                        className="pri-draft-row pri-load-row pri-tr-row--stack"
                         key={row.playerId}
                       >
-                        <span className="pri-tr-player">
-                          {renderTransferPhoto(row)}
-                          <span className="pri-load-info">
-                            <span className="pri-load-name">{row.name}</span>
-                            <span className="pri-load-meta">
-                              {row.currentClub}
-                              {transferHoldersMeta(row)}
+                        <span className="pri-tr-top">
+                          <span className="pri-tr-player">
+                            {renderTransferPhoto(row)}
+                            <span className="pri-load-info">
+                              <span className="pri-load-name">{row.name}</span>
+                              <span className="pri-load-meta">
+                                {row.currentClub}
+                                {row.draftedBy.length === 0 &&
+                                  " · Libre en el pool"}
+                              </span>
                             </span>
                           </span>
+                          {row.draftedBy.length > 0 && (
+                            <span className="pri-badge pri-badge--alert">
+                              Revisar
+                            </span>
+                          )}
                         </span>
+
+                        {/* Planteles que lo tienen: el bloqueo puntual se
+                            resuelve acá mismo, sin ir a buscar el plantel */}
                         {row.draftedBy.length > 0 && (
-                          <span className="pri-badge pri-badge--alert">
-                            Revisar
+                          <span className="pri-tr-holders">
+                            {row.draftedBy.map((holder) => (
+                              <span
+                                className="pri-tr-holder"
+                                key={`${holder.ownerId}-${holder.slotNumber}`}
+                              >
+                                <span className="pri-tr-holder-name">
+                                  Plantel de {holder.name}
+                                  <span className="pri-squad-club">
+                                    {" "}
+                                    · {holder.slotNumber} {holder.position}
+                                  </span>
+                                </span>
+                                {canBlockFromReport ? (
+                                  <button
+                                    type="button"
+                                    className={`pri-block-btn${
+                                      holder.blocked
+                                        ? " pri-block-btn--active"
+                                        : ""
+                                    }`}
+                                    disabled={transferActionPending}
+                                    onClick={() =>
+                                      blockMutation.mutate({
+                                        universeId,
+                                        playerId: holder.ownerId,
+                                        slotNumber: holder.slotNumber,
+                                        blocked: !holder.blocked,
+                                      })
+                                    }
+                                  >
+                                    {holder.blocked
+                                      ? "Desbloquear"
+                                      : "Bloquear"}
+                                  </button>
+                                ) : (
+                                  <span className="pri-load-meta">
+                                    Bloqueo disponible con el draft cerrado
+                                  </span>
+                                )}
+                              </span>
+                            ))}
                           </span>
                         )}
                       </div>
@@ -1513,6 +1626,9 @@ const GdtUniverseDetail = () => {
                 </details>
               )}
 
+              {/* Nuevos agrupados por club: además del alta fila por fila,
+                  el club entero entra de una — es el caso que antes cubría
+                  el reimport (equipo que la API no había podido resolver) */}
               {transferReport.newPlayers.length > 0 && (
                 <details className="pri-squad">
                   <summary className="pri-squad-summary">
@@ -1520,39 +1636,65 @@ const GdtUniverseDetail = () => {
                       Nuevos en la liga ({transferReport.newPlayers.length})
                     </span>
                   </summary>
-                  <div className="pri-draft-list pri-load-list">
-                    {transferReport.newPlayers.map((row) => (
-                      <div
-                        className="pri-draft-row pri-load-row"
-                        key={row.providerPlayerId}
-                      >
-                        <span className="pri-tr-player">
-                          {renderTransferPhoto(row)}
-                          <span className="pri-load-info">
-                            <span className="pri-load-name">{row.name}</span>
-                            <span className="pri-load-meta">
-                              {row.club} · {row.position ?? "Sin posición"}
-                            </span>
-                          </span>
+                  {newPlayersByClub.map((group) => (
+                    <div className="pri-tr-group" key={group.club}>
+                      <div className="pri-tr-group-head">
+                        <span className="pri-tr-group-name">
+                          {group.club} ({group.rows.length})
                         </span>
-                        <span className="pri-load-actions">
-                          <button
-                            type="button"
-                            className="pri-status-btn"
-                            onClick={() =>
-                              addTransferPlayerMutation.mutate({
-                                universeId,
-                                providerPlayerId: row.providerPlayerId,
-                              })
-                            }
-                            disabled={transferActionPending}
-                          >
-                            Agregar
-                          </button>
-                        </span>
+                        <button
+                          type="button"
+                          className="pri-status-btn"
+                          onClick={() =>
+                            addTransferPlayersMutation.mutate({
+                              universeId,
+                              providerPlayerIds: group.rows.map(
+                                (row) => row.providerPlayerId,
+                              ),
+                            })
+                          }
+                          disabled={transferActionPending}
+                        >
+                          Agregar todos
+                        </button>
                       </div>
-                    ))}
-                  </div>
+                      <div className="pri-draft-list pri-load-list">
+                        {group.rows.map((row) => (
+                          <div
+                            className="pri-draft-row pri-load-row"
+                            key={row.providerPlayerId}
+                          >
+                            <span className="pri-tr-player">
+                              {renderTransferPhoto(row)}
+                              <span className="pri-load-info">
+                                <span className="pri-load-name">
+                                  {row.name}
+                                </span>
+                                <span className="pri-load-meta">
+                                  {row.position ?? "Sin posición"}
+                                </span>
+                              </span>
+                            </span>
+                            <span className="pri-load-actions">
+                              <button
+                                type="button"
+                                className="pri-status-btn"
+                                onClick={() =>
+                                  addTransferPlayersMutation.mutate({
+                                    universeId,
+                                    providerPlayerIds: [row.providerPlayerId],
+                                  })
+                                }
+                                disabled={transferActionPending}
+                              >
+                                Agregar
+                              </button>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </details>
               )}
             </>
@@ -1560,36 +1702,39 @@ const GdtUniverseDetail = () => {
         </div>
       )}
 
-      {/* ── Import (carga inicial) / reimport ADITIVO (equipos que faltaron
-           resolver, refuerzos del mercado — nunca pisa ni duplica) ── */}
-      <div className="pri-import-bar">
-        {!isLoadingPlayers && (
-          <button
-            type="button"
-            className={`pri-import-btn${
-              players.length > 0 ? " pri-import-btn--again" : ""
-            }`}
-            onClick={() => setConfirmImportVisible(true)}
-            disabled={importMutation.isPending}
-          >
-            {importMutation.isPending
-              ? "Importando planteles..."
-              : players.length === 0
-                ? `Importar planteles de ${team.league}`
-                : "Reimportar planteles (solo agrega faltantes)"}
-          </button>
-        )}
-        <Link className="pri-create-btn" to="jugadores/crear">
-          <i className="fa-solid fa-plus"></i>
-          Agregar jugador
-        </Link>
-      </div>
+      {/* ── Carga inicial del pool: existe UNA sola vez. Después, todo lo
+           que venga de la API entra por "Sincronización con la liga" (que
+           reemplazó al reimport masivo) o a mano ── */}
+      {(showInitialImport || showManualAdd) && (
+        <div className="pri-import-bar">
+          {showInitialImport && (
+            <button
+              type="button"
+              className="pri-import-btn"
+              onClick={() => setConfirmImportVisible(true)}
+              disabled={importMutation.isPending}
+            >
+              {importMutation.isPending
+                ? "Importando planteles..."
+                : `Importar planteles de ${team.league}`}
+            </button>
+          )}
+          {showManualAdd && (
+            <Link className="pri-create-btn" to="jugadores/crear">
+              <i className="fa-solid fa-plus"></i>
+              Agregar jugador
+            </Link>
+          )}
+        </div>
+      )}
 
       {isLoadingPlayers ? (
         <p className="pri-state">Cargando pool...</p>
       ) : players.length <= 0 ? (
         <p className="pri-state">
-          El pool está vacío: importá los planteles de la liga para arrancar.
+          {team.leagueProviderId
+            ? "El pool está vacío: importá los planteles de la liga para arrancar."
+            : "El pool está vacío y el universo no tiene liga del catálogo asociada: cargá los jugadores a mano."}
         </p>
       ) : (
         <>
@@ -1875,15 +2020,13 @@ const GdtUniverseDetail = () => {
                 <path d="M12 15V3" />
               </svg>
             </div>
-            <h4>
-              {players.length === 0
-                ? `¿Importar los planteles de ${team.league}?`
-                : `¿Reimportar los planteles de ${team.league}?`}
-            </h4>
+            <h4>¿Importar los planteles de {team.league}?</h4>
             <p>
-              {players.length === 0
-                ? "Es la carga inicial del pool de este universo: se traen los planteles actuales de toda la liga. A partir de ahí el pool se cura a mano — ediciones, altas y bajas. Puede tardar varios minutos: no cierres esta pantalla."
-                : "El reimport es aditivo: solo agrega lo que falta (equipos que no se habían podido resolver, refuerzos del mercado de pases). Nunca pisa tus ediciones ni duplica jugadores ya importados. Puede tardar varios minutos: no cierres esta pantalla."}
+              Es la carga inicial del pool de este universo: se traen los
+              planteles actuales de toda la liga. De ahí en adelante el pool
+              se mantiene desde "Sincronización con la liga" (cambios de club,
+              refuerzos, bajas) o a mano. Puede tardar varios minutos: no
+              cierres esta pantalla.
             </p>
             <div className="delete-confirmation-btn-container">
               <button

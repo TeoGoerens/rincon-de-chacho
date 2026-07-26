@@ -225,8 +225,10 @@ const ProdeGuide = () => {
           </li>
           <li>
             <strong>Importar el pool</strong> desde la API (son cientos de
-            jugadores; la importación tarda un rato). Revisar por arriba que
-            clubes y posiciones estén bien.
+            jugadores; la importación tarda un rato). Es la única carga masiva
+            y va una sola vez: de ahí en adelante el pool se mantiene desde
+            "Sincronización con la liga" (sección 05) o a mano. Revisar por
+            arriba que clubes y posiciones estén bien.
           </li>
           <li>
             Definir el deadline y <strong>abrir el draft</strong>: cada
@@ -307,6 +309,40 @@ const ProdeGuide = () => {
           </li>
         </ol>
         <p className="pgu-p">
+          En paralelo hay que <strong>mantener el pool al día</strong>: el
+          import trae la foto de la liga del día que se hizo y ahí queda
+          congelada. La herramienta es{" "}
+          <strong>Sincronización con la liga</strong>, en el detalle del
+          universo: el botón <strong>Detectar diferencias</strong> compara el
+          pool contra los planteles vigentes de la liga y lista tres cosas,
+          cada una con su acción fila por fila. Nunca escribe nada solo.
+        </p>
+        <ul className="pgu-list">
+          <li>
+            <strong>Cambios de club</strong> — "Actualizar" escribe el club
+            nuevo (es la misma edición manual del pool, con sus avisos de
+            impacto sobre los planteles). "Ignorar" silencia la fila cuando ya
+            lo habías corregido a mano y la API viene atrasada.
+          </li>
+          <li>
+            <strong>Ya no figuran en la liga</strong> (vendido al exterior,
+            retirado) — <strong>no se borran</strong>: romperían los planteles
+            que lo tienen. Si alguien lo tiene drafteado, la fila muestra el
+            plantel y el slot con el botón <strong>Bloquear</strong> ahí mismo.
+          </li>
+          <li>
+            <strong>Nuevos en la liga</strong> — refuerzos que todavía no están
+            en el pool, agrupados por club: se agregan de a uno o el club
+            entero de una.
+          </li>
+        </ul>
+        <Alert>
+          La primera corrida del día recorre toda la liga y puede tardar unos
+          minutos; repetirla dentro de la media hora es instantánea (reusa el
+          mismo snapshot). No existe un "reimportar todo": después de la carga
+          inicial, lo que entra al pool lo decidís vos fila por fila.
+        </Alert>
+        <p className="pgu-p">
           Para las situaciones fuera de libreto hay{" "}
           <strong>tres herramientas de excepción</strong>, cada una con su
           caso de uso — elegir la correcta es la decisión importante:
@@ -334,10 +370,11 @@ const ProdeGuide = () => {
         </ul>
         <Alert hard>
           Transferencia a mitad de mes = <strong>editar el club del jugador
-          en el pool</strong>. Jamás crear un jugador nuevo: el duplicado deja
-          un fantasma en los planteles que lo tienen. Al editar, el sistema
-          lista los impactos sobre los planteles vigentes y sugiere bloqueos o
-          desbloqueos — leer esos avisos antes de cerrar la pantalla.
+          en el pool</strong> (lo que hace el botón "Actualizar" del detector).
+          Jamás crear un jugador nuevo: el duplicado deja un fantasma en los
+          planteles que lo tienen. Al editar, el sistema lista los impactos
+          sobre los planteles vigentes y sugiere bloqueos o desbloqueos — leer
+          esos avisos antes de cerrar la pantalla.
         </Alert>
       </Section>
 

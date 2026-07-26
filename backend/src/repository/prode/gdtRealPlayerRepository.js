@@ -164,9 +164,10 @@ const fetchLeagueSnapshot = async (leagueProviderId) => {
   return value;
 };
 
-/* Quién tiene a cada jugador del pool en su plantel VIGENTE (para ordenar
-   el reporte por urgencia: un cambio de club de un drafteado puede estar
-   generando un conflicto 1-por-club ahora mismo) */
+/* Quién tiene a cada jugador del pool en su plantel VIGENTE, con el slot
+   exacto: ordena el reporte por urgencia (un cambio de club de un drafteado
+   puede estar generando un conflicto 1-por-club ahora mismo) y habilita el
+   bloqueo puntual desde el propio reporte, sin ir a buscar el plantel. */
 const buildDraftedByMap = async (universe) => {
   const tournament = await ProdeTournament.findById(universe.tournament, {
     months: 1,
@@ -180,12 +181,19 @@ const buildDraftedByMap = async (universe) => {
   const squads = await GdtSquad.find({ gdtUniverse: universe._id });
   const draftedBy = new Map();
   for (const squad of latestSquadsByPlayer(squads, months).values()) {
-    const owner = nameById.get(squadOwnerId(squad)) ?? "?";
+    const ownerId = squadOwnerId(squad);
+    const owner = nameById.get(ownerId) ?? "?";
     for (const slot of squad.slots ?? []) {
       if (!slot.realPlayer) continue;
       const key = String(slot.realPlayer);
       if (!draftedBy.has(key)) draftedBy.set(key, []);
-      draftedBy.get(key).push({ name: owner, blocked: Boolean(slot.blocked) });
+      draftedBy.get(key).push({
+        ownerId,
+        name: owner,
+        slotNumber: slot.slotNumber,
+        position: slot.position,
+        blocked: Boolean(slot.blocked),
+      });
     }
   }
   return draftedBy;
@@ -447,15 +455,15 @@ export default class GdtRealPlayerRepository {
       knownProviderIds.add(player.providerPlayerId);
 
       const snapPlayer = snapshot.byProviderId.get(player.providerPlayerId);
-      const holders = draftedBy.get(String(player._id)) ?? [];
       const row = {
         playerId: player._id,
         name: player.name,
         photoUrl: player.photoUrl,
         position: player.position,
         currentClub: player.club,
-        draftedBy: holders.map((holder) => holder.name),
-        blocked: holders.some((holder) => holder.blocked),
+        /* [{ownerId, name, slotNumber, position, blocked}]: el slot viaja
+           para poder bloquear desde el reporte */
+        draftedBy: draftedBy.get(String(player._id)) ?? [],
       };
 
       if (!snapPlayer) {
@@ -538,46 +546,71 @@ export default class GdtRealPlayerRepository {
     return { playerName: player.name };
   };
 
-  /* --------------- TRANSFER ADD PLAYER --------------- */
-  /* Alta selectiva de un jugador nuevo detectado por el reporte. El server
-     no confía en el navegador: los datos salen del snapshot cacheado, el
-     body solo trae el providerPlayerId (mismo patrón que el carrito). */
-  addTransferPlayer = async (universeId, { providerPlayerId }) => {
+  /* --------------- TRANSFER ADD PLAYERS --------------- */
+  /* Alta selectiva de jugadores nuevos detectados por el reporte: una fila
+     sola o todo un club de una (el reporte ABSORBIÓ al reimport masivo, así
+     que el club entero tiene que poder entrar con un clic). El server no
+     confía en el navegador: los datos salen del snapshot cacheado, el body
+     solo trae providerPlayerIds (mismo patrón que el carrito).
+     Una fila que falla NO cancela el resto: se informa en skipped. */
+  addTransferPlayers = async (universeId, { providerPlayerIds }) => {
     const team = await getTeamOrThrow(universeId);
     if (!team.leagueProviderId) {
       throw new Error(
         "El universo GDT no tiene liga del catálogo asociada: no se puede agregar desde el reporte",
       );
     }
-    if (!providerPlayerId) throw new Error("Falta el jugador a agregar");
+    const ids = [
+      ...new Set((providerPlayerIds ?? []).map(String).filter(Boolean)),
+    ];
+    if (ids.length === 0) throw new Error("Faltan los jugadores a agregar");
 
     const snapshot = await fetchLeagueSnapshot(team.leagueProviderId);
-    const snapPlayer = snapshot.byProviderId.get(String(providerPlayerId));
-    if (!snapPlayer) {
-      throw new Error(
-        "El jugador ya no figura en el snapshot de la liga: volvé a detectar transferencias",
-      );
-    }
+    const summary = { created: [], skipped: [], withoutPosition: [] };
 
-    const exists = await GdtRealPlayer.exists({
-      gdtUniverse: team._id,
-      providerPlayerId: String(providerPlayerId),
-    });
-    if (exists) throw new Error("Ese jugador ya está en el pool");
+    for (const providerPlayerId of ids) {
+      const snapPlayer = snapshot.byProviderId.get(providerPlayerId);
+      if (!snapPlayer) {
+        summary.skipped.push(
+          "Un jugador ya no figura en el snapshot de la liga: volvé a detectar diferencias",
+        );
+        continue;
+      }
 
-    try {
-      return await GdtRealPlayer.create({
+      const exists = await GdtRealPlayer.exists({
         gdtUniverse: team._id,
-        name: snapPlayer.name,
-        club: snapPlayer.club,
-        position: snapPlayer.position ?? null,
-        league: team.league,
-        providerPlayerId: String(providerPlayerId),
-        nationality: snapPlayer.nationality,
-        photoUrl: snapPlayer.photoUrl,
+        providerPlayerId,
       });
-    } catch (error) {
-      throwFriendlyDuplicate(error);
+      if (exists) {
+        summary.skipped.push(`${snapPlayer.name}: ya estaba en el pool`);
+        continue;
+      }
+
+      try {
+        const created = await GdtRealPlayer.create({
+          gdtUniverse: team._id,
+          name: snapPlayer.name,
+          club: snapPlayer.club,
+          position: snapPlayer.position ?? null,
+          league: team.league,
+          providerPlayerId,
+          nationality: snapPlayer.nationality,
+          photoUrl: snapPlayer.photoUrl,
+        });
+        summary.created.push({ name: created.name, club: created.club });
+        if (!created.position) summary.withoutPosition.push(created.name);
+      } catch (error) {
+        /* Homónimo en el mismo club ya cargado a mano: se saltea */
+        if (error?.code === 11000) {
+          summary.skipped.push(
+            `${snapPlayer.name}: ya existe en el pool (mismo nombre y club)`,
+          );
+          continue;
+        }
+        throw error;
+      }
     }
+
+    return summary;
   };
 }

@@ -130,7 +130,7 @@ router.post(
   adminAuthMiddleware,
   gdtController.importGdtUniversePool,
 );
-/* ---------- GDT: DETECTOR DE TRANSFERENCIAS ---------- */
+/* ---------- GDT: DETECTOR DE DIFERENCIAS CON LA LIGA ---------- */
 router.get(
   "/gdt/universes/:id/transfer-report",
   authMiddleware,
@@ -147,7 +147,7 @@ router.post(
   "/gdt/universes/:id/transfer-add",
   authMiddleware,
   adminAuthMiddleware,
-  gdtController.addGdtTransferPlayer,
+  gdtController.addGdtTransferPlayers,
 );
 /* ---------- GDT: DRAFT A CIEGAS ---------- */
 router.put(

@@ -408,22 +408,6 @@
   cursor: not-allowed;
 }
 
-/* Reimport aditivo (pool ya cargado): acción secundaria, sin competir con
-   el resto del panel */
-.pri-import-btn--again {
-  color: var(--third-color);
-  background: transparent;
-  border: 1px solid rgba(168, 218, 220, 0.35);
-  transition:
-    border-color var(--transition-base),
-    opacity var(--transition-base);
-}
-
-.pri-import-btn--again:hover:not(:disabled) {
-  opacity: 1;
-  border-color: rgba(168, 218, 220, 0.7);
-}
-
 .pri-filter-row {
   display: flex;
   align-items: center;
@@ -584,9 +568,13 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/* minmax(0, 1fr) y no 1fr: la columna tiene que poder encogerse por debajo
+   del min-content de la fila — los botones no se comprimen (flex-shrink: 0)
+   y el que absorbe el achique es el nombre con su ellipsis. Con 1fr, una
+   fila de dos botones desborda el contenedor en pantallas angostas. */
 @media (max-width: 700px) {
   .pri-load-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -597,12 +585,79 @@
   min-width: 0;
 }
 
-/* Detector de transferencias: foto + info de dos líneas en la fila */
+/* Detector de diferencias: foto + info de dos líneas en la fila */
 .pri-tr-player {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
   min-width: 0;
+}
+
+/* Fila apilada: el jugador arriba y abajo los planteles que lo tienen, con
+   su bloqueo puntual — el circuito se cierra sin salir del reporte */
+.pri-tr-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pri-tr-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.pri-tr-holders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pri-tr-holder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.pri-tr-holder-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-body-dark);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nuevos en la liga agrupados por club: el club entero entra con un clic */
+.pri-tr-group + .pri-tr-group {
+  margin-top: var(--space-sm);
+}
+
+.pri-tr-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.35rem 0 0.45rem;
+}
+
+.pri-tr-group-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-label-dark);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pri-load-name {
