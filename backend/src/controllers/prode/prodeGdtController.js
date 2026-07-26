@@ -521,4 +521,52 @@ export default class ProdeGdtController {
       next(error);
     }
   };
+
+  /* --------------- GDT TRANSFER REPORT --------------- */
+  getGdtTransferReport = async (req, res, next) => {
+    try {
+      const report = await realPlayerRepository.getTransferReport(
+        req.params.id,
+      );
+      res.status(200).json({
+        message: "GDT transfer report generated successfully",
+        report,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- GDT TRANSFER IGNORE --------------- */
+  ignoreGdtTransfer = async (req, res, next) => {
+    try {
+      const { playerId, apiClub } = req.body;
+      const result = await realPlayerRepository.ignoreTransfer(req.params.id, {
+        playerId,
+        apiClub,
+      });
+      res.status(200).json({
+        message: "GDT transfer ignored successfully",
+        ...result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /* --------------- GDT TRANSFER ADD PLAYER --------------- */
+  addGdtTransferPlayer = async (req, res, next) => {
+    try {
+      const playerCreated = await realPlayerRepository.addTransferPlayer(
+        req.params.id,
+        { providerPlayerId: req.body.providerPlayerId },
+      );
+      res.status(201).json({
+        message: "GDT player added from transfer report successfully",
+        playerCreated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

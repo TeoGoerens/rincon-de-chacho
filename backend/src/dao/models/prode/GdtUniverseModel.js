@@ -106,6 +106,28 @@ const gdtUniverseSchema = new mongoose.Schema(
       ],
       default: [],
     },
+
+    /* Detector de transferencias: pares silenciados por el admin cuando SU
+       dato le gana a la API (editó el club antes de que la API actualice y
+       el diff aparecería al revés). Cada entrada muere sola cuando la API
+       deja de decir ese club para el jugador (limpieza perezosa al computar
+       el reporte). */
+    transferIgnores: {
+      type: [
+        new mongoose.Schema(
+          {
+            realPlayer: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "GdtRealPlayer",
+              required: true,
+            },
+            apiClub: { type: String, required: true, trim: true },
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
   },
   { timestamps: true },
 );

@@ -13,10 +13,12 @@ export const REQUEST_GAP_MS = 700;
 export const RETRY_DELAY_MS = 2500;
 export const UPCOMING_CACHE_TTL_MS = 5 * 60 * 1000;
 
-// La fecha en curso del torneo se ofrece SIEMPRE en el catálogo; la fecha
-// siguiente solo si sus partidos caen dentro de esta ventana (evita llenar
-// la lista con partidos lejanos que ninguna fecha del Prode va a usar)
-export const NEXT_ROUND_WINDOW_DAYS = 14;
+// El catálogo ofrece TODO partido con kickoff dentro de esta ventana,
+// sin importar a qué fecha del torneo pertenezca (así entran recuperados
+// de fechas viejas y adelantados). Con la key gratuita "123" no se puede
+// consultar la temporada completa: la ventana se aproxima con la fecha
+// en curso y la siguiente.
+export const CATALOG_WINDOW_DAYS = 15;
 
 // Catálogo de ligas ofrecidas en el carrito del admin (IDs verificados contra
 // la API el 2026-07-08). Agregar una liga = agregar una línea acá.

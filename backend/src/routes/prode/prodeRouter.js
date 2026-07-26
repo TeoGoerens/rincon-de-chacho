@@ -130,6 +130,25 @@ router.post(
   adminAuthMiddleware,
   gdtController.importGdtUniversePool,
 );
+/* ---------- GDT: DETECTOR DE TRANSFERENCIAS ---------- */
+router.get(
+  "/gdt/universes/:id/transfer-report",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.getGdtTransferReport,
+);
+router.put(
+  "/gdt/universes/:id/transfer-ignores",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.ignoreGdtTransfer,
+);
+router.post(
+  "/gdt/universes/:id/transfer-add",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.addGdtTransferPlayer,
+);
 /* ---------- GDT: DRAFT A CIEGAS ---------- */
 router.put(
   "/gdt/universes/:id/draft/open",

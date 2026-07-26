@@ -109,6 +109,88 @@ const getTeamOrThrow = async (universeId) => {
   return team;
 };
 
+/* --------------- DETECTOR DE TRANSFERENCIAS: helpers --------------- */
+
+const normClubKey = (club) => (club ?? "").trim().toLowerCase();
+
+/* Snapshot de los planteles vigentes de la liga según el provider, cacheado
+   en memoria del server: re-correr el detector (o agregar un jugador nuevo
+   desde el reporte) dentro de la ventana no vuelve a gastar cuota diaria. */
+const SNAPSHOT_CACHE_TTL_MS = 30 * 60 * 1000;
+const snapshotCache = new Map();
+
+const fetchLeagueSnapshot = async (leagueProviderId) => {
+  const hit = snapshotCache.get(String(leagueProviderId));
+  if (hit && hit.expiresAt > Date.now()) return hit.value;
+
+  const { teams: providerTeams, unresolvedTeams } =
+    await getPoolLeagueTeams(leagueProviderId);
+  const byProviderId = new Map();
+  const failedTeams = [...unresolvedTeams];
+  for (const providerTeam of providerTeams) {
+    try {
+      const players = await getPoolTeamPlayers(
+        providerTeam.providerTeamId,
+        providerTeam.name,
+      );
+      for (const player of players) {
+        if (player.providerPlayerId) {
+          byProviderId.set(player.providerPlayerId, player);
+        }
+      }
+    } catch (error) {
+      console.error(
+        `Detector GDT: falló el plantel de ${providerTeam.name}:`,
+        error.message,
+      );
+      failedTeams.push(providerTeam.name);
+    }
+  }
+
+  /* Snapshot sin UN solo plantel = no hay nada que comparar (cuota diaria
+     agotada, API caída). Se corta con error claro y NO se cachea: cachearlo
+     dejaría al detector mostrando un reporte vacío mentiroso hasta el TTL. */
+  if (byProviderId.size === 0) {
+    throw new Error(
+      "No se pudo consultar ningún plantel de la liga (probablemente se agotó la cuota diaria de API-Football): reintentá más tarde",
+    );
+  }
+
+  const value = { byProviderId, failedTeams, fetchedAt: new Date() };
+  snapshotCache.set(String(leagueProviderId), {
+    value,
+    expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS,
+  });
+  return value;
+};
+
+/* Quién tiene a cada jugador del pool en su plantel VIGENTE (para ordenar
+   el reporte por urgencia: un cambio de club de un drafteado puede estar
+   generando un conflicto 1-por-club ahora mismo) */
+const buildDraftedByMap = async (universe) => {
+  const tournament = await ProdeTournament.findById(universe.tournament, {
+    months: 1,
+    participants: 1,
+  }).populate("participants", "name");
+  const months = tournament?.months ?? [];
+  const nameById = new Map(
+    (tournament?.participants ?? []).map((p) => [String(p._id), p.name]),
+  );
+
+  const squads = await GdtSquad.find({ gdtUniverse: universe._id });
+  const draftedBy = new Map();
+  for (const squad of latestSquadsByPlayer(squads, months).values()) {
+    const owner = nameById.get(squadOwnerId(squad)) ?? "?";
+    for (const slot of squad.slots ?? []) {
+      if (!slot.realPlayer) continue;
+      const key = String(slot.realPlayer);
+      if (!draftedBy.has(key)) draftedBy.set(key, []);
+      draftedBy.get(key).push({ name: owner, blocked: Boolean(slot.blocked) });
+    }
+  }
+  return draftedBy;
+};
+
 export default class GdtRealPlayerRepository {
   /* --------------- GET POOL BY TEAM --------------- */
   getPlayersByTeam = async (universeId) =>
@@ -304,5 +386,198 @@ export default class GdtRealPlayerRepository {
     }
 
     return summary;
+  };
+
+  /* --------------- TRANSFER REPORT --------------- */
+  /* SOLO LEE Y COMPARA el pool contra los planteles vigentes de la liga:
+     el import es solo-crea y los clubes quedan congelados tras la carga
+     inicial — este reporte es la capa de detección de transferencias.
+     Escribir es siempre una acción manual del admin, fila por fila. */
+  getTransferReport = async (universeId) => {
+    const team = await getTeamOrThrow(universeId);
+    if (!team.leagueProviderId) {
+      throw new Error(
+        "El universo GDT no tiene liga del catálogo asociada: no se puede detectar transferencias",
+      );
+    }
+
+    const poolPlayers = await GdtRealPlayer.find({ gdtUniverse: team._id });
+    if (poolPlayers.length === 0) {
+      throw new Error(
+        "El pool está vacío: primero importá los planteles de la liga",
+      );
+    }
+
+    const snapshot = await fetchLeagueSnapshot(team.leagueProviderId);
+    const draftedBy = await buildDraftedByMap(team);
+
+    /* Un equipo que falló en el snapshot no prueba ausencia: sus jugadores
+       no pueden reportarse como "fuera de la liga" */
+    const failedClubKeys = new Set(snapshot.failedTeams.map(normClubKey));
+
+    /* Limpieza perezosa de silenciados: si la API ya no dice ese club para
+       el jugador, la entrada cumplió su ciclo */
+    const poolById = new Map(poolPlayers.map((p) => [String(p._id), p]));
+    const ignores = team.transferIgnores ?? [];
+    const validIgnores = ignores.filter((entry) => {
+      const poolPlayer = poolById.get(String(entry.realPlayer));
+      if (!poolPlayer?.providerPlayerId) return false;
+      const snapPlayer = snapshot.byProviderId.get(poolPlayer.providerPlayerId);
+      return (
+        snapPlayer &&
+        normClubKey(snapPlayer.club) === normClubKey(entry.apiClub)
+      );
+    });
+    if (validIgnores.length !== ignores.length) {
+      team.transferIgnores = validIgnores;
+      await team.save();
+    }
+    const ignoredPlayerIds = new Set(
+      validIgnores.map((entry) => String(entry.realPlayer)),
+    );
+
+    const clubChanged = [];
+    const missingFromLeague = [];
+    const knownProviderIds = new Set();
+
+    for (const player of poolPlayers) {
+      /* Altas manuales (sin providerPlayerId): fuera del detector, no hay
+         cómo matchearlas confiablemente contra la API */
+      if (!player.providerPlayerId) continue;
+      knownProviderIds.add(player.providerPlayerId);
+
+      const snapPlayer = snapshot.byProviderId.get(player.providerPlayerId);
+      const holders = draftedBy.get(String(player._id)) ?? [];
+      const row = {
+        playerId: player._id,
+        name: player.name,
+        photoUrl: player.photoUrl,
+        position: player.position,
+        currentClub: player.club,
+        draftedBy: holders.map((holder) => holder.name),
+        blocked: holders.some((holder) => holder.blocked),
+      };
+
+      if (!snapPlayer) {
+        if (!failedClubKeys.has(normClubKey(player.club))) {
+          missingFromLeague.push(row);
+        }
+        continue;
+      }
+      if (
+        normClubKey(snapPlayer.club) !== normClubKey(player.club) &&
+        !ignoredPlayerIds.has(String(player._id))
+      ) {
+        clubChanged.push({ ...row, apiClub: snapPlayer.club });
+      }
+    }
+
+    /* Jugadores de la API que no están en el pool (refuerzos del mercado):
+       se listan para agregarlos selectivamente desde el reporte */
+    const newPlayers = [];
+    for (const [providerPlayerId, snapPlayer] of snapshot.byProviderId) {
+      if (knownProviderIds.has(providerPlayerId)) continue;
+      newPlayers.push({
+        providerPlayerId,
+        name: snapPlayer.name,
+        club: snapPlayer.club,
+        position: snapPlayer.position ?? null,
+        photoUrl: snapPlayer.photoUrl,
+      });
+    }
+
+    const byDraftedThenName = (a, b) =>
+      (b.draftedBy.length > 0) - (a.draftedBy.length > 0) ||
+      a.name.localeCompare(b.name, "es");
+    clubChanged.sort(byDraftedThenName);
+    missingFromLeague.sort(byDraftedThenName);
+    newPlayers.sort(
+      (a, b) =>
+        a.club.localeCompare(b.club, "es") ||
+        a.name.localeCompare(b.name, "es"),
+    );
+
+    return {
+      league: team.league,
+      fetchedAt: snapshot.fetchedAt,
+      failedTeams: snapshot.failedTeams,
+      ignoredCount: validIgnores.length,
+      clubChanged,
+      missingFromLeague,
+      newPlayers,
+    };
+  };
+
+  /* --------------- TRANSFER IGNORE --------------- */
+  /* Silencia el par (jugador, club según la API): el caso "el admin le ganó
+     a la API" — editó el club antes de que la API actualice y el diff
+     aparecería al revés sugiriendo revertir la corrección */
+  ignoreTransfer = async (universeId, { playerId, apiClub }) => {
+    const team = await getTeamOrThrow(universeId);
+    if (!playerId) throw new Error("Falta el jugador a silenciar");
+    if (!apiClub?.trim()) throw new Error("Falta el club según la API");
+
+    const player = await GdtRealPlayer.findOne({
+      _id: playerId,
+      gdtUniverse: team._id,
+    });
+    if (!player) {
+      throw new Error("Jugador no encontrado en el pool de este universo");
+    }
+
+    const alreadyIgnored = (team.transferIgnores ?? []).some(
+      (entry) => String(entry.realPlayer) === String(player._id),
+    );
+    if (!alreadyIgnored) {
+      team.transferIgnores.push({
+        realPlayer: player._id,
+        apiClub: apiClub.trim(),
+      });
+      await team.save();
+    }
+    return { playerName: player.name };
+  };
+
+  /* --------------- TRANSFER ADD PLAYER --------------- */
+  /* Alta selectiva de un jugador nuevo detectado por el reporte. El server
+     no confía en el navegador: los datos salen del snapshot cacheado, el
+     body solo trae el providerPlayerId (mismo patrón que el carrito). */
+  addTransferPlayer = async (universeId, { providerPlayerId }) => {
+    const team = await getTeamOrThrow(universeId);
+    if (!team.leagueProviderId) {
+      throw new Error(
+        "El universo GDT no tiene liga del catálogo asociada: no se puede agregar desde el reporte",
+      );
+    }
+    if (!providerPlayerId) throw new Error("Falta el jugador a agregar");
+
+    const snapshot = await fetchLeagueSnapshot(team.leagueProviderId);
+    const snapPlayer = snapshot.byProviderId.get(String(providerPlayerId));
+    if (!snapPlayer) {
+      throw new Error(
+        "El jugador ya no figura en el snapshot de la liga: volvé a detectar transferencias",
+      );
+    }
+
+    const exists = await GdtRealPlayer.exists({
+      gdtUniverse: team._id,
+      providerPlayerId: String(providerPlayerId),
+    });
+    if (exists) throw new Error("Ese jugador ya está en el pool");
+
+    try {
+      return await GdtRealPlayer.create({
+        gdtUniverse: team._id,
+        name: snapPlayer.name,
+        club: snapPlayer.club,
+        position: snapPlayer.position ?? null,
+        league: team.league,
+        providerPlayerId: String(providerPlayerId),
+        nationality: snapPlayer.nationality,
+        photoUrl: snapPlayer.photoUrl,
+      });
+    } catch (error) {
+      throwFriendlyDuplicate(error);
+    }
   };
 }

@@ -511,7 +511,7 @@ const ProdeMatchdayItems = ({ matchday }) => {
             )}
             {upcomingQuery.isSuccess && events.length === 0 && (
               <p className="prf-hint">
-                La liga no tiene partidos próximos en el catálogo.
+                No hay partidos de esta competición en los próximos 15 días.
               </p>
             )}
             {events.length > 0 && (

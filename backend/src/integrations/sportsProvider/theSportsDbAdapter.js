@@ -4,7 +4,7 @@ import {
   REQUEST_GAP_MS,
   RETRY_DELAY_MS,
   UPCOMING_CACHE_TTL_MS,
-  NEXT_ROUND_WINDOW_DAYS,
+  CATALOG_WINDOW_DAYS,
   SUPPORTED_LEAGUES,
 } from "../../config/sportsProvider/theSportsDbConfig.js";
 
@@ -115,63 +115,55 @@ export const getUpcomingEventsByLeague = async (leagueId) => {
   assertSupportedLeague(leagueId);
 
   return withCache(`upcoming:${leagueId}`, async () => {
-    /* Con key premium eventsnextleague trae los próximos ~20 partidos y
-       eventsround da 404 (endpoint legacy, mismo caso que lookup_all_teams,
-       verificado 2026-07-09) → se filtra directo de esa lista. Con la key
-       gratuita "123" trae 1 solo evento (alcanza para conocer fecha y
-       temporada en curso) y la fecha completa sale de eventsround. Ambos
-       caminos aplican el mismo criterio de horizonte: la fecha en curso
-       SIEMPRE (aunque un receso la deje lejos: es lo próximo real que hay),
-       la siguiente solo dentro de la ventana. */
+    /* Criterio de VENTANA (2026-07-26, supera al criterio por fecha del
+       torneo): se ofrece TODO partido con kickoff dentro de los próximos
+       CATALOG_WINDOW_DAYS, sin mirar intRound — así entran recuperados de
+       fechas viejas y adelantados. Con key premium la temporada completa
+       sale de eventsseason (eventsnextleague solo aporta la temporada en
+       curso; capado a ~20 eventos, no alcanza para la ventana y eventsround
+       da 404 — legacy, verificado 2026-07-09). Con la key gratuita "123"
+       eventsseason no está disponible: se aproxima la ventana con
+       eventsround de la fecha en curso y la siguiente. */
     const nextData = await fetchJson("eventsnextleague.php", { id: leagueId });
     const nextEvents = nextData.events || [];
     const nextEvent = nextEvents[0];
     if (!nextEvent) return [];
 
     const now = Date.now();
-    const windowLimit = now + NEXT_ROUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+    const windowLimit = now + CATALOG_WINDOW_DAYS * 24 * 60 * 60 * 1000;
     const collected = new Map();
 
-    const addEvent = (rawEvent, { onlyWithinWindow }) => {
+    const addEvent = (rawEvent) => {
       const event = normalizeEvent(rawEvent);
       if (!event.kickoff) return;
       const kickoffMs = new Date(event.kickoff).getTime();
-      if (kickoffMs < now) return;
-      if (onlyWithinWindow && kickoffMs > windowLimit) return;
+      if (kickoffMs < now || kickoffMs > windowLimit) return;
       collected.set(event.providerEventId, event);
     };
 
-    const currentRound = String(nextEvent.intRound ?? "");
-    const numericRound = Number(nextEvent.intRound);
-    const followingRound = Number.isInteger(numericRound)
-      ? String(numericRound + 1)
-      : null;
-
     if (THESPORTSDB_API_KEY !== "123") {
-      /* Si una fecha tuviera más partidos futuros que los ~20 que devuelve
-         el endpoint, quedaría recortada a los primeros por kickoff */
-      nextEvents.forEach((rawEvent) => {
-        const round = String(rawEvent.intRound ?? "");
-        if (round === currentRound) {
-          addEvent(rawEvent, { onlyWithinWindow: false });
-        } else if (followingRound && round === followingRound) {
-          addEvent(rawEvent, { onlyWithinWindow: true });
-        }
+      const seasonData = await fetchJson("eventsseason.php", {
+        id: leagueId,
+        s: nextEvent.strSeason,
       });
+      (seasonData.events || []).forEach(addEvent);
     } else {
-      const addRound = async (round, options) => {
+      const currentRound = String(nextEvent.intRound ?? "");
+      const numericRound = Number(nextEvent.intRound);
+      const followingRound = Number.isInteger(numericRound)
+        ? String(numericRound + 1)
+        : null;
+      const addRound = async (round) => {
         if (!round) return;
         const roundData = await fetchJson("eventsround.php", {
           id: leagueId,
           r: round,
           s: nextEvent.strSeason,
         });
-        (roundData.events || []).forEach((rawEvent) =>
-          addEvent(rawEvent, options),
-        );
+        (roundData.events || []).forEach(addEvent);
       };
-      await addRound(currentRound, { onlyWithinWindow: false });
-      await addRound(followingRound, { onlyWithinWindow: true });
+      await addRound(currentRound);
+      await addRound(followingRound);
     }
 
     return [...collected.values()].sort(

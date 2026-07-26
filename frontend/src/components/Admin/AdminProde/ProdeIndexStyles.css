@@ -597,6 +597,14 @@
   min-width: 0;
 }
 
+/* Detector de transferencias: foto + info de dos líneas en la fila */
+.pri-tr-player {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
 .pri-load-name {
   font-family: var(--secondary-font);
   font-size: var(--text-sm);
