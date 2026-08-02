@@ -866,10 +866,9 @@ export default class ProdeMatchdayRepository {
         throw new Error("Hay un jugador con más de un puntaje cargado");
       }
       seen.add(playerId);
-      if (!Number.isInteger(score?.points) || score.points < 0) {
-        throw new Error(
-          "Cada puntaje debe ser un número entero de 0 o más",
-        );
+      /* Puede ser NEGATIVO: una performance desastrosa resta en GDT */
+      if (!Number.isInteger(score?.points)) {
+        throw new Error("Cada puntaje debe ser un número entero");
       }
     }
 

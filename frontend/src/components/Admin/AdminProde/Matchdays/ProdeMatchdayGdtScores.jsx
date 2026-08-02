@@ -22,8 +22,9 @@ const POSITION_LABELS = {
   DEL: "Delantero",
 };
 
+/* El puntaje puede ser NEGATIVO: una performance desastrosa resta en GDT */
 const isValidPoints = (value) =>
-  value !== "" && Number.isInteger(Number(value)) && Number(value) >= 0;
+  value !== "" && Number.isInteger(Number(value));
 
 const plural = (count, singular, pluralWord) =>
   `${count} ${count === 1 ? singular : pluralWord}`;
@@ -144,9 +145,7 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
       const value = values[player._id] ?? "";
       if (value === "") continue;
       if (!isValidPoints(value)) {
-        toast.error(
-          `El puntaje de ${player.name} debe ser un entero de 0 o más`,
-        );
+        toast.error(`El puntaje de ${player.name} debe ser un número entero`);
         return;
       }
       scores.push({ realPlayer: player._id, points: Number(value) });
@@ -160,7 +159,6 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
     return (
       <input
         type="number"
-        min="0"
         inputMode="numeric"
         aria-label={`Puntaje de ${player.name}`}
         className={`${saved ? "prf-rt-input--done" : ""} ${extraClass}`.trim()}
@@ -378,29 +376,9 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
                           <span className="prf-gdt-md-slot">
                             {miniDuel.slotNumber} · {miniDuel.position}
                           </span>
-                          {miniDuelSide(
-                            miniDuel.a,
-                            pending
-                              ? miniDuel.a?.blocked
-                                ? 0
-                                : (miniDuel.a?.points ?? null)
-                              : (miniDuel.a?.blocked
-                                  ? 0
-                                  : (miniDuel.a?.points ?? 0)),
-                            miniDuel.result === "A",
-                          )}
+                          {miniDuelSide(miniDuel.a, miniDuel.result === "A")}
                           <span className="prf-gdt-md-vs">vs</span>
-                          {miniDuelSide(
-                            miniDuel.b,
-                            pending
-                              ? miniDuel.b?.blocked
-                                ? 0
-                                : (miniDuel.b?.points ?? null)
-                              : (miniDuel.b?.blocked
-                                  ? 0
-                                  : (miniDuel.b?.points ?? 0)),
-                            miniDuel.result === "B",
-                          )}
+                          {miniDuelSide(miniDuel.b, miniDuel.result === "B")}
                         </div>
                       );
                     })}
