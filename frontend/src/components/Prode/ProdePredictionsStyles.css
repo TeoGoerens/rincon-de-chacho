@@ -611,9 +611,11 @@
 
 /* ---------- Comparación post-deadline: tabs Mi duelo / Todos ---------- */
 
+/* Columnas automáticas: 2 pestañas para el participante, 3 para el admin */
 .prp-tabs {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -638,6 +640,463 @@
 .prp-tab--active {
   background-color: var(--status-teal-bg);
   color: var(--third-color);
+}
+
+/* ---------- Vista Resumen (admin): foto de la fecha para el grupo ----------
+   Compacta y autoexplicativa: pensada para sacarle una captura y mandarla */
+
+/* Sin caja propia: el peso visual lo llevan las tarjetas de cada prode, para
+   no encajonar una card dentro de otra. Dos por fila en desktop */
+.prp-sum {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+@media (max-width: 900px) {
+  .prp-sum {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.prp-sum-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prp-sum-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.prp-sum-state {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  color: var(--text-subtle-dark);
+}
+
+/* Un bloque por prode: ranking arriba, sus duelos abajo. Acento naranja
+   superior fijo (patrón de las vitrinas de Records) — fijo y no al hover,
+   porque en una captura de pantalla no hay hover */
+.prp-sum-block {
+  position: relative;
+  padding: var(--space-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-card-dark);
+  overflow: hidden;
+}
+
+.prp-sum-block::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-prode) 55%, transparent),
+    transparent
+  );
+}
+
+.prp-sum-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.prp-sum-block-title {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-md);
+  font-weight: var(--fw-extrabold);
+  letter-spacing: var(--ls-tight);
+  color: var(--text-bright);
+}
+
+/* Cuántos ítems ya no dependen de nadie. Se enciende en teal al completarse:
+   de un vistazo se sabe si el prode está cerrado o falta cargar */
+.prp-sum-pill {
+  flex-shrink: 0;
+  padding: 0.12rem 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--status-neutral-bg);
+  font-family: var(--secondary-font);
+  font-size: var(--text-3xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  color: var(--text-subtle-dark);
+  white-space: nowrap;
+}
+
+.prp-sum-pill--done {
+  background-color: var(--status-teal-bg);
+  color: var(--third-color);
+}
+
+/* ── Ranking ── */
+
+.prp-sum-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.prp-sum-table td {
+  position: relative;
+  padding: 0.32rem 0;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-body-dark);
+}
+
+.prp-sum-pos {
+  width: 1.6rem;
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-bold);
+  color: var(--text-subtle-dark);
+}
+
+/* Barra proporcional al puntaje: hace comparable el ranking de un vistazo */
+.prp-sum-bar {
+  position: absolute;
+  left: 0;
+  top: 0.18rem;
+  bottom: 0.18rem;
+  border-radius: var(--radius-xs);
+  background-color: var(--status-teal-bg);
+  transition: width var(--transition-base);
+}
+
+.prp-sum-name {
+  overflow: hidden;
+}
+
+.prp-sum-name-text {
+  position: relative;
+  padding-left: 0.45rem;
+  color: var(--text-body-dark);
+}
+
+.prp-sum-pts {
+  width: 2.6rem;
+  text-align: right;
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+}
+
+.prp-sum-row--leader .prp-sum-pos,
+.prp-sum-row--leader .prp-sum-name-text,
+.prp-sum-row--leader .prp-sum-pts {
+  color: var(--third-color);
+}
+
+.prp-sum-row--leader .prp-sum-bar {
+  background-color: var(--status-teal-bg-strong);
+}
+
+/* ── Duelos del prode: marcador con los dos lados enfrentados ── */
+
+/* Divisor en vez de un subtítulo: separa el ranking de los duelos sin
+   sumar texto */
+.prp-sum-duels {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prp-sum-duel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.prp-sum-duel:last-child {
+  border-bottom: none;
+}
+
+.prp-sum-duel-side {
+  overflow: hidden;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-body-dark);
+}
+
+.prp-sum-duel-side:first-child {
+  text-align: right;
+}
+
+.prp-sum-duel-side--win {
+  font-weight: var(--fw-bold);
+  color: var(--status-green);
+}
+
+.prp-sum-duel-side--lose {
+  color: var(--text-subtle-dark);
+}
+
+.prp-sum-duel-score {
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-xs);
+  background-color: var(--status-neutral-bg);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+
+/* ── Gran DT: banda ancha con los planteles enfrentados ── */
+
+/* Sin ranking propio: el número de cada participante ES el resultado de su
+   duelo. Ocupa las dos columnas de la grilla */
+.prp-sum-block--wide {
+  grid-column: 1 / -1;
+}
+
+/* Los duelos en UNA fila con scroll horizontal, no encolumnados hacia abajo:
+   así cada captura cubre siempre la misma superficie de viewport y se sacan
+   dos o tres corriendo el scroll (pedido del dueño 2026-08-02). El snap
+   garantiza que al soltar siempre haya un duelo pegado al borde izquierdo,
+   nunca uno cortado al medio. Mismo patrón de scrollbar que ProdeTorneo. */
+.prp-sum-gdt-grid {
+  --sum-gdt-cols: 2;
+  display: grid;
+  grid-auto-flow: column;
+  /* La columna mide EXACTAMENTE un enésimo del contenedor: así entran N
+     duelos completos y nunca asoma un pedazo del siguiente */
+  grid-auto-columns: calc(
+    (100% - (var(--sum-gdt-cols) - 1) * var(--space-md)) /
+      var(--sum-gdt-cols)
+  );
+  gap: var(--space-md);
+  padding-bottom: var(--space-xs);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.prp-sum-gdt-grid::-webkit-scrollbar {
+  height: 4px;
+}
+
+.prp-sum-gdt-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prp-sum-gdt-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+/* Paginado: el ancla de snap va solo cada N duelos, no en cada uno. Así el
+   scroll RENUEVA la página entera (1-2 → 3-4 → 5-…) en vez de avanzar de a
+   uno dejando el anterior a la vista */
+.prp-sum-gdt-duel {
+  min-width: 0;
+  scroll-snap-align: none;
+}
+
+.prp-sum-gdt-duel:nth-child(odd) {
+  scroll-snap-align: start;
+}
+
+/* Columna vacía final cuando los duelos son impares: sin ella el scroll no
+   llega a apoyar el último duelo contra el borde izquierdo */
+.prp-sum-gdt-spacer {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .prp-sum-gdt-grid {
+    --sum-gdt-cols: 1;
+  }
+
+  /* Un duelo por pantalla: todos son ancla y el relleno sobra */
+  .prp-sum-gdt-duel:nth-child(even) {
+    scroll-snap-align: start;
+  }
+
+  .prp-sum-gdt-spacer {
+    display: none;
+  }
+}
+
+/* El marcador queda solo en su fila (simétrico) y los pendientes van en una
+   línea aparte debajo: metidos en la celda central desbalanceaban el duelo */
+.prp-sum-gdt-head {
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prp-sum-gdt-head .prp-sum-duel {
+  padding-top: 0;
+  border-bottom: none;
+}
+
+/* La pill del copete es idéntica a la de cada fila: ese es el vínculo */
+.prp-sum-gdt-pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-style: italic;
+  color: var(--text-subtle-dark);
+}
+
+/* Un mini-duelo: plantel izquierdo, slot, plantel derecho */
+/* La columna de la pill existe SIEMPRE (vacía en las resueltas) para que las
+   filas queden alineadas y la tabla no se corra */
+.prp-sum-md {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) 2.4rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.2rem;
+}
+
+/* Cambio de línea de la formación (ARQ → DEF → VOL → DEL): rompe el bloque
+   de 11 filas iguales y da estructura leíble. Mismo recurso que la tabla
+   GDT de Mi duelo, más suave por ser filas más compactas */
+.prp-sum-md--line {
+  margin-top: 0.3rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Mini-duelo sin definir: pill al inicio de la fila, separada del plantel.
+   Marca la fila sin tocar nada de lo que hay dentro — ni el fondo detrás del
+   texto ni el color de los nombres. Patrón de badge del proyecto: fondo
+   tintado + punto en currentColor. Neutro a propósito: el verde ya significa
+   "ganó" y el amarillo "empató". */
+.prp-sum-md-flag {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.prp-sum-md-pill {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 0.62rem;
+  border-radius: var(--radius-full);
+  background-color: var(--status-yellow-bg);
+  color: var(--status-yellow);
+}
+
+.prp-sum-md-pill::before {
+  content: "";
+  width: 0.24rem;
+  height: 0.24rem;
+  border-radius: var(--radius-full);
+  background-color: currentColor;
+}
+
+/* Simetría especular: los NOMBRES contra el borde exterior de cada plantel y
+   los NÚMEROS contra el centro, pegados a la columna de posiciones. Así las
+   dos cifras de cada mini-duelo quedan enfrentadas y se comparan de un
+   vistazo, en vez de estar separadas por dos nombres de largo variable. */
+.prp-sum-md-side {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.16rem 0.4rem;
+  border-radius: var(--radius-xs);
+}
+
+/* El ganador se marca con un BLOQUE tintado, no solo con el color del texto:
+   así el duelo se lee como un patrón de un vistazo y el estado no depende
+   únicamente del color (regla de accesibilidad) */
+.prp-sum-md-side--win {
+  background-color: var(--status-green-bg);
+}
+
+/* Nombre = etiqueta: chico y apagado. Número = dato: grande y bold. Antes
+   competían con el mismo peso y por eso se leía como una lista plana.
+   La jerarquía la dan TAMAÑO y PESO, no opacidad: --text-muted-dark es el
+   tono más apagado que todavía pasa 7:1 sobre #111 (7.39:1) */
+/* flex:1 para que el nombre ocupe el remanente: sin eso el text-align del
+   plantel derecho no tendría sobre qué actuar y el ellipsis no cortaría */
+.prp-sum-md-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-2xs);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-muted-dark);
+}
+
+/* Plantel derecho: espejo del izquierdo */
+.prp-sum-md-side:last-child .prp-sum-md-name {
+  text-align: right;
+}
+
+.prp-sum-md-side--win .prp-sum-md-name {
+  color: var(--text-body-dark);
+}
+
+/* tabular-nums: los dígitos ocupan lo mismo, así las dos columnas de
+   números quedan alineadas aunque haya 1 y 2 cifras mezcladas */
+.prp-sum-md-pts {
+  flex-shrink: 0;
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body-dark);
+}
+
+.prp-sum-md-side--win .prp-sum-md-pts {
+  color: var(--status-green);
+}
+
+/* Sin puntaje: se distingue por PESO, no por un color más apagado, así el
+   "—" no queda por debajo del umbral de contraste */
+.prp-sum-md-pts--empty {
+  font-weight: var(--fw-regular);
+  color: var(--text-muted-dark);
+}
+
+/* El slot es una coordenada, no un dato: lo baja el TAMAÑO (--text-4xs),
+   no un color ilegible */
+.prp-sum-md-slot {
+  font-family: var(--secondary-font);
+  font-size: var(--text-4xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-align: center;
+  color: var(--text-muted-dark);
 }
 
 /* ---------- Hero del duelo: tablero compacto ---------- */

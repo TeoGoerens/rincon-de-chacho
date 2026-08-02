@@ -1,6 +1,7 @@
 // Import React dependencies
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 
 // Imports CSS & helpers
 import "./ProdePredictionsStyles.css";
@@ -56,6 +57,23 @@ const formatKickoff = (isoDate) => {
 const isItemSettled = (item) =>
   item.status === "finished" || item.status === "annulled";
 
+/* Etiquetas de slot: solo se numeran las posiciones que se repiten (ARQ queda
+   sin número, DEF1..DEF4 sí). Compartido por el bloque GDT de Mi duelo y el
+   detalle de planteles del Resumen. */
+const gdtSlotLabels = (miniDuels) => {
+  const totals = {};
+  for (const miniDuel of miniDuels) {
+    totals[miniDuel.position] = (totals[miniDuel.position] ?? 0) + 1;
+  }
+  const seen = {};
+  return miniDuels.map((miniDuel) => {
+    seen[miniDuel.position] = (seen[miniDuel.position] ?? 0) + 1;
+    return totals[miniDuel.position] > 1
+      ? `${miniDuel.position}${seen[miniDuel.position]}`
+      : miniDuel.position;
+  });
+};
+
 /* Código de colores del comparativo: la CELDA se tiñe con el 1X2 elegido
    (L verde / E amarillo / V rojo) y el NÚMERO se pinta con lo que dice el
    marcador cargado — si no coinciden, la incoherencia salta sola */
@@ -69,6 +87,9 @@ const scoreTone = (home, away) =>
    desplegable con el mismo detalle). */
 const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
   const myPlayerId = myPlayer?._id;
+  /* La pestaña Resumen es exclusiva del admin (foto de la fecha para
+     compartir en el grupo). Mismo gate que el link Admin del Sidebar. */
+  const { isAdmin } = useSelector((store) => store.users);
   const [view, setView] = useState("duel");
   /* Duelos desplegados en la vista Todos (clave = id del jugador izquierdo) */
   const [openDuels, setOpenDuels] = useState(() => new Set());
@@ -118,6 +139,23 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
       ) ?? null,
     [matchday, myPlayerId],
   );
+
+  /* Participantes de la fecha, tomados de los duelos: incluye a quien no
+     cargó nada (computeMatchdayPartials igual lo cuenta en 0). Lo usa la
+     vista Resumen del admin. */
+  const summaryPlayers = useMemo(() => {
+    const list = [];
+    for (const duel of matchday.duels ?? []) {
+      for (const side of ["playerA", "playerB"]) {
+        const player = duel[side];
+        const id = toId(player);
+        if (!list.some((entry) => entry.id === id)) {
+          list.push({ id, name: player?.name ?? "?" });
+        }
+      }
+    }
+    return list;
+  }, [matchday]);
 
   const isConsolidated = matchday.phase === "consolidated";
 
@@ -597,19 +635,8 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
   const renderGdtBlock = (ctx) => {
     if (!ctx.gdtDuel) return null;
 
-    /* ARQ, DEF1..DEF4, VOL1..VOL4, DEL1, DEL2 — índice solo cuando la
-       posición se repite (mismo criterio que la guía del comparador) */
-    const totals = {};
-    for (const miniDuel of ctx.gdtDuel.miniDuels) {
-      totals[miniDuel.position] = (totals[miniDuel.position] ?? 0) + 1;
-    }
-    const seen = {};
-    const slotLabels = ctx.gdtDuel.miniDuels.map((miniDuel) => {
-      seen[miniDuel.position] = (seen[miniDuel.position] ?? 0) + 1;
-      return totals[miniDuel.position] > 1
-        ? `${miniDuel.position}${seen[miniDuel.position]}`
-        : miniDuel.position;
-    });
+    /* ARQ, DEF1..DEF4, VOL1..VOL4, DEL1, DEL2 */
+    const slotLabels = gdtSlotLabels(ctx.gdtDuel.miniDuels);
 
     return (
       <section className="prp-block">
@@ -828,17 +855,271 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
     </div>
   );
 
+  /* ---------- Vista Resumen (admin): foto de la fecha para el grupo ----------
+     Escueta y pensada para captura de pantalla: una tabla por prode con
+     TODOS los participantes y sus puntos de la fecha, y abajo el marcador
+     de cada duelo. El GDT queda pendiente. */
+
+  const summaryRanking = (code) =>
+    summaryPlayers
+      .map((player) => ({
+        ...player,
+        points: partials?.totals?.[player.id]?.[code] ?? 0,
+      }))
+      .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+
+  /* Marcador de un desafío en el orden canónico A vs B del fixture (sin el
+     flip de "mi lado primero" que hace buildDuelCtx) */
+  const summaryDuelScore = (duel, code) => {
+    if (isConsolidated) {
+      const challenge = duel.challenges?.find((c) => c.type === code);
+      if (!challenge || challenge.scoreA === null) return null;
+      return { a: challenge.scoreA, b: challenge.scoreB };
+    }
+    const partial = partials?.duels?.find(
+      (d) => d.playerA === toId(duel.playerA),
+    );
+    if (!partial) return null;
+    return { a: partial.challenges[code].a, b: partial.challenges[code].b };
+  };
+
+  /* Duelo GDT completo (marcador de mini-duelos + los 11 slot a slot) en el
+     orden canónico A vs B. Siempre desde los parciales, también con la fecha
+     consolidada: así el marcador y el detalle de abajo salen del mismo
+     cálculo y no pueden contradecirse. */
+  const summaryGdtDuel = (duel) =>
+    partials?.gdt?.duels?.find((d) => d.playerA === toId(duel.playerA)) ?? null;
+
+  /* Valor efectivo del slot en su mini-duelo: sin puntaje cargado, pendiente */
+  const gdtSideValue = (side) =>
+    side?.value === null || side?.value === undefined ? "—" : side.value;
+
+  const gdtSideClass = (result, code) => {
+    const base = "prp-sum-md-side";
+    if (result === null || result === "draw") return base;
+    return result === code ? `${base} prp-sum-md-side--win` : base;
+  };
+
+  /* Sin puntaje cargado el número se apaga: un "—" con el mismo peso que un
+     número real se lee como si fuera un dato */
+  const gdtPtsClass = (side) =>
+    side?.value === null || side?.value === undefined
+      ? "prp-sum-md-pts prp-sum-md-pts--empty"
+      : "prp-sum-md-pts";
+
+  /* Ganó / perdió / empató un lado del duelo en ese prode. Sin marcador
+     todavía, los dos lados quedan neutros. */
+  const duelSideClass = (score, side) => {
+    const base = "prp-sum-duel-side";
+    /* El empate NO se distingue con color: ya lo dice el marcador. El ámbar
+       queda reservado para "pendiente", que no tiene ninguna otra señal. */
+    if (!score || score.a === score.b) return base;
+    const winner = score.a > score.b ? "a" : "b";
+    return winner === side
+      ? `${base} prp-sum-duel-side--win`
+      : `${base} prp-sum-duel-side--lose`;
+  };
+
+  /* Duelos con datos GDT (una fecha sin universo no los tiene). Se resuelve
+     antes de renderizar para saber si hace falta la columna de relleno. */
+  const gdtRows = (matchday.duels ?? [])
+    .map((duel) => ({ duel, gdtDuel: summaryGdtDuel(duel) }))
+    .filter((row) => row.gdtDuel);
+
+  const renderSummaryView = () => (
+    <div className="prp-sum">
+      <div className="prp-sum-head">
+        <span className="prp-sum-title">Fecha {matchday.roundNumber}</span>
+        <span className="prp-sum-state">
+          {isConsolidated ? "Consolidada" : "En juego"}
+        </span>
+      </div>
+
+      {/* Estructura duplicada a propósito (pedido del dueño): cada prode
+          con su ranking y, debajo, SUS duelos con el marcador de ese prode */}
+      {CHALLENGE_BLOCKS.map(({ code, title }) => {
+        const ranking = summaryRanking(code);
+        const topPoints = ranking[0]?.points ?? 0;
+        /* Mismo criterio y wording que el hero del duelo, para que no digan
+           cosas distintas sobre la misma fecha */
+        const blockItems = items.filter((i) => i.challenge === code);
+        const settled = blockItems.filter(isItemSettled).length;
+        const isComplete = blockItems.length > 0 && settled === blockItems.length;
+        return (
+          <section className="prp-sum-block" key={code}>
+            <div className="prp-sum-block-head">
+              <span className="prp-sum-block-title">{title}</span>
+              {blockItems.length > 0 && (
+                <span
+                  className={`prp-sum-pill${
+                    isComplete ? " prp-sum-pill--done" : ""
+                  }`}
+                >
+                  {settled} de {blockItems.length} definidos
+                </span>
+              )}
+            </div>
+
+            <table className="prp-sum-table">
+              <tbody>
+                {ranking.map((player, index) => {
+                  const isLeader = topPoints > 0 && player.points === topPoints;
+                  return (
+                    <tr
+                      key={player.id}
+                      className={isLeader ? "prp-sum-row--leader" : undefined}
+                    >
+                      <td className="prp-sum-pos">{index + 1}</td>
+                      <td className="prp-sum-name">
+                        <span
+                          className="prp-sum-bar"
+                          style={{
+                            width: topPoints
+                              ? `${(player.points / topPoints) * 100}%`
+                              : "0%",
+                          }}
+                        />
+                        <span className="prp-sum-name-text">{player.name}</span>
+                      </td>
+                      <td className="prp-sum-pts">{player.points}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            <div className="prp-sum-duels">
+              {(matchday.duels ?? []).map((duel) => {
+                const score = summaryDuelScore(duel, code);
+                return (
+                  <div className="prp-sum-duel" key={toId(duel.playerA)}>
+                    <span className={duelSideClass(score, "a")}>
+                      {duel.playerA?.name ?? "?"}
+                    </span>
+                    <span className="prp-sum-duel-score">
+                      {score ? `${score.a} – ${score.b}` : "—"}
+                    </span>
+                    <span className={duelSideClass(score, "b")}>
+                      {duel.playerB?.name ?? "?"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+
+      {/* Gran DT: sin ranking propio (el número de cada participante ES el
+          resultado de su duelo), pero con los planteles enfrentados slot a
+          slot y el puntaje de cada mini-duelo. */}
+      {partials?.gdt && (
+        <section className="prp-sum-block prp-sum-block--wide">
+          <div className="prp-sum-block-head">
+            <span className="prp-sum-block-title">Gran DT</span>
+          </div>
+          <div className="prp-sum-gdt-grid">
+            {gdtRows.map(({ duel, gdtDuel }) => {
+              const score = { a: gdtDuel.score.a, b: gdtDuel.score.b };
+              const { pending } = gdtDuel.score;
+              const labels = gdtSlotLabels(gdtDuel.miniDuels);
+              return (
+                <div className="prp-sum-gdt-duel" key={toId(duel.playerA)}>
+                  <div className="prp-sum-gdt-head">
+                    <div className="prp-sum-duel">
+                      <span className={duelSideClass(score, "a")}>
+                        {duel.playerA?.name ?? "?"}
+                      </span>
+                      <span className="prp-sum-duel-score">
+                        {score.a} – {score.b}
+                      </span>
+                      <span className={duelSideClass(score, "b")}>
+                        {duel.playerB?.name ?? "?"}
+                      </span>
+                    </div>
+                    {pending > 0 && (
+                      <div className="prp-sum-gdt-pending">
+                        {/* La MISMA pill que marca cada fila: es lo que ata el
+                            copete con los mini-duelos que cuenta */}
+                        <span className="prp-sum-md-pill" />
+                        {pending}{" "}
+                        {pending === 1
+                          ? "mini-duelo pendiente"
+                          : "mini-duelos pendientes"}
+                      </div>
+                    )}
+                  </div>
+
+                  {gdtDuel.miniDuels.map((miniDuel, index, arr) => {
+                    /* Hairline al cambiar de línea de la formación: da el
+                       ritmo 1 / 4 / 4 / 2 en vez de 11 filas iguales */
+                    const isNewLine =
+                      index > 0 &&
+                      arr[index - 1].position !== miniDuel.position;
+                    return (
+                      <div
+                        className={`prp-sum-md${
+                          isNewLine ? " prp-sum-md--line" : ""
+                        }${
+                          miniDuel.result === null
+                            ? " prp-sum-md--pending"
+                            : ""
+                        }`}
+                        key={miniDuel.slotNumber}
+                      >
+                        <span className="prp-sum-md-flag">
+                          {miniDuel.result === null && (
+                            <span
+                              className="prp-sum-md-pill"
+                              title="Mini-duelo pendiente: falta cargar algún puntaje"
+                            />
+                          )}
+                        </span>
+                        <span className={gdtSideClass(miniDuel.result, "A")}>
+                          <span className="prp-sum-md-name">
+                            {miniDuel.a?.playerName ?? "—"}
+                          </span>
+                          <span className={gdtPtsClass(miniDuel.a)}>
+                            {gdtSideValue(miniDuel.a)}
+                          </span>
+                        </span>
+                        <span className="prp-sum-md-slot">{labels[index]}</span>
+                        <span className={gdtSideClass(miniDuel.result, "B")}>
+                          <span className={gdtPtsClass(miniDuel.b)}>
+                            {gdtSideValue(miniDuel.b)}
+                          </span>
+                          <span className="prp-sum-md-name">
+                            {miniDuel.b?.playerName ?? "—"}
+                          </span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+            {gdtRows.length % 2 === 1 && (
+              <div className="prp-sum-gdt-spacer" aria-hidden="true" />
+            )}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+
   return (
     <>
-      {myDuel && (
+      {(myDuel || isAdmin) && (
         <div className="prp-tabs">
-          <button
-            type="button"
-            className={`prp-tab${view === "duel" ? " prp-tab--active" : ""}`}
-            onClick={() => setView("duel")}
-          >
-            Mi duelo
-          </button>
+          {myDuel && (
+            <button
+              type="button"
+              className={`prp-tab${view === "duel" ? " prp-tab--active" : ""}`}
+              onClick={() => setView("duel")}
+            >
+              Mi duelo
+            </button>
+          )}
           <button
             type="button"
             className={`prp-tab${view === "all" ? " prp-tab--active" : ""}`}
@@ -846,12 +1127,23 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
           >
             Todos
           </button>
+          {isAdmin && (
+            <button
+              type="button"
+              className={`prp-tab${view === "summary" ? " prp-tab--active" : ""}`}
+              onClick={() => setView("summary")}
+            >
+              Resumen
+            </button>
+          )}
         </div>
       )}
 
-      {myDuel && view === "duel"
-        ? renderDuelView(buildDuelCtx(myDuel))
-        : renderAllView()}
+      {isAdmin && view === "summary"
+        ? renderSummaryView()
+        : myDuel && view === "duel"
+          ? renderDuelView(buildDuelCtx(myDuel))
+          : renderAllView()}
     </>
   );
 };
