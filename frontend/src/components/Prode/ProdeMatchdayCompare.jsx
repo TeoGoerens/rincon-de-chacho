@@ -61,10 +61,6 @@ const isItemSettled = (item) =>
    marcador cargado — si no coinciden, la incoherencia salta sola */
 const PICK_TONE = { home: "l", draw: "e", away: "v" };
 
-/* Puntaje estándar del 1X2 (default del schema del backend): un partido
-   que se aparta del 5-5-5 se marca como excepción con un tile lateral */
-const STANDARD_1X2_POINTS = 5;
-
 const scoreTone = (home, away) =>
   home > away ? "l" : home === away ? "e" : "v";
 
@@ -463,11 +459,6 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
               item.kind === "match"
                 ? matchCell(pickFor(ctx.right.id, item._id), item)
                 : questionCell(pickFor(ctx.right.id, item._id));
-            const exceptionalPoints =
-              item.kind === "match" &&
-              (item.pointsHome !== STANDARD_1X2_POINTS ||
-                item.pointsDraw !== STANDARD_1X2_POINTS ||
-                item.pointsAway !== STANDARD_1X2_POINTS);
             /* Definidos: la celda replica las 3 filas de la metadata —
                primera vacía, resultado pronosticado, puntaje obtenido */
             const valClass =
@@ -475,12 +466,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
                 ? "prp-dt-val prp-dt-val--settled"
                 : "prp-dt-val";
             return (
-              <tr
-                key={item._id}
-                className={
-                  exceptionalPoints ? "prp-dt-row--exception" : undefined
-                }
-              >
+              <tr key={item._id}>
                 <td className="prp-dt-item">
                   {item.kind === "match" && (
                     <div className="prp-dt-sub">

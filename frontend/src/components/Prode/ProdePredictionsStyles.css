@@ -1014,12 +1014,6 @@
   white-space: nowrap;
 }
 
-/* Partido que paga fuera del 5-5-5: tile lateral que lo marca como
-   excepción */
-.prp-dt-row--exception td:first-child {
-  box-shadow: inset 3px 0 0 var(--status-yellow);
-}
-
 /* Resultado real del ítem (final / respuesta oficial / anulado) */
 /* Resultado real en la misma línea, empujado al final */
 .prp-dt-result {
