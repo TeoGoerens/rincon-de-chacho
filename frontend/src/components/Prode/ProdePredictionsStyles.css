@@ -181,6 +181,39 @@
   transition: width var(--transition-slow);
 }
 
+/* Rival del duelo: una sola línea micro debajo de la barra — el sticky no
+   puede crecer, se come el viewport vertical de la carga */
+.prp-progress-duel {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.prp-progress-duel-label,
+.prp-progress-duel-sep,
+.prp-progress-duel-vs {
+  font-family: var(--secondary-font);
+  font-size: var(--text-3xs);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-subtle-dark);
+  white-space: nowrap;
+}
+
+.prp-progress-duel-rival {
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
+  /* Naranja de la sección para cortar el monocromo teal del form. El -soft
+     y no el --color-prode: el puro no llega al piso de 7:1 sobre dark */
+  color: var(--color-prode-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ---------- Bloques ARG / MISC ---------- */
 
 .prp-block {
@@ -1057,6 +1090,17 @@
   color: var(--text-muted-dark);
 }
 
+/* Código del equipo: 3 letras que definió el admin. Va en el tono más claro
+   del sistema y no heredando el del nombre — a --text-2xs, cualquier gris se
+   volvía ilegible. 15.4:1 sobre #111 y 13.3:1 sobre la fila ganadora.
+   El PESO queda en regular, igual que el nombre: en semibold competía con el
+   puntaje, que es el único dato que se compara en la fila */
+.prp-sum-md-team {
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--ls-tight);
+  color: var(--text-bright);
+}
+
 /* Plantel derecho: espejo del izquierdo */
 .prp-sum-md-side:last-child .prp-sum-md-name {
   text-align: right;
@@ -1065,6 +1109,7 @@
 .prp-sum-md-side--win .prp-sum-md-name {
   color: var(--text-body-dark);
 }
+
 
 /* tabular-nums: los dígitos ocupan lo mismo, así las dos columnas de
    números quedan alineadas aunque haya 1 y 2 cifras mezcladas */
@@ -2062,6 +2107,10 @@
 
   .prp-progress-text strong {
     font-size: var(--text-base);
+  }
+
+  .prp-progress-duel-rival {
+    font-size: var(--text-xs);
   }
 
   .prp-card {

@@ -6,6 +6,7 @@ import ProdePredictionController from "../../controllers/prode/prodePredictionCo
 import ProdeSportsController from "../../controllers/prode/prodeSportsController.js";
 import ProdeGdtController from "../../controllers/prode/prodeGdtController.js";
 import ProdeStatsController from "../../controllers/prode/prodeStatsController.js";
+import ProdeTeamController from "../../controllers/prode/prodeTeamController.js";
 import authMiddleware from "../../middlewares/auth/authMiddleware.js";
 import adminAuthMiddleware from "../../middlewares/auth/adminAuthMiddleware.js";
 import superAdminMiddleware from "../../middlewares/auth/superAdminMiddleware.js";
@@ -19,6 +20,7 @@ const predictionController = new ProdePredictionController();
 const sportsController = new ProdeSportsController();
 const gdtController = new ProdeGdtController();
 const statsController = new ProdeStatsController();
+const teamController = new ProdeTeamController();
 
 /* ---------- STATS PÚBLICAS (todo usuario logueado) ---------- */
 router.get(
@@ -316,6 +318,17 @@ router.delete(
   authMiddleware,
   adminAuthMiddleware,
   playerController.deleteProdePlayer,
+);
+
+/* ---------- TEAMS (identidad editable de los equipos del pool) ---------- */
+/* El GET es de todo usuario logueado: el sitio público necesita el nombre y
+   el código para mostrar los clubes. Editar, solo admin. */
+router.get("/team", authMiddleware, teamController.getAllProdeTeams);
+router.put(
+  "/team/:id",
+  authMiddleware,
+  adminAuthMiddleware,
+  teamController.updateProdeTeam,
 );
 
 /* ---------- TOURNAMENTS ---------- */

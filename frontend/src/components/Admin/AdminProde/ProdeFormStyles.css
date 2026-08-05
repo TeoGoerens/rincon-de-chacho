@@ -11,21 +11,25 @@
 }
 
 /* ── Editor de fecha: metadatos + duelos lado a lado en desktop ── */
+/* minmax(0, …) y no 1fr pelado: 1fr es minmax(auto, 1fr) y el track no puede
+   encoger por debajo del min-content de lo que tiene adentro. Un <select> se
+   mide por su opción más larga (los universos GDT son nombres kilométricos),
+   así que con 1fr el editor desbordaba la página en mobile */
 .prf-editor-top {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-md);
 }
 
 @media (min-width: 1100px) {
   .prf-editor-top {
-    grid-template-columns: 1fr 1.5fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
   }
 }
 
 .prf-meta-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-sm);
   align-items: start;
 }
@@ -294,6 +298,9 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%23909fb0' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
+  /* Carril reservado para el chevron: el select ahora puede encogerse y una
+     opción larga se truncaría justo por debajo de la flecha */
+  padding-right: 2rem;
 }
 
 .prf-form select option {
@@ -333,6 +340,16 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  /* Como item de grilla o de flex, el mínimo automático es su min-content:
+     sin esto el campo se planta en el ancho de su control más ancho */
+  min-width: 0;
+}
+
+/* El ancho lo manda el contenedor, nunca el largo de las opciones */
+.prf-field > input,
+.prf-field > select,
+.prf-field > textarea {
+  min-width: 0;
 }
 
 .prf-player-row {
@@ -1465,6 +1482,8 @@
 
 .prf-compact select {
   background-position: right 0.6rem center;
+  /* Va después del shorthand `padding` de arriba, si no lo pisa */
+  padding-right: 1.75rem;
 }
 
 .prf-compact .prf-submit-btn {

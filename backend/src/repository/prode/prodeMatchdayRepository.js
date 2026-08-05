@@ -35,6 +35,7 @@ import {
   getEventResult,
 } from "../../integrations/sportsProvider/index.js";
 import ProdeStatsRepository from "./prodeStatsRepository.js";
+import ProdeTeamRepository from "./prodeTeamRepository.js";
 
 const statsRepository = new ProdeStatsRepository();
 
@@ -149,7 +150,8 @@ const squadsForMatchdayMonth = async (matchday, months) => {
   const allSquads = await GdtSquad.find(
     { gdtUniverse: universeId },
     { player: 1, month: 1, slots: 1 },
-  ).populate("slots.realPlayer", "name club position photoUrl");
+    /* league viaja para resolver el equipo: el código es único por liga */
+  ).populate("slots.realPlayer", "name club position photoUrl league");
 
   const upToMonth = allSquads.filter(
     (squad) => monthIndexOf(months, squad.month) <= matchdayIndex,
@@ -180,6 +182,12 @@ const computeMatchdayGdt = async (matchday) => {
 
   const squadByPlayer = await squadsForMatchdayMonth(matchday, months);
   const gdtPoints = gdtScoresMap(matchday.gdtScores);
+  /* Identidad editable del equipo (nombre corto + código de 3 letras que
+     define el admin). Sin entrada todavía, se cae al nombre de la API y el
+     código queda vacío: la UI muestra el nombre solo, nunca un "(???)" */
+  const teamMap = await new ProdeTeamRepository().getTeamMap();
+  const resolveTeam = (league, club) =>
+    teamMap.get(`${league}|${club}`) ?? { displayName: club, code: "" };
 
   /* Jugadores deduplicados (los compartidos aparecen una sola vez: el
      puntaje es del jugador real, no del plantel) */
@@ -192,10 +200,15 @@ const computeMatchdayGdt = async (matchday) => {
       if (existing) {
         existing.squadCount += 1;
       } else {
+        const team = resolveTeam(realPlayer?.league, realPlayer?.club ?? "");
         playersById.set(playerId, {
           _id: playerId,
           name: realPlayer?.name ?? "?",
+          /* club = nombre de la API (clave, la usa la regla 1-por-club);
+             clubDisplay y teamCode = identidad para mostrar */
           club: realPlayer?.club ?? "",
+          clubDisplay: team.displayName,
+          teamCode: team.code,
           position: realPlayer?.position ?? null,
           photoUrl: realPlayer?.photoUrl ?? "",
           squadCount: 1,
@@ -221,9 +234,15 @@ const computeMatchdayGdt = async (matchday) => {
     const slot = (squad?.slots ?? []).find((s) => s.slotNumber === slotNumber);
     if (!slot) return null;
     const playerId = String(slot.realPlayer?._id ?? slot.realPlayer);
+    const team = resolveTeam(
+      slot.realPlayer?.league,
+      slot.realPlayer?.club ?? "",
+    );
     return {
       playerName: slot.realPlayer?.name ?? "?",
       club: slot.realPlayer?.club ?? "",
+      clubDisplay: team.displayName,
+      teamCode: team.code,
       photoUrl: slot.realPlayer?.photoUrl ?? "",
       blocked: slot.blocked === true,
       points: gdtPoints[playerId] ?? null,

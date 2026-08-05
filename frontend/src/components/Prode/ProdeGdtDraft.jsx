@@ -252,6 +252,12 @@ const ProdeGdtDraft = () => {
 
   const filledCount = slots.filter(Boolean).length;
 
+  /* Lo que se MUESTRA del club: el nombre corto que definió el admin en
+     Prode → Equipos, con el de la API como red de seguridad. Las
+     COMPARACIONES de la regla 1-por-club nunca pasan por acá: siguen usando
+     player.club, que es la clave real. */
+  const clubLabel = (player) => player?.clubDisplay ?? player?.club ?? "";
+
   /* Clubes ya usados por OTROS slots (regla 1 por club) */
   const clubBySlot = slots.map((playerId) =>
     playerId ? poolById.get(playerId)?.club : null,
@@ -278,7 +284,7 @@ const ProdeGdtDraft = () => {
         poolById.get(otherId)?.club === player.club,
     );
     if (duplicatedClub) {
-      return `Tenés dos jugadores de ${player.club}: dejá solo uno`;
+      return `Tenés dos jugadores de ${clubLabel(player)}: dejá solo uno`;
     }
     return null;
   });
@@ -463,10 +469,13 @@ const ProdeGdtDraft = () => {
           .filter((p) => p.position === SLOT_LAYOUT[activeSlot - 1])
           .filter((p) => {
             const term = search.trim().toLowerCase();
+            /* Busca por los DOS nombres del club: el corto que ves en
+               pantalla y el de la API, para que ninguno quede infindable */
             return (
               !term ||
               p.name.toLowerCase().includes(term) ||
-              p.club.toLowerCase().includes(term)
+              p.club.toLowerCase().includes(term) ||
+              clubLabel(p).toLowerCase().includes(term)
             );
           })
       : [];
@@ -583,7 +592,7 @@ const ProdeGdtDraft = () => {
         ([slotNumber, club]) =>
           slotNumber !== slot.slotNumber && club === candidate.club,
       );
-      if (clubClash) return `Ya tenés un jugador de ${candidate.club}`;
+      if (clubClash) return `Ya tenés un jugador de ${clubLabel(candidate)}`;
       return null;
     };
 
@@ -647,7 +656,7 @@ const ProdeGdtDraft = () => {
                     {renderAvatar(player)}
                     <span className="prg-slot-player">
                       <span className="prg-slot-name">{player?.name}</span>
-                      <span className="prg-slot-club">{player?.club}</span>
+                      <span className="prg-slot-club">{clubLabel(player)}</span>
                     </span>
                     {burned && (
                       <span className="prg-rev-burned-tag">Quemado</span>
@@ -703,7 +712,7 @@ const ProdeGdtDraft = () => {
                                 {chosen.name}
                               </span>
                               <span className="prg-slot-club">
-                                {chosen.club}
+                                {clubLabel(chosen)}
                               </span>
                             </span>
                             <span className="prg-slot-actions">
@@ -761,7 +770,8 @@ const ProdeGdtDraft = () => {
                             return (
                               !term ||
                               candidate.name.toLowerCase().includes(term) ||
-                              candidate.club.toLowerCase().includes(term)
+                              candidate.club.toLowerCase().includes(term) ||
+                              clubLabel(candidate).toLowerCase().includes(term)
                             );
                           })
                           .map((candidate) => {
@@ -788,7 +798,7 @@ const ProdeGdtDraft = () => {
                                     {candidate.name}
                                   </span>
                                   <span className="prg-picker-club">
-                                    {reason ?? candidate.club}
+                                    {reason ?? clubLabel(candidate)}
                                   </span>
                                 </span>
                               </button>
@@ -825,12 +835,15 @@ const ProdeGdtDraft = () => {
                         </span>
                         <span
                           className="prg-change-out"
-                          title={change.out.club}
+                          title={clubLabel(change.out)}
                         >
                           {change.out.name}
                         </span>
                         <span className="prg-change-arrow">→</span>
-                        <span className="prg-change-in" title={change.in.club}>
+                        <span
+                          className="prg-change-in"
+                          title={clubLabel(change.in)}
+                        >
                           {change.in.name}
                         </span>
                       </div>
@@ -1171,7 +1184,7 @@ const ProdeGdtDraft = () => {
                               {player.name}
                             </span>
                             <span className="prg-slot-club">
-                              {player.club}
+                              {clubLabel(player)}
                             </span>
                             {issue && (
                               <span className="prg-slot-warn">{issue}</span>
@@ -1241,7 +1254,7 @@ const ProdeGdtDraft = () => {
                               usedInSlot !== -1
                                 ? "Ya está en tu equipo"
                                 : clubClashSlot !== -1
-                                  ? `Ya tenés un jugador de ${candidate.club}`
+                                  ? `Ya tenés un jugador de ${clubLabel(candidate)}`
                                   : null;
 
                             return (
@@ -1260,7 +1273,7 @@ const ProdeGdtDraft = () => {
                                     {candidate.name}
                                   </span>
                                   <span className="prg-picker-club">
-                                    {disabledReason ?? candidate.club}
+                                    {disabledReason ?? clubLabel(candidate)}
                                   </span>
                                 </span>
                               </button>

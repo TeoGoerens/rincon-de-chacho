@@ -170,6 +170,25 @@ const ProdeMatchdayPredictions = () => {
   );
   const itemIds = useMemo(() => items.map((i) => String(i._id)), [items]);
 
+  /* Rival del duelo de la fecha: sale del fixture ya populado con los
+     nombres. Puede no haber duelo todavía (fixture sin armar) */
+  const rivalName = useMemo(() => {
+    const myPlayerId = myPlayer?._id;
+    if (!myPlayerId) return null;
+    const toId = (player) => String(player?._id ?? player);
+    const myDuel = (matchday?.duels ?? []).find(
+      (duel) =>
+        toId(duel.playerA) === String(myPlayerId) ||
+        toId(duel.playerB) === String(myPlayerId),
+    );
+    if (!myDuel) return null;
+    const rival =
+      toId(myDuel.playerA) === String(myPlayerId)
+        ? myDuel.playerB
+        : myDuel.playerA;
+    return rival?.name ?? null;
+  }, [matchday, myPlayer]);
+
   const deadlineMs = matchday?.predictionsDeadline
     ? new Date(matchday.predictionsDeadline).getTime()
     : null;
@@ -654,6 +673,16 @@ const ProdeMatchdayPredictions = () => {
                 style={{ width: `${progressPct}%` }}
               />
             </div>
+            {rivalName && (
+              <div className="prp-progress-duel">
+                <span className="prp-progress-duel-label">
+                  Tu duelo de la fecha
+                </span>
+                <span className="prp-progress-duel-sep">·</span>
+                <span className="prp-progress-duel-vs">vs</span>
+                <span className="prp-progress-duel-rival">{rivalName}</span>
+              </div>
+            )}
           </div>
 
           {/* ── Bloques ARG / MISC ── */}

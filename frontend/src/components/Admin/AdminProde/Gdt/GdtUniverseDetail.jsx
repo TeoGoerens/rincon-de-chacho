@@ -738,10 +738,21 @@ const GdtUniverseDetail = () => {
 
   const players = useMemo(() => playersData ?? [], [playersData]);
 
-  const clubs = useMemo(
-    () => [...new Set(players.map((p) => p.club))].sort(),
-    [players],
-  );
+  /* Nombre corto del equipo (Prode → Equipos) para MOSTRAR; el club de la API
+     sigue siendo el valor con el que se filtra y compara. El detector de
+     transferencias, más abajo, conserva a propósito el nombre de la API:
+     ahí se compara justamente contra lo que dice el proveedor. */
+  const clubLabel = (player) => player?.clubDisplay ?? player?.club ?? "";
+
+  const clubs = useMemo(() => {
+    const byClub = new Map();
+    for (const player of players) {
+      if (!byClub.has(player.club)) byClub.set(player.club, clubLabel(player));
+    }
+    return [...byClub.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [players]);
 
   const filteredPlayers = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -1747,8 +1758,8 @@ const GdtUniverseDetail = () => {
               >
                 <option value="">Todos los clubes</option>
                 {clubs.map((club) => (
-                  <option key={club} value={club}>
-                    {club}
+                  <option key={club.value} value={club.value}>
+                    {club.label}
                   </option>
                 ))}
               </select>
@@ -1794,7 +1805,7 @@ const GdtUniverseDetail = () => {
                 {pagedPlayers.map((player) => (
                   <tr key={player._id}>
                     <td>{renderPlayerCell(player)}</td>
-                    <td>{player.club}</td>
+                    <td>{clubLabel(player)}</td>
                     <td>{GDT_POSITION_LABELS[player.position] ?? "—"}</td>
                     <td>
                       <div className="pri-actions">

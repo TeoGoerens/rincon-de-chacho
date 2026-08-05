@@ -20,6 +20,7 @@ import CreateGdtUniverse from "./AdminProde/Gdt/CreateGdtUniverse";
 import GdtUniverseDetail from "./AdminProde/Gdt/GdtUniverseDetail";
 import CreateGdtPlayer from "./AdminProde/Gdt/CreateGdtPlayer";
 import UpdateGdtPlayer from "./AdminProde/Gdt/UpdateGdtPlayer";
+import ProdeTeamsIndex from "./AdminProde/Teams/ProdeTeamsIndex";
 import ProdeGuide from "./AdminProde/Guide/ProdeGuide";
 
 //Admin PODRIDA Components
@@ -89,6 +90,8 @@ const AdminRoutes = () => {
             path="jugadores/editar/:id"
             element={<UpdateProdePlayer />}
           />
+
+          <Route path="equipos" element={<ProdeTeamsIndex />} />
 
           <Route path="fechas" element={<ProdeMatchdaysIndex />} />
           <Route path="fechas/crear" element={<CreateProdeMatchday />} />

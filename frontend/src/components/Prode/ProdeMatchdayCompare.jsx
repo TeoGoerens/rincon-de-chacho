@@ -890,6 +890,18 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
   const summaryGdtDuel = (duel) =>
     partials?.gdt?.duels?.find((d) => d.playerA === toId(duel.playerA)) ?? null;
 
+  /* "Fernández (BOC)". El código de 3 letras lo define el admin en Prode →
+     Equipos; mientras no lo haya cargado no se muestra nada — un "(???)" o el
+     nombre largo del club recargarían la fila sin aportar */
+  const renderSlotName = (side) => (
+    <span className="prp-sum-md-name">
+      {side?.playerName ?? "—"}
+      {side?.teamCode && (
+        <span className="prp-sum-md-team"> ({side.teamCode})</span>
+      )}
+    </span>
+  );
+
   /* Valor efectivo del slot en su mini-duelo: sin puntaje cargado, pendiente */
   const gdtSideValue = (side) =>
     side?.value === null || side?.value === undefined ? "—" : side.value;
@@ -1076,9 +1088,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
                           )}
                         </span>
                         <span className={gdtSideClass(miniDuel.result, "A")}>
-                          <span className="prp-sum-md-name">
-                            {miniDuel.a?.playerName ?? "—"}
-                          </span>
+                          {renderSlotName(miniDuel.a)}
                           <span className={gdtPtsClass(miniDuel.a)}>
                             {gdtSideValue(miniDuel.a)}
                           </span>
@@ -1088,9 +1098,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
                           <span className={gdtPtsClass(miniDuel.b)}>
                             {gdtSideValue(miniDuel.b)}
                           </span>
-                          <span className="prp-sum-md-name">
-                            {miniDuel.b?.playerName ?? "—"}
-                          </span>
+                          {renderSlotName(miniDuel.b)}
                         </span>
                       </div>
                     );

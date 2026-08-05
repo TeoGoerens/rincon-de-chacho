@@ -12,6 +12,7 @@ import {
   squadOwnerId,
   latestSquadsByPlayer,
 } from "./gdtSquadVersioning.js";
+import ProdeTeamRepository from "./prodeTeamRepository.js";
 
 /* Revisión post-edición del pool (transferencia de club, corrección de
    posición) sobre los planteles VIGENTES — detección automática en ambas
@@ -201,8 +202,24 @@ const buildDraftedByMap = async (universe) => {
 
 export default class GdtRealPlayerRepository {
   /* --------------- GET POOL BY TEAM --------------- */
-  getPlayersByTeam = async (universeId) =>
-    GdtRealPlayer.find({ gdtUniverse: universeId }).sort({ club: 1, name: 1 });
+  /* club sigue siendo el nombre de la API (clave de la regla 1-por-club y de
+     las comparaciones); clubDisplay y teamCode son la identidad EDITABLE que
+     el admin define en Prode → Equipos, solo para mostrar. */
+  getPlayersByTeam = async (universeId) => {
+    const players = await GdtRealPlayer.find({ gdtUniverse: universeId })
+      .sort({ club: 1, name: 1 })
+      .lean();
+    const teamMap = await new ProdeTeamRepository().getTeamMap();
+
+    return players.map((player) => {
+      const team = teamMap.get(`${player.league}|${player.club}`);
+      return {
+        ...player,
+        clubDisplay: team?.displayName ?? player.club,
+        teamCode: team?.code ?? "",
+      };
+    });
+  };
 
   /* --------------- GET PLAYER BY ID --------------- */
   getGdtRealPlayerById = async (playerId) => {

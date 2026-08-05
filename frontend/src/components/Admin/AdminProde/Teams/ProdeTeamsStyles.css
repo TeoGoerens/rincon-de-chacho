@@ -1,0 +1,165 @@
+/* ═══════════════════════════════════════════════════════════
+   PRODE TEAMS (Admin Prode · Equipos)  —  El Rincón de Chacho
+   Prefijo pte-. El shell (header, tabla, cards mobile) se reusa
+   de ProdeIndexStyles.css; acá va solo lo propio de Equipos.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Pills de liga ── */
+.pte-leagues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.pte-league {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-normal);
+  text-transform: uppercase;
+  color: var(--text-muted-dark);
+  cursor: pointer;
+  transition: border-color var(--transition-base),
+    color var(--transition-base), background var(--transition-base);
+}
+
+.pte-league:hover {
+  border-color: var(--third-color);
+  color: var(--text-bright);
+}
+
+.pte-league--active {
+  border-color: var(--third-color);
+  background: rgba(168, 218, 220, 0.1);
+  color: var(--third-color);
+}
+
+/* ── Encabezado con InfoTip ── */
+/* color explícito: sin esto el span cae en el `* { color }` de App.css (que
+   es #343a40, para fondo claro) y este th se ve más apagado que los otros */
+.pte-th {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-subtle-dark);
+}
+
+/* ── Nombre de la API: mismo formato que el resto de la tabla; lo único que
+      lo baja de jerarquía es el color, igual que .pri-cell-email. Es dato de
+      referencia, no el nombre protagonista de la fila ── */
+.pte-api-name {
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--text-muted-dark);
+}
+
+/* ── Código de 3 letras: es el dato protagonista de la tabla ── */
+.pte-code {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+  background: rgba(168, 218, 220, 0.1);
+  font-family: "Urbanist", var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-extrabold);
+  letter-spacing: var(--ls-wide);
+  /* 12.3:1 sobre #111 */
+  color: var(--third-color);
+}
+
+/* Sin código todavía: no puede leerse como un valor cargado */
+.pte-code--empty {
+  background: var(--status-neutral-bg);
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--ls-tight);
+  text-transform: none;
+  color: var(--text-muted-dark);
+}
+
+/* ── Inputs de edición en línea ── */
+.pte-input {
+  width: 100%;
+  max-width: 260px;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  color: var(--input-text-dark);
+  outline: none;
+  transition: border-color var(--transition-base);
+}
+
+.pte-input:focus {
+  border-color: var(--third-color);
+}
+
+.pte-input::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* El código son 3 letras: un campo ancho invitaría a escribir de más */
+.pte-input--code {
+  width: 5rem;
+  max-width: 5rem;
+  font-family: "Urbanist", var(--secondary-font);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+/* Mobile: los dos campos apilados dentro de la card */
+.pte-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+  flex: 1;
+}
+
+/* ── Botones de fila ── */
+.pte-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.pte-btn {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-tight);
+  color: var(--text-body-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+.pte-btn:hover {
+  border-color: var(--third-color);
+  color: var(--text-bright);
+}
+
+.pte-btn--save {
+  border-color: var(--third-color);
+  color: var(--third-color);
+}
+
+.pte-btn--save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

@@ -88,13 +88,21 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
     isValidPoints(values[player._id] ?? ""),
   ).length;
 
-  const clubs = useMemo(
-    () =>
-      [...new Set(players.map((player) => player.club).filter(Boolean))].sort(
-        (a, b) => a.localeCompare(b),
-      ),
-    [players],
-  );
+  /* El VALOR del filtro sigue siendo el club de la API (con eso compara);
+     lo que se lee es el nombre corto que definió el admin en Prode → Equipos */
+  const clubLabel = (player) => player?.clubDisplay ?? player?.club ?? "";
+
+  const clubs = useMemo(() => {
+    const byClub = new Map();
+    for (const player of players) {
+      if (player.club && !byClub.has(player.club)) {
+        byClub.set(player.club, clubLabel(player));
+      }
+    }
+    return [...byClub.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [players]);
 
   const normalized = (text) =>
     (text ?? "")
@@ -114,7 +122,7 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
      y, adentro, arquero → defensores → volantes → delanteros) */
   const groups = [];
   for (const player of visiblePlayers) {
-    const title = player.club || "Sin club";
+    const title = clubLabel(player) || "Sin club";
     const last = groups[groups.length - 1];
     if (last && last.title === title) {
       last.players.push(player);
@@ -185,7 +193,7 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
           title={
             side.blocked
               ? "Bloqueado por el admin: vale 0 mientras dure el conflicto"
-              : side.club
+              : clubLabel(side)
           }
         >
           {side.playerName}
@@ -228,8 +236,8 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
               >
                 <option value="">Todos los clubes</option>
                 {clubs.map((club) => (
-                  <option key={club} value={club}>
-                    {club}
+                  <option key={club.value} value={club.value}>
+                    {club.label}
                   </option>
                 ))}
               </select>
