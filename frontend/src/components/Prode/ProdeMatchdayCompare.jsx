@@ -1,7 +1,6 @@
 // Import React dependencies
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
 
 // Imports CSS & helpers
 import "./ProdePredictionsStyles.css";
@@ -83,13 +82,10 @@ const scoreTone = (home, away) =>
   home > away ? "l" : home === away ? "e" : "v";
 
 /* Vista post-deadline: el duelo como tablero en vivo. "Mi duelo" (vos contra
-   tu rival, lo que más importa) y "Todos" (los duelos de la fecha, cada uno
-   desplegable con el mismo detalle). */
+   tu rival, lo que más importa), "Todos" (los duelos de la fecha, cada uno
+   desplegable con el mismo detalle) y "Resumen" (la foto de la fecha). */
 const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
   const myPlayerId = myPlayer?._id;
-  /* La pestaña Resumen es exclusiva del admin (foto de la fecha para
-     compartir en el grupo). Mismo gate que el link Admin del Sidebar. */
-  const { isAdmin } = useSelector((store) => store.users);
   const [view, setView] = useState("duel");
   /* Duelos desplegados en la vista Todos (clave = id del jugador izquierdo) */
   const [openDuels, setOpenDuels] = useState(() => new Set());
@@ -142,7 +138,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
 
   /* Participantes de la fecha, tomados de los duelos: incluye a quien no
      cargó nada (computeMatchdayPartials igual lo cuenta en 0). Lo usa la
-     vista Resumen del admin. */
+     vista Resumen. */
   const summaryPlayers = useMemo(() => {
     const list = [];
     for (const duel of matchday.duels ?? []) {
@@ -855,7 +851,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
     </div>
   );
 
-  /* ---------- Vista Resumen (admin): foto de la fecha para el grupo ----------
+  /* ---------- Vista Resumen: foto de la fecha para el grupo ----------
      Escueta y pensada para captura de pantalla: una tabla por prode con
      TODOS los participantes y sus puntos de la fecha, y abajo el marcador
      de cada duelo. El GDT queda pendiente. */
@@ -1117,37 +1113,33 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
 
   return (
     <>
-      {(myDuel || isAdmin) && (
-        <div className="prp-tabs">
-          {myDuel && (
-            <button
-              type="button"
-              className={`prp-tab${view === "duel" ? " prp-tab--active" : ""}`}
-              onClick={() => setView("duel")}
-            >
-              Mi duelo
-            </button>
-          )}
+      <div className="prp-tabs">
+        {myDuel && (
           <button
             type="button"
-            className={`prp-tab${view === "all" ? " prp-tab--active" : ""}`}
-            onClick={() => setView("all")}
+            className={`prp-tab${view === "duel" ? " prp-tab--active" : ""}`}
+            onClick={() => setView("duel")}
           >
-            Todos
+            Mi duelo
           </button>
-          {isAdmin && (
-            <button
-              type="button"
-              className={`prp-tab${view === "summary" ? " prp-tab--active" : ""}`}
-              onClick={() => setView("summary")}
-            >
-              Resumen
-            </button>
-          )}
-        </div>
-      )}
+        )}
+        <button
+          type="button"
+          className={`prp-tab${view === "all" ? " prp-tab--active" : ""}`}
+          onClick={() => setView("all")}
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          className={`prp-tab${view === "summary" ? " prp-tab--active" : ""}`}
+          onClick={() => setView("summary")}
+        >
+          Resumen
+        </button>
+      </div>
 
-      {isAdmin && view === "summary"
+      {view === "summary"
         ? renderSummaryView()
         : myDuel && view === "duel"
           ? renderDuelView(buildDuelCtx(myDuel))

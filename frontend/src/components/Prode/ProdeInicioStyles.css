@@ -150,26 +150,34 @@
   }
 }
 
-/* ── CTA de card ── */
-.pin-cta {
+/* ── CTA: formato único para toda la hoja (cards, pendientes y pie) ── */
+.pin-cta,
+.pin-pending-cta,
+.pin-footer-link {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  align-self: flex-start;
+  align-self: flex-end;
   font-family: var(--secondary-font);
   font-size: var(--text-xs);
   font-weight: var(--fw-semibold);
   color: var(--third-color);
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: color var(--transition-base);
 }
 
-.pin-cta svg {
+.pin-cta svg,
+.pin-pending-cta svg,
+.pin-footer-link svg {
   width: 14px;
   height: 14px;
 }
 
-.pin-cta:hover {
+.pin-cta:hover,
+.pin-footer-link:hover,
+.pin-pending-card:hover .pin-pending-cta {
   color: var(--text-bright);
 }
 
@@ -188,7 +196,7 @@
   background: var(--bg-card-dark);
   border: 1px solid rgba(168, 218, 220, 0.22);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1.1rem;
+  padding: 1rem 1.25rem;
   text-decoration: none;
   transition:
     border-color var(--transition-base),
@@ -223,23 +231,6 @@
   font-family: var(--secondary-font);
   font-size: var(--text-2xs);
   color: var(--text-muted-dark);
-}
-
-.pin-pending-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: var(--secondary-font);
-  font-size: var(--text-xs);
-  font-weight: var(--fw-semibold);
-  color: var(--third-color);
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.pin-pending-cta svg {
-  width: 14px;
-  height: 14px;
 }
 
 .pin-uptodate {
@@ -480,26 +471,13 @@
 /* ── Pie ── */
 .pin-footer {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--space-sm);
   flex-wrap: wrap;
   margin-top: var(--space-sm);
   padding-top: var(--space-md);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.pin-footer-link {
-  font-family: var(--secondary-font);
-  font-size: var(--text-xs);
-  font-weight: var(--fw-semibold);
-  color: var(--third-color);
-  text-decoration: none;
-  transition: color var(--transition-base);
-}
-
-.pin-footer-link:hover {
-  color: var(--text-bright);
 }
 
 /* ── Responsive ── */
@@ -522,7 +500,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
-    padding: 0.8rem 0.9rem;
+    padding: 0.85rem 0.9rem;
   }
 
   .pin-duel-name {

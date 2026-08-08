@@ -1,7 +1,7 @@
 // Import React dependencies
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 
 // Imports CSS & helpers
 import "./ProdeInicioStyles.css";
@@ -112,22 +112,21 @@ const ProdeInicio = () => {
   /* ── Selección de fechas ── */
   const matchdays = useMemo(() => matchdaysData ?? [], [matchdaysData]);
 
-  const inPlayMatchday = useMemo(
+  /* Puede haber más de una fecha viva a la vez (el admin abre la que viene
+     antes de consolidar la anterior): son listas, no una sola fecha */
+  const inPlayMatchdays = useMemo(
     () =>
       matchdays
         .filter((m) => m.phase === "in_play")
-        .sort((a, b) => b.roundNumber - a.roundNumber)[0] ?? null,
+        .sort((a, b) => a.roundNumber - b.roundNumber),
     [matchdays],
   );
 
-  const openMatchday = useMemo(
+  const openMatchdays = useMemo(
     () =>
       matchdays
         .filter((m) => m.phase === "open")
-        .sort(
-          (a, b) =>
-            new Date(a.predictionsDeadline) - new Date(b.predictionsDeadline),
-        )[0] ?? null,
+        .sort((a, b) => a.roundNumber - b.roundNumber),
     [matchdays],
   );
 
@@ -139,22 +138,49 @@ const ProdeInicio = () => {
     [matchdays],
   );
 
-  /* La fecha protagonista: en juego > abierta > última consolidada */
-  const currentMatchday = inPlayMatchday ?? openMatchday ?? lastConsolidated;
-
-  /* Mi pronóstico de la fecha abierta (completitud) */
-  const { data: myPrediction, isLoading: myPredictionLoading } = useQuery({
-    queryKey: ["prode-my-prediction", openMatchday?._id, userId],
-    queryFn: () => fetchMyProdePrediction(openMatchday._id),
-    enabled: Boolean(openMatchday) && isParticipant,
+  /* Mi pronóstico de cada fecha abierta (completitud) */
+  const myPredictionQueries = useQueries({
+    queries: openMatchdays.map((matchday) => ({
+      queryKey: ["prode-my-prediction", matchday._id, userId],
+      queryFn: () => fetchMyProdePrediction(matchday._id),
+      enabled: isParticipant,
+    })),
   });
 
-  /* Parciales de la fecha en juego (mi duelo en vivo) */
-  const { data: partials, isLoading: partialsLoading } = useQuery({
-    queryKey: ["prode-matchday-partials", inPlayMatchday?._id],
-    queryFn: () => fetchProdeMatchdayPartials(inPlayMatchday._id),
-    enabled: Boolean(inPlayMatchday) && isParticipant,
+  /* Parciales de cada fecha en juego (mi duelo en vivo) */
+  const partialsQueries = useQueries({
+    queries: inPlayMatchdays.map((matchday) => ({
+      queryKey: ["prode-matchday-partials", matchday._id],
+      queryFn: () => fetchProdeMatchdayPartials(matchday._id),
+      enabled: isParticipant,
+    })),
   });
+
+  /* Progreso de carga por fecha abierta, indexado por id */
+  const progressByMatchday = useMemo(() => {
+    const map = new Map();
+    openMatchdays.forEach((matchday, index) => {
+      const total = matchday.items?.length ?? 0;
+      const done = myPredictionQueries[index]?.data?.picks?.length ?? 0;
+      map.set(String(matchday._id), {
+        total,
+        done,
+        missing: Math.max(0, total - done),
+        isLoading: myPredictionQueries[index]?.isLoading ?? false,
+      });
+    });
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openMatchdays, myPredictionQueries.map((q) => q.dataUpdatedAt).join()]);
+
+  const partialsByMatchday = useMemo(() => {
+    const map = new Map();
+    inPlayMatchdays.forEach((matchday, index) => {
+      map.set(String(matchday._id), partialsQueries[index]?.data ?? null);
+    });
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inPlayMatchdays, partialsQueries.map((q) => q.dataUpdatedAt).join()]);
 
   /* ── Nombres de participantes (tabla + torneo activo) ── */
   const nameById = useMemo(() => {
@@ -169,10 +195,6 @@ const ProdeInicio = () => {
   }, [activeTournament, standingsData]);
 
   /* ── Pendientes de acción (participante) ── */
-  const totalItems = openMatchday?.items?.length ?? 0;
-  const doneItems = myPrediction?.picks?.length ?? 0;
-  const missingItems = Math.max(0, totalItems - doneItems);
-
   const reopenedForMe = useMemo(
     () =>
       matchdays.filter(
@@ -218,19 +240,24 @@ const ProdeInicio = () => {
         highlight: true,
       });
     }
-    if (openMatchday && !myPredictionLoading && missingItems > 0) {
+    /* La fecha abierta es un pendiente mientras le falte algo. Al completarla
+       sale de acá y pasa a la sección de fechas, para poder revisarla o
+       editarla hasta el deadline. */
+    for (const matchday of openMatchdays) {
+      const progress = progressByMatchday.get(String(matchday._id));
+      if (!progress || progress.isLoading || progress.missing === 0) continue;
       list.push({
-        key: `open-${openMatchday._id}`,
-        to: `/prode/fecha/${openMatchday._id}`,
-        title: `Fecha ${openMatchday.roundNumber} · ${
-          doneItems === 0
+        key: `open-${matchday._id}`,
+        to: `/prode/fecha/${matchday._id}`,
+        title: `Fecha ${matchday.roundNumber} · ${
+          progress.done === 0
             ? "todavía no cargaste nada"
-            : `te falta${missingItems === 1 ? "" : "n"} ${missingItems} ítem${
-                missingItems === 1 ? "" : "s"
-              }`
+            : `te falta${progress.missing === 1 ? "" : "n"} ${
+                progress.missing
+              } ítem${progress.missing === 1 ? "" : "s"}`
         }`,
-        caption: `Cierra el ${formatDeadline(openMatchday.predictionsDeadline)}`,
-        cta: doneItems === 0 ? "Cargar pronósticos" : "Completar",
+        caption: `Cierra el ${formatDeadline(matchday.predictionsDeadline)}`,
+        cta: progress.done === 0 ? "Cargar pronósticos" : "Completar",
         highlight: false,
       });
     }
@@ -263,55 +290,33 @@ const ProdeInicio = () => {
     return list;
   }, [
     reopenedForMe,
-    openMatchday,
-    myPredictionLoading,
-    missingItems,
-    doneItems,
+    openMatchdays,
+    progressByMatchday,
     activeDrafts,
     activeWindows,
   ]);
 
-  /* ── Mi duelo en vivo (fecha en juego) ── */
-  const myDuelPartial = useMemo(() => {
-    if (!partials || !myPlayer) return null;
+  /* ── Mi duelo en vivo, dentro de los parciales de una fecha en juego ── */
+  const findMyDuel = (duels) => {
+    if (!myPlayer) return null;
     return (
-      (partials.duels ?? []).find(
+      (duels ?? []).find(
         (duel) =>
           duel.playerA === String(myPlayer._id) ||
           duel.playerB === String(myPlayer._id),
       ) ?? null
     );
-  }, [partials, myPlayer]);
-  const iAmSideA = myDuelPartial?.playerA === String(myPlayer?._id);
-
-  const myGdtDuel = useMemo(() => {
-    if (!partials || !myPlayer) return null;
-    return (
-      (partials.gdt?.duels ?? []).find(
-        (duel) =>
-          duel.playerA === String(myPlayer._id) ||
-          duel.playerB === String(myPlayer._id),
-      ) ?? null
-    );
-  }, [partials, myPlayer]);
-  const iAmGdtA = myGdtDuel?.playerA === String(myPlayer?._id);
-
-  const rivalId = myDuelPartial
-    ? iAmSideA
-      ? myDuelPartial.playerB
-      : myDuelPartial.playerA
-    : null;
+  };
 
   /* ── Mi resultado en la última consolidada ── */
   const consolidatedDuels = useMemo(() => {
-    if (!currentMatchday || currentMatchday.phase !== "consolidated")
-      return null;
+    if (!lastConsolidated) return null;
     return (
       (standingsData?.matchdays ?? []).find(
-        (md) => String(md._id) === String(currentMatchday._id),
+        (md) => String(md._id) === String(lastConsolidated._id),
       )?.duels ?? null
     );
-  }, [currentMatchday, standingsData]);
+  }, [lastConsolidated, standingsData]);
 
   const myConsolidatedDuel = useMemo(() => {
     if (!consolidatedDuels || !myPlayer) return null;
@@ -323,6 +328,22 @@ const ProdeInicio = () => {
       ) ?? null
     );
   }, [consolidatedDuels, myPlayer]);
+
+  /* ── Qué fechas van en la sección de fechas ──
+     Todas las que están en juego, más las abiertas que ya tengo completas (las
+     incompletas están en Pendientes, no se duplican). El espectador ve todas
+     las abiertas, porque no tiene Pendientes. */
+  const visibleOpenMatchdays = openMatchdays.filter(
+    (matchday) =>
+      !isParticipant ||
+      (progressByMatchday.get(String(matchday._id))?.missing ?? 0) === 0,
+  );
+  const liveMatchdays = [...inPlayMatchdays, ...visibleOpenMatchdays].sort(
+    (a, b) => a.roundNumber - b.roundNumber,
+  );
+  /* Si no hay ninguna fecha viva, la sección cae en la última consolidada */
+  const hasAnyLiveMatchday =
+    inPlayMatchdays.length > 0 || openMatchdays.length > 0;
 
   /* ── Recorte de tabla: top 3 + mi fila si estoy afuera ── */
   const standingsRows = standingsData?.standings ?? [];
@@ -341,12 +362,154 @@ const ProdeInicio = () => {
     (Boolean(activeTournament) && matchdaysLoading) ||
     standingsLoading ||
     (Boolean(activeTournament) && isParticipant && gdtUniversesLoading) ||
-    (Boolean(openMatchday) && isParticipant && myPredictionLoading) ||
-    (Boolean(inPlayMatchday) && isParticipant && partialsLoading);
+    (isParticipant && myPredictionQueries.some((q) => q.isLoading)) ||
+    (isParticipant && partialsQueries.some((q) => q.isLoading));
 
-  /* ── Render de la fecha en curso según fase y usuario ── */
-  const renderCurrentMatchday = () => {
-    if (!currentMatchday) {
+  /* ── Card de la fecha abierta ──
+     Solo llega acá si ya está completa (mientras falte algo vive en
+     Pendientes): sirve para volver a revisarla o editarla hasta el deadline.
+     Al espectador se le muestra siempre, porque no tiene Pendientes. */
+  const renderOpenMatchday = (matchday) => {
+    if (!isParticipant) {
+      return (
+        <div key={matchday._id} className="pin-card">
+          <div className="pin-card-head">
+            <span className="pin-card-title">
+              Fecha {matchday.roundNumber} · abierta
+            </span>
+            <span className="pin-status-dot pin-status-dot--open" />
+          </div>
+          <p className="pin-card-caption">
+            Los participantes cargan sus pronósticos hasta el{" "}
+            {formatDeadline(matchday.predictionsDeadline)}.
+          </p>
+        </div>
+      );
+    }
+    const { total, done, missing } = progressByMatchday.get(
+      String(matchday._id),
+    ) ?? { total: 0, done: 0, missing: 0 };
+    const progressPct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return (
+      <div key={matchday._id} className="pin-card">
+        <div className="pin-card-head">
+          <span className="pin-card-title">
+            Fecha {matchday.roundNumber} · abierta
+          </span>
+          <span className="pin-card-meta">
+            Cierra el {formatDeadline(matchday.predictionsDeadline)}
+          </span>
+        </div>
+        <div className="pin-progress">
+          <div className="pin-progress-track">
+            <div
+              className="pin-progress-fill"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <span className="pin-progress-label">
+            {missing > 0
+              ? `Pronosticaste ${done} de ${total} ítems`
+              : `Pronóstico completo · ${total} de ${total} ítems`}
+          </span>
+        </div>
+        <Link className="pin-cta" to={`/prode/fecha/${matchday._id}`}>
+          {missing > 0 ? "Cargar pronósticos" : "Ver o editar mis pronósticos"}
+          <ArrowIcon />
+        </Link>
+      </div>
+    );
+  };
+
+  /* ── Card de la fecha en juego ── */
+  const renderInPlayMatchday = (matchday) => {
+    if (!isParticipant) {
+      return (
+        <div key={matchday._id} className="pin-card">
+          <div className="pin-card-head">
+            <span className="pin-card-title">
+              Fecha {matchday.roundNumber} · en juego
+            </span>
+            <span className="pin-status-dot pin-status-dot--live" />
+          </div>
+          <p className="pin-card-caption">
+            El deadline ya venció: los duelos se están definiendo. Los
+            resultados aparecen acá y en la pestaña Torneo al consolidarse la
+            fecha.
+          </p>
+        </div>
+      );
+    }
+    const partials = partialsByMatchday.get(String(matchday._id));
+    const myDuelPartial = findMyDuel(partials?.duels);
+    const iAmSideA = myDuelPartial?.playerA === String(myPlayer?._id);
+    const myGdtDuel = findMyDuel(partials?.gdt?.duels);
+    const iAmGdtA = myGdtDuel?.playerA === String(myPlayer?._id);
+    const rivalId = myDuelPartial
+      ? iAmSideA
+        ? myDuelPartial.playerB
+        : myDuelPartial.playerA
+      : null;
+    const myArg = myDuelPartial?.challenges?.ARG;
+    const myMisc = myDuelPartial?.challenges?.MISC;
+    return (
+      <div key={matchday._id} className="pin-card">
+        <div className="pin-card-head">
+          <span className="pin-card-title">
+            Fecha {matchday.roundNumber} · en juego
+          </span>
+          <span className="pin-status-dot pin-status-dot--live" />
+        </div>
+        {myDuelPartial ? (
+          <>
+            <div className="pin-duel-hero">
+              <span className="pin-duel-name pin-duel-name--me">Vos</span>
+              <span className="pin-duel-vs">vs</span>
+              <span className="pin-duel-name">
+                {nameById.get(String(rivalId)) ?? "Rival"}
+              </span>
+            </div>
+            <div className="pin-duel-chips">
+              {myArg && (
+                <span className="pin-duel-chip">
+                  <span className="pin-duel-chip-label">ARG</span>
+                  {iAmSideA ? myArg.a : myArg.b}–{iAmSideA ? myArg.b : myArg.a}
+                </span>
+              )}
+              {myMisc && (
+                <span className="pin-duel-chip">
+                  <span className="pin-duel-chip-label">RESTO</span>
+                  {iAmSideA ? myMisc.a : myMisc.b}–
+                  {iAmSideA ? myMisc.b : myMisc.a}
+                </span>
+              )}
+              {myGdtDuel && (
+                <span className="pin-duel-chip">
+                  <span className="pin-duel-chip-label">GDT</span>
+                  {iAmGdtA ? myGdtDuel.score.a : myGdtDuel.score.b}–
+                  {iAmGdtA ? myGdtDuel.score.b : myGdtDuel.score.a}
+                </span>
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="pin-card-caption">
+            La fecha está en juego: entrá al tablero para seguir tu duelo.
+          </p>
+        )}
+        <Link className="pin-cta" to={`/prode/fecha/${matchday._id}`}>
+          Ver tablero completo
+          <ArrowIcon />
+        </Link>
+      </div>
+    );
+  };
+
+  /* ── Card de la última fecha consolidada ──
+     Solo se muestra cuando no hay ninguna fecha viva, para que la sección
+     nunca quede vacía. */
+  const renderLastConsolidated = () => {
+    if (!lastConsolidated) {
       return (
         <div className="pin-card pin-card--empty">
           <p className="pin-empty-text">
@@ -357,130 +520,6 @@ const ProdeInicio = () => {
       );
     }
 
-    const phase = currentMatchday.phase;
-
-    if (phase === "open") {
-      if (!isParticipant) {
-        return (
-          <div className="pin-card">
-            <div className="pin-card-head">
-              <span className="pin-card-title">
-                Fecha {currentMatchday.roundNumber} · abierta
-              </span>
-              <span className="pin-status-dot pin-status-dot--open" />
-            </div>
-            <p className="pin-card-caption">
-              Los participantes cargan sus pronósticos hasta el{" "}
-              {formatDeadline(currentMatchday.predictionsDeadline)}.
-            </p>
-          </div>
-        );
-      }
-      const progressPct =
-        totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
-      return (
-        <div className="pin-card">
-          <div className="pin-card-head">
-            <span className="pin-card-title">
-              Fecha {currentMatchday.roundNumber} · abierta
-            </span>
-            <span className="pin-card-meta">
-              Cierra el {formatDeadline(currentMatchday.predictionsDeadline)}
-            </span>
-          </div>
-          <div className="pin-progress">
-            <div className="pin-progress-track">
-              <div
-                className="pin-progress-fill"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            <span className="pin-progress-label">
-              Pronosticaste {doneItems} de {totalItems} ítems
-            </span>
-          </div>
-          <Link className="pin-cta" to={`/prode/fecha/${currentMatchday._id}`}>
-            {missingItems > 0 ? "Cargar pronósticos" : "Editar pronósticos"}
-            <ArrowIcon />
-          </Link>
-        </div>
-      );
-    }
-
-    if (phase === "in_play") {
-      if (!isParticipant) {
-        return (
-          <div className="pin-card">
-            <div className="pin-card-head">
-              <span className="pin-card-title">
-                Fecha {currentMatchday.roundNumber} · en juego
-              </span>
-              <span className="pin-status-dot pin-status-dot--live" />
-            </div>
-            <p className="pin-card-caption">
-              El deadline ya venció: los duelos se están definiendo. Los
-              resultados aparecen acá y en la pestaña Torneo al consolidarse la
-              fecha.
-            </p>
-          </div>
-        );
-      }
-      const myArg = myDuelPartial?.challenges?.ARG;
-      const myMisc = myDuelPartial?.challenges?.MISC;
-      return (
-        <div className="pin-card">
-          <div className="pin-card-head">
-            <span className="pin-card-title">
-              Fecha {currentMatchday.roundNumber} · en juego
-            </span>
-            <span className="pin-status-dot pin-status-dot--live" />
-          </div>
-          {myDuelPartial ? (
-            <>
-              <div className="pin-duel-hero">
-                <span className="pin-duel-name pin-duel-name--me">Vos</span>
-                <span className="pin-duel-vs">vs</span>
-                <span className="pin-duel-name">
-                  {nameById.get(String(rivalId)) ?? "Rival"}
-                </span>
-              </div>
-              <div className="pin-duel-chips">
-                {myArg && (
-                  <span className="pin-duel-chip">
-                    <span className="pin-duel-chip-label">ARG</span>
-                    {iAmSideA ? myArg.a : myArg.b}–{iAmSideA ? myArg.b : myArg.a}
-                  </span>
-                )}
-                {myMisc && (
-                  <span className="pin-duel-chip">
-                    <span className="pin-duel-chip-label">RESTO</span>
-                    {iAmSideA ? myMisc.a : myMisc.b}–
-                    {iAmSideA ? myMisc.b : myMisc.a}
-                  </span>
-                )}
-                {myGdtDuel && (
-                  <span className="pin-duel-chip">
-                    <span className="pin-duel-chip-label">GDT</span>
-                    {iAmGdtA ? myGdtDuel.score.a : myGdtDuel.score.b}–
-                    {iAmGdtA ? myGdtDuel.score.b : myGdtDuel.score.a}
-                  </span>
-                )}
-              </div>
-            </>
-          ) : (
-            <p className="pin-card-caption">
-              La fecha está en juego: entrá al tablero para seguir tu duelo.
-            </p>
-          )}
-          <Link className="pin-cta" to={`/prode/fecha/${currentMatchday._id}`}>
-            Ver tablero completo
-            <ArrowIcon />
-          </Link>
-        </div>
-      );
-    }
-
-    /* Consolidada: la última fecha jugada */
     if (isParticipant && myConsolidatedDuel) {
       const iAmA = toId(myConsolidatedDuel.playerA) === String(myPlayer._id);
       const rivalName =
@@ -505,7 +544,7 @@ const ProdeInicio = () => {
         <div className="pin-card">
           <div className="pin-card-head">
             <span className="pin-card-title">
-              Fecha {currentMatchday.roundNumber} · consolidada
+              Fecha {lastConsolidated.roundNumber} · consolidada
             </span>
             <span className="pin-card-meta">Última fecha jugada</span>
           </div>
@@ -528,7 +567,7 @@ const ProdeInicio = () => {
               {myBonus > 0 ? " · incluye bonus" : ""}
             </span>
           </p>
-          <Link className="pin-cta" to={`/prode/fecha/${currentMatchday._id}`}>
+          <Link className="pin-cta" to={`/prode/fecha/${lastConsolidated._id}`}>
             Ver resultados
             <ArrowIcon />
           </Link>
@@ -540,7 +579,7 @@ const ProdeInicio = () => {
       <div className="pin-card">
         <div className="pin-card-head">
           <span className="pin-card-title">
-            Fecha {currentMatchday.roundNumber} · consolidada
+            Fecha {lastConsolidated.roundNumber} · consolidada
           </span>
           <span className="pin-card-meta">Última fecha jugada</span>
         </div>
@@ -637,13 +676,22 @@ const ProdeInicio = () => {
               </section>
             )}
 
-            {/* ── La fecha en curso ── */}
-            {activeTournament && (
-              <section className="pin-section">
-                <h2 className="pin-section-title">La fecha</h2>
-                {renderCurrentMatchday()}
-              </section>
-            )}
+            {/* ── Las fechas vivas (o la última jugada si no hay ninguna) ── */}
+            {activeTournament &&
+              (liveMatchdays.length > 0 || !hasAnyLiveMatchday) && (
+                <section className="pin-section">
+                  <h2 className="pin-section-title">
+                    {liveMatchdays.length > 1 ? "Las fechas" : "La fecha"}
+                  </h2>
+                  {liveMatchdays.length > 0
+                    ? liveMatchdays.map((matchday) =>
+                        matchday.phase === "in_play"
+                          ? renderInPlayMatchday(matchday)
+                          : renderOpenMatchday(matchday),
+                      )
+                    : renderLastConsolidated()}
+                </section>
+              )}
 
             {/* ── Gran DT: acceso a los universos (puertas adentro) ── */}
             {isParticipant && (gdtUniversesData ?? []).length > 0 && (
@@ -735,7 +783,8 @@ const ProdeInicio = () => {
             {/* ── Pie ── */}
             <footer className="pin-footer">
               <Link className="pin-footer-link" to="/prode/reglas">
-                Reglas del Prode →
+                Reglas del Prode
+                <ArrowIcon />
               </Link>
             </footer>
           </>
