@@ -4,6 +4,7 @@ import "./ChachosSquadStyles.css";
 import ChachosMenu from "../ChachosMenu";
 import fetchSquad from "../../../reactquery/chachos/fetchSquad";
 import fetchPlayerProfile from "../../../reactquery/chachos/fetchPlayerProfile";
+import { isSuperAdmin } from "../../../reactquery/getUserInformation";
 
 const POSITION_LABEL = {
   goalkeeper: "Portero",
@@ -13,10 +14,10 @@ const POSITION_LABEL = {
 };
 
 const PEARLS = [
-  { key: "white_pearl",   emoji: "⚪", label: "Blanca"   },
-  { key: "vanilla_pearl", emoji: "🟡", label: "Vainilla" },
-  { key: "ocher_pearl",   emoji: "🟠", label: "Ocre"     },
-  { key: "black_pearl",   emoji: "⚫", label: "Negra"    },
+  { key: "white_pearl",   label: "Blanca",   color: "rgba(168,218,220,0.15)", border: "rgba(168,218,220,0.25)", emoji: "⚪" },
+  { key: "vanilla_pearl", label: "Vainilla", color: "rgba(246,201,14,0.1)",   border: "rgba(246,201,14,0.25)",  emoji: "🟡" },
+  { key: "ocher_pearl",   label: "Ocre",     color: "rgba(249,115,22,0.1)",   border: "rgba(249,115,22,0.25)",  emoji: "🟠" },
+  { key: "black_pearl",   label: "Negra",    color: "rgba(230,57,70,0.1)",    border: "rgba(230,57,70,0.2)",    emoji: "⚫" },
 ];
 
 const SOCIAL_ITEMS = [
@@ -79,6 +80,10 @@ const ChachosSquad = () => {
   const initials = profile
     ? (profile.first_name?.[0] ?? "").toUpperCase()
     : (selected?.player.first_name?.[0] ?? "").toUpperCase();
+
+  const pearlCards = PEARLS.filter(
+    ({ key }) => isSuperAdmin() || key === "white_pearl" || key === "vanilla_pearl"
+  );
 
   return (
     <>
@@ -251,13 +256,11 @@ const ChachosSquad = () => {
                 </div>
 
                 {/* ── Fila 3: perlas ── */}
-                <div className="csq-pcard-pearls">
-                  {[
-                    { key: "white_pearl",   label: "Blanca",   color: "rgba(168,218,220,0.15)", border: "rgba(168,218,220,0.25)", emoji: "⚪" },
-                    { key: "vanilla_pearl", label: "Vainilla", color: "rgba(246,201,14,0.1)",   border: "rgba(246,201,14,0.25)",  emoji: "🟡" },
-                    { key: "ocher_pearl",   label: "Ocre",     color: "rgba(249,115,22,0.1)",   border: "rgba(249,115,22,0.25)",  emoji: "🟠" },
-                    { key: "black_pearl",   label: "Negra",    color: "rgba(230,57,70,0.1)",    border: "rgba(230,57,70,0.2)",    emoji: "⚫" },
-                  ].map(({ key, label, color, border, emoji }) => (
+                <div
+                  className="csq-pcard-pearls"
+                  style={{ gridTemplateColumns: `repeat(${pearlCards.length}, 1fr)` }}
+                >
+                  {pearlCards.map(({ key, label, color, border, emoji }) => (
                     <div key={key} className="csq-ppearl" style={{ "--pearl-bg": color, "--pearl-border": border }}>
                       <span className="csq-ppearl-top">
                         <span className="csq-ppearl-emoji">{emoji}</span>
@@ -395,8 +398,8 @@ const ChachosSquad = () => {
               </>
             )}
 
-            {/* ── Social insights ── */}
-            {Object.values(social).some(Boolean) && (
+            {/* ── Social insights (solo súper admin: expone relaciones de perla negra/ocre) ── */}
+            {isSuperAdmin() && Object.values(social).some(Boolean) && (
               <>
                 <h3 className="csq-section-heading">Radiografía social</h3>
                 <div className="csq-social-grid">

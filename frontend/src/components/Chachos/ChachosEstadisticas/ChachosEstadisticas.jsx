@@ -4,6 +4,7 @@ import ChachosMenu from "../ChachosMenu";
 import fetchAllTournaments from "../../../reactquery/chachos/fetchAllTournaments";
 import fetchStatsSummary from "../../../reactquery/chachos/fetchStatsSummary";
 import fetchVoteRecords from "../../../reactquery/chachos/fetchVoteRecords";
+import { isSuperAdmin } from "../../../reactquery/getUserInformation";
 import "./ChachosEstadisticasStyles.css";
 
 const MOBILE_STAT_OPTIONS = [
@@ -24,11 +25,17 @@ const RANKING_COLS = [
   { key: "avg_points",   label: "Puntaje",      short: "PTS" },
 ];
 
-const PEARL_COLS = [
+const PEARL_COLS_FULL = [
   { key: "white",   label: "⚪" },
   { key: "vanilla", label: "🟡" },
   { key: "ocher",   label: "🟠" },
   { key: "black",   label: "⚫" },
+  { key: "total",   label: "PTS" },
+];
+
+const PEARL_COLS_PUBLIC = [
+  { key: "white",   label: "⚪" },
+  { key: "vanilla", label: "🟡" },
   { key: "total",   label: "PTS" },
 ];
 
@@ -51,6 +58,9 @@ const AlterAvatar = ({ name, picture }) => {
 };
 
 const ChachosEstadisticas = () => {
+  const superAdmin = isSuperAdmin();
+  const pearlCols  = superAdmin ? PEARL_COLS_FULL : PEARL_COLS_PUBLIC;
+
   const [selectedYear, setSelectedYear] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -118,7 +128,9 @@ const ChachosEstadisticas = () => {
         vanilla: p.vanilla_pearl,
         ocher:   p.ocher_pearl,
         black:   p.black_pearl,
-        total:   p.white_pearl * 5 + p.vanilla_pearl * 1 + p.ocher_pearl * -1 + p.black_pearl * -5,
+        total:   superAdmin
+          ? p.white_pearl * 5 + p.vanilla_pearl * 1 + p.ocher_pearl * -1 + p.black_pearl * -5
+          : p.white_pearl * 5 + p.vanilla_pearl * 1,
       }))
       .filter((p) => p.white + p.vanilla + p.ocher + p.black > 0);
     return arr.sort((a, b) => {
@@ -126,7 +138,7 @@ const ChachosEstadisticas = () => {
       const vb = b[pearlSort.key] ?? -Infinity;
       return pearlSort.dir === "desc" ? vb - va : va - vb;
     });
-  }, [individualRaw, pearlSort]);
+  }, [individualRaw, pearlSort, superAdmin]);
 
   const toggleRankSort = (key) =>
     setRankSort((prev) =>
@@ -509,12 +521,12 @@ const ChachosEstadisticas = () => {
                   <table className="ce-table">
                     <colgroup>
                       <col className="ce-col--name" />
-                      {PEARL_COLS.map((col) => <col key={col.key} className="ce-col--stat-lg" />)}
+                      {pearlCols.map((col) => <col key={col.key} className="ce-col--stat-lg" />)}
                     </colgroup>
                     <thead>
                       <tr>
                         <th className="ce-th ce-th--name">Jugador</th>
-                        {PEARL_COLS.map((col) => (
+                        {pearlCols.map((col) => (
                           <th
                             key={col.key}
                             className={`ce-th ce-th--stat${pearlSort.key === col.key ? " ce-th--active" : ""}`}
@@ -537,8 +549,12 @@ const ChachosEstadisticas = () => {
                           </td>
                           <td className={`ce-td ce-td--stat${p.white   === 0 ? " ce-val--zero" : ""}${pearlSort.key === "white"   ? " ce-td--active" : ""}`}>{p.white}</td>
                           <td className={`ce-td ce-td--stat${p.vanilla === 0 ? " ce-val--zero" : ""}${pearlSort.key === "vanilla" ? " ce-td--active" : ""}`}>{p.vanilla}</td>
-                          <td className={`ce-td ce-td--stat${p.ocher   === 0 ? " ce-val--zero" : ""}${pearlSort.key === "ocher"   ? " ce-td--active" : ""}`}>{p.ocher}</td>
-                          <td className={`ce-td ce-td--stat${p.black   === 0 ? " ce-val--zero" : ""}${pearlSort.key === "black"   ? " ce-td--active" : ""}`}>{p.black}</td>
+                          {superAdmin && (
+                            <>
+                              <td className={`ce-td ce-td--stat${p.ocher === 0 ? " ce-val--zero" : ""}${pearlSort.key === "ocher" ? " ce-td--active" : ""}`}>{p.ocher}</td>
+                              <td className={`ce-td ce-td--stat${p.black === 0 ? " ce-val--zero" : ""}${pearlSort.key === "black" ? " ce-td--active" : ""}`}>{p.black}</td>
+                            </>
+                          )}
                           <td className={`ce-td ce-td--stat${pearlSort.key === "total"   ? " ce-td--active" : ""}`}>{p.total}</td>
                         </tr>
                       ))}

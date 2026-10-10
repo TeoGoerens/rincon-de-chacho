@@ -248,16 +248,16 @@ export default class TournamentRoundRepository extends baseRepository {
         .populate({ path: "rival",         select: "name" })
         .populate({ path: "tournament",    select: "year" })
         .populate({ path: "white_pearl",   select: "first_name last_name" })
-        .populate({ path: "vanilla_pearl", select: "first_name" })
+        .populate({ path: "vanilla_pearl", select: "first_name last_name" })
         .populate({ path: "ocher_pearl",   select: "first_name" })
         .populate({ path: "black_pearl",   select: "first_name last_name" })
         .lean();
 
-      // Batch lookup de fotos para perla blanca y perla negra
+      // Batch lookup de fotos para perla blanca y perla vainilla
       const allPearlIds = [...new Set(
         rounds.flatMap((r) => [
           ...(r.white_pearl ?? []).map((p) => p._id?.toString()),
-          ...(r.black_pearl ?? []).map((p) => p._id?.toString()),
+          ...(r.vanilla_pearl ?? []).map((p) => p._id?.toString()),
         ].filter(Boolean))
       )];
 
@@ -276,8 +276,8 @@ export default class TournamentRoundRepository extends baseRepository {
               profile_picture: picMap[p._id?.toString()] ?? null,
             }));
           }
-          if (r.black_pearl?.length) {
-            r.black_pearl = r.black_pearl.map((p) => ({
+          if (r.vanilla_pearl?.length) {
+            r.vanilla_pearl = r.vanilla_pearl.map((p) => ({
               ...p,
               profile_picture: picMap[p._id?.toString()] ?? null,
             }));

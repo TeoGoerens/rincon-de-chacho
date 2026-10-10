@@ -4,6 +4,16 @@ import PlayerRepository from "../../repository/chachos/playerRepository.js";
 const repository = new PlayerRepository();
 
 export default class PlayerController {
+  // ---------- GET MY PLAYER (usuario logueado) ----------
+  getMyPlayer = async (req, res, next) => {
+    try {
+      const chacho_player = await repository.getMyPlayer(req.user.id);
+      res.status(200).json({ message: "Logged-in user's chacho_player retrieved", chacho_player });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // ---------- GET PLAYER BY ID ----------
   getPlayerById = async (req, res, next) => {
     try {

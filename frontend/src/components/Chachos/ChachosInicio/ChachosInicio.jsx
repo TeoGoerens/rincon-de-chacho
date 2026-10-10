@@ -6,7 +6,8 @@ import ChachosMenu              from "../ChachosMenu";
 import fetchCurrentContext      from "../../../reactquery/chachos/fetchCurrentContext";
 import fetchVoteByVoterAndRound from "../../../reactquery/chachos/fetchVoteByVoterAndRound";
 import createVote               from "../../../reactquery/chachos/createVote";
-import { getUserId }            from "../../../reactquery/getUserInformation";
+import fetchMyChachoPlayer      from "../../../reactquery/chachos/fetchMyChachoPlayer";
+import { getUserId, isSuperAdmin } from "../../../reactquery/getUserInformation";
 import "./ChachosInicioStyles.css";
 
 /* ─── Constantes ─── */
@@ -65,6 +66,7 @@ const ChachosInicio = () => {
   const [mobileStat, setMobileStat] = useState("goals");
   const [expandedPearls, setExpandedPearls] = useState({});
   const togglePearlExpand = (k) => setExpandedPearls((prev) => ({ ...prev, [k]: !prev[k] }));
+  const [resultsRevealed, setResultsRevealed] = useState(false);
   const queryClient = useQueryClient();
   const userId = getUserId();
 
@@ -112,6 +114,15 @@ const ChachosInicio = () => {
   });
   const alreadyVoted = !!voteData?.usersVote;
 
+  /* ── Mi jugador vinculado (para auto-revelación) ── */
+  const { data: myPlayerData } = useQuery({
+    queryKey: ["ci-my-chacho-player"],
+    queryFn:  fetchMyChachoPlayer,
+    enabled:  !isSuperAdmin(),
+    staleTime: 60 * 60 * 1000,
+  });
+  const myPlayerId = myPlayerData?.chacho_player ?? null;
+
   /* ── Players con stats del partido ── */
   const playersWithStats = useMemo(() =>
     players.map((player) => {
@@ -129,6 +140,44 @@ const ChachosInicio = () => {
       };
     }),
   [players, roundStats]);
+
+  /* ── Ranking de puntajes de la fecha (completo, ordenado) ── */
+  const scoreRanking = useMemo(() =>
+    [...playersWithStats]
+      .filter((p) => p.points !== null)
+      .sort((a, b) => b.points - a.points),
+  [playersWithStats]);
+
+  const visibleScoreRows = isSuperAdmin() ? scoreRanking : scoreRanking.slice(0, 5);
+
+  /* ── Qué puede auto-revelarse el usuario logueado para esta fecha ──
+     El botón se muestra siempre que jugó, sin importar si hay algo "negativo"
+     para revelar — que aparezca o no ya sería una señal en sí misma. El
+     contenido revelado siempre muestra puntaje + perla (sea cual sea, incluida
+     "Ninguna"), por consistencia — no solo cuando hay algo negativo. */
+  const iPlayedThisRound = !isSuperAdmin() && !!myPlayerId &&
+    players.some((p) => p._id?.toString() === myPlayerId?.toString());
+
+  const isMe = (p) => p._id?.toString() === myPlayerId?.toString();
+
+  const myScoreRank = iPlayedThisRound ? scoreRanking.findIndex(isMe) : -1;
+  const myScoreRow  = myScoreRank >= 0 ? scoreRanking[myScoreRank] : null;
+
+  const myPearl = iPlayedThisRound
+    ? (lastRound?.white_pearl   ?? []).some(isMe) ? "white"
+    : (lastRound?.vanilla_pearl ?? []).some(isMe) ? "vanilla"
+    : (lastRound?.ocher_pearl   ?? []).some(isMe) ? "ocher"
+    : (lastRound?.black_pearl   ?? []).some(isMe) ? "black"
+    : "none"
+    : "none";
+
+  const PEARL_REVEAL_LABEL = {
+    white:   "⚪ Blanca",
+    vanilla: "🟡 Vainilla",
+    ocher:   "🟠 Ocre",
+    black:   "⚫ Negra",
+    none:    "Ninguna",
+  };
 
   /* ── Highlights del partido ── */
   const highlights = useMemo(() => {
@@ -407,9 +456,7 @@ const ChachosInicio = () => {
 
                   {/* Puntajes */}
                   <div className="ci-results-scores">
-                    {[...playersWithStats]
-                      .filter((p) => p.points !== null)
-                      .sort((a, b) => b.points - a.points)
+                    {visibleScoreRows
                       .map((p, i) => {
                         const pic = playerPictures[p._id?.toString()];
                         const hasPhoto = pic && !pic.includes("pixabay") && !pic.includes("avatar-1577909");
@@ -440,7 +487,9 @@ const ChachosInicio = () => {
                       { key: "vanilla_pearl", emoji: "🟡", label: "Perla Vainilla" },
                       { key: "ocher_pearl",   emoji: "🟠", label: "Perla Ocre"     },
                       { key: "black_pearl",   emoji: "⚫", label: "Perla Negra"    },
-                    ].map(({ key, emoji, label }) => {
+                    ]
+                      .filter(({ key }) => isSuperAdmin() || key === "white_pearl" || key === "vanilla_pearl")
+                      .map(({ key, emoji, label }) => {
                       const winner = lastRound[key]?.[0] ?? null;
                       const pic    = winner ? playerPictures[winner._id?.toString()] : null;
                       const defaultPic = pic && !pic.includes("pixabay") && !pic.includes("avatar-1577909");
@@ -468,6 +517,32 @@ const ChachosInicio = () => {
                   </div>
 
                   </div>
+
+                  {iPlayedThisRound && (
+                    <div className="ci-self-reveal">
+                      {!resultsRevealed ? (
+                        <button
+                          type="button"
+                          className="ci-self-reveal-btn"
+                          onClick={() => setResultsRevealed(true)}
+                        >
+                          Ver mi resultado →
+                        </button>
+                      ) : (
+                        <div className="ci-self-reveal-content">
+                          {myScoreRow && (
+                            <span className="ci-self-reveal-item">
+                              Tu puntaje: <strong>{myScoreRow.points.toFixed(2)}</strong>
+                              {" "}({myScoreRank + 1} de {scoreRanking.length} jugadores)
+                            </span>
+                          )}
+                          <span className="ci-self-reveal-item">
+                            Tu perla: <strong>{PEARL_REVEAL_LABEL[myPearl]}</strong>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                 </div>
               </>
@@ -591,7 +666,9 @@ const ChachosInicio = () => {
                 { key: "vanilla_pearl_count", emoji: "🟡", label: "Perla Vainilla", color: "#f6c90e" },
                 { key: "ocher_pearl_count",   emoji: "🟠", label: "Perla Ocre",     color: "#c87941" },
                 { key: "black_pearl_count",   emoji: "⚫", label: "Perla Negra",    color: "#9b8ec4" },
-              ].map(({ key, emoji, label, color }) => {
+              ]
+                .filter(({ key }) => isSuperAdmin() || key === "white_pearl_count" || key === "vanilla_pearl_count")
+                .map(({ key, emoji, label, color }) => {
                 const winners = rankingsByCategory
                   .filter((r) => (r[key] ?? 0) > 0)
                   .sort((a, b) => {

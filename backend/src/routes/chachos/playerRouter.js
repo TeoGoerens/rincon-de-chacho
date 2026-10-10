@@ -8,6 +8,7 @@ const controller = new PlayerController();
 
 // ---------- GET ROUTES ----------
 router.get("/squad",        authMiddleware, controller.getSquad);
+router.get("/me",           authMiddleware, controller.getMyPlayer);
 router.get("/:pid/profile", authMiddleware, controller.getPlayerProfile);
 router.get("/:pid",         authMiddleware, controller.getPlayerById);
 router.get("/",             authMiddleware, controller.getAllPlayers);

@@ -11,6 +11,16 @@ export default class PlayerRepository extends baseRepository {
     super(Player);
   }
 
+  // ---------- GET MY PLAYER (usuario logueado -> su chacho_player) ----------
+  getMyPlayer = async (userId) => {
+    try {
+      const user = await User.findById(userId).select("chacho_player").lean();
+      return user?.chacho_player ?? null;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // ---------- GET SQUAD (grid view) ----------
   getSquad = async () => {
     try {

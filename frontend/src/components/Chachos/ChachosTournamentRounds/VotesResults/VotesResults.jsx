@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import "./VotesResultsStyles.css";
@@ -9,6 +9,8 @@ import fetchRoundById from "../../../../reactquery/chachos/fetchRoundById";
 import fetchVotesByRound from "../../../../reactquery/chachos/fetchVotesByRound";
 import fetchMatchStatsByRound from "../../../../reactquery/chachos/fetchMatchStatsByRound";
 import fetchPlayerPicturesByRound from "../../../../reactquery/chachos/fetchPlayerPicturesByRound";
+import fetchMyChachoPlayer from "../../../../reactquery/chachos/fetchMyChachoPlayer";
+import { isSuperAdmin } from "../../../../reactquery/getUserInformation";
 
 // ── Definición de perlas ──────────────────────────────────────────────────────
 const PEARLS = [
@@ -58,6 +60,8 @@ const resultMeta = (round) => {
 const VotesResults = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const superAdmin = isSuperAdmin();
+  const [resultsRevealed, setResultsRevealed] = useState(false);
 
   // ── Fetch paralelo: round + votes ─────────────────────────────────────────
   const {
@@ -92,6 +96,13 @@ const VotesResults = () => {
     staleTime: 30 * 60 * 1000,
   });
 
+  const { data: myPlayerData } = useQuery({
+    queryKey: ["vr-my-chacho-player"],
+    queryFn:  fetchMyChachoPlayer,
+    enabled:  !superAdmin,
+    staleTime: 60 * 60 * 1000,
+  });
+
   const round      = roundData?.tournamentRound;
   const votes      = votesData?.allVotesForRound ?? [];
   const totalVotes = votes.length;
@@ -121,6 +132,39 @@ const VotesResults = () => {
     ocher_pearl:   calculateTotalVotesByPearl(votes, "ocher_pearl"),
     black_pearl:   calculateTotalVotesByPearl(votes, "black_pearl"),
   };
+
+  const visiblePearls = superAdmin
+    ? PEARLS
+    : PEARLS.filter((p) => p.key === "white_pearl" || p.key === "vanilla_pearl");
+
+  const visibleScores = superAdmin ? sortedScores : sortedScores.slice(0, 5);
+
+  /* ── Auto-revelación (mismo mecanismo que ChachosInicio) ── */
+  const myPlayerId = myPlayerData?.chacho_player ?? null;
+  const isMe = (p) => p._id?.toString() === myPlayerId?.toString();
+  const iPlayedThisRound = !superAdmin && !!myPlayerId && (round?.players ?? []).some(isMe);
+
+  const myScoreRank = iPlayedThisRound ? sortedScores.findIndex(isMe) : -1;
+  const myScoreRow  = myScoreRank >= 0 ? sortedScores[myScoreRank] : null;
+
+  const myPearl = iPlayedThisRound
+    ? (round?.white_pearl   ?? []).some(isMe) ? "white"
+    : (round?.vanilla_pearl ?? []).some(isMe) ? "vanilla"
+    : (round?.ocher_pearl   ?? []).some(isMe) ? "ocher"
+    : (round?.black_pearl   ?? []).some(isMe) ? "black"
+    : "none"
+    : "none";
+
+  const PEARL_REVEAL_LABEL = {
+    white:   "⚪ Blanca",
+    vanilla: "🟡 Vainilla",
+    ocher:   "🟠 Ocre",
+    black:   "⚫ Negra",
+    none:    "Ninguna",
+  };
+
+  const myOcherVotes = iPlayedThisRound ? (pearlStandings.ocher_pearl.find(isMe)?.total_votes ?? 0) : 0;
+  const myBlackVotes = iPlayedThisRound ? (pearlStandings.black_pearl.find(isMe)?.total_votes ?? 0) : 0;
 
   const isLoading = loadingRound || loadingVotes;
   const isError   = errorRound   || errorVotes;
@@ -240,7 +284,7 @@ const VotesResults = () => {
               {/* ── Grid de perlas ── */}
               <h2 className="vr-section-heading">Perlas</h2>
               <div className="vr-pearls-grid">
-                {PEARLS.map((pearl) => {
+                {visiblePearls.map((pearl) => {
                   const winners   = round?.[pearl.key] ?? [];
                   const standings = pearlStandings[pearl.key] ?? [];
                   const topVotes  = standings[0]?.total_votes ?? 1;
@@ -325,7 +369,7 @@ const VotesResults = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedScores.map((player, idx) => (
+                      {visibleScores.map((player, idx) => (
                         <tr key={player._id} className={`vr-tr${idx === 0 ? " vr-tr--top" : ""}`}>
                           <td className="vr-td vr-td--name">
                             <div className="vr-td-name-inner">
@@ -341,6 +385,35 @@ const VotesResults = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {iPlayedThisRound && (
+                  <div className="vr-self-reveal">
+                    {!resultsRevealed ? (
+                      <button
+                        type="button"
+                        className="vr-self-reveal-btn"
+                        onClick={() => setResultsRevealed(true)}
+                      >
+                        Ver mi resultado →
+                      </button>
+                    ) : (
+                      <div className="vr-self-reveal-content">
+                        {myScoreRow && (
+                          <span className="vr-self-reveal-item">
+                            Tu puntaje: <strong>{myScoreRow.points.toFixed(2)}</strong>
+                            {" "}({myScoreRank + 1} de {sortedScores.length} jugadores)
+                          </span>
+                        )}
+                        <span className="vr-self-reveal-item">
+                          Tu perla: <strong>{PEARL_REVEAL_LABEL[myPearl]}</strong>
+                        </span>
+                        <span className="vr-self-reveal-item">
+                          Votos recibidos: 🟠 <strong>{myOcherVotes}</strong> · ⚫ <strong>{myBlackVotes}</strong>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </>
           )}

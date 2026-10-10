@@ -194,7 +194,7 @@ const ChachosTournamentRounds = () => {
                   <col className="cf-col--rival"       />
                   <col className="cf-col--score"       />
                   <col className="cf-col--white-pearl" />
-                  <col className="cf-col--black-pearl" />
+                  <col className="cf-col--vanilla-pearl" />
                   <col className="cf-col--action"      />
                 </colgroup>
                 <thead>
@@ -203,7 +203,7 @@ const ChachosTournamentRounds = () => {
                     <th className="cf-th cf-th--left">Partido</th>
                     <th className="cf-th cf-th--center">Marcador</th>
                     <th className="cf-th cf-th--left cf-th--white-pearl">⚪ Perla Blanca</th>
-                    <th className="cf-th cf-th--left cf-th--black-pearl">⚫ Perla Negra</th>
+                    <th className="cf-th cf-th--left cf-th--vanilla-pearl">🟡 Perla Vainilla</th>
                     <th className="cf-th" />
                   </tr>
                 </thead>
@@ -214,8 +214,8 @@ const ChachosTournamentRounds = () => {
                     const wp = round.white_pearl?.[0] ?? null;
                     const wpInitials = wp ? (wp.first_name?.[0] ?? "").toUpperCase() : null;
 
-                    const bp = round.black_pearl?.[0] ?? null;
-                    const bpInitials = bp ? (bp.first_name?.[0] ?? "").toUpperCase() : null;
+                    const vp = round.vanilla_pearl?.[0] ?? null;
+                    const vpInitials = vp ? (vp.first_name?.[0] ?? "").toUpperCase() : null;
 
                     return (
                       <tr key={round._id} className={`cf-tr cf-tr--${cls}${round.open_for_vote ? " cf-tr--active" : ""}`}>
@@ -247,14 +247,14 @@ const ChachosTournamentRounds = () => {
                           )}
                         </td>
 
-                        <td className="cf-td cf-td--black-pearl">
-                          {bp ? (
-                            <div className="cf-black-pearl-cell">
-                              {bp.profile_picture
-                                ? <img src={bp.profile_picture} alt={bp.first_name} className="cf-mvp-avatar" />
-                                : <span className="cf-mvp-avatar cf-mvp-avatar--initials">{bpInitials}</span>
+                        <td className="cf-td cf-td--vanilla-pearl">
+                          {vp ? (
+                            <div className="cf-vanilla-pearl-cell">
+                              {vp.profile_picture
+                                ? <img src={vp.profile_picture} alt={vp.first_name} className="cf-mvp-avatar" />
+                                : <span className="cf-mvp-avatar cf-mvp-avatar--initials">{vpInitials}</span>
                               }
-                              <span className="cf-black-pearl-name">{bp.first_name} {bp.last_name}</span>
+                              <span className="cf-vanilla-pearl-name">{vp.first_name} {vp.last_name}</span>
                             </div>
                           ) : (
                             <span className="cf-pearl-empty">—</span>
