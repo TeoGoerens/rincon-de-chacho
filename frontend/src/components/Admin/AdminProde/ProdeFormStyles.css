@@ -1616,6 +1616,20 @@
   flex-shrink: 0;
 }
 
+/* Puntaje GDT en la tabla desktop: más ancho que un marcador de goles
+   porque admite decimales con coma y signo ("-12,5") */
+.prf-results-table input.prf-gdt-input {
+  width: 64px;
+}
+
+/* Puntaje con formato inválido (letras, punto en vez de coma): se marca
+   en vivo; el guardado lo rechaza con el motivo */
+.prf-form input.prf-rt-input--invalid,
+.prf-results-table input.prf-rt-input--invalid {
+  border-color: var(--status-red);
+  background: var(--status-red-bg);
+}
+
 input.prf-gdt-minput::-webkit-outer-spin-button,
 input.prf-gdt-minput::-webkit-inner-spin-button {
   -webkit-appearance: none;

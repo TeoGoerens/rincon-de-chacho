@@ -7,6 +7,8 @@ import { GDT_POSITIONS } from "../../dao/models/prode/prodeConstants.js";
 import {
   getPoolLeagueTeams,
   getPoolTeamPlayers,
+  getPoolQuota,
+  isDailyQuotaError,
 } from "../../integrations/sportsProvider/index.js";
 import {
   squadOwnerId,
@@ -114,55 +116,122 @@ const getTeamOrThrow = async (universeId) => {
 
 const normClubKey = (club) => (club ?? "").trim().toLowerCase();
 
-/* Snapshot de los planteles vigentes de la liga según el provider, cacheado
-   en memoria del server: re-correr el detector (o agregar un jugador nuevo
-   desde el reporte) dentro de la ventana no vuelve a gastar cuota diaria. */
+/* Planteles según el provider, cacheados en memoria del server POR EQUIPO
+   (clave: ID de API-Football — detector selectivo, 2026-11-09): re-detectar
+   sobre los mismos equipos, cambiar la selección o agregar un jugador nuevo
+   desde el reporte dentro de la ventana no vuelve a gastar cuota diaria.
+   El import también alimenta este cache: detectar justo después de
+   importar sale gratis. */
 const SNAPSHOT_CACHE_TTL_MS = 30 * 60 * 1000;
-const snapshotCache = new Map();
+const teamSnapshotCache = new Map();
 
-const fetchLeagueSnapshot = async (leagueProviderId) => {
-  const hit = snapshotCache.get(String(leagueProviderId));
-  if (hit && hit.expiresAt > Date.now()) return hit.value;
+const getCachedTeamPlayers = (providerTeamId) => {
+  const hit = teamSnapshotCache.get(String(providerTeamId));
+  return hit && hit.expiresAt > Date.now() ? hit : null;
+};
 
-  const { teams: providerTeams, unresolvedTeams } =
-    await getPoolLeagueTeams(leagueProviderId);
+const cacheTeamPlayers = (providerTeamId, players) => {
+  const entry = {
+    players,
+    fetchedAt: new Date(),
+    expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS,
+  };
+  teamSnapshotCache.set(String(providerTeamId), entry);
+  return entry;
+};
+
+/* Jugador del provider buscado en todos los planteles cacheados vigentes:
+   el alta desde el reporte no confía en el navegador (patrón carrito) */
+const findCachedSnapshotPlayer = (providerPlayerId) => {
+  for (const entry of teamSnapshotCache.values()) {
+    if (entry.expiresAt <= Date.now()) continue;
+    const player = entry.players.find(
+      (item) => item.providerPlayerId === providerPlayerId,
+    );
+    if (player) return player;
+  }
+  return null;
+};
+
+/* Equipos elegidos en el modal → equipos resueltos de la liga. El server
+   solo acepta IDs que la propia liga reconoce. */
+const resolveSelectedTeams = async (leagueProviderId, providerTeamIds) => {
+  const ids = [
+    ...new Set((providerTeamIds ?? []).map(String).filter(Boolean)),
+  ];
+  if (ids.length === 0) throw new Error("Elegí al menos un equipo");
+
+  const { teams } = await getPoolLeagueTeams(leagueProviderId);
+  const byId = new Map(teams.map((item) => [item.providerTeamId, item]));
+  const selected = ids.map((id) => byId.get(id)).filter(Boolean);
+  if (selected.length !== ids.length) {
+    throw new Error(
+      "Algún equipo elegido ya no figura en la liga: volvé a abrir la selección",
+    );
+  }
+  return selected;
+};
+
+/* Snapshot de los planteles de los equipos ELEGIDOS. Ante la cuota diaria
+   agotada se deja de consultar (los que faltan quedan como fallidos). */
+const fetchTeamsSnapshot = async (providerTeams) => {
   const byProviderId = new Map();
-  const failedTeams = [...unresolvedTeams];
+  const failedTeams = [];
+  const comparedTeams = [];
+  let quotaExhausted = false;
+  let oldestFetch = null;
+
   for (const providerTeam of providerTeams) {
-    try {
-      const players = await getPoolTeamPlayers(
-        providerTeam.providerTeamId,
-        providerTeam.name,
-      );
-      for (const player of players) {
-        if (player.providerPlayerId) {
-          byProviderId.set(player.providerPlayerId, player);
-        }
+    let entry = getCachedTeamPlayers(providerTeam.providerTeamId);
+    if (!entry) {
+      if (quotaExhausted) {
+        failedTeams.push(providerTeam.name);
+        continue;
       }
-    } catch (error) {
-      console.error(
-        `Detector GDT: falló el plantel de ${providerTeam.name}:`,
-        error.message,
-      );
-      failedTeams.push(providerTeam.name);
+      try {
+        const players = await getPoolTeamPlayers(
+          providerTeam.providerTeamId,
+          providerTeam.name,
+        );
+        entry = cacheTeamPlayers(providerTeam.providerTeamId, players);
+      } catch (error) {
+        if (isDailyQuotaError(error)) quotaExhausted = true;
+        console.error(
+          `Detector GDT: falló el plantel de ${providerTeam.name}:`,
+          error.message,
+        );
+        failedTeams.push(providerTeam.name);
+        continue;
+      }
+    }
+
+    comparedTeams.push(providerTeam.name);
+    if (!oldestFetch || entry.fetchedAt < oldestFetch) {
+      oldestFetch = entry.fetchedAt;
+    }
+    for (const player of entry.players) {
+      if (player.providerPlayerId) {
+        byProviderId.set(player.providerPlayerId, player);
+      }
     }
   }
 
-  /* Snapshot sin UN solo plantel = no hay nada que comparar (cuota diaria
-     agotada, API caída). Se corta con error claro y NO se cachea: cachearlo
-     dejaría al detector mostrando un reporte vacío mentiroso hasta el TTL. */
-  if (byProviderId.size === 0) {
+  /* Ni un solo plantel = no hay nada que comparar: error claro en vez de
+     un reporte vacío mentiroso */
+  if (comparedTeams.length === 0) {
     throw new Error(
-      "No se pudo consultar ningún plantel de la liga (probablemente se agotó la cuota diaria de API-Football): reintentá más tarde",
+      quotaExhausted
+        ? "Se agotó la cuota diaria de API-Football: reintentá mañana"
+        : "No se pudo consultar ningún plantel de los equipos elegidos: reintentá más tarde",
     );
   }
 
-  const value = { byProviderId, failedTeams, fetchedAt: new Date() };
-  snapshotCache.set(String(leagueProviderId), {
-    value,
-    expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS,
-  });
-  return value;
+  return {
+    byProviderId,
+    failedTeams,
+    comparedTeams,
+    fetchedAt: oldestFetch ?? new Date(),
+  };
 };
 
 /* Quién tiene a cada jugador del pool en su plantel VIGENTE, con el slot
@@ -327,12 +396,81 @@ export default class GdtRealPlayerRepository {
     return deleted;
   };
 
+  /* --------------- GET POOL TEAMS (modal de selección) --------------- */
+  /* Equipos de la liga del universo con su estado en ESTE pool: jugadores
+     ya cargados, último import (ok / falló) y si su plantel está en el
+     cache del detector (re-consultarlo no gasta cuota). Viaja la cuota
+     diaria conocida para que el admin calcule el gasto antes de confirmar. */
+  getPoolTeams = async (universeId) => {
+    const universe = await getTeamOrThrow(universeId);
+    if (!universe.leagueProviderId) {
+      throw new Error(
+        "El universo GDT no tiene liga del catálogo asociada: no hay equipos para elegir",
+      );
+    }
+
+    const { teams, unresolvedTeams } = await getPoolLeagueTeams(
+      universe.leagueProviderId,
+    );
+
+    /* Cantidad en el pool por club: cubre también los universos importados
+       antes del import selectivo, que no tienen importedTeams */
+    const counts = await GdtRealPlayer.aggregate([
+      { $match: { gdtUniverse: universe._id } },
+      { $group: { _id: "$club", count: { $sum: 1 } } },
+    ]);
+    const poolCountByClub = new Map();
+    for (const item of counts) {
+      const key = normClubKey(item._id);
+      poolCountByClub.set(key, (poolCountByClub.get(key) ?? 0) + item.count);
+    }
+    const lastImportById = new Map(
+      (universe.importedTeams ?? []).map((entry) => [
+        entry.providerTeamId,
+        entry,
+      ]),
+    );
+
+    return {
+      league: universe.league,
+      /* Orden alfabético: los resueltos por búsqueda individual llegan al
+         final de la lista del provider */
+      teams: [...teams]
+        .sort((a, b) => a.name.localeCompare(b.name, "es"))
+        .map((providerTeam) => {
+          const lastImport = lastImportById.get(providerTeam.providerTeamId);
+          return {
+            providerTeamId: providerTeam.providerTeamId,
+            name: providerTeam.name,
+            poolCount:
+              poolCountByClub.get(normClubKey(providerTeam.name)) ?? 0,
+            lastImport: lastImport
+              ? {
+                  status: lastImport.status,
+                  created: lastImport.created,
+                  error: lastImport.error,
+                  importedAt: lastImport.importedAt,
+                }
+              : null,
+            cached: Boolean(
+              getCachedTeamPlayers(providerTeam.providerTeamId),
+            ),
+          };
+        }),
+      unresolvedTeams,
+      quota: getPoolQuota(),
+    };
+  };
+
   /* --------------- IMPORT POOL FROM PROVIDER --------------- */
-  /* Trae la foto fresca de la liga del universo. SOLO CREA lo que falta en
-     este pool (idempotente y aditivo: re-importar tras un mercado de pases
-     suma refuerzos sin pisar ediciones del admin). Los jugadores sin
-     posición mapeable se informan para alta manual. */
-  importPoolFromProvider = async (universeId) => {
+  /* Import SELECTIVO (2026-11-09): trae SOLO los equipos que el admin tildó
+     en el modal — cada plantel es una request de la cuota diaria. Sigue
+     siendo idempotente y aditivo: solo crea lo que falta en este pool, así
+     que re-importar un equipo suma refuerzos sin pisar ediciones del
+     admin. Cada equipo deja registro en importedTeams. Si se agota la
+     cuota diaria, los que faltan quedan sin intentar (no como fallidos)
+     para retomarlos otro día desde el mismo modal. */
+  importPoolFromProvider = async (universeId, { providerTeamIds } = {}) => {
     const team = await getTeamOrThrow(universeId);
     if (!team.leagueProviderId) {
       throw new Error(
@@ -340,37 +478,68 @@ export default class GdtRealPlayerRepository {
       );
     }
 
-    /* Lista de equipos vigentes + IDs resueltos en API-Football (los
-       planteles vienen de ahí — plan híbrido); los equipos que no se
-       pudieron resolver se informan como fallidos */
-    const { teams: providerTeams, unresolvedTeams } = await getPoolLeagueTeams(
+    const selectedTeams = await resolveSelectedTeams(
       team.leagueProviderId,
+      providerTeamIds,
     );
     const summary = {
       league: team.league,
-      teams: providerTeams.length,
+      teams: selectedTeams.length,
       created: 0,
       alreadyExisting: 0,
       withoutPosition: [],
-      failedTeams: [...unresolvedTeams],
+      failedTeams: [],
+      notAttempted: [],
     };
 
-    for (const providerTeam of providerTeams) {
+    const recordTeamImport = async (providerTeam, fields) => {
+      team.importedTeams = [
+        ...(team.importedTeams ?? []).filter(
+          (entry) => entry.providerTeamId !== providerTeam.providerTeamId,
+        ),
+        {
+          providerTeamId: providerTeam.providerTeamId,
+          name: providerTeam.name,
+          importedAt: new Date(),
+          ...fields,
+        },
+      ];
+      await team.save();
+    };
+
+    let quotaExhausted = false;
+    for (const providerTeam of selectedTeams) {
+      if (quotaExhausted) {
+        summary.notAttempted.push(providerTeam.name);
+        continue;
+      }
+
       let players;
       try {
         players = await getPoolTeamPlayers(
           providerTeam.providerTeamId,
           providerTeam.name,
         );
+        cacheTeamPlayers(providerTeam.providerTeamId, players);
       } catch (error) {
         console.error(
           `Import GDT: falló el plantel de ${providerTeam.name}:`,
           error.message,
         );
+        if (isDailyQuotaError(error)) {
+          quotaExhausted = true;
+          summary.notAttempted.push(providerTeam.name);
+          continue;
+        }
         summary.failedTeams.push(providerTeam.name);
+        await recordTeamImport(providerTeam, {
+          status: "failed",
+          error: error.message,
+        });
         continue;
       }
 
+      let createdForTeam = 0;
       for (const player of players) {
         const club = player.club || providerTeam.name;
 
@@ -407,9 +576,16 @@ export default class GdtRealPlayerRepository {
           photoUrl: player.photoUrl,
         });
         summary.created += 1;
+        createdForTeam += 1;
       }
+
+      await recordTeamImport(providerTeam, {
+        status: "imported",
+        created: createdForTeam,
+      });
     }
 
+    summary.quota = getPoolQuota();
     return summary;
   };
 
@@ -417,8 +593,10 @@ export default class GdtRealPlayerRepository {
   /* SOLO LEE Y COMPARA el pool contra los planteles vigentes de la liga:
      el import es solo-crea y los clubes quedan congelados tras la carga
      inicial — este reporte es la capa de detección de transferencias.
-     Escribir es siempre una acción manual del admin, fila por fila. */
-  getTransferReport = async (universeId) => {
+     Escribir es siempre una acción manual del admin, fila por fila.
+     SELECTIVO (2026-11-09): compara solo los equipos elegidos en el modal;
+     los planteles cacheados no gastan cuota. */
+  getTransferReport = async (universeId, { providerTeamIds } = {}) => {
     const team = await getTeamOrThrow(universeId);
     if (!team.leagueProviderId) {
       throw new Error(
@@ -433,25 +611,28 @@ export default class GdtRealPlayerRepository {
       );
     }
 
-    const snapshot = await fetchLeagueSnapshot(team.leagueProviderId);
+    const selectedTeams = await resolveSelectedTeams(
+      team.leagueProviderId,
+      providerTeamIds,
+    );
+    const snapshot = await fetchTeamsSnapshot(selectedTeams);
     const draftedBy = await buildDraftedByMap(team);
 
-    /* Un equipo que falló en el snapshot no prueba ausencia: sus jugadores
-       no pueden reportarse como "fuera de la liga" */
-    const failedClubKeys = new Set(snapshot.failedTeams.map(normClubKey));
+    /* Solo un equipo efectivamente CONSULTADO prueba ausencia: los no
+       elegidos y los que fallaron no pueden reportar "no figura en su club" */
+    const comparedClubKeys = new Set(snapshot.comparedTeams.map(normClubKey));
 
     /* Limpieza perezosa de silenciados: si la API ya no dice ese club para
-       el jugador, la entrada cumplió su ciclo */
+       el jugador, la entrada cumplió su ciclo. Con snapshot parcial, la
+       ausencia solo cuenta si el club silenciado fue consultado. */
     const poolById = new Map(poolPlayers.map((p) => [String(p._id), p]));
     const ignores = team.transferIgnores ?? [];
     const validIgnores = ignores.filter((entry) => {
       const poolPlayer = poolById.get(String(entry.realPlayer));
       if (!poolPlayer?.providerPlayerId) return false;
       const snapPlayer = snapshot.byProviderId.get(poolPlayer.providerPlayerId);
-      return (
-        snapPlayer &&
-        normClubKey(snapPlayer.club) === normClubKey(entry.apiClub)
-      );
+      if (!snapPlayer) return !comparedClubKeys.has(normClubKey(entry.apiClub));
+      return normClubKey(snapPlayer.club) === normClubKey(entry.apiClub);
     });
     if (validIgnores.length !== ignores.length) {
       team.transferIgnores = validIgnores;
@@ -484,7 +665,7 @@ export default class GdtRealPlayerRepository {
       };
 
       if (!snapPlayer) {
-        if (!failedClubKeys.has(normClubKey(player.club))) {
+        if (comparedClubKeys.has(normClubKey(player.club))) {
           missingFromLeague.push(row);
         }
         continue;
@@ -525,11 +706,13 @@ export default class GdtRealPlayerRepository {
     return {
       league: team.league,
       fetchedAt: snapshot.fetchedAt,
+      comparedTeams: snapshot.comparedTeams,
       failedTeams: snapshot.failedTeams,
       ignoredCount: validIgnores.length,
       clubChanged,
       missingFromLeague,
       newPlayers,
+      quota: getPoolQuota(),
     };
   };
 
@@ -582,14 +765,13 @@ export default class GdtRealPlayerRepository {
     ];
     if (ids.length === 0) throw new Error("Faltan los jugadores a agregar");
 
-    const snapshot = await fetchLeagueSnapshot(team.leagueProviderId);
     const summary = { created: [], skipped: [], withoutPosition: [] };
 
     for (const providerPlayerId of ids) {
-      const snapPlayer = snapshot.byProviderId.get(providerPlayerId);
+      const snapPlayer = findCachedSnapshotPlayer(providerPlayerId);
       if (!snapPlayer) {
         summary.skipped.push(
-          "Un jugador ya no figura en el snapshot de la liga: volvé a detectar diferencias",
+          "Un jugador ya no figura en los planteles consultados (venció el cache de media hora): volvé a detectar diferencias",
         );
         continue;
       }

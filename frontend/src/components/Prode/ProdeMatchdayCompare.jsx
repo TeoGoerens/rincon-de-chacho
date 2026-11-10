@@ -12,6 +12,7 @@ import SpinnerOverlay from "../Layout/Spinner/SpinnerOverlay";
 import fetchProdeMatchdayPredictions from "../../reactquery/prode/fetchProdeMatchdayPredictions";
 import fetchProdeMatchdayPartials from "../../reactquery/prode/fetchProdeMatchdayPartials";
 import { orderProdeItems } from "../../helpers/prodeItemOrder";
+import { displayGdtPoints } from "../../helpers/gdtPoints";
 
 const CHALLENGE_BLOCKS = [
   { code: "ARG", title: "Prode Argentina", short: "Argentina" },
@@ -619,7 +620,7 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
             pending ? " prp-gdt-num--pending" : ""
           }`}
         >
-          {pending ? "—" : side.value}
+          {pending ? "—" : displayGdtPoints(side.value)}
         </span>
       </div>
     );
@@ -900,7 +901,9 @@ const ProdeMatchdayCompare = ({ matchday, myPlayer }) => {
 
   /* Valor efectivo del slot en su mini-duelo: sin puntaje cargado, pendiente */
   const gdtSideValue = (side) =>
-    side?.value === null || side?.value === undefined ? "—" : side.value;
+    side?.value === null || side?.value === undefined
+      ? "—"
+      : displayGdtPoints(side.value);
 
   const gdtSideClass = (result, code) => {
     const base = "prp-sum-md-side";

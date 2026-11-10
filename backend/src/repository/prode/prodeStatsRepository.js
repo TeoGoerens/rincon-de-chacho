@@ -808,7 +808,9 @@ export default class ProdeStatsRepository {
         );
         squadTotals.push({
           player: playerRef(playerId),
-          value: total,
+          /* Puntajes con decimales: la suma en punto flotante deja restos
+             (7,1 + 0,2 = 7,300000000000001); se redondea el ruido */
+          value: Number(total.toFixed(6)),
           context: `Fecha ${md.roundNumber} · ${tournamentName(md.tournament)}`,
           order: orderByMatchday.get(String(md._id)),
         });
@@ -865,7 +867,14 @@ export default class ProdeStatsRepository {
         mostChampionships: topRecordGroups(countItems(championCounts)),
         mostLastPlaces: topRecordGroups(countItems(lastPlaceCounts)),
         bestSquadScore: topRecordGroups(squadTotals),
-        worstSquadScore: topRecordGroups(squadTotals, { ascending: true }),
+        /* Sin los planteles que suman 0 (decisión del dueño 2026-11-09):
+           en fechas sin partidos de la liga del universo se carga 0 a todos
+           para forzar el empate técnico del desafío GDT, y eso no es un
+           "peor puntaje" real */
+        worstSquadScore: topRecordGroups(
+          squadTotals.filter((item) => item.value !== 0),
+          { ascending: true },
+        ),
       },
       challengeTable,
     };

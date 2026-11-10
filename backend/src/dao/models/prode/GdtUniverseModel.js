@@ -92,6 +92,31 @@ const gdtUniverseSchema = new mongoose.Schema(
       default: [],
     },
 
+    /* Último import de cada equipo de la liga (import SELECTIVO, 2026-11-09):
+       el modal de selección muestra qué equipos ya entraron y cuáles
+       fallaron, para no gastar cuota diaria re-importando lo que está bien.
+       providerTeamId = ID de API-Football. */
+    importedTeams: {
+      type: [
+        new mongoose.Schema(
+          {
+            providerTeamId: { type: String, required: true },
+            name: { type: String, required: true, trim: true },
+            status: {
+              type: String,
+              enum: ["imported", "failed"],
+              required: true,
+            },
+            created: { type: Number, default: 0 },
+            error: { type: String, default: "" },
+            importedAt: { type: Date, default: Date.now },
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
+
     /* CORRECCIÓN habilitada por el admin (one-shot): tras corregir un error
        de DATOS del pool (posición/club que la API trajo mal), el afectado
        repone SOLO sus slots inconsistentes, sin gastar cambios mensuales.

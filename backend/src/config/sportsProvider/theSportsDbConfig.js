@@ -42,4 +42,6 @@ export const SUPPORTED_LEAGUES = [
   { id: "4429", name: "Mundial FIFA" },
   { id: "4499", name: "Copa América" },
   { id: "4502", name: "Eurocopa" },
+  { id: "4490", name: "UEFA Nations League" },
+  { id: "5518", name: "Eliminatorias UEFA · Mundial" },
 ];

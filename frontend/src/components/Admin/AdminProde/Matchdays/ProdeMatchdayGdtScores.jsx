@@ -6,6 +6,12 @@ import { toast } from "react-toastify";
 // Imports CSS & helpers
 import "../ProdeFormStyles.css";
 import "../ProdeIndexStyles.css";
+import {
+  isValidGdtPoints,
+  parseGdtPoints,
+  gdtPointsError,
+  formatGdtPoints,
+} from "../../../../helpers/gdtPoints";
 
 //Import components
 import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
@@ -22,9 +28,9 @@ const POSITION_LABELS = {
   DEL: "Delantero",
 };
 
-/* El puntaje puede ser NEGATIVO: una performance desastrosa resta en GDT */
-const isValidPoints = (value) =>
-  value !== "" && Number.isInteger(Number(value));
+/* El puntaje puede ser NEGATIVO (una performance desastrosa resta en GDT) y
+   con decimales, escritos con COMA */
+const isValidPoints = isValidGdtPoints;
 
 const plural = (count, singular, pluralWord) =>
   `${count} ${count === 1 ? singular : pluralWord}`;
@@ -71,14 +77,13 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
     setValues((prev) => {
       const next = {};
       for (const player of players) {
-        next[player._id] = player.points === null ? "" : String(player.points);
+        next[player._id] = formatGdtPoints(player.points);
       }
       return { ...next, ...prev };
     });
   }, [players]);
 
-  const serverValueOf = (player) =>
-    player.points === null ? "" : String(player.points);
+  const serverValueOf = (player) => formatGdtPoints(player.points);
 
   const dirty = players.some(
     (player) => (values[player._id] ?? "") !== serverValueOf(player),
@@ -150,13 +155,13 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
   const handleSave = () => {
     const scores = [];
     for (const player of players) {
-      const value = values[player._id] ?? "";
+      const value = (values[player._id] ?? "").trim();
       if (value === "") continue;
       if (!isValidPoints(value)) {
-        toast.error(`El puntaje de ${player.name} debe ser un número entero`);
+        toast.error(`Puntaje de ${player.name}: ${gdtPointsError(value)}`);
         return;
       }
-      scores.push({ realPlayer: player._id, points: Number(value) });
+      scores.push({ realPlayer: player._id, points: parseGdtPoints(value) });
     }
     saveMutation.mutate({ matchdayId: matchday._id, scores });
   };
@@ -164,12 +169,19 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
   const scoreInput = (player, extraClass = "") => {
     const value = values[player._id] ?? "";
     const saved = value !== "" && value === serverValueOf(player);
+    const invalid = value.trim() !== "" && !isValidPoints(value);
+    /* type="text": un input number no acepta la coma decimal en todos los
+       navegadores. La validación marca el campo en vivo. */
     return (
       <input
-        type="number"
-        inputMode="numeric"
+        type="text"
+        inputMode="decimal"
         aria-label={`Puntaje de ${player.name}`}
-        className={`${saved ? "prf-rt-input--done" : ""} ${extraClass}`.trim()}
+        aria-invalid={invalid}
+        title={invalid ? `Puntaje inválido: ${gdtPointsError(value)}` : undefined}
+        className={`${saved ? "prf-rt-input--done" : ""} ${invalid ? "prf-rt-input--invalid" : ""} ${extraClass}`
+          .replace(/\s+/g, " ")
+          .trim()}
         value={value}
         disabled={readOnly}
         onFocus={(e) => e.target.select()}
@@ -199,7 +211,9 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
           {side.playerName}
         </span>
         <span className="prf-gdt-md-pts">
-          {side.value === null || side.value === undefined ? "—" : side.value}
+          {side.value === null || side.value === undefined
+            ? "—"
+            : formatGdtPoints(side.value)}
         </span>
       </span>
     );
@@ -303,7 +317,7 @@ const ProdeMatchdayGdtScores = ({ matchday }) => {
                             {player.squadCount}
                           </td>
                           <td className="prf-rt-score">
-                            {scoreInput(player)}
+                            {scoreInput(player, "prf-gdt-input")}
                           </td>
                         </tr>
                       ))}

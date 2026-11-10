@@ -19,6 +19,25 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
    El límite DIARIO agotado corta con error claro (no tiene sentido esperar). */
 let minuteRemaining = null;
 
+/* Cuota DIARIA según los headers de la última respuesta válida: el modal
+   de selección de equipos la muestra para que el admin calcule el gasto
+   antes de importar o detectar. null = todavía no se consultó la API. */
+let dailyQuota = { remaining: null, limit: null, checkedAt: null };
+
+export const getPoolQuota = () => ({ ...dailyQuota });
+
+/* Error marcado: los loops de planteles cortan acá en vez de seguir
+   gastando requests que van a fallar igual */
+const dailyQuotaError = () => {
+  const error = new Error(
+    "Se agotaron las requests diarias del plan de API-Football: reintentá mañana",
+  );
+  error.code = "DAILY_QUOTA";
+  return error;
+};
+
+export const isDailyQuotaError = (error) => error?.code === "DAILY_QUOTA";
+
 const fetchJson = async (endpoint, params = {}, isRetry = false) => {
   if (!API_FOOTBALL_KEY) {
     throw new Error(
@@ -43,6 +62,20 @@ const fetchJson = async (endpoint, params = {}, isRetry = false) => {
   minuteRemaining =
     remainingHeader === null ? null : Number(remainingHeader);
 
+  /* Las respuestas de error no traen los headers de cuota: se conserva el
+     último valor conocido */
+  const dailyRemainingHeader = response.headers.get(
+    "x-ratelimit-requests-remaining",
+  );
+  if (dailyRemainingHeader !== null) {
+    const dailyLimitHeader = response.headers.get("x-ratelimit-requests-limit");
+    dailyQuota = {
+      remaining: Number(dailyRemainingHeader),
+      limit: dailyLimitHeader === null ? null : Number(dailyLimitHeader),
+      checkedAt: new Date(),
+    };
+  }
+
   if (response.status === 429) {
     if (isRetry) {
       throw new Error("API-Football rechazó por rate limit dos veces seguidas");
@@ -60,9 +93,8 @@ const fetchJson = async (endpoint, params = {}, isRetry = false) => {
   const errors = data?.errors;
   if (errors && !Array.isArray(errors) && Object.keys(errors).length > 0) {
     if (errors.requests) {
-      throw new Error(
-        "Se agotaron las requests diarias del plan de API-Football: reintentá mañana",
-      );
+      dailyQuota = { ...dailyQuota, remaining: 0, checkedAt: new Date() };
+      throw dailyQuotaError();
     }
     if (errors.rateLimit && !isRetry) {
       minuteRemaining = 0;
@@ -94,9 +126,14 @@ const normalizeName = (name) =>
 const accentCount = (name) =>
   (name ?? "").normalize("NFD").match(/\p{Diacritic}/gu)?.length ?? 0;
 
-/* Equipos filiales que la búsqueda puede devolver junto al principal */
+/* Equipos filiales que la búsqueda puede devolver junto al principal:
+   juveniles, reserva, femeninos ("Santos W") y segundos equipos
+   ("Mirassol B") — verificado contra el Brasileirão 2026-11-09, donde un
+   femenino se colaba como única coincidencia de Athletico Paranaense */
 const isYouthOrReserveTeam = (name) =>
-  /\bu-?\d{2}\b|\bres\.?$|\breserves?\b|\bfem/i.test(name ?? "");
+  /\bu-?\d{2}\b|\bres\.?$|\breserves?\b|\bfem|\s(w|b)$/i.test(
+    (name ?? "").trim(),
+  );
 
 /* Posiciones de API-Football: 4 categorías limpias, mapeo 1 a 1 */
 const POSITION_MAP = {
@@ -121,6 +158,33 @@ const getLeagueConfigOrThrow = (theSportsDbLeagueId) => {
 const resolutionCache = new Map();
 const RESOLUTION_CACHE_TTL_MS = 10 * 60 * 1000;
 
+/* Listado de una competición de selecciones. Las que van por CICLO
+   (eliminatorias: temporadas 2018, 2020, 2024…) no tienen temporada para
+   cada año: si la temporada base no existe (o el plan no la ve), se usa
+   la última de la competición anterior a la base. */
+const fetchNationalTeamList = async (apiFootballLeagueId) => {
+  const baseSeason = teamListSeason();
+  const listSeason = async (season) =>
+    (
+      await fetchJson("/teams", { league: apiFootballLeagueId, season })
+    ).response ?? [];
+
+  try {
+    const items = await listSeason(baseSeason);
+    if (items.length > 0) return items;
+  } catch (error) {
+    if (isDailyQuotaError(error)) throw error;
+  }
+
+  const leagueData = await fetchJson("/leagues", { id: apiFootballLeagueId });
+  const previousSeasons = (leagueData.response?.[0]?.seasons ?? [])
+    .map((season) => season.year)
+    .filter((year) => year < baseSeason)
+    .sort((a, b) => b - a);
+  if (previousSeasons.length === 0) return [];
+  return listSeason(previousSeasons[0]);
+};
+
 /* --------------- LISTA DE EQUIPOS DEL POOL --------------- */
 /* Devuelve { teams: [{ providerTeamId, name }], unresolvedTeams: [names] }.
    providerTeamId = ID de API-Football; name = nombre según API-Football
@@ -130,6 +194,26 @@ export const getPoolLeagueTeams = async (theSportsDbLeagueId) => {
   if (cached && cached.expiresAt > Date.now()) return cached.value;
 
   const leagueConfig = getLeagueConfigOrThrow(theSportsDbLeagueId);
+
+  /* Selecciones: la lista sale directo del listado de API-Football (una
+     request). No hay ascensos ni descensos que cruzar con TheSportsDB, y
+     su filtro por país no aplica (el país de una selección es ella misma) */
+  if (leagueConfig.national) {
+    const nationalTeams = await fetchNationalTeamList(leagueConfig.id);
+    const teams = nationalTeams
+      .filter((item) => item.team.national)
+      .map((item) => ({
+        providerTeamId: String(item.team.id),
+        name: item.team.name,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "es"));
+    const value = { teams, unresolvedTeams: [] };
+    resolutionCache.set(String(theSportsDbLeagueId), {
+      value,
+      expiresAt: Date.now() + RESOLUTION_CACHE_TTL_MS,
+    });
+    return value;
+  }
 
   /* ① Equipos VIGENTES de la liga según TheSportsDB, deduplicados por
      nombre normalizado (sus duplicados con/sin tilde colapsan acá; se
@@ -242,8 +326,16 @@ export const getPoolLeagueTeams = async (theSportsDbLeagueId) => {
     const newCandidates = candidates.filter(
       (item) => !resolved.has(String(item.team.id)),
     );
+    /* Desempate por nombre EXACTO (normalizado): ante homónimos del mismo
+       país ("Santos" / "Santos AP", "Coritiba" / "Coritiba SE") gana el
+       que se llama igual, solo si es uno. Si no, sigue sin adivinarse. */
+    const exactMatches = newCandidates.filter(
+      (item) => normalizeName(item.team.name) === normalizeName(name),
+    );
     if (newCandidates.length === 1) {
       addResolved(newCandidates[0].team.id, name);
+    } else if (exactMatches.length === 1) {
+      addResolved(exactMatches[0].team.id, name);
     } else {
       unresolvedTeams.push(name);
     }

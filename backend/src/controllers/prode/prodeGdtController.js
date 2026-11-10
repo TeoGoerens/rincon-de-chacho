@@ -508,10 +508,23 @@ export default class ProdeGdtController {
   };
 
   /* --------------- IMPORT TEAM POOL --------------- */
+  getGdtPoolTeams = async (req, res, next) => {
+    try {
+      const poolTeams = await realPlayerRepository.getPoolTeams(req.params.id);
+      res.status(200).json({
+        message: "GDT pool teams retrieved successfully",
+        ...poolTeams,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   importGdtUniversePool = async (req, res, next) => {
     try {
       const summary = await realPlayerRepository.importPoolFromProvider(
         req.params.id,
+        { providerTeamIds: req.body.providerTeamIds },
       );
       res.status(200).json({
         message: "GDT team pool imported successfully",
@@ -525,8 +538,13 @@ export default class ProdeGdtController {
   /* --------------- GDT TRANSFER REPORT --------------- */
   getGdtTransferReport = async (req, res, next) => {
     try {
+      /* ?teams=ID1,ID2,... — los equipos elegidos en el modal */
+      const providerTeamIds = String(req.query.teams ?? "")
+        .split(",")
+        .filter(Boolean);
       const report = await realPlayerRepository.getTransferReport(
         req.params.id,
+        { providerTeamIds },
       );
       res.status(200).json({
         message: "GDT transfer report generated successfully",

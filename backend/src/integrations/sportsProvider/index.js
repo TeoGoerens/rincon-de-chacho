@@ -12,4 +12,6 @@ export {
 export {
   getPoolLeagueTeams,
   getPoolTeamPlayers,
+  getPoolQuota,
+  isDailyQuotaError,
 } from "./apiFootballAdapter.js";

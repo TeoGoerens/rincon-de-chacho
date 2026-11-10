@@ -63,9 +63,12 @@ const CreateGdtUniverse = () => {
   const mutation = useMutation({
     mutationFn: createGdtUniverse,
     onSuccess: (teamCreated) => {
-      toast.success("Universo GDT creado — ahora importá su pool de jugadores");
+      toast.success("Universo GDT creado — elegí qué equipos importar");
       queryClient.invalidateQueries(["gdt-universes", tournamentId]);
-      navigate(`/admin/prode/gdt/${teamCreated._id}`);
+      /* El detalle abre solo el modal de import selectivo */
+      navigate(`/admin/prode/gdt/${teamCreated._id}`, {
+        state: { openImport: true },
+      });
     },
     onError: (error) => {
       toast.error(error?.message || "Error al crear el universo GDT");

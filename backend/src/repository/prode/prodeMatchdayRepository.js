@@ -885,9 +885,11 @@ export default class ProdeMatchdayRepository {
         throw new Error("Hay un jugador con más de un puntaje cargado");
       }
       seen.add(playerId);
-      /* Puede ser NEGATIVO: una performance desastrosa resta en GDT */
-      if (!Number.isInteger(score?.points)) {
-        throw new Error("Cada puntaje debe ser un número entero");
+      /* Puede ser NEGATIVO (una performance desastrosa resta en GDT) y con
+         DECIMALES (2026-11-09): los mini-duelos solo comparan puntajes, así
+         que cualquier número finito es válido */
+      if (typeof score?.points !== "number" || !Number.isFinite(score.points)) {
+        throw new Error("Cada puntaje debe ser un número");
       }
     }
 

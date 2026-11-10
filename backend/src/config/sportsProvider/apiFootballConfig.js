@@ -27,6 +27,15 @@ export const API_FOOTBALL_LEAGUES = {
   4332: { id: 135, country: "Italy" }, // Serie A
   4331: { id: 78, country: "Germany" }, // Bundesliga
   4334: { id: 61, country: "France" }, // Ligue 1
+  /* Competición de SELECCIONES (2026-11-09): la lista de equipos sale
+     directo de API-Football (las 54 de la UEFA, verificadas en vivo con la
+     temporada base) sin cruzar con TheSportsDB. El "plantel" de una
+     selección es su última convocatoria (~23 jugadores). */
+  4490: { id: 5, country: null, national: true }, // UEFA Nations League
+  /* Temporadas por CICLO (2018, 2020, 2024…), no por año: el listado usa
+     la última temporada disponible si la base no existe. Verificada en
+     vivo el 2026-11-09 (ciclo 2026 terminado, ciclo 2030 sin cargar). */
+  5518: { id: 32, country: null, national: true }, // Eliminatorias UEFA
 };
 
 /* Equipos cuyo nombre difiere tanto entre TheSportsDB y API-Football que ni
@@ -43,4 +52,7 @@ export const API_FOOTBALL_TEAM_ALIASES = {
   "independiente rivadavia": 473, // Independ. Rivadavia
   "central cordoba de santiago del estero": 1065, // Central Cordoba de Santiago
   "gimnasia y esgrima de mendoza": 1066, // Gimnasia M.
+  /* Brasileirão — VERIFICADOS en vivo el 2026-11-09 */
+  "athletico paranaense": 134, // Atletico Paranaense (la búsqueda con "h" solo trae el femenino)
+  "atletico mineiro": 1062, // Atletico-MG (el 117 "Atletico Mineiro" es un registro vacío)
 };

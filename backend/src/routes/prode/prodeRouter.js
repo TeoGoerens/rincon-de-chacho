@@ -126,6 +126,12 @@ router.post(
   adminAuthMiddleware,
   gdtController.createGdtRealPlayer,
 );
+router.get(
+  "/gdt/universes/:id/pool-teams",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.getGdtPoolTeams,
+);
 router.post(
   "/gdt/universes/:id/players/import",
   authMiddleware,

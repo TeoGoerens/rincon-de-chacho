@@ -11,8 +11,11 @@ import SpinnerOverlay from "../Layout/Spinner/SpinnerOverlay";
 
 //Import React Query functions
 import fetchProdeRecords from "../../reactquery/prode/fetchProdeRecords";
+import { displayGdtPoints } from "../../helpers/gdtPoints";
 
 const formatPts = (value) => `${value} pts`;
+/* Puntaje de plantel GDT: redondo sin decimales; si no, 1 decimal con coma */
+const formatSquadPts = (value) => `${displayGdtPoints(value)} pts`;
 const formatFechas = (value) => (value === 1 ? "1 fecha" : `${value} fechas`);
 const formatMargin = (value) => `+${value}`;
 const formatCount = (value) => `${value}`;
@@ -136,13 +139,13 @@ const GDT_RECORDS = [
     key: "bestSquadScore",
     title: "Mejor puntaje del plantel en una fecha",
     hint: "La mejor suma de puntos de los 11 del plantel en una fecha",
-    format: formatPts,
+    format: formatSquadPts,
   },
   {
     key: "worstSquadScore",
     title: "Menor puntaje del plantel en una fecha",
-    hint: "La peor suma de puntos de los 11 del plantel en una fecha",
-    format: formatPts,
+    hint: "La peor suma de puntos de los 11 del plantel en una fecha (sin contar las fechas en 0)",
+    format: formatSquadPts,
   },
 ];
 

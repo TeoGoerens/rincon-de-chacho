@@ -1,6 +1,6 @@
 // Import React dependencies
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
@@ -20,6 +20,7 @@ import SpinnerOverlay from "../../../Layout/Spinner/SpinnerOverlay";
 import DeleteButton from "../../../Layout/Buttons/DeleteButton";
 import SuperDeleteButton from "../../../Layout/Buttons/SuperDeleteButton";
 import EditButton from "../../../Layout/Buttons/EditButton";
+import GdtPoolTeamsModal from "./GdtPoolTeamsModal";
 
 //Import React Query functions
 import fetchGdtUniverseById from "../../../../reactquery/prode/fetchGdtUniverseById";
@@ -81,12 +82,18 @@ const countInconsistentSlots = (squad) => {
 const GdtUniverseDetail = () => {
   const { universeId } = useParams();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [clubFilter, setClubFilter] = useState("");
   const [positionFilter, setPositionFilter] = useState("");
   const [search, setSearch] = useState("");
   const [poolPage, setPoolPage] = useState(1);
-  const [confirmImportVisible, setConfirmImportVisible] = useState(false);
+  /* Modal de selección de equipos: "import" | "detect" | null */
+  const [teamsModalMode, setTeamsModalMode] = useState(null);
+  /* Equipos de la última detección: el queryFn del reporte los lee de acá
+     para que los refetch tras cada acción comparen los mismos equipos */
+  const detectTeamIdsRef = useRef([]);
   const [draftDeadlineInput, setDraftDeadlineInput] = useState("");
   const [confirmOpenDraftVisible, setConfirmOpenDraftVisible] = useState(false);
   const [confirmRevealVisible, setConfirmRevealVisible] = useState(false);
@@ -246,6 +253,7 @@ const GdtUniverseDetail = () => {
   const invalidatePool = () => {
     queryClient.invalidateQueries(["gdt-universe-players", universeId]);
     queryClient.invalidateQueries(["gdt-universes"]);
+    queryClient.invalidateQueries(["gdt-pool-teams", universeId]);
   };
 
   const invalidateDraft = () => {
@@ -610,6 +618,12 @@ const GdtUniverseDetail = () => {
           `No se pudo consultar el plantel de: ${summary.failedTeams.join(", ")}`,
         );
       }
+      if (summary.notAttempted.length > 0) {
+        toast.warn(
+          `Se agotó la cuota diaria: quedaron sin importar ${summary.notAttempted.join(", ")}. Retomalos mañana desde el mismo botón.`,
+          { autoClose: false },
+        );
+      }
       invalidatePool();
     },
     onError: (err) => {
@@ -617,12 +631,13 @@ const GdtUniverseDetail = () => {
     },
   });
 
-  /* Detector de transferencias: fetch SOLO por botón (nunca al montar) —
-     el server recorre la liga y cachea el snapshot; re-correr dentro de la
-     ventana de cache es instantáneo y no gasta cuota */
+  /* Detector de transferencias: fetch SOLO desde el modal de equipos (nunca
+     al montar) — el server consulta los equipos elegidos y cachea cada
+     plantel media hora; re-correr dentro de esa ventana no gasta cuota */
   const transferReportQuery = useQuery({
     queryKey: ["gdt-transfer-report", universeId],
-    queryFn: () => fetchGdtTransferReport(universeId),
+    queryFn: () =>
+      fetchGdtTransferReport(universeId, detectTeamIdsRef.current),
     enabled: false,
     staleTime: Infinity,
     retry: false,
@@ -788,10 +803,26 @@ const GdtUniverseDetail = () => {
     poolPage * POOL_PAGE_SIZE,
   );
 
-  const handleConfirmImport = () => {
-    setConfirmImportVisible(false);
-    importMutation.mutate({ universeId });
+  const handleTeamsConfirm = (providerTeamIds) => {
+    const mode = teamsModalMode;
+    setTeamsModalMode(null);
+    if (mode === "import") {
+      importMutation.mutate({ universeId, providerTeamIds });
+      return;
+    }
+    detectTeamIdsRef.current = providerTeamIds;
+    transferReportQuery.refetch().then(() =>
+      queryClient.invalidateQueries(["gdt-pool-teams", universeId]),
+    );
   };
+
+  /* Recién creado el universo, el modal de import se abre solo. El state de
+     navegación se limpia para que un refresh no lo vuelva a abrir. */
+  useEffect(() => {
+    if (!location.state?.openImport || !team) return;
+    if (team.leagueProviderId) setTeamsModalMode("import");
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, team, navigate]);
 
   const renderPlayerCell = (player) => (
     <span className="pri-cell-player">
@@ -848,11 +879,12 @@ const GdtUniverseDetail = () => {
      puede cambiar al jugador y no hay nada que sancionar) */
   const canBlockFromReport = team.draftStatus === "final";
 
-  /* La carga inicial se ofrece solo con el pool vacío y liga del catálogo;
-     el alta manual, en cuanto hay pool (o siempre, si el universo no tiene
-     liga asociada y el pool solo puede armarse a mano) */
-  const showInitialImport =
-    !isLoadingPlayers && players.length === 0 && Boolean(team.leagueProviderId);
+  /* El import selectivo se ofrece siempre que haya liga del catálogo: el
+     modal muestra qué equipos ya entraron y permite sumar los que falten
+     (o retomar los que cortó la cuota). El alta manual, en cuanto hay pool
+     (o siempre, si el universo no tiene liga asociada y el pool solo puede
+     armarse a mano) */
+  const showImport = !isLoadingPlayers && Boolean(team.leagueProviderId);
   const showManualAdd = players.length > 0 || !team.leagueProviderId;
 
   return (
@@ -1443,17 +1475,17 @@ const GdtUniverseDetail = () => {
         <div className="prf-form pri-draft-card prf-compact">
           <div className="prf-card-title">
             Sincronización con la liga
-            <InfoTip text="Compara el pool contra los planteles vigentes de la liga según la API y lista las tres diferencias posibles: cambios de club, jugadores que ya no figuran en la liga y refuerzos que todavía no están en el pool. Nada se modifica solo. Actualizar equivale a editar el club a mano (avisa si genera conflictos 1 por club en planteles vigentes); Ignorar silencia una fila cuando tu corrección le ganó a la API; los nuevos se agregan de a uno o por club entero. A los que ya no figuran en la liga no se los borra (romperían planteles): si alguien lo tiene drafteado, bloqueás ese slot desde la misma fila. La primera corrida recorre toda la liga y puede tardar unos minutos; repetirla dentro de la media hora es instantánea." />
+            <InfoTip text="Compara el pool contra los planteles vigentes de los equipos que elijas y lista las tres diferencias posibles: cambios de club, jugadores que ya no figuran en su club y refuerzos que todavía no están en el pool. Nada se modifica solo. Actualizar equivale a editar el club a mano (avisa si genera conflictos 1 por club en planteles vigentes); Ignorar silencia una fila cuando tu corrección le ganó a la API; los nuevos se agregan de a uno o por club entero. A los que ya no figuran en su club no se los borra (romperían planteles): si alguien lo tiene drafteado, bloqueás ese slot desde la misma fila. Cada equipo consultado gasta una request de la cuota diaria; los consultados en la última media hora quedan en cache y no gastan." />
           </div>
 
           <button
             type="button"
             className="prf-submit-btn"
-            onClick={() => transferReportQuery.refetch()}
+            onClick={() => setTeamsModalMode("detect")}
             disabled={transferReportQuery.isFetching}
           >
             {transferReportQuery.isFetching
-              ? "Consultando la liga..."
+              ? "Consultando los planteles..."
               : transferReport
                 ? "Volver a detectar"
                 : "Detectar diferencias"}
@@ -1470,14 +1502,20 @@ const GdtUniverseDetail = () => {
             <>
               <p className="prf-hint">
                 Snapshot de {formatDeadline(transferReport.fetchedAt)} ·{" "}
-                {transferReport.clubChanged.length}{" "}
+                {transferReport.comparedTeams.length}{" "}
+                {transferReport.comparedTeams.length === 1
+                  ? "equipo comparado"
+                  : "equipos comparados"}{" "}
+                · {transferReport.clubChanged.length}{" "}
                 {transferReport.clubChanged.length === 1
                   ? "cambio de club"
                   : "cambios de club"}{" "}
-                · {transferReport.missingFromLeague.length} fuera de la liga ·{" "}
+                · {transferReport.missingFromLeague.length} fuera de su club ·{" "}
                 {transferReport.newPlayers.length} nuevos
                 {transferReport.ignoredCount > 0 &&
                   ` · ${transferReport.ignoredCount} silenciados`}
+                {transferReport.quota?.remaining != null &&
+                  ` · te quedan ${transferReport.quota.remaining} requests hoy`}
               </p>
               {transferReport.failedTeams.length > 0 && (
                 <p className="prf-hint">
@@ -1489,7 +1527,8 @@ const GdtUniverseDetail = () => {
                 transferReport.missingFromLeague.length === 0 &&
                 transferReport.newPlayers.length === 0 && (
                   <p className="pri-state">
-                    El pool está al día con la liga: sin diferencias.
+                    El pool está al día con los equipos comparados: sin
+                    diferencias.
                   </p>
                 )}
 
@@ -1555,7 +1594,7 @@ const GdtUniverseDetail = () => {
                 <details className="pri-squad">
                   <summary className="pri-squad-summary">
                     <span className="pri-draft-name">
-                      Ya no figuran en la liga (
+                      Ya no figuran en su club (
                       {transferReport.missingFromLeague.length})
                     </span>
                   </summary>
@@ -1713,21 +1752,24 @@ const GdtUniverseDetail = () => {
         </div>
       )}
 
-      {/* ── Carga inicial del pool: existe UNA sola vez. Después, todo lo
-           que venga de la API entra por "Sincronización con la liga" (que
-           reemplazó al reimport masivo) o a mano ── */}
-      {(showInitialImport || showManualAdd) && (
+      {/* ── Import SELECTIVO del pool: abre el modal de equipos (cada uno
+           gasta una request de la cuota diaria). Los cambios de club y las
+           bajas de los ya importados entran por "Sincronización con la
+           liga" o a mano ── */}
+      {(showImport || showManualAdd) && (
         <div className="pri-import-bar">
-          {showInitialImport && (
+          {showImport && (
             <button
               type="button"
               className="pri-import-btn"
-              onClick={() => setConfirmImportVisible(true)}
+              onClick={() => setTeamsModalMode("import")}
               disabled={importMutation.isPending}
             >
               {importMutation.isPending
                 ? "Importando planteles..."
-                : `Importar planteles de ${team.league}`}
+                : players.length === 0
+                  ? `Importar planteles de ${team.league}`
+                  : "Importar equipos"}
             </button>
           )}
           {showManualAdd && (
@@ -2012,49 +2054,17 @@ const GdtUniverseDetail = () => {
         </div>
       )}
 
-      {/* ── Modal de confirmación del import ── */}
-      {confirmImportVisible && (
-        <div className="delete-confirmation-overlay">
-          <div className="delete-confirmation-modal">
-            <div className="delete-confirmation-icon delete-confirmation-icon--teal">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <path d="m7 10 5 5 5-5" />
-                <path d="M12 15V3" />
-              </svg>
-            </div>
-            <h4>¿Importar los planteles de {team.league}?</h4>
-            <p>
-              Es la carga inicial del pool de este universo: se traen los
-              planteles actuales de toda la liga. De ahí en adelante el pool
-              se mantiene desde "Sincronización con la liga" (cambios de club,
-              refuerzos, bajas) o a mano. Puede tardar varios minutos: no
-              cierres esta pantalla.
-            </p>
-            <div className="delete-confirmation-btn-container">
-              <button
-                className="delete-confirmation-btn-cancel"
-                onClick={() => setConfirmImportVisible(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="delete-confirmation-btn-confirm"
-                onClick={handleConfirmImport}
-              >
-                Importar
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ── Modal de selección de equipos (import selectivo / detector) ── */}
+      {teamsModalMode && (
+        <GdtPoolTeamsModal
+          universeId={universeId}
+          mode={teamsModalMode}
+          initialSelection={
+            teamsModalMode === "detect" ? detectTeamIdsRef.current : []
+          }
+          onConfirm={handleTeamsConfirm}
+          onClose={() => setTeamsModalMode(null)}
+        />
       )}
     </div>
   );
