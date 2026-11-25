@@ -110,6 +110,8 @@
   --status-teal-bg-strong:   rgba(168, 218, 220, 0.24);
 
   /* ── Espaciado base ── */
+  --space-3xs:  0.15rem;  /* separación mínima entre líneas de un mismo bloque */
+  --space-2xs:  0.35rem;  /* padding vertical de filas compactas */
   --space-xs:   0.5rem;
   --space-sm:   0.875rem;
   --space-md:   1.25rem;

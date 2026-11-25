@@ -17,16 +17,24 @@ export const teamListSeason = () => new Date().getFullYear() - 2;
 
 /* Liga TheSportsDB (leagueProviderId del universo) → liga API-Football.
    IDs y países VERIFICADOS en vivo contra la API el 2026-07-09. Solo ligas
-   elegibles como universo GDT — las copas no llevan pool de planteles. */
+   elegibles como universo GDT — las copas no llevan pool de planteles.
+
+   lowerDivisions: 2ª y 3ª división (en ese orden) de la misma liga, para
+   resolver los ASCENDIDOS que no figuran en el listado base. El listado
+   base es de hace 2 temporadas: en ese lapso un club sube como mucho dos
+   veces (3ª → 2ª → 1ª), así que 2ª + 3ª cubren a todos los posibles. Si la
+   3ª está partida en grupos, van todos. IDs VERIFICADOS en vivo el
+   2026-11-24 (todos con temporada 2024 disponible). La MLS no tiene
+   ascensos: sin divisiones inferiores. */
 export const API_FOOTBALL_LEAGUES = {
-  4406: { id: 128, country: "Argentina" }, // Liga Profesional Argentina
-  4351: { id: 71, country: "Brazil" }, // Brasileirão Serie A
+  4406: { id: 128, country: "Argentina", lowerDivisions: [129, 131, 134] }, // Liga Profesional · (Primera Nacional, Primera B Metro, Federal A)
+  4351: { id: 71, country: "Brazil", lowerDivisions: [72, 75] }, // Brasileirão Serie A · (Serie B, Serie C)
   4346: { id: 253, country: "USA" }, // Major League Soccer
-  4328: { id: 39, country: "England" }, // Premier League
-  4335: { id: 140, country: "Spain" }, // La Liga
-  4332: { id: 135, country: "Italy" }, // Serie A
-  4331: { id: 78, country: "Germany" }, // Bundesliga
-  4334: { id: 61, country: "France" }, // Ligue 1
+  4328: { id: 39, country: "England", lowerDivisions: [40, 41] }, // Premier League · (Championship, League One)
+  4335: { id: 140, country: "Spain", lowerDivisions: [141, 435, 436] }, // La Liga · (Segunda, Primera RFEF grupos 1 y 2)
+  4332: { id: 135, country: "Italy", lowerDivisions: [136, 138, 942, 943] }, // Serie A · (Serie B, Serie C gironi A/B/C)
+  4331: { id: 78, country: "Germany", lowerDivisions: [79, 80] }, // Bundesliga · (2. Bundesliga, 3. Liga)
+  4334: { id: 61, country: "France", lowerDivisions: [62, 63] }, // Ligue 1 · (Ligue 2, National)
   /* Competición de SELECCIONES (2026-11-09): la lista de equipos sale
      directo de API-Football (las 54 de la UEFA, verificadas en vivo con la
      temporada base) sin cruzar con TheSportsDB. El "plantel" de una

@@ -11,6 +11,7 @@ export {
 } from "./theSportsDbAdapter.js";
 export {
   getPoolLeagueTeams,
+  searchPoolTeams,
   getPoolTeamPlayers,
   getPoolQuota,
   isDailyQuotaError,

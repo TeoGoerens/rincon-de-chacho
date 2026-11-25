@@ -1,12 +1,16 @@
 // Import React dependencies
 import React, { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Imports CSS & helpers
 import "../ProdeIndexStyles.css";
 
+// Import components
+import GdtUnresolvedTeams from "./GdtUnresolvedTeams";
+
 //Import React Query functions
 import fetchGdtPoolTeams from "../../../../reactquery/prode/fetchGdtPoolTeams";
+import unlinkGdtPoolTeam from "../../../../reactquery/prode/unlinkGdtPoolTeam";
 
 const formatShortDate = (isoDate) =>
   new Date(isoDate).toLocaleDateString("es-AR", {
@@ -45,6 +49,20 @@ const GdtPoolTeamsModal = ({
     retry: false,
   });
   const teams = useMemo(() => data?.teams ?? [], [data]);
+
+  /* Deshacer un vínculo manual: el equipo vuelve al bloque "sin vincular" */
+  const queryClient = useQueryClient();
+  const unlinkMutation = useMutation({
+    mutationFn: unlinkGdtPoolTeam,
+    onSuccess: (_, { providerTeamId }) => {
+      setSelected((current) => {
+        const next = new Set(current ?? []);
+        next.delete(providerTeamId);
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ["gdt-pool-teams", universeId] });
+    },
+  });
 
   /* Selección inicial: la última usada en el detector; si no hay, los que
      faltan importar (import) o los ya importados (detector) */
@@ -114,6 +132,7 @@ const GdtPoolTeamsModal = ({
     }
     if (parts.length === 0) parts.push("Sin importar");
     if (!isImport && team.cached) parts.push("en cache, no gasta cuota");
+    if (team.linkSourceTeamId) parts.push("vinculado a mano");
     return parts.join(" · ");
   };
 
@@ -200,16 +219,37 @@ const GdtPoolTeamsModal = ({
                       {teamMeta(team)}
                     </span>
                   </span>
+                  {team.linkSourceTeamId && (
+                    <button
+                      type="button"
+                      className="pri-status-btn pri-tm-unlink"
+                      disabled={unlinkMutation.isPending}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        unlinkMutation.mutate({
+                          universeId,
+                          sourceTeamId: team.linkSourceTeamId,
+                          providerTeamId: team.providerTeamId,
+                        });
+                      }}
+                    >
+                      Deshacer
+                    </button>
+                  )}
                 </label>
               ))}
             </div>
 
-            {data.unresolvedTeams.length > 0 && (
-              <p className="pri-tm-note">
-                Sin resolver en API-Football (falta un alias en la config):{" "}
-                {data.unresolvedTeams.join(", ")}
+            {unlinkMutation.isError && (
+              <p className="pri-tm-note pri-tm-note--warn">
+                {unlinkMutation.error?.message}
               </p>
             )}
+
+            <GdtUnresolvedTeams
+              universeId={universeId}
+              details={data.unresolvedDetails}
+            />
 
             <p className={`pri-tm-cost ${overQuota ? "pri-tm-cost--over" : ""}`}>
               {plural(selectedTeams.length, "equipo elegido", "equipos elegidos")}{" "}

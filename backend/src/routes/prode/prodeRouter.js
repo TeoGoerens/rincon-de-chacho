@@ -132,6 +132,25 @@ router.get(
   adminAuthMiddleware,
   gdtController.getGdtPoolTeams,
 );
+/* Vínculos manuales de equipos sin resolver (guardados por liga) */
+router.get(
+  "/gdt/universes/:id/pool-teams/search",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.searchGdtPoolTeams,
+);
+router.post(
+  "/gdt/universes/:id/pool-teams/links",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.linkGdtPoolTeam,
+);
+router.delete(
+  "/gdt/universes/:id/pool-teams/links/:sourceTeamId",
+  authMiddleware,
+  adminAuthMiddleware,
+  gdtController.unlinkGdtPoolTeam,
+);
 router.post(
   "/gdt/universes/:id/players/import",
   authMiddleware,

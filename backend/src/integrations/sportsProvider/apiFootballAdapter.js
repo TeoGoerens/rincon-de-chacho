@@ -185,15 +185,83 @@ const fetchNationalTeamList = async (apiFootballLeagueId) => {
   return listSeason(previousSeasons[0]);
 };
 
+/* Listado de una división inferior en la temporada base. Es de una
+   temporada TERMINADA (no cambia): se cachea un día para que reabrir el
+   modal o reintentar un import no vuelva a gastar cuota. */
+const divisionListCache = new Map();
+const DIVISION_LIST_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+const fetchDivisionTeams = async (apiFootballLeagueId) => {
+  const season = teamListSeason();
+  const cacheKey = `${apiFootballLeagueId}:${season}`;
+  const cached = divisionListCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.items;
+
+  const data = await fetchJson("/teams", {
+    league: apiFootballLeagueId,
+    season,
+  });
+  const items = data.response ?? [];
+  divisionListCache.set(cacheKey, {
+    items,
+    expiresAt: Date.now() + DIVISION_LIST_CACHE_TTL_MS,
+  });
+  return items;
+};
+
 /* --------------- LISTA DE EQUIPOS DEL POOL --------------- */
-/* Devuelve { teams: [{ providerTeamId, name }], unresolvedTeams: [names] }.
-   providerTeamId = ID de API-Football; name = nombre según API-Football
-   (fuente única del club → sin duplicados con/sin tilde). */
-export const getPoolLeagueTeams = async (theSportsDbLeagueId) => {
-  const cached = resolutionCache.get(String(theSportsDbLeagueId));
+
+const tokensOfName = (name) => new Set(normalizeName(name).split(" "));
+const isSubset = (small, big) => [...small].every((token) => big.has(token));
+/* Un nombre contiene al otro palabra por palabra, en cualquier dirección:
+   "Leeds" ↔ "Leeds United", "Brighton" ↔ "Brighton and Hove Albion" */
+const namesOverlap = (nameA, nameB) => {
+  const tokensA = tokensOfName(nameA);
+  const tokensB = tokensOfName(nameB);
+  return isSubset(tokensA, tokensB) || isSubset(tokensB, tokensA);
+};
+
+/* Parecido para ORDENAR sugerencias (no para decidir): proporción de
+   palabras compartidas sobre el nombre más largo */
+const similarity = (nameA, nameB) => {
+  const tokensA = tokensOfName(nameA);
+  const tokensB = tokensOfName(nameB);
+  const shared = [...tokensA].filter((token) => tokensB.has(token)).length;
+  return shared / Math.max(tokensA.size, tokensB.size, 1);
+};
+
+const MAX_SUGGESTIONS = 5;
+
+/* Devuelve:
+   · teams: [{ providerTeamId, name }] — providerTeamId = ID API-Football;
+     name = nombre TheSportsDB (acentuado, igual al de los partidos del
+     prode): API-Football solo aporta el ID.
+   · unresolvedTeams: [names] — los que no se pudieron decidir.
+   · unresolvedDetails: [{ sourceTeamId, name, suggestions }] — lo mismo
+     con candidatos ordenados por parecido, para que el admin los vincule.
+
+   links: vínculos manuales guardados por el admin para esta liga
+   ([{ sourceTeamId, providerTeamId }]), con prioridad sobre todo lo demás.
+
+   Un solo camino de decisión, estricto: ante la duda NO se adivina, el
+   equipo queda para que lo vincule el admin. */
+export const getPoolLeagueTeams = async (theSportsDbLeagueId, links = []) => {
+  /* La clave incluye los vínculos: guardar uno nuevo invalida solo */
+  const cacheKey = [
+    String(theSportsDbLeagueId),
+    ...links.map((link) => `${link.sourceTeamId}:${link.providerTeamId}`).sort(),
+  ].join("|");
+  const cached = resolutionCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return cached.value;
 
   const leagueConfig = getLeagueConfigOrThrow(theSportsDbLeagueId);
+  const cacheAndReturn = (value) => {
+    resolutionCache.set(cacheKey, {
+      value,
+      expiresAt: Date.now() + RESOLUTION_CACHE_TTL_MS,
+    });
+    return value;
+  };
 
   /* Selecciones: la lista sale directo del listado de API-Football (una
      request). No hay ascensos ni descensos que cruzar con TheSportsDB, y
@@ -207,41 +275,26 @@ export const getPoolLeagueTeams = async (theSportsDbLeagueId) => {
         name: item.team.name,
       }))
       .sort((a, b) => a.name.localeCompare(b.name, "es"));
-    const value = { teams, unresolvedTeams: [] };
-    resolutionCache.set(String(theSportsDbLeagueId), {
-      value,
-      expiresAt: Date.now() + RESOLUTION_CACHE_TTL_MS,
-    });
-    return value;
+    return cacheAndReturn({ teams, unresolvedTeams: [], unresolvedDetails: [] });
   }
 
   /* ① Equipos VIGENTES de la liga según TheSportsDB, deduplicados por
      nombre normalizado (sus duplicados con/sin tilde colapsan acá; se
      conserva la variante acentuada, que es la que se muestra como club) */
   const currentTeams = await getLeagueTeams(theSportsDbLeagueId);
-  const currentNames = new Map();
+  const sourceByKey = new Map();
   for (const team of currentTeams) {
     const key = normalizeName(team.name);
     if (!key) continue;
-    const existing = currentNames.get(key);
-    if (!existing || accentCount(team.name) > accentCount(existing)) {
-      currentNames.set(key, team.name);
+    const existing = sourceByKey.get(key);
+    if (!existing || accentCount(team.name) > accentCount(existing.name)) {
+      sourceByKey.set(key, {
+        sourceTeamId: String(team.providerTeamId),
+        name: team.name,
+      });
     }
   }
 
-  /* ② Listado base de la liga en API-Football (temporada accesible del
-     plan) — resuelve la mayoría de los IDs en UNA request */
-  const baseData = await fetchJson("/teams", {
-    league: leagueConfig.id,
-    season: teamListSeason(),
-  });
-  const baseByName = new Map();
-  for (const item of baseData.response ?? []) {
-    baseByName.set(normalizeName(item.team.name), String(item.team.id));
-  }
-
-  /* El nombre visible del club es SIEMPRE el de TheSportsDB (acentuado,
-     igual al de los partidos del prode); API-Football solo aporta el ID */
   const resolved = new Map();
   const addResolved = (providerTeamId, displayName) =>
     resolved.set(String(providerTeamId), {
@@ -249,104 +302,127 @@ export const getPoolLeagueTeams = async (theSportsDbLeagueId) => {
       name: displayName,
     });
 
-  const tokensOfName = (name) => new Set(normalizeName(name).split(" "));
-  const isSubset = (small, big) =>
-    [...small].every((token) => big.has(token));
-
-  /* Un nombre corto ("Belgrano", "Unión") se resuelve contra la PROPIA
-     liga: si contiene o está contenido en exactamente UN equipo del
-     listado base, es ese — sin requests extra ni adivinanzas */
-  const findUniqueBaseMatch = (key) => {
-    const keyTokens = new Set(key.split(" "));
-    const matches = [];
-    for (const [baseKey, baseId] of baseByName) {
-      const baseTokens = new Set(baseKey.split(" "));
-      if (isSubset(keyTokens, baseTokens) || isSubset(baseTokens, keyTokens)) {
-        matches.push(baseId);
-      }
+  /* ② Vínculos manuales del admin y alias curados de la config */
+  const linkBySource = new Map(
+    links.map((link) => [String(link.sourceTeamId), String(link.providerTeamId)]),
+  );
+  let pending = [];
+  for (const [key, source] of sourceByKey) {
+    const linkedId =
+      linkBySource.get(source.sourceTeamId) ?? API_FOOTBALL_TEAM_ALIASES[key];
+    if (linkedId) {
+      addResolved(linkedId, source.name);
+    } else {
+      pending.push(source);
     }
-    return matches.length === 1 ? matches[0] : null;
-  };
-
-  const pendingSearch = [];
-  for (const [key, originalName] of currentNames) {
-    /* Alias curados para nombres que difieren demasiado entre proveedores */
-    if (API_FOOTBALL_TEAM_ALIASES[key]) {
-      addResolved(API_FOOTBALL_TEAM_ALIASES[key], originalName);
-      continue;
-    }
-    if (baseByName.has(key)) {
-      addResolved(baseByName.get(key), originalName);
-      continue;
-    }
-    const uniqueBaseMatch = findUniqueBaseMatch(key);
-    if (uniqueBaseMatch) {
-      addResolved(uniqueBaseMatch, originalName);
-      continue;
-    }
-    pendingSearch.push(originalName);
   }
 
-  /* ③ Los que faltan (ascendidos posteriores a la temporada base, nombres
-     nuevos, o entradas DUPLICADAS de TheSportsDB tipo "Belgrano" +
-     "Belgrano Córdoba") se buscan uno a uno. Si la búsqueda devuelve un
-     equipo YA resuelto cuyo nombre contiene al pendiente, es una variante
-     duplicada y se fusiona en silencio. Ante ambigüedad real NO se adivina:
-     se reporta sin resolver y la solución es un alias en la config. */
-  const unresolvedTeams = [];
-  for (const name of pendingSearch) {
-    let candidates = [];
+  /* ③ Match por DIVISIÓN, de arriba hacia abajo: 1ª de la temporada base y,
+     solo si quedan pendientes, 2ª y 3ª (los ascendidos — ver lowerDivisions
+     en la config). Una request por división, cacheada un día. En cada una:
+     nombre exacto, o si no, UN ÚNICO club que coincida palabra por palabra.
+     Si el club ya estaba resuelto con otro nombre que se le parece, es una
+     entrada duplicada de TheSportsDB ("Belgrano" / "Belgrano Córdoba") y
+     se fusiona. Cualquier otra duda queda para el admin. */
+  const divisionIds = [leagueConfig.id, ...(leagueConfig.lowerDivisions ?? [])];
+  const candidatePool = [];
+  for (const [index, divisionId] of divisionIds.entries()) {
+    if (pending.length === 0) break;
+
+    let items;
     try {
-      const searchData = await fetchJson("/teams", {
-        search: normalizeName(name),
-      });
-      candidates = (searchData.response ?? []).filter(
-        (item) =>
-          item.team.country === leagueConfig.country &&
-          !isYouthOrReserveTeam(item.team.name),
+      items = (await fetchDivisionTeams(divisionId)).filter(
+        (item) => !isYouthOrReserveTeam(item.team.name),
       );
     } catch (error) {
+      /* Sin el listado de 1ª no hay resolución posible: el error sube */
+      if (index === 0 || isDailyQuotaError(error)) throw error;
       console.error(
-        `API-Football: falló la búsqueda de "${name}":`,
+        `API-Football: falló el listado de la división ${divisionId}:`,
         error.message,
       );
+      continue;
     }
+    const tier = index === 0 ? 1 : index === 1 ? 2 : 3;
+    for (const item of items) candidatePool.push({ item, tier });
 
-    const pendingTokens = tokensOfName(name);
-    const duplicateOfResolved = candidates.some((item) => {
-      const resolvedEntry = resolved.get(String(item.team.id));
-      return (
-        resolvedEntry &&
-        (isSubset(pendingTokens, tokensOfName(resolvedEntry.name)) ||
-          isSubset(pendingTokens, tokensOfName(item.team.name)))
-      );
-    });
-    if (duplicateOfResolved) continue;
+    const nextPending = [];
+    for (const source of pending) {
+      const key = normalizeName(source.name);
+      const exact = items.filter((item) => normalizeName(item.team.name) === key);
+      const byTokens = items.filter((item) => namesOverlap(source.name, item.team.name));
+      const match =
+        exact.length === 1 ? exact[0] : byTokens.length === 1 ? byTokens[0] : null;
 
-    const newCandidates = candidates.filter(
-      (item) => !resolved.has(String(item.team.id)),
-    );
-    /* Desempate por nombre EXACTO (normalizado): ante homónimos del mismo
-       país ("Santos" / "Santos AP", "Coritiba" / "Coritiba SE") gana el
-       que se llama igual, solo si es uno. Si no, sigue sin adivinarse. */
-    const exactMatches = newCandidates.filter(
-      (item) => normalizeName(item.team.name) === normalizeName(name),
-    );
-    if (newCandidates.length === 1) {
-      addResolved(newCandidates[0].team.id, name);
-    } else if (exactMatches.length === 1) {
-      addResolved(exactMatches[0].team.id, name);
-    } else {
-      unresolvedTeams.push(name);
+      if (!match) {
+        nextPending.push(source);
+        continue;
+      }
+      const matchId = String(match.team.id);
+      const existing = resolved.get(matchId);
+      if (existing) {
+        if (!namesOverlap(source.name, existing.name)) nextPending.push(source);
+        continue;
+      }
+      addResolved(matchId, source.name);
     }
+    pending = nextPending;
   }
 
-  const value = { teams: [...resolved.values()], unresolvedTeams };
-  resolutionCache.set(String(theSportsDbLeagueId), {
-    value,
-    expiresAt: Date.now() + RESOLUTION_CACHE_TTL_MS,
+  /* ④ Lo que queda va al admin, con sugerencias de los mismos listados ya
+     descargados (cero requests extra): primero el más parecido y, a igual
+     parecido, el de la división más alta */
+  const unresolvedDetails = pending.map((source) => {
+    const seen = new Set();
+    const suggestions = candidatePool
+      .filter(({ item }) => {
+        const id = String(item.team.id);
+        if (resolved.has(id) || seen.has(id)) return false;
+        seen.add(id);
+        return similarity(source.name, item.team.name) > 0;
+      })
+      .map(({ item, tier }) => ({
+        providerTeamId: String(item.team.id),
+        name: item.team.name,
+        tier,
+        score: similarity(source.name, item.team.name),
+      }))
+      .sort((a, b) => b.score - a.score || a.tier - b.tier)
+      .slice(0, MAX_SUGGESTIONS)
+      .map(({ score, ...suggestion }) => suggestion);
+    return { sourceTeamId: source.sourceTeamId, name: source.name, suggestions };
   });
-  return value;
+
+  return cacheAndReturn({
+    teams: [...resolved.values()],
+    unresolvedTeams: unresolvedDetails.map((detail) => detail.name),
+    unresolvedDetails,
+  });
+};
+
+/* --------------- BÚSQUEDA MANUAL DE EQUIPO --------------- */
+/* Para el admin, cuando el club correcto no está entre las sugerencias.
+   UNA request, solo a pedido. La búsqueda de API-Football compara por
+   substring: conviene el nombre corto ("Leeds", no "Leeds United"). Se
+   filtra por el país de la liga y sin juveniles ni filiales. */
+export const searchPoolTeams = async (theSportsDbLeagueId, term) => {
+  const leagueConfig = getLeagueConfigOrThrow(theSportsDbLeagueId);
+  const query = normalizeName(term);
+  if (query.length < 3) {
+    throw new Error("Escribí al menos 3 letras para buscar");
+  }
+  const data = await fetchJson("/teams", { search: query });
+  return (data.response ?? [])
+    .filter(
+      (item) =>
+        (!leagueConfig.country || item.team.country === leagueConfig.country) &&
+        !isYouthOrReserveTeam(item.team.name),
+    )
+    .map((item) => ({
+      providerTeamId: String(item.team.id),
+      name: item.team.name,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "es"));
 };
 
 /* --------------- PLANTEL DE UN EQUIPO --------------- */

@@ -3,9 +3,11 @@ import GdtUniverse from "../../dao/models/prode/GdtUniverseModel.js";
 import GdtSquad from "../../dao/models/prode/GdtSquadModel.js";
 import ProdeMatchday from "../../dao/models/prode/ProdeMatchdayModel.js";
 import ProdeTournament from "../../dao/models/prode/ProdeTournamentModel.js";
+import GdtTeamLink from "../../dao/models/prode/GdtTeamLinkModel.js";
 import { GDT_POSITIONS } from "../../dao/models/prode/prodeConstants.js";
 import {
   getPoolLeagueTeams,
+  searchPoolTeams,
   getPoolTeamPlayers,
   getPoolQuota,
   isDailyQuotaError,
@@ -153,6 +155,27 @@ const findCachedSnapshotPlayer = (providerPlayerId) => {
   return null;
 };
 
+/* Resolución de equipos de la liga CON los vínculos manuales que el admin
+   guardó para ella (GdtTeamLink): todo acceso a la lista pasa por acá */
+const getLeagueTeamsWithLinks = async (leagueProviderId) => {
+  const links = await GdtTeamLink.find(
+    { leagueProviderId: String(leagueProviderId) },
+    { sourceTeamId: 1, providerTeamId: 1 },
+  ).lean();
+  const resolution = await getPoolLeagueTeams(leagueProviderId, links);
+  return { ...resolution, links };
+};
+
+const getUniverseWithLeagueOrThrow = async (universeId) => {
+  const universe = await getTeamOrThrow(universeId);
+  if (!universe.leagueProviderId) {
+    throw new Error(
+      "El universo GDT no tiene liga del catálogo asociada: no hay equipos para elegir",
+    );
+  }
+  return universe;
+};
+
 /* Equipos elegidos en el modal → equipos resueltos de la liga. El server
    solo acepta IDs que la propia liga reconoce. */
 const resolveSelectedTeams = async (leagueProviderId, providerTeamIds) => {
@@ -161,7 +184,7 @@ const resolveSelectedTeams = async (leagueProviderId, providerTeamIds) => {
   ];
   if (ids.length === 0) throw new Error("Elegí al menos un equipo");
 
-  const { teams } = await getPoolLeagueTeams(leagueProviderId);
+  const { teams } = await getLeagueTeamsWithLinks(leagueProviderId);
   const byId = new Map(teams.map((item) => [item.providerTeamId, item]));
   const selected = ids.map((id) => byId.get(id)).filter(Boolean);
   if (selected.length !== ids.length) {
@@ -402,15 +425,13 @@ export default class GdtRealPlayerRepository {
      cache del detector (re-consultarlo no gasta cuota). Viaja la cuota
      diaria conocida para que el admin calcule el gasto antes de confirmar. */
   getPoolTeams = async (universeId) => {
-    const universe = await getTeamOrThrow(universeId);
-    if (!universe.leagueProviderId) {
-      throw new Error(
-        "El universo GDT no tiene liga del catálogo asociada: no hay equipos para elegir",
-      );
-    }
+    const universe = await getUniverseWithLeagueOrThrow(universeId);
 
-    const { teams, unresolvedTeams } = await getPoolLeagueTeams(
-      universe.leagueProviderId,
+    const { teams, unresolvedTeams, unresolvedDetails, links } =
+      await getLeagueTeamsWithLinks(universe.leagueProviderId);
+    /* Equipos resueltos por un vínculo manual: el modal permite deshacerlo */
+    const linkSourceByProviderId = new Map(
+      links.map((link) => [String(link.providerTeamId), link.sourceTeamId]),
     );
 
     /* Cantidad en el pool por club: cubre también los universos importados
@@ -455,9 +476,87 @@ export default class GdtRealPlayerRepository {
             cached: Boolean(
               getCachedTeamPlayers(providerTeam.providerTeamId),
             ),
+            linkSourceTeamId:
+              linkSourceByProviderId.get(providerTeam.providerTeamId) ?? null,
           };
         }),
       unresolvedTeams,
+      unresolvedDetails,
+      quota: getPoolQuota(),
+    };
+  };
+
+  /* --------------- VÍNCULOS MANUALES DE EQUIPOS --------------- */
+  /* El admin vincula un equipo que la resolución automática no pudo
+     decidir. Se guarda POR LIGA: sirve para todos los universos futuros de
+     la misma liga. Solo se aceptan equipos que HOY figuran sin resolver, y
+     un club de API-Football que no esté ya asignado a otro equipo. */
+  linkPoolTeam = async (
+    universeId,
+    { sourceTeamId, providerTeamId, providerTeamName },
+  ) => {
+    const universe = await getUniverseWithLeagueOrThrow(universeId);
+    const sourceId = String(sourceTeamId ?? "").trim();
+    const providerId = String(providerTeamId ?? "").trim();
+    if (!sourceId || !/^\d+$/.test(providerId)) {
+      throw new Error("Faltan los datos del vínculo");
+    }
+
+    const { teams, unresolvedDetails } = await getLeagueTeamsWithLinks(
+      universe.leagueProviderId,
+    );
+    const source = unresolvedDetails.find(
+      (detail) => detail.sourceTeamId === sourceId,
+    );
+    if (!source) {
+      throw new Error(
+        "Ese equipo ya no figura sin resolver: volvé a abrir la selección",
+      );
+    }
+    const takenBy = teams.find((team) => team.providerTeamId === providerId);
+    if (takenBy) {
+      throw new Error(
+        `Ese club de API-Football ya está asignado a ${takenBy.name}`,
+      );
+    }
+
+    await GdtTeamLink.findOneAndUpdate(
+      { leagueProviderId: String(universe.leagueProviderId), sourceTeamId: sourceId },
+      {
+        sourceTeamName: source.name,
+        providerTeamId: providerId,
+        providerTeamName: String(providerTeamName ?? "").trim(),
+      },
+      { upsert: true, new: true, runValidators: true },
+    );
+    return { sourceTeamId: sourceId, providerTeamId: providerId };
+  };
+
+  unlinkPoolTeam = async (universeId, sourceTeamId) => {
+    const universe = await getUniverseWithLeagueOrThrow(universeId);
+    const deleted = await GdtTeamLink.findOneAndDelete({
+      leagueProviderId: String(universe.leagueProviderId),
+      sourceTeamId: String(sourceTeamId),
+    });
+    if (!deleted) throw new Error("No existe ese vínculo");
+    return { sourceTeamId: String(sourceTeamId) };
+  };
+
+  /* Búsqueda manual en API-Football (1 request de la cuota, a pedido) para
+     cuando el club correcto no está entre las sugerencias. Marca los que
+     ya están asignados a otro equipo de la liga. */
+  searchPoolTeamCandidates = async (universeId, term) => {
+    const universe = await getUniverseWithLeagueOrThrow(universeId);
+    const { teams } = await getLeagueTeamsWithLinks(universe.leagueProviderId);
+    const assignedTo = new Map(
+      teams.map((team) => [team.providerTeamId, team.name]),
+    );
+    const results = await searchPoolTeams(universe.leagueProviderId, term);
+    return {
+      results: results.map((result) => ({
+        ...result,
+        assignedTo: assignedTo.get(result.providerTeamId) ?? null,
+      })),
       quota: getPoolQuota(),
     };
   };

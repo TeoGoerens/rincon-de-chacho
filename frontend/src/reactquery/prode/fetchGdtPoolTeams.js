@@ -20,8 +20,15 @@ const fetchGdtPoolTeams = async (universeId) => {
         timeout: 120000,
       },
     );
-    const { teams, unresolvedTeams, quota, league } = response.data;
-    return { teams, unresolvedTeams, quota, league };
+    const { teams, unresolvedTeams, unresolvedDetails, quota, league } =
+      response.data;
+    return {
+      teams,
+      unresolvedTeams,
+      unresolvedDetails: unresolvedDetails ?? [],
+      quota,
+      league,
+    };
   } catch (error) {
     throw new Error(
       error?.response?.data?.message ||

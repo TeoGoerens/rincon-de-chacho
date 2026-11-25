@@ -1059,6 +1059,158 @@
   cursor: not-allowed;
 }
 
+/* "Deshacer" de un equipo vinculado a mano: a la derecha de la fila */
+.pri-tm-unlink {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── Equipos sin vincular (resolución manual por liga) ── */
+.pri-ut {
+  margin-bottom: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--status-yellow-bg);
+  border: 1px solid var(--status-yellow-bg-strong);
+  border-radius: var(--radius-md);
+}
+
+.pri-ut-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--secondary-font);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--status-yellow);
+  cursor: pointer;
+  text-align: left;
+}
+
+.pri-ut-header-text {
+  color: var(--status-yellow);
+}
+
+.pri-ut-chevron {
+  font-size: var(--text-lg);
+  color: var(--status-yellow);
+}
+
+/* La regla del modal ".delete-confirmation-modal button" estira todos los
+   botones (flex: 1 + padding grande): los de este bloque y el "Deshacer"
+   de la lista vuelven al tamaño compacto de .pri-status-btn */
+.delete-confirmation-modal .pri-ut .pri-ut-header {
+  flex: none;
+  padding: 0;
+}
+
+.delete-confirmation-modal .pri-ut .pri-status-btn,
+.delete-confirmation-modal .pri-tm-row .pri-tm-unlink {
+  flex: none;
+  padding: var(--space-2xs) var(--space-sm);
+  font-size: var(--text-2xs);
+}
+
+.delete-confirmation-modal.pri-tm .pri-ut > .pri-tm-note {
+  margin: var(--space-xs) 0;
+}
+
+.pri-ut-card {
+  margin-top: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--bg-card-dark);
+  border: 1px solid var(--status-neutral-bg);
+  border-radius: var(--radius-sm);
+}
+
+.delete-confirmation-modal.pri-tm .pri-ut-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  margin-bottom: var(--space-xs);
+}
+
+.pri-ut-source {
+  font-family: var(--secondary-font);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+}
+
+.pri-ut-hint {
+  font-family: var(--secondary-font);
+  font-size: var(--text-2xs);
+  color: var(--text-muted-dark);
+}
+
+.pri-ut-options {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--status-neutral-bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.pri-ut-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-2xs) var(--space-sm);
+  border-bottom: 1px solid var(--status-neutral-bg);
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.pri-ut-option:last-child {
+  border-bottom: none;
+}
+
+.pri-ut-option:hover {
+  background: var(--status-neutral-bg);
+}
+
+.pri-ut-option input[type="radio"] {
+  flex-shrink: 0;
+  accent-color: var(--third-color);
+  cursor: pointer;
+}
+
+.pri-ut-option--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pri-ut-option--disabled input[type="radio"] {
+  cursor: not-allowed;
+}
+
+.pri-ut-search {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-xs);
+}
+
+.pri-ut-search-input {
+  flex: 1;
+  min-width: 160px;
+  font-size: var(--text-sm);
+}
+
+.pri-ut-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pri-ut-link-btn:not(:disabled) {
+  border-color: var(--third-color);
+  color: var(--third-color);
+}
+
 @media (max-width: 480px) {
   .pri-tm-tools {
     flex-direction: column;

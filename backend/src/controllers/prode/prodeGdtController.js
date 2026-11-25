@@ -520,6 +520,43 @@ export default class ProdeGdtController {
     }
   };
 
+  linkGdtPoolTeam = async (req, res, next) => {
+    try {
+      const link = await realPlayerRepository.linkPoolTeam(req.params.id, {
+        sourceTeamId: req.body.sourceTeamId,
+        providerTeamId: req.body.providerTeamId,
+        providerTeamName: req.body.providerTeamName,
+      });
+      res.status(200).json({ message: "GDT pool team linked successfully", link });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  unlinkGdtPoolTeam = async (req, res, next) => {
+    try {
+      const link = await realPlayerRepository.unlinkPoolTeam(
+        req.params.id,
+        req.params.sourceTeamId,
+      );
+      res.status(200).json({ message: "GDT pool team unlinked successfully", link });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  searchGdtPoolTeams = async (req, res, next) => {
+    try {
+      const search = await realPlayerRepository.searchPoolTeamCandidates(
+        req.params.id,
+        req.query.q,
+      );
+      res.status(200).json({ message: "GDT pool team search done", ...search });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   importGdtUniversePool = async (req, res, next) => {
     try {
       const summary = await realPlayerRepository.importPoolFromProvider(
